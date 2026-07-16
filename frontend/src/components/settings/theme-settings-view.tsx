@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { Sun, Moon, Monitor, Check } from "lucide-react";
 import { PageHeader } from "@/components/shell/page-header";
-import { LocaleSwitcher, TextSizeSwitcher } from "@/components/shared";
+import { LocaleSwitcher } from "@/components/shared";
 import { cn } from "@/lib/utils";
 
 type ThemeOption = "light" | "dark" | "system";
@@ -18,7 +18,6 @@ const OPTIONS: { value: ThemeOption; icon: typeof Sun }[] = [
 
 export function ThemeSettingsView() {
   const t = useTranslations("settings.theme");
-  const tp = useTranslations("preferences.textSize");
   const { theme, setTheme } = useTheme();
   // Mount detection without setState-in-effect: false during SSR/hydration,
   // true on the client, so the selected option never causes a hydration mismatch.
@@ -80,14 +79,6 @@ export function ThemeSettingsView() {
             );
           })}
         </div>
-      </section>
-
-      <section className="space-y-3">
-        <div>
-          <h2 className="font-heading text-base font-semibold text-foreground">{tp("title")}</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">{tp("description")}</p>
-        </div>
-        <TextSizeSwitcher />
       </section>
 
       <section className="space-y-3">

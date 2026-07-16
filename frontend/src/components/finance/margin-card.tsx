@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CHART_FILL_OPACITY } from "@/lib/chart-style";
 import type { FinancialSummary } from "@/lib/api/finance-types";
 import { formatEUR, formatPercent } from "./finance-format";
 
@@ -129,7 +128,7 @@ export function MarginCard({ summary, loading = false, className }: MarginCardPr
                   }}
                   labelFormatter={(label) => t(`margin.items.${String(label)}`)}
                 />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16} fillOpacity={CHART_FILL_OPACITY}>
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16}>
                   {chartData.map((entry) => (
                     <Cell key={entry.key} fill={entry.fill} />
                   ))}

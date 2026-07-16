@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
-import { LocaleSwitcher, TextSizeSwitcher, EmptyState, SkeletonList, toast } from "@/components/shared";
+import { LocaleSwitcher, EmptyState, SkeletonList, toast } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { profileApi } from "@/lib/api/profile";
 import {
@@ -55,9 +55,6 @@ export function PreferencesSection({ user }: { user: SessionUser }) {
         </div>
         <ThemePicker />
       </div>
-
-      {/* Text size */}
-      <TextSizePreference />
 
       {/* Language */}
       <div className="space-y-3">
@@ -150,19 +147,6 @@ function ThemePicker() {
           </button>
         );
       })}
-    </div>
-  );
-}
-
-function TextSizePreference() {
-  const t = useTranslations("preferences.textSize");
-  return (
-    <div className="space-y-3">
-      <div>
-        <h3 className="font-heading text-base font-semibold text-foreground">{t("title")}</h3>
-        <p className="mt-0.5 text-sm text-muted-foreground">{t("description")}</p>
-      </div>
-      <TextSizeSwitcher />
     </div>
   );
 }

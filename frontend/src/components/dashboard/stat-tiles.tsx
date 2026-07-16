@@ -70,8 +70,8 @@ export function StatTiles({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {Array.from({ length: 9 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
           <Card key={i} className="gap-3 p-5">
             <div className="flex items-center justify-between">
               <div className="h-3.5 w-20 animate-pulse rounded bg-muted" />
@@ -99,9 +99,7 @@ export function StatTiles({
   }
 
   return (
-    // 3-up on ≥sm: every role payload has a count divisible by 3 (9 full / 6
-    // finance-gated / 3 scoped-membro), so rows always fill with no dead column.
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (

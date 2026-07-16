@@ -3606,25 +3606,5 @@
       "loadDescription": "Ocorreu um erro ao carregar esta informação. Tente novamente.",
       "retry": "Tentar novamente"
     }
-  },
-  "preferences": {
-    "textSize": {
-      "title": "Tamanho do texto",
-      "description": "Ajuste a dimensão do texto e da interface em toda a aplicação.",
-      "options": {
-        "compact": {
-          "title": "Compacto",
-          "description": "Mais conteúdo no ecrã."
-        },
-        "normal": {
-          "title": "Normal",
-          "description": "Equilíbrio recomendado."
-        },
-        "large": {
-          "title": "Grande",
-          "description": "Texto maior, mais legível."
-        }
-      }
-    }
   }
 }

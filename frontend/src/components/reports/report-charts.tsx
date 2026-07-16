@@ -16,7 +16,6 @@ import {
   type TooltipContentProps,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { CHART_FILL_OPACITY } from "@/lib/chart-style";
 
 /* ------------------------------------------------------------------ *
  * Shared chrome (mirrors dashboard-charts.tsx so both read as one system)
@@ -99,7 +98,6 @@ export function DistributionDonut({
               paddingAngle={2}
               stroke="var(--card)"
               strokeWidth={2}
-              fillOpacity={CHART_FILL_OPACITY}
               isAnimationActive={animate}
             >
               {(nonZero.length > 0 ? nonZero : data).map((entry) => (
@@ -202,7 +200,7 @@ export function CountBars({
               );
             }}
           />
-          <Bar dataKey="value" radius={[4, 4, 0, 0]} fillOpacity={CHART_FILL_OPACITY} isAnimationActive={animate}>
+          <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={animate}>
             {data.map((entry) => (
               <Cell key={entry.key} fill={entry.color} />
             ))}
@@ -262,7 +260,7 @@ export function HBars({
               );
             }}
           />
-          <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16} fillOpacity={CHART_FILL_OPACITY} isAnimationActive={animate}>
+          <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16} isAnimationActive={animate}>
             {data.map((entry) => (
               <Cell key={entry.key} fill={entry.color} />
             ))}
@@ -347,8 +345,8 @@ export function DualBars({
                 );
               }}
             />
-            <Bar dataKey="a" fill={series.a.color} fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
-            <Bar dataKey="b" fill={series.b.color} fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+            <Bar dataKey="a" fill={series.a.color} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+            <Bar dataKey="b" fill={series.b.color} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
           </BarChart>
         </ResponsiveContainer>
       </div>
