@@ -1,0 +1,141 @@
+{
+  "app": {
+    "name": "Aurea System",
+    "tagline": "Aurea's internal operating system."
+  },
+  "nav": {
+    "sectionMain": "General",
+    "sectionCommercial": "Commercial",
+    "sectionDelivery": "Delivery",
+    "sectionOrg": "Organization",
+    "home": "Home",
+    "myWork": "My work",
+    "crm": "CRM",
+    "crmCompanies": "Companies",
+    "crmContacts": "Contacts",
+    "crmPipeline": "Pipeline",
+    "crmProposals": "Proposals",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "team": "Team",
+    "finance": "Finance",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "shell": {
+    "search": {
+      "placeholder": "Search…",
+      "trigger": "Search everything"
+    },
+    "commandPalette": {
+      "title": "Commands and search",
+      "placeholder": "Type a command or search…",
+      "empty": "No results.",
+      "groupNavigation": "Navigation",
+      "groupCreate": "Create",
+      "groupRecent": "Recent",
+      "hint": "to open",
+      "openLabel": "Open search (Cmd/Ctrl+K)"
+    },
+    "quickCreate": {
+      "label": "Create",
+      "opportunity": "New opportunity",
+      "company": "New company",
+      "contact": "New contact",
+      "project": "New project",
+      "task": "New task",
+      "timeEntry": "Log time"
+    },
+    "notifications": {
+      "label": "Notifications",
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "empty": "No new notifications.",
+      "viewAll": "View all"
+    },
+    "help": {
+      "label": "Help"
+    },
+    "userMenu": {
+      "profile": "My profile",
+      "preferences": "Preferences",
+      "settings": "Settings",
+      "signOut": "Sign out"
+    },
+    "sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu",
+      "open": "Open menu",
+      "close": "Close menu"
+    }
+  },
+  "roles": {
+    "admin": "Administrator",
+    "gestor": "Manager",
+    "membro": "Member"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle theme"
+  },
+  "locale": {
+    "label": "Language",
+    "pt-PT": "Português (Portugal)",
+    "en": "English"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Try again",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "viewDetails": "View details",
+    "empty": "Nothing here yet.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn't load this information. Please try again."
+  },
+  "status": {
+    "healthy": "Healthy",
+    "attention": "Attention",
+    "atRisk": "At risk",
+    "overdue": "Overdue",
+    "blocked": "Blocked",
+    "due": "Due soon",
+    "done": "Done"
+  },
+  "foundation": {
+    "dashboard": {
+      "greeting": "Good morning, {name}.",
+      "subtitle": "Here's how the operation looks today.",
+      "attentionTitle": "Needs attention",
+      "attentionSubtitle": "Items that need action so nothing slips.",
+      "metricPipeline": "Open pipeline",
+      "metricActiveProjects": "Active projects",
+      "metricOverdueTasks": "Overdue tasks",
+      "metricReceivable": "Receivable",
+      "placeholderNote": "Foundation surface — feature builders fill these panels with real data.",
+      "chartTitle": "Pipeline evolution",
+      "healthTitle": "Project health"
+    },
+    "myWork": {
+      "greeting": "Hi, {name}.",
+      "subtitle": "Your day in one place.",
+      "today": "Today",
+      "overdue": "Overdue",
+      "thisWeek": "This week",
+      "placeholderNote": "Foundation surface — the member daily hub will be built on this base."
+    }
+  }
+}

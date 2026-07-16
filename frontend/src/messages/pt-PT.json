@@ -1,0 +1,141 @@
+{
+  "app": {
+    "name": "Aurea System",
+    "tagline": "O sistema operativo interno da Aurea."
+  },
+  "nav": {
+    "sectionMain": "Geral",
+    "sectionCommercial": "Comercial",
+    "sectionDelivery": "Entrega",
+    "sectionOrg": "Organização",
+    "home": "Início",
+    "myWork": "O meu trabalho",
+    "crm": "CRM",
+    "crmCompanies": "Empresas",
+    "crmContacts": "Contactos",
+    "crmPipeline": "Pipeline",
+    "crmProposals": "Propostas",
+    "projects": "Projetos",
+    "tasks": "Tarefas",
+    "calendar": "Calendário",
+    "team": "Equipa",
+    "finance": "Financeiro",
+    "reports": "Relatórios",
+    "settings": "Definições"
+  },
+  "shell": {
+    "search": {
+      "placeholder": "Procurar…",
+      "trigger": "Procurar em tudo"
+    },
+    "commandPalette": {
+      "title": "Comandos e pesquisa",
+      "placeholder": "Escreva um comando ou pesquise…",
+      "empty": "Sem resultados.",
+      "groupNavigation": "Navegação",
+      "groupCreate": "Criar",
+      "groupRecent": "Recentes",
+      "hint": "para abrir",
+      "openLabel": "Abrir pesquisa (Cmd/Ctrl+K)"
+    },
+    "quickCreate": {
+      "label": "Criar",
+      "opportunity": "Nova oportunidade",
+      "company": "Nova empresa",
+      "contact": "Novo contacto",
+      "project": "Novo projeto",
+      "task": "Nova tarefa",
+      "timeEntry": "Registar tempo"
+    },
+    "notifications": {
+      "label": "Notificações",
+      "title": "Notificações",
+      "markAllRead": "Marcar tudo como lido",
+      "empty": "Sem notificações novas.",
+      "viewAll": "Ver todas"
+    },
+    "help": {
+      "label": "Ajuda"
+    },
+    "userMenu": {
+      "profile": "O meu perfil",
+      "preferences": "Preferências",
+      "settings": "Definições",
+      "signOut": "Terminar sessão"
+    },
+    "sidebar": {
+      "collapse": "Recolher menu",
+      "expand": "Expandir menu",
+      "open": "Abrir menu",
+      "close": "Fechar menu"
+    }
+  },
+  "roles": {
+    "admin": "Administrador",
+    "gestor": "Gestor",
+    "membro": "Membro"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "toggle": "Alternar tema"
+  },
+  "locale": {
+    "label": "Idioma",
+    "pt-PT": "Português (Portugal)",
+    "en": "English"
+  },
+  "common": {
+    "loading": "A carregar…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Criar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "retry": "Tentar novamente",
+    "search": "Procurar",
+    "filter": "Filtrar",
+    "clear": "Limpar",
+    "viewDetails": "Ver detalhes",
+    "empty": "Ainda não existe nada aqui.",
+    "errorTitle": "Algo correu mal",
+    "errorBody": "Não foi possível carregar esta informação. Tente novamente."
+  },
+  "status": {
+    "healthy": "Saudável",
+    "attention": "Atenção",
+    "atRisk": "Em risco",
+    "overdue": "Atrasado",
+    "blocked": "Bloqueado",
+    "due": "A vencer",
+    "done": "Concluído"
+  },
+  "foundation": {
+    "dashboard": {
+      "greeting": "Bom dia, {name}.",
+      "subtitle": "Aqui está o estado da operação hoje.",
+      "attentionTitle": "Atenção necessária",
+      "attentionSubtitle": "Itens que precisam de ação para nada escapar.",
+      "metricPipeline": "Pipeline aberto",
+      "metricActiveProjects": "Projetos ativos",
+      "metricOverdueTasks": "Tarefas atrasadas",
+      "metricReceivable": "A receber",
+      "placeholderNote": "Superfície de fundação — os construtores de funcionalidades preenchem estes painéis com dados reais.",
+      "chartTitle": "Evolução do pipeline",
+      "healthTitle": "Saúde dos projetos"
+    },
+    "myWork": {
+      "greeting": "Olá, {name}.",
+      "subtitle": "O teu dia num só sítio.",
+      "today": "Hoje",
+      "overdue": "Atrasadas",
+      "thisWeek": "Esta semana",
+      "placeholderNote": "Superfície de fundação — o hub diário do membro será construído sobre esta base."
+    }
+  }
+}
