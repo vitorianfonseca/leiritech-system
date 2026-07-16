@@ -2652,5 +2652,104 @@
       "viewProject": "View project",
       "retry": "Try again"
     }
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Weekly workload, availability and capacity across the team.",
+    "subtitleOwn": "Your workload and capacity for this week.",
+    "ownNotice": "You only see your own workload. The full team view is available to Administrators and Managers.",
+    "loading": "Loading workload…",
+    "viewLabel": "View mode",
+    "views": {
+      "heatmap": "Heatmap",
+      "table": "Table"
+    },
+    "week": {
+      "current": "This week",
+      "previous": "Previous week",
+      "next": "Next week",
+      "weeksAgo": "{n} weeks ago",
+      "weeksAhead": "In {n} weeks",
+      "prev": "Previous week",
+      "today": "This week"
+    },
+    "stats": {
+      "team": "Members",
+      "overloaded": "Overloaded",
+      "available": "Available",
+      "avgUtil": "Avg. utilization"
+    },
+    "availability": {
+      "disponivel": "Available",
+      "equilibrado": "Balanced",
+      "sobrecarregado": "Overloaded",
+      "ausente": "Away"
+    },
+    "heatmap": {
+      "member": "Member",
+      "weekTotal": "Week total",
+      "cellLabel": "{name}, {day}: {hours}h allocated",
+      "overAllocated": "Overloaded",
+      "utilizationPct": "{pct}% of capacity",
+      "legend": {
+        "title": "Intensity:",
+        "light": "Slack",
+        "moderate": "Moderate",
+        "full": "Near capacity",
+        "over": "Overloaded"
+      },
+      "function": {
+        "engineering": "Engineering",
+        "design": "Design",
+        "qa": "Quality",
+        "management": "Management",
+        "leadership": "Leadership"
+      }
+    },
+    "table": {
+      "member": "Member",
+      "function": "Function",
+      "availability": "State",
+      "activeProjects": "Active projects",
+      "openTasks": "Current tasks",
+      "overdueTasks": "Overdue tasks",
+      "allocated": "Estimated load",
+      "logged": "Hours this week",
+      "capacity": "Weekly capacity",
+      "hours": "{n}h",
+      "searchPlaceholder": "Search member…",
+      "emptyTitle": "No members",
+      "emptyDescription": "There are no team members to show for this week."
+    },
+    "capacity": {
+      "open": "Configure capacity",
+      "openShort": "Capacity",
+      "title": "Capacity by function",
+      "description": "Set weekly capacity, non-project hours, utilization target and internal cost per function. Net capacity is derived from these values (BR-080/081).",
+      "functionLabel": "Function",
+      "fields": {
+        "weeklyCapacity": "Weekly capacity (h)",
+        "nonProject": "Non-project hours (h)",
+        "target": "Utilization target (%)",
+        "costRate": "Internal cost (€/h)"
+      },
+      "netPreview": "Net delivery capacity: {hours}h/week.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "{fn} capacity updated.",
+      "errors": {
+        "saveFailed": "Could not save the configuration.",
+        "capacityRange": "Capacity must be between 1 and 168 hours.",
+        "nonProjectRange": "Non-project hours must be lower than capacity.",
+        "targetRange": "Utilization target must be between 1 and 100%.",
+        "costRange": "Internal cost cannot be negative."
+      }
+    },
+    "errors": {
+      "loadTitle": "Could not load the team",
+      "loadDescription": "An error occurred while fetching team workload. Please try again.",
+      "retry": "Try again"
+    }
   }
 }

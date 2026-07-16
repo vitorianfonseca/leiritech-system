@@ -2652,5 +2652,104 @@
       "viewProject": "Ver projeto",
       "retry": "Tentar novamente"
     }
+  },
+  "team": {
+    "title": "Equipa",
+    "subtitle": "Carga de trabalho semanal, disponibilidade e capacidade da equipa.",
+    "subtitleOwn": "A sua carga de trabalho e capacidade desta semana.",
+    "ownNotice": "Vê apenas a sua própria carga de trabalho. A visão completa da equipa está disponível para Administradores e Gestores.",
+    "loading": "A carregar a carga de trabalho…",
+    "viewLabel": "Modo de visualização",
+    "views": {
+      "heatmap": "Mapa de calor",
+      "table": "Tabela"
+    },
+    "week": {
+      "current": "Esta semana",
+      "previous": "Semana anterior",
+      "next": "Próxima semana",
+      "weeksAgo": "Há {n} semanas",
+      "weeksAhead": "Daqui a {n} semanas",
+      "prev": "Semana anterior",
+      "today": "Esta semana"
+    },
+    "stats": {
+      "team": "Elementos",
+      "overloaded": "Sobrecarregados",
+      "available": "Disponíveis",
+      "avgUtil": "Utilização média"
+    },
+    "availability": {
+      "disponivel": "Disponível",
+      "equilibrado": "Equilibrado",
+      "sobrecarregado": "Sobrecarregado",
+      "ausente": "Ausente"
+    },
+    "heatmap": {
+      "member": "Membro",
+      "weekTotal": "Total semana",
+      "cellLabel": "{name}, {day}: {hours}h alocadas",
+      "overAllocated": "Sobrecarregado",
+      "utilizationPct": "{pct}% da capacidade",
+      "legend": {
+        "title": "Intensidade:",
+        "light": "Folga",
+        "moderate": "Moderada",
+        "full": "Quase no limite",
+        "over": "Sobrecarga"
+      },
+      "function": {
+        "engineering": "Engenharia",
+        "design": "Design",
+        "qa": "Qualidade",
+        "management": "Gestão",
+        "leadership": "Direção"
+      }
+    },
+    "table": {
+      "member": "Membro",
+      "function": "Função",
+      "availability": "Estado",
+      "activeProjects": "Projetos ativos",
+      "openTasks": "Tarefas atuais",
+      "overdueTasks": "Tarefas atrasadas",
+      "allocated": "Carga estimada",
+      "logged": "Horas desta semana",
+      "capacity": "Capacidade semanal",
+      "hours": "{n}h",
+      "searchPlaceholder": "Procurar membro…",
+      "emptyTitle": "Sem membros",
+      "emptyDescription": "Não há membros de equipa para mostrar nesta semana."
+    },
+    "capacity": {
+      "open": "Configurar capacidade",
+      "openShort": "Capacidade",
+      "title": "Capacidade por função",
+      "description": "Defina a capacidade semanal, horas não imputáveis, meta de utilização e custo interno por função. A capacidade líquida deriva destes valores (BR-080/081).",
+      "functionLabel": "Função",
+      "fields": {
+        "weeklyCapacity": "Capacidade semanal (h)",
+        "nonProject": "Horas não imputáveis (h)",
+        "target": "Meta de utilização (%)",
+        "costRate": "Custo interno (€/h)"
+      },
+      "netPreview": "Capacidade líquida de entrega: {hours}h/semana.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Capacidade de {fn} atualizada.",
+      "errors": {
+        "saveFailed": "Não foi possível guardar a configuração.",
+        "capacityRange": "A capacidade tem de estar entre 1 e 168 horas.",
+        "nonProjectRange": "As horas não imputáveis têm de ser inferiores à capacidade.",
+        "targetRange": "A meta de utilização tem de estar entre 1 e 100%.",
+        "costRange": "O custo interno não pode ser negativo."
+      }
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar a equipa",
+      "loadDescription": "Ocorreu um erro ao obter a carga de trabalho da equipa. Tente novamente.",
+      "retry": "Tentar novamente"
+    }
   }
 }
