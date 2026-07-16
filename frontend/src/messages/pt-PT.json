@@ -1699,5 +1699,381 @@
       "retry": "Tentar novamente",
       "backToList": "Voltar à lista"
     }
+  },
+  "projects": {
+    "list": {
+      "title": "Projetos",
+      "subtitle": "Acompanhe a entrega, a saúde e o progresso de cada projeto.",
+      "new": "Novo projeto",
+      "searchPlaceholder": "Pesquisar por nome ou cliente…",
+      "valueRestricted": "Restrito",
+      "hoursOf": "{used}h de {budget}h",
+      "archivedToast": "Projeto \"{name}\" arquivado.",
+      "columns": {
+        "name": "Projeto",
+        "client": "Cliente",
+        "manager": "Gestor",
+        "team": "Equipa",
+        "state": "Estado",
+        "health": "Saúde",
+        "progress": "Progresso",
+        "startDate": "Início",
+        "dueDate": "Prazo",
+        "value": "Valor",
+        "hoursBudget": "Orçamento (h)",
+        "hoursUsed": "Horas usadas",
+        "nextDelivery": "Próxima entrega"
+      },
+      "actions": {
+        "view": "Ver detalhe",
+        "archive": "Arquivar"
+      },
+      "empty": {
+        "title": "Sem projetos",
+        "description": "Ainda não existem projetos para apresentar."
+      },
+      "errors": {
+        "loadTitle": "Não foi possível carregar os projetos",
+        "loadDescription": "Ocorreu um erro ao obter a lista. Tente novamente.",
+        "retry": "Tentar novamente"
+      },
+      "archiveConfirm": {
+        "title": "Arquivar projeto?",
+        "description": "\"{name}\" será arquivado e ficará só de leitura. As entidades associadas são congeladas.",
+        "confirm": "Arquivar"
+      }
+    },
+    "states": {
+      "planning": "Planeamento",
+      "active": "Ativo",
+      "on_hold": "Em pausa",
+      "completed": "Concluído",
+      "cancelled": "Cancelado",
+      "archived": "Arquivado"
+    },
+    "health": {
+      "healthy": "Saudável",
+      "attention": "Atenção",
+      "at_risk": "Em risco",
+      "suggestedShort": "sugestão"
+    },
+    "phaseStates": {
+      "not_started": "Não iniciada",
+      "in_progress": "Em curso",
+      "blocked": "Bloqueada",
+      "completed": "Concluída"
+    },
+    "deliveryStatus": {
+      "upcoming": "A caminho",
+      "due_soon": "Prazo próximo",
+      "overdue": "Atrasada",
+      "met": "Cumprida"
+    },
+    "taskFlags": {
+      "overdue": "Atrasada",
+      "blocked": "Bloqueada"
+    },
+    "newPage": {
+      "title": "Novo projeto",
+      "subtitle": "Crie um projeto em planeamento. As fases e a equipa gerem-se no detalhe.",
+      "back": "Voltar aos projetos",
+      "createdToast": "Projeto \"{name}\" criado."
+    },
+    "form": {
+      "name": "Nome do projeto",
+      "namePlaceholder": "Ex.: Rebranding + Manual de marca",
+      "client": "Cliente",
+      "clientPlaceholder": "Selecionar cliente",
+      "noClients": "Sem clientes",
+      "manager": "Gestor de projeto",
+      "managerPlaceholder": "Selecionar gestor",
+      "noManagers": "Sem gestores",
+      "startDate": "Data de início",
+      "dueDate": "Prazo",
+      "hoursBudget": "Orçamento de horas",
+      "hoursHint": "Total de horas previstas para o projeto.",
+      "hoursPlaceholder": "Ex.: 320",
+      "value": "Valor contratado",
+      "valueHint": "Valor em euros (opcional).",
+      "valuePlaceholder": "Ex.: 34.000",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Breve descrição do âmbito do projeto…",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "saveCreate": "Criar projeto"
+    },
+    "validation": {
+      "valueInvalid": "Indique um valor válido.",
+      "hoursRequired": "Indique o orçamento de horas.",
+      "hoursInvalid": "Indique um número de horas válido.",
+      "nameRequired": "O nome é obrigatório.",
+      "clientRequired": "Selecione um cliente.",
+      "managerRequired": "Selecione um gestor.",
+      "startRequired": "Indique a data de início.",
+      "dueRequired": "Indique o prazo.",
+      "dueBeforeStart": "O prazo não pode ser anterior ao início.",
+      "phaseNameRequired": "O nome da fase é obrigatório.",
+      "reasonRequired": "Indique um motivo (mín. 5 caracteres)."
+    },
+    "detail": {
+      "back": "Voltar aos projetos",
+      "backToList": "Voltar à lista",
+      "notFoundTitle": "Projeto não encontrado",
+      "notFoundDescription": "Este projeto não existe ou não tem acesso ao mesmo.",
+      "errorTitle": "Não foi possível carregar o projeto",
+      "errorDescription": "Ocorreu um erro ao obter o projeto. Tente novamente.",
+      "retry": "Tentar novamente",
+      "healthPublished": "Saúde do projeto atualizada.",
+      "healthReasonRequired": "É necessário um motivo para alterar a saúde.",
+      "healthError": "Não foi possível atualizar a saúde.",
+      "publishHealth": "Publicar saúde",
+      "updateHealth": "Alterar saúde",
+      "suggestionHint": "Sugestão do sistema: {health}",
+      "pausedBanner": "Projeto em pausa — {reason}",
+      "cancelledBanner": "Projeto cancelado — {reason}",
+      "archivedBanner": "Projeto arquivado. Restaure para editar.",
+      "progress": "Progresso",
+      "dates": "Datas",
+      "manager": "Gestor",
+      "hours": "Horas",
+      "hoursValue": "{used}h / {budget}h",
+      "value": "Valor contratado",
+      "team": "Equipa",
+      "teamValue": "{count} membros"
+    },
+    "tabs": {
+      "overview": "Visão geral",
+      "tasks": "Tarefas",
+      "phases": "Fases",
+      "calendar": "Calendário",
+      "files": "Ficheiros",
+      "activity": "Atividade",
+      "finance": "Financeiro"
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "saving": "A processar…",
+      "start": "Iniciar projeto",
+      "pause": "Colocar em pausa",
+      "resume": "Retomar",
+      "complete": "Concluir projeto",
+      "archive": "Arquivar",
+      "startBlockedHint": "Adicione pelo menos uma fase e um membro e confirme os marcos de pagamento.",
+      "completeBlockedHint": "Conclua todas as fases antes de fechar o projeto.",
+      "toast": {
+        "start": "Projeto iniciado.",
+        "pause": "Projeto colocado em pausa.",
+        "resume": "Projeto retomado.",
+        "complete": "Projeto concluído.",
+        "cancel": "Projeto cancelado.",
+        "archive": "Projeto arquivado."
+      },
+      "pauseDialog": {
+        "title": "Colocar projeto em pausa",
+        "description": "Os cronómetros ativos são parados e as fases congeladas até retomar.",
+        "label": "Motivo da pausa",
+        "placeholder": "Indique porque está a colocar o projeto em pausa…"
+      },
+      "cancelDialog": {
+        "title": "Cancelar projeto",
+        "description": "Ação destrutiva. As entidades associadas são congeladas (só de leitura).",
+        "label": "Motivo do cancelamento",
+        "placeholder": "Indique o motivo do cancelamento…",
+        "confirm": "Cancelar projeto"
+      },
+      "resumeDialog": {
+        "title": "Retomar projeto?",
+        "description": "O projeto volta ao estado ativo."
+      },
+      "completeDialog": {
+        "title": "Concluir projeto?",
+        "description": "Todas as fases estão concluídas. O projeto será fechado."
+      },
+      "archiveDialog": {
+        "title": "Arquivar projeto?",
+        "description": "O projeto fica só de leitura e as entidades associadas são congeladas."
+      }
+    },
+    "errors": {
+      "loadTitle": "Algo correu mal",
+      "loadDescription": "Não foi possível apresentar esta página. Tente novamente.",
+      "retry": "Tentar novamente",
+      "network": "Erro de ligação. Tente novamente.",
+      "not_found": "Projeto não encontrado.",
+      "forbidden": "Sem permissão para esta ação.",
+      "invalid_transition": "Transição inválida.",
+      "guard_failed": "Não é possível concluir esta ação.",
+      "reason_required": "É necessário indicar um motivo.",
+      "reorderFailed": "Não foi possível reordenar as fases.",
+      "guard": {
+        "startNotPlanning": "Só é possível iniciar um projeto em planeamento.",
+        "startNeedsPhaseAndMember": "Adicione pelo menos uma fase e um membro à equipa.",
+        "startNeedsMilestones": "Confirme os marcos de pagamento antes de iniciar (BR-037).",
+        "pauseNotActive": "Só é possível pausar um projeto ativo.",
+        "resumeNotOnHold": "Só é possível retomar um projeto em pausa.",
+        "completeNotActive": "Inicie o projeto antes de o concluir.",
+        "completeOpenPhases": "Existem fases por concluir. Conclua-as antes de fechar o projeto.",
+        "cancelNotLive": "Este projeto já não pode ser cancelado.",
+        "archiveNotClosed": "Só projetos concluídos ou cancelados podem ser arquivados.",
+        "phaseStartInvalid": "Só é possível iniciar uma fase não iniciada.",
+        "phaseNeedsActiveProject": "O projeto tem de estar ativo para trabalhar nesta fase.",
+        "phaseBlockInvalid": "Só é possível bloquear uma fase em curso.",
+        "phaseUnblockInvalid": "Só é possível desbloquear uma fase bloqueada.",
+        "phaseCompleteInvalid": "Inicie a fase antes de a concluir.",
+        "phaseOpenTasks": "Existem tarefas por concluir nesta fase.",
+        "phaseReopenInvalid": "Só é possível reabrir uma fase concluída.",
+        "phaseReopenProjectClosed": "Não é possível reabrir fases de um projeto concluído.",
+        "nameRequired": "O nome é obrigatório.",
+        "phaseNameRequired": "O nome da fase é obrigatório."
+      }
+    },
+    "overview": {
+      "descriptionTitle": "Descrição",
+      "noDescription": "Sem descrição.",
+      "readiness": {
+        "title": "Pronto para iniciar",
+        "phase": "Pelo menos uma fase criada",
+        "member": "Pelo menos um membro na equipa",
+        "milestones": "Marcos de pagamento confirmados",
+        "ready": "Tudo pronto — pode iniciar o projeto.",
+        "blocked": "Complete os pontos acima para iniciar o projeto."
+      },
+      "phaseProgressTitle": "Progresso por fase",
+      "noPhases": "Sem fases definidas.",
+      "attentionTitle": "Tarefas atrasadas ou bloqueadas",
+      "noAttention": "Sem tarefas em atenção.",
+      "risksTitle": "Riscos, decisões e próximos passos",
+      "noRisks": "Sem registos.",
+      "riskKind": {
+        "risk": "Risco",
+        "decision": "Decisão",
+        "next_step": "Próximo passo"
+      },
+      "activityTitle": "Atividade recente",
+      "milestonesTitle": "Próximos marcos",
+      "noMilestones": "Sem marcos agendados.",
+      "hoursTitle": "Horas",
+      "ofBudget": "de {budget}h",
+      "hoursOver": "Acima do orçamento de horas.",
+      "consumed": "consumido",
+      "budgetTitle": "Valor contratado",
+      "contractedHint": "Valor total contratado para o projeto.",
+      "teamTitle": "Equipa",
+      "noTeam": "Sem membros atribuídos."
+    },
+    "phases": {
+      "subtitle": "Fases do projeto. Arraste para reordenar.",
+      "addPhase": "Adicionar fase",
+      "empty": {
+        "title": "Sem fases",
+        "description": "Adicione a primeira fase para estruturar a entrega."
+      },
+      "dragHandle": "Reordenar fase {name}",
+      "phaseActions": "Ações da fase",
+      "taskCount": "{done}/{total} tarefas",
+      "due": "prazo {date}",
+      "progressLabel": "Progresso da fase {name}",
+      "completeSuggestion": "Todas as tarefas concluídas — pode concluir a fase.",
+      "actions": {
+        "start": "Iniciar fase",
+        "block": "Bloquear fase",
+        "unblock": "Desbloquear",
+        "complete": "Concluir fase",
+        "reopen": "Reabrir fase",
+        "edit": "Editar",
+        "remove": "Remover"
+      },
+      "toast": {
+        "start": "Fase iniciada.",
+        "block": "Fase bloqueada.",
+        "unblock": "Fase desbloqueada.",
+        "complete": "Fase concluída.",
+        "reopen": "Fase reaberta.",
+        "updated": "Fase atualizada.",
+        "added": "Fase adicionada.",
+        "removed": "Fase removida."
+      },
+      "blockDialog": {
+        "title": "Bloquear fase",
+        "description": "Indique o motivo do bloqueio.",
+        "label": "Motivo do bloqueio",
+        "placeholder": "Descreva o que está a bloquear a fase…"
+      },
+      "removeConfirm": {
+        "title": "Remover fase?",
+        "description": "A fase \"{name}\" será removida do projeto.",
+        "confirm": "Remover"
+      }
+    },
+    "phaseDialog": {
+      "editTitle": "Editar fase",
+      "createTitle": "Nova fase",
+      "subtitle": "Defina o nome e, opcionalmente, o prazo da fase.",
+      "name": "Nome da fase",
+      "namePlaceholder": "Ex.: Descoberta e estratégia",
+      "dueDate": "Prazo (opcional)",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "save": "Guardar",
+      "create": "Adicionar fase"
+    },
+    "healthDialog": {
+      "title": "Saúde do projeto",
+      "subtitle": "O sistema sugere; a decisão de publicar é sua (BR-030).",
+      "suggestion": "Sugestão do sistema: {health}",
+      "pickLabel": "Selecione a saúde a publicar",
+      "suggestedTag": "sugerida",
+      "reasonLabel": "Motivo da alteração",
+      "reasonPlaceholder": "Explique porque difere da sugestão do sistema…",
+      "reasonHint": "Obrigatório porque difere da sugestão (BR-031).",
+      "reasonRequired": "Indique um motivo (mín. 5 caracteres).",
+      "acceptHint": "Coincide com a sugestão do sistema — não é necessário motivo.",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "override": "Publicar com motivo",
+      "accept": "Aceitar sugestão"
+    },
+    "finance": {
+      "forbiddenTitle": "Sem acesso financeiro",
+      "forbiddenDescription": "Não tem permissão para ver os dados financeiros deste projeto.",
+      "errorTitle": "Não foi possível carregar os dados financeiros",
+      "errorDescription": "Ocorreu um erro. Tente novamente.",
+      "retry": "Tentar novamente",
+      "milestonesTitle": "Marcos de pagamento",
+      "milestonesSubtitle": "Marcos deste projeto (só de leitura).",
+      "manage": "Gerir em Financeiro",
+      "costsTitle": "Custos do projeto",
+      "costsSubtitle": "Custos que entram na margem (BR-069)."
+    },
+    "tasksTab": {
+      "summaryNote": "Resumo só de leitura. A gestão de tarefas chega em breve.",
+      "openMyWork": "Ver o meu trabalho",
+      "byPhase": "Tarefas por fase",
+      "noPhases": "Sem fases definidas.",
+      "count": "{done}/{total}",
+      "attention": "Em atenção"
+    },
+    "calendarTab": {
+      "summaryNote": "Agenda do projeto (só de leitura).",
+      "openCalendar": "Abrir calendário",
+      "agenda": "Agenda",
+      "empty": "Sem datas agendadas.",
+      "kind": {
+        "milestone": "Marco",
+        "phase": "Fase"
+      }
+    },
+    "filesTab": {
+      "title": "Ficheiros",
+      "empty": {
+        "title": "Sem ficheiros",
+        "description": "Ainda não há ficheiros associados a este projeto."
+      },
+      "comingSoon": "O carregamento de ficheiros chega numa próxima fase."
+    },
+    "activityTab": {
+      "notesTitle": "Notas",
+      "timelineTitle": "Cronologia"
+    }
   }
 }

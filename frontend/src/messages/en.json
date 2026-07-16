@@ -1699,5 +1699,381 @@
       "retry": "Try again",
       "backToList": "Back to list"
     }
+  },
+  "projects": {
+    "list": {
+      "title": "Projects",
+      "subtitle": "Track delivery, health and progress across every project.",
+      "new": "New project",
+      "searchPlaceholder": "Search by name or client…",
+      "valueRestricted": "Restricted",
+      "hoursOf": "{used}h of {budget}h",
+      "archivedToast": "Project \"{name}\" archived.",
+      "columns": {
+        "name": "Project",
+        "client": "Client",
+        "manager": "Manager",
+        "team": "Team",
+        "state": "State",
+        "health": "Health",
+        "progress": "Progress",
+        "startDate": "Start",
+        "dueDate": "Due",
+        "value": "Value",
+        "hoursBudget": "Budget (h)",
+        "hoursUsed": "Hours used",
+        "nextDelivery": "Next delivery"
+      },
+      "actions": {
+        "view": "View detail",
+        "archive": "Archive"
+      },
+      "empty": {
+        "title": "No projects",
+        "description": "There are no projects to show yet."
+      },
+      "errors": {
+        "loadTitle": "Couldn't load projects",
+        "loadDescription": "Something went wrong fetching the list. Please try again.",
+        "retry": "Try again"
+      },
+      "archiveConfirm": {
+        "title": "Archive project?",
+        "description": "\"{name}\" will be archived and become read-only. Related entities are frozen.",
+        "confirm": "Archive"
+      }
+    },
+    "states": {
+      "planning": "Planning",
+      "active": "Active",
+      "on_hold": "On hold",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "archived": "Archived"
+    },
+    "health": {
+      "healthy": "Healthy",
+      "attention": "Attention",
+      "at_risk": "At risk",
+      "suggestedShort": "suggested"
+    },
+    "phaseStates": {
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "completed": "Completed"
+    },
+    "deliveryStatus": {
+      "upcoming": "Upcoming",
+      "due_soon": "Due soon",
+      "overdue": "Overdue",
+      "met": "Met"
+    },
+    "taskFlags": {
+      "overdue": "Overdue",
+      "blocked": "Blocked"
+    },
+    "newPage": {
+      "title": "New project",
+      "subtitle": "Create a project in planning. Phases and team are managed on the detail page.",
+      "back": "Back to projects",
+      "createdToast": "Project \"{name}\" created."
+    },
+    "form": {
+      "name": "Project name",
+      "namePlaceholder": "e.g. Rebranding + Brand manual",
+      "client": "Client",
+      "clientPlaceholder": "Select client",
+      "noClients": "No clients",
+      "manager": "Project manager",
+      "managerPlaceholder": "Select manager",
+      "noManagers": "No managers",
+      "startDate": "Start date",
+      "dueDate": "Due date",
+      "hoursBudget": "Hours budget",
+      "hoursHint": "Total hours planned for the project.",
+      "hoursPlaceholder": "e.g. 320",
+      "value": "Contracted value",
+      "valueHint": "Amount in euros (optional).",
+      "valuePlaceholder": "e.g. 34,000",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the project scope…",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "saveCreate": "Create project"
+    },
+    "validation": {
+      "valueInvalid": "Enter a valid amount.",
+      "hoursRequired": "Enter the hours budget.",
+      "hoursInvalid": "Enter a valid number of hours.",
+      "nameRequired": "Name is required.",
+      "clientRequired": "Select a client.",
+      "managerRequired": "Select a manager.",
+      "startRequired": "Enter the start date.",
+      "dueRequired": "Enter the due date.",
+      "dueBeforeStart": "The due date can't be before the start date.",
+      "phaseNameRequired": "The phase name is required.",
+      "reasonRequired": "Enter a reason (min. 5 characters)."
+    },
+    "detail": {
+      "back": "Back to projects",
+      "backToList": "Back to list",
+      "notFoundTitle": "Project not found",
+      "notFoundDescription": "This project doesn't exist or you don't have access to it.",
+      "errorTitle": "Couldn't load the project",
+      "errorDescription": "Something went wrong fetching the project. Please try again.",
+      "retry": "Try again",
+      "healthPublished": "Project health updated.",
+      "healthReasonRequired": "A reason is required to change the health.",
+      "healthError": "Couldn't update the health.",
+      "publishHealth": "Publish health",
+      "updateHealth": "Change health",
+      "suggestionHint": "System suggestion: {health}",
+      "pausedBanner": "Project on hold — {reason}",
+      "cancelledBanner": "Project cancelled — {reason}",
+      "archivedBanner": "Project archived. Restore to edit.",
+      "progress": "Progress",
+      "dates": "Dates",
+      "manager": "Manager",
+      "hours": "Hours",
+      "hoursValue": "{used}h / {budget}h",
+      "value": "Contracted value",
+      "team": "Team",
+      "teamValue": "{count} members"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "tasks": "Tasks",
+      "phases": "Phases",
+      "calendar": "Calendar",
+      "files": "Files",
+      "activity": "Activity",
+      "finance": "Financials"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "saving": "Working…",
+      "start": "Start project",
+      "pause": "Put on hold",
+      "resume": "Resume",
+      "complete": "Complete project",
+      "archive": "Archive",
+      "startBlockedHint": "Add at least one phase and one member, and confirm the payment milestones.",
+      "completeBlockedHint": "Complete all phases before closing the project.",
+      "toast": {
+        "start": "Project started.",
+        "pause": "Project put on hold.",
+        "resume": "Project resumed.",
+        "complete": "Project completed.",
+        "cancel": "Project cancelled.",
+        "archive": "Project archived."
+      },
+      "pauseDialog": {
+        "title": "Put project on hold",
+        "description": "Running timers are stopped and phases frozen until you resume.",
+        "label": "Pause reason",
+        "placeholder": "Explain why you're putting the project on hold…"
+      },
+      "cancelDialog": {
+        "title": "Cancel project",
+        "description": "Destructive action. Related entities are frozen (read-only).",
+        "label": "Cancellation reason",
+        "placeholder": "Enter the cancellation reason…",
+        "confirm": "Cancel project"
+      },
+      "resumeDialog": {
+        "title": "Resume project?",
+        "description": "The project returns to the active state."
+      },
+      "completeDialog": {
+        "title": "Complete project?",
+        "description": "All phases are completed. The project will be closed."
+      },
+      "archiveDialog": {
+        "title": "Archive project?",
+        "description": "The project becomes read-only and related entities are frozen."
+      }
+    },
+    "errors": {
+      "loadTitle": "Something went wrong",
+      "loadDescription": "We couldn't render this page. Please try again.",
+      "retry": "Try again",
+      "network": "Connection error. Please try again.",
+      "not_found": "Project not found.",
+      "forbidden": "You don't have permission for this action.",
+      "invalid_transition": "Invalid transition.",
+      "guard_failed": "This action can't be completed.",
+      "reason_required": "A reason is required.",
+      "reorderFailed": "Couldn't reorder the phases.",
+      "guard": {
+        "startNotPlanning": "Only a project in planning can be started.",
+        "startNeedsPhaseAndMember": "Add at least one phase and one team member.",
+        "startNeedsMilestones": "Confirm the payment milestones before starting (BR-037).",
+        "pauseNotActive": "Only an active project can be paused.",
+        "resumeNotOnHold": "Only a project on hold can be resumed.",
+        "completeNotActive": "Start the project before completing it.",
+        "completeOpenPhases": "There are open phases. Complete them before closing the project.",
+        "cancelNotLive": "This project can no longer be cancelled.",
+        "archiveNotClosed": "Only completed or cancelled projects can be archived.",
+        "phaseStartInvalid": "Only a not-started phase can be started.",
+        "phaseNeedsActiveProject": "The project must be active to work on this phase.",
+        "phaseBlockInvalid": "Only a phase in progress can be blocked.",
+        "phaseUnblockInvalid": "Only a blocked phase can be unblocked.",
+        "phaseCompleteInvalid": "Start the phase before completing it.",
+        "phaseOpenTasks": "There are open tasks in this phase.",
+        "phaseReopenInvalid": "Only a completed phase can be reopened.",
+        "phaseReopenProjectClosed": "You can't reopen phases of a completed project.",
+        "nameRequired": "Name is required.",
+        "phaseNameRequired": "The phase name is required."
+      }
+    },
+    "overview": {
+      "descriptionTitle": "Description",
+      "noDescription": "No description.",
+      "readiness": {
+        "title": "Ready to start",
+        "phase": "At least one phase created",
+        "member": "At least one team member",
+        "milestones": "Payment milestones confirmed",
+        "ready": "All set — you can start the project.",
+        "blocked": "Complete the items above to start the project."
+      },
+      "phaseProgressTitle": "Progress by phase",
+      "noPhases": "No phases defined.",
+      "attentionTitle": "Overdue or blocked tasks",
+      "noAttention": "No tasks needing attention.",
+      "risksTitle": "Risks, decisions and next steps",
+      "noRisks": "No entries.",
+      "riskKind": {
+        "risk": "Risk",
+        "decision": "Decision",
+        "next_step": "Next step"
+      },
+      "activityTitle": "Recent activity",
+      "milestonesTitle": "Upcoming milestones",
+      "noMilestones": "No milestones scheduled.",
+      "hoursTitle": "Hours",
+      "ofBudget": "of {budget}h",
+      "hoursOver": "Over the hours budget.",
+      "consumed": "consumed",
+      "budgetTitle": "Contracted value",
+      "contractedHint": "Total value contracted for the project.",
+      "teamTitle": "Team",
+      "noTeam": "No members assigned."
+    },
+    "phases": {
+      "subtitle": "Project phases. Drag to reorder.",
+      "addPhase": "Add phase",
+      "empty": {
+        "title": "No phases",
+        "description": "Add the first phase to structure delivery."
+      },
+      "dragHandle": "Reorder phase {name}",
+      "phaseActions": "Phase actions",
+      "taskCount": "{done}/{total} tasks",
+      "due": "due {date}",
+      "progressLabel": "Progress of phase {name}",
+      "completeSuggestion": "All tasks are done — you can complete the phase.",
+      "actions": {
+        "start": "Start phase",
+        "block": "Block phase",
+        "unblock": "Unblock",
+        "complete": "Complete phase",
+        "reopen": "Reopen phase",
+        "edit": "Edit",
+        "remove": "Remove"
+      },
+      "toast": {
+        "start": "Phase started.",
+        "block": "Phase blocked.",
+        "unblock": "Phase unblocked.",
+        "complete": "Phase completed.",
+        "reopen": "Phase reopened.",
+        "updated": "Phase updated.",
+        "added": "Phase added.",
+        "removed": "Phase removed."
+      },
+      "blockDialog": {
+        "title": "Block phase",
+        "description": "Enter the blocker reason.",
+        "label": "Blocker reason",
+        "placeholder": "Describe what's blocking the phase…"
+      },
+      "removeConfirm": {
+        "title": "Remove phase?",
+        "description": "Phase \"{name}\" will be removed from the project.",
+        "confirm": "Remove"
+      }
+    },
+    "phaseDialog": {
+      "editTitle": "Edit phase",
+      "createTitle": "New phase",
+      "subtitle": "Set the name and, optionally, the phase due date.",
+      "name": "Phase name",
+      "namePlaceholder": "e.g. Discovery and strategy",
+      "dueDate": "Due date (optional)",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "save": "Save",
+      "create": "Add phase"
+    },
+    "healthDialog": {
+      "title": "Project health",
+      "subtitle": "The system suggests; publishing is your decision (BR-030).",
+      "suggestion": "System suggestion: {health}",
+      "pickLabel": "Select the health to publish",
+      "suggestedTag": "suggested",
+      "reasonLabel": "Reason for the change",
+      "reasonPlaceholder": "Explain why it differs from the system suggestion…",
+      "reasonHint": "Required because it differs from the suggestion (BR-031).",
+      "reasonRequired": "Enter a reason (min. 5 characters).",
+      "acceptHint": "Matches the system suggestion — no reason required.",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "override": "Publish with reason",
+      "accept": "Accept suggestion"
+    },
+    "finance": {
+      "forbiddenTitle": "No financial access",
+      "forbiddenDescription": "You don't have permission to view this project's financial data.",
+      "errorTitle": "Couldn't load financial data",
+      "errorDescription": "Something went wrong. Please try again.",
+      "retry": "Try again",
+      "milestonesTitle": "Payment milestones",
+      "milestonesSubtitle": "Milestones for this project (read-only).",
+      "manage": "Manage in Financials",
+      "costsTitle": "Project costs",
+      "costsSubtitle": "Costs that feed the margin (BR-069)."
+    },
+    "tasksTab": {
+      "summaryNote": "Read-only summary. Task management is coming soon.",
+      "openMyWork": "Open My Work",
+      "byPhase": "Tasks by phase",
+      "noPhases": "No phases defined.",
+      "count": "{done}/{total}",
+      "attention": "Needs attention"
+    },
+    "calendarTab": {
+      "summaryNote": "Project agenda (read-only).",
+      "openCalendar": "Open calendar",
+      "agenda": "Agenda",
+      "empty": "No dates scheduled.",
+      "kind": {
+        "milestone": "Milestone",
+        "phase": "Phase"
+      }
+    },
+    "filesTab": {
+      "title": "Files",
+      "empty": {
+        "title": "No files",
+        "description": "There are no files attached to this project yet."
+      },
+      "comingSoon": "File upload is coming in a later phase."
+    },
+    "activityTab": {
+      "notesTitle": "Notes",
+      "timelineTitle": "Timeline"
+    }
   }
 }
