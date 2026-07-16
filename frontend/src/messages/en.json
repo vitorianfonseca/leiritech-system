@@ -2992,5 +2992,502 @@
         "ratio": "Margin %"
       }
     }
+  },
+  "settings": {
+    "navLabel": "Settings navigation",
+    "index": {
+      "title": "Settings",
+      "subtitle": "Configure Aurea, the team and the rules that keep the system running."
+    },
+    "groups": {
+      "organization": "Organization",
+      "commercial": "Commercial",
+      "resources": "Resources",
+      "preferences": "Preferences",
+      "data": "Data"
+    },
+    "navLabelShort": "Settings",
+    "areas": {
+      "aurea": {
+        "title": "Aurea details",
+        "description": "Organization name, contacts, address and logo."
+      },
+      "members": {
+        "title": "Members",
+        "description": "Invite people, assign roles and activate or deactivate them."
+      },
+      "roles": {
+        "title": "Roles & permissions",
+        "description": "What each role can see and do in the system."
+      },
+      "pipeline": {
+        "title": "Pipeline stages",
+        "description": "Order the stages, set colours and probabilities."
+      },
+      "states": {
+        "title": "States & priorities",
+        "description": "Task states and priority colours."
+      },
+      "tags": {
+        "title": "Tags",
+        "description": "Create and organize the tags used across Aurea."
+      },
+      "templates": {
+        "title": "Project templates",
+        "description": "Reusable phase and task templates."
+      },
+      "capacity": {
+        "title": "Weekly capacity",
+        "description": "Hours per function, utilization targets and availability."
+      },
+      "costs": {
+        "title": "Internal costs",
+        "description": "Internal hourly cost for each function."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Choose what you receive in-app and by email."
+      },
+      "theme": {
+        "title": "Theme",
+        "description": "Light or dark appearance and interface language."
+      },
+      "archive": {
+        "title": "Archive",
+        "description": "Review and restore archived items."
+      },
+      "export": {
+        "title": "Data export",
+        "description": "Export your data as CSV files."
+      }
+    },
+    "colors": {
+      "label": "Colour",
+      "gold": "Gold",
+      "teal": "Teal",
+      "green": "Green",
+      "indigo": "Indigo",
+      "terracotta": "Terracotta",
+      "violet": "Violet",
+      "info": "Blue"
+    },
+    "errors": {
+      "loadTitle": "Couldn't load settings",
+      "loadDescription": "Something went wrong loading this section. Please try again.",
+      "retry": "Try again"
+    },
+    "aurea": {
+      "title": "Aurea details",
+      "subtitle": "The organization identity used across the system.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Aurea details updated.",
+      "logo": {
+        "title": "Logo",
+        "description": "PNG or SVG up to 512 KB. Used in the header and documents.",
+        "previewAlt": "Logo preview",
+        "upload": "Upload logo",
+        "remove": "Remove"
+      },
+      "identity": {
+        "title": "Identity"
+      },
+      "address": {
+        "title": "Address"
+      },
+      "fields": {
+        "name": "Name",
+        "tagline": "Tagline",
+        "email": "Email",
+        "phone": "Phone",
+        "website": "Website",
+        "addressLine": "Address",
+        "city": "City",
+        "postalCode": "Postal code",
+        "country": "Country"
+      },
+      "validation": {
+        "nameRequired": "Enter the organization name.",
+        "taglineLong": "The tagline is too long.",
+        "emailInvalid": "Invalid email.",
+        "urlInvalid": "Invalid URL (start with http:// or https://)."
+      },
+      "errors": {
+        "saveFailed": "Couldn't save.",
+        "loadTitle": "Couldn't load the details",
+        "loadDescription": "Something went wrong loading the Aurea details. Please try again.",
+        "retry": "Try again",
+        "logoType": "The file must be an image.",
+        "logoSize": "The image exceeds 512 KB."
+      }
+    },
+    "members": {
+      "title": "Members",
+      "subtitle": "Who has access to Aurea and with which role.",
+      "inviteAction": "Invite member",
+      "inviteShort": "Invite",
+      "searchPlaceholder": "Search by name or email…",
+      "emptyTitle": "No members yet",
+      "emptyDescription": "Invite the first person to get started.",
+      "lastAdminNotice": "There must always be at least one active administrator.",
+      "columns": {
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "lastActive": "Last active"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "inactive": "Inactive"
+      },
+      "invited": "Invitation sent to {email}.",
+      "roleChanged": "{name} is now {role}.",
+      "activated": "{name} was reactivated.",
+      "deactivated": "{name} was deactivated.",
+      "actions": {
+        "activate": "Reactivate",
+        "deactivate": "Deactivate"
+      },
+      "deactivateConfirm": {
+        "title": "Deactivate member?",
+        "description": "{name} loses access to Aurea. You can reactivate them at any time."
+      },
+      "invite": {
+        "title": "Invite member",
+        "description": "Send an email invitation with the access role.",
+        "fields": {
+          "email": "Email",
+          "role": "Role"
+        },
+        "roleHint": {
+          "admin": "Full access, including settings and financial values.",
+          "gestor": "Manages clients, proposals and the team's projects.",
+          "membro": "Only accesses the projects and tasks they take part in."
+        },
+        "cancel": "Cancel",
+        "sending": "Sending…",
+        "send": "Send invitation"
+      },
+      "errors": {
+        "saveFailed": "Couldn't complete the operation.",
+        "loadTitle": "Couldn't load members",
+        "loadDescription": "Something went wrong loading the team. Please try again.",
+        "retry": "Try again",
+        "emailInvalid": "Invalid email.",
+        "emailDuplicate": "A member with this email already exists.",
+        "lastAdmin": "You can't remove the last active administrator.",
+        "lastAdminTitle": "Action not allowed"
+      }
+    },
+    "roles": {
+      "title": "Roles & permissions",
+      "subtitle": "What each role can see and do in Aurea.",
+      "notice": "These permissions are enforced consistently across the system.",
+      "summary": {
+        "admin": "Full access to configuration, the team and financial values.",
+        "gestor": "Manages commercial and delivery; financial values only with a grant.",
+        "membro": "Only accesses the projects and tasks they take part in."
+      },
+      "matrix": {
+        "capability": "Area"
+      },
+      "capabilities": {
+        "crm": "CRM (companies & contacts)",
+        "pipeline": "Pipeline & proposals",
+        "projects": "Projects",
+        "tasks": "Tasks",
+        "time": "Time tracking",
+        "financial": "Financial values",
+        "team": "Team & workload",
+        "reports": "Reports",
+        "settings": "Settings"
+      },
+      "levels": {
+        "full": "Full",
+        "scoped": "Own",
+        "grant": "With grant",
+        "none": "No access"
+      }
+    },
+    "pipeline": {
+      "title": "Pipeline stages",
+      "subtitle": "Order the stages and set the colour and win probability of each one.",
+      "notice": "These stages drive the commercial pipeline board.",
+      "reset": "Reset",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Pipeline stages updated.",
+      "reorder": "Reorder the {name} stage",
+      "colorFor": "Colour of the {name} stage",
+      "colorLabel": "Colour",
+      "probability": "Probability",
+      "probabilityFor": "Win probability of the {name} stage",
+      "errors": {
+        "saveFailed": "Couldn't save the stages.",
+        "loadTitle": "Couldn't load the stages",
+        "loadDescription": "Something went wrong loading the stages. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "states": {
+      "title": "States & priorities",
+      "subtitle": "The task workflow states and the priority colours.",
+      "taskStatesTitle": "Task states",
+      "taskStatesNotice": "States are defined by the workflow and can't be changed.",
+      "prioritiesTitle": "Priorities",
+      "prioritiesNotice": "Adjust the colour of each priority.",
+      "color": "Colour",
+      "changeColor": "Change the colour of {name}",
+      "prioritySaved": "{name} colour updated.",
+      "taskStates": {
+        "a_fazer": {
+          "title": "To do",
+          "description": "Not started yet."
+        },
+        "em_curso": {
+          "title": "In progress",
+          "description": "Being worked on by a member."
+        },
+        "em_revisao": {
+          "title": "In review",
+          "description": "Awaiting manager approval."
+        },
+        "concluida": {
+          "title": "Done",
+          "description": "Approved and closed."
+        },
+        "bloqueada": {
+          "title": "Blocked",
+          "description": "Held up by a dependency."
+        }
+      },
+      "priorities": {
+        "baixa": "Low",
+        "media": "Medium",
+        "alta": "High",
+        "urgente": "Urgent"
+      },
+      "errors": {
+        "saveFailed": "Couldn't save."
+      }
+    },
+    "capacity": {
+      "title": "Weekly capacity",
+      "subtitle": "Contracted hours, non-project hours and utilization target per function.",
+      "notice": "These values drive team availability in /team.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "{fn} capacity updated.",
+      "saveFailed": "Couldn't save.",
+      "fields": {
+        "weeklyCapacity": "Weekly capacity (h)",
+        "nonProject": "Non-project hours (h)",
+        "target": "Utilization target",
+        "costRate": "Internal cost (€/h)",
+        "netCapacity": "Net capacity"
+      },
+      "hoursValue": "{hours} h",
+      "netPreview": "Net delivery capacity: {hours} h/week.",
+      "weeklyCostPreview": "Estimated weekly cost: {cost}.",
+      "errors": {
+        "loadTitle": "Couldn't load the configuration",
+        "loadDescription": "Something went wrong loading the functions. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "costs": {
+      "title": "Internal costs",
+      "subtitle": "Internal hourly cost for each function. Used to compute margin.",
+      "notice": "Internal costs are confidential and visible to administrators only.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "{fn} cost updated.",
+      "saveFailed": "Couldn't save.",
+      "fields": {
+        "weeklyCapacity": "Weekly capacity (h)",
+        "nonProject": "Non-project hours (h)",
+        "target": "Utilization target",
+        "costRate": "Internal cost (€/h)",
+        "netCapacity": "Net capacity"
+      },
+      "hoursValue": "{hours} h",
+      "netPreview": "Net delivery capacity: {hours} h/week.",
+      "weeklyCostPreview": "Estimated weekly cost: {cost}.",
+      "errors": {
+        "loadTitle": "Couldn't load the configuration",
+        "loadDescription": "Something went wrong loading the functions. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "tags": {
+      "title": "Tags",
+      "subtitle": "Reusable tags to classify companies, deals and projects.",
+      "createAction": "New tag",
+      "createShort": "New",
+      "searchPlaceholder": "Search tags…",
+      "emptyTitle": "No tags yet",
+      "emptyDescription": "Create the first tag to start classifying.",
+      "columns": {
+        "label": "Tag",
+        "usage": "Usage"
+      },
+      "usageValue": "{count, plural, =0 {unused} one {# record} other {# records}}",
+      "created": "Tag “{label}” created.",
+      "updated": "Tag “{label}” updated.",
+      "deleted": "Tag “{label}” deleted.",
+      "restored": "Tag “{label}” restored.",
+      "createTitle": "New tag",
+      "editTitle": "Edit tag",
+      "formDescription": "Pick a clear name and a distinct colour.",
+      "preview": "Preview",
+      "previewPlaceholder": "Tag",
+      "fields": {
+        "label": "Name",
+        "color": "Colour"
+      },
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "save": "Save",
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "deleteConfirm": {
+        "title": "Delete tag?",
+        "description": "The tag “{label}” will be permanently removed.",
+        "descriptionInUse": "The tag “{label}” is on {count, plural, one {# record} other {# records}}. Deleting it removes the association."
+      },
+      "errors": {
+        "saveFailed": "Couldn't save the tag.",
+        "loadTitle": "Couldn't load the tags",
+        "loadDescription": "Something went wrong loading the tags. Please try again.",
+        "retry": "Try again",
+        "labelRequired": "Enter a name for the tag.",
+        "labelDuplicate": "A tag with this name already exists."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose what you receive in the app and by email.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Notification preferences saved.",
+      "columns": {
+        "category": "Notification",
+        "inApp": "In app",
+        "email": "Email"
+      },
+      "toggle": {
+        "inApp": "{category} in app",
+        "email": "{category} by email"
+      },
+      "categories": {
+        "mentions": {
+          "title": "Mentions",
+          "description": "When someone mentions you in a comment."
+        },
+        "taskAssigned": {
+          "title": "Assigned tasks",
+          "description": "When a task is assigned to you."
+        },
+        "approvals": {
+          "title": "Approvals",
+          "description": "When tasks are waiting for approval."
+        },
+        "paymentMilestones": {
+          "title": "Payment milestones",
+          "description": "When a payment milestone becomes due."
+        },
+        "weeklyDigest": {
+          "title": "Weekly digest",
+          "description": "A summary of the week's activity."
+        }
+      },
+      "errors": {
+        "saveFailed": "Couldn't save the preferences.",
+        "loadTitle": "Couldn't load the preferences",
+        "loadDescription": "Something went wrong loading the notifications. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "theme": {
+      "title": "Theme",
+      "subtitle": "Adjust the appearance and language of the interface.",
+      "appearanceTitle": "Appearance",
+      "languageTitle": "Language",
+      "languageLabel": "Interface language",
+      "languageDescription": "Applies only to you and doesn't change the URL.",
+      "profileNote": "Other personal preferences are available in your profile.",
+      "options": {
+        "light": {
+          "title": "Light",
+          "description": "Aurea's default theme."
+        },
+        "dark": {
+          "title": "Dark",
+          "description": "Great for low-light environments."
+        },
+        "system": {
+          "title": "System",
+          "description": "Follows your device preference."
+        }
+      }
+    },
+    "archive": {
+      "title": "Archive",
+      "subtitle": "Archived items you can review or restore.",
+      "searchPlaceholder": "Search the archive…",
+      "emptyTitle": "The archive is empty",
+      "emptyDescription": "Archived items show up here.",
+      "columns": {
+        "item": "Item",
+        "kind": "Type",
+        "archivedAt": "Archived on"
+      },
+      "kind": {
+        "project": "Project",
+        "opportunity": "Deal",
+        "task": "Task"
+      },
+      "actions": {
+        "restore": "Restore"
+      },
+      "restored": "“{title}” was restored.",
+      "restoreConfirm": {
+        "title": "Restore item?",
+        "description": "“{title}” becomes active in the system again."
+      },
+      "errors": {
+        "saveFailed": "Couldn't restore.",
+        "loadTitle": "Couldn't load the archive",
+        "loadDescription": "Something went wrong loading the archive. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "export": {
+      "title": "Data export",
+      "subtitle": "Export your data as CSV files.",
+      "notice": "Files are generated as CSV, ready for a spreadsheet.",
+      "exportAction": "Export CSV",
+      "exporting": "Exporting…",
+      "exported": "{dataset} export complete.",
+      "rowCount": "{rows, number} records",
+      "datasets": {
+        "companies": "Companies",
+        "contacts": "Contacts",
+        "opportunities": "Deals",
+        "projects": "Projects",
+        "tasks": "Tasks",
+        "timeEntries": "Time entries",
+        "members": "Members"
+      },
+      "errors": {
+        "failed": "Couldn't generate the export.",
+        "loadTitle": "Couldn't load the datasets",
+        "loadDescription": "Something went wrong loading the export. Please try again.",
+        "retry": "Try again"
+      }
+    }
   }
 }
