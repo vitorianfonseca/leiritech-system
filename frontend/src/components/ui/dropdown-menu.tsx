@@ -74,12 +74,18 @@ function DropdownMenuGroup(
   return <MenuPrimitive.Group {...props} />;
 }
 
+// Rendered as a plain presentational element rather than base-ui's
+// MenuPrimitive.GroupLabel, which throws "MenuGroupContext is missing" unless
+// wrapped in a Menu.Group. Menu labels here are decorative headers used
+// standalone (locale switcher, quick-create, task-row, notifications filter),
+// so a styled div keeps them group-independent and crash-free.
 function DropdownMenuLabel({
   className,
   ...props
-}: React.ComponentProps<typeof MenuPrimitive.GroupLabel>) {
+}: React.ComponentProps<"div">) {
   return (
-    <MenuPrimitive.GroupLabel
+    <div
+      role="presentation"
       data-slot="dropdown-label"
       className={cn(
         "px-2.5 py-1.5 text-xs font-medium text-muted-foreground",
