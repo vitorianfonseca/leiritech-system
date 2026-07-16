@@ -527,5 +527,185 @@
       "description": "Something went wrong fetching events. Try again.",
       "retry": "Try again"
     }
+  },
+  "finance": {
+    "title": "Finance",
+    "subtitle": "Payment milestones, costs and live margin.",
+    "tiles": {
+      "contracted": {
+        "label": "Contracted",
+        "hint": "Total of active milestones"
+      },
+      "received": {
+        "label": "Received",
+        "hint": "Already collected from clients"
+      },
+      "pending": {
+        "label": "Pending",
+        "hint": "Still to collect"
+      },
+      "margin": {
+        "label": "Margin",
+        "hint": "{percent} of contracted"
+      }
+    },
+    "margin": {
+      "title": "Business margin",
+      "subtitle": "Contracted minus costs and time.",
+      "liveLabel": "Live margin",
+      "items": {
+        "contracted": "Contracted",
+        "costs": "Costs",
+        "timeCost": "Time cost",
+        "margin": "Margin"
+      }
+    },
+    "status": {
+      "planned": "Planned",
+      "invoiced": "Issued",
+      "partially_paid": "Partially paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    },
+    "urgency": {
+      "overdue": "{days} days overdue",
+      "dueSoon": "Due in {days} days"
+    },
+    "milestones": {
+      "title": "Payment milestones",
+      "subtitle": "Track what is due to issue and to collect."
+    },
+    "costs": {
+      "title": "Project costs",
+      "subtitle": "Expenses that feed the margin calculation."
+    },
+    "table": {
+      "searchPlaceholder": "Search milestones…",
+      "emptyTitle": "No payment milestones yet",
+      "emptyDescription": "Create the first milestone to start tracking receipts.",
+      "columns": {
+        "description": "Description",
+        "status": "Status",
+        "amount": "Amount",
+        "received": "Received",
+        "expectedDate": "Expected date",
+        "completionCriteria": "Completion criteria",
+        "paidDate": "Received on",
+        "externalRef": "External reference"
+      }
+    },
+    "costsTable": {
+      "searchPlaceholder": "Search costs…",
+      "emptyTitle": "No costs recorded",
+      "emptyDescription": "Record costs to reflect the project's real margin.",
+      "columns": {
+        "description": "Description",
+        "category": "Category",
+        "amount": "Amount",
+        "incurredDate": "Date"
+      }
+    },
+    "costCategory": {
+      "subcontracting": "Subcontracting",
+      "software": "Software",
+      "hardware": "Hardware",
+      "travel": "Travel",
+      "other": "Other"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "newMilestone": "New milestone",
+      "newCost": "New cost",
+      "recordPayment": "Record payment",
+      "editMilestone": "Edit milestone",
+      "cancelMilestone": "Cancel milestone",
+      "deleteCost": "Delete cost",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "New payment milestone",
+      "editTitle": "Edit payment milestone",
+      "subtitle": "Set the amount, expected date and completion criteria.",
+      "project": "Project",
+      "projectPlaceholder": "Select the project",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Approved design delivery",
+      "amount": "Amount (€)",
+      "expectedDate": "Expected date",
+      "completionCriteria": "Completion criteria",
+      "completionCriteriaHint": "Required — what must be done before this milestone can be billed.",
+      "completionCriteriaPlaceholder": "e.g. Final mockups approved in writing by the client.",
+      "externalRef": "External reference",
+      "externalRefHint": "Optional reference (e.g. a document number generated in another system).",
+      "externalRefPlaceholder": "e.g. REF-2026-021",
+      "saving": "Saving…",
+      "saveCreate": "Create milestone",
+      "saveEdit": "Save changes"
+    },
+    "recordPayment": {
+      "title": "Record payment",
+      "amount": "Milestone amount",
+      "alreadyReceived": "Already received",
+      "remaining": "Outstanding",
+      "amountReceived": "Amount received (€)",
+      "paidDate": "Payment date",
+      "saving": "Recording…",
+      "confirm": "Confirm payment"
+    },
+    "cost": {
+      "createTitle": "New project cost",
+      "subtitle": "Record an expense linked to the project.",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Software licenses",
+      "category": "Category",
+      "incurredDate": "Date",
+      "save": "Record cost"
+    },
+    "detail": {
+      "client": "Client",
+      "status": "Status",
+      "amount": "Amount",
+      "received": "Received",
+      "expectedDate": "Expected date",
+      "invoicedDate": "Issued on",
+      "paidDate": "Received on",
+      "externalRef": "External reference",
+      "completionCriteria": "Completion criteria",
+      "required": "Required"
+    },
+    "cancelConfirm": {
+      "title": "Cancel this milestone?",
+      "description": "Milestone “{name}” will stop counting towards contracted and margin. You can undo this.",
+      "confirm": "Cancel milestone"
+    },
+    "deleteCostConfirm": {
+      "title": "Delete this cost?",
+      "description": "Cost “{name}” will be removed and the margin recalculated. You can undo this.",
+      "confirm": "Delete cost"
+    },
+    "validation": {
+      "amountRequired": "Enter an amount.",
+      "amountInvalid": "Enter a valid amount greater than zero.",
+      "amountExceedsRemaining": "The amount cannot exceed the outstanding balance.",
+      "dateRequired": "Enter a date.",
+      "dateInvalid": "Enter a valid date.",
+      "projectRequired": "Select a project.",
+      "descriptionRequired": "Describe the milestone (at least 3 characters).",
+      "completionCriteriaRequired": "Completion criteria are required."
+    },
+    "errors": {
+      "loadTitle": "Could not load finance",
+      "loadDescription": "An error occurred loading the financial data. Please try again.",
+      "retry": "Try again"
+    },
+    "toasts": {
+      "milestoneCreated": "Payment milestone created.",
+      "milestoneUpdated": "Payment milestone updated.",
+      "paymentRecorded": "Payment of {amount} recorded.",
+      "milestoneCancelled": "Milestone “{name}” cancelled.",
+      "costCreated": "Cost recorded.",
+      "costDeleted": "Cost “{name}” deleted."
+    }
   }
 }

@@ -527,5 +527,185 @@
       "description": "Ocorreu um erro ao obter os eventos. Tenta novamente.",
       "retry": "Tentar novamente"
     }
+  },
+  "finance": {
+    "title": "Financeiro",
+    "subtitle": "Marcos de pagamento, custos e margem em tempo real.",
+    "tiles": {
+      "contracted": {
+        "label": "Contratado",
+        "hint": "Total dos marcos ativos"
+      },
+      "received": {
+        "label": "Recebido",
+        "hint": "Já cobrado aos clientes"
+      },
+      "pending": {
+        "label": "Pendente",
+        "hint": "Por receber"
+      },
+      "margin": {
+        "label": "Margem",
+        "hint": "{percent} do contratado"
+      }
+    },
+    "margin": {
+      "title": "Margem do negócio",
+      "subtitle": "Contratado menos custos e tempo.",
+      "liveLabel": "Margem em tempo real",
+      "items": {
+        "contracted": "Contratado",
+        "costs": "Custos",
+        "timeCost": "Custo do tempo",
+        "margin": "Margem"
+      }
+    },
+    "status": {
+      "planned": "Planeado",
+      "invoiced": "Emitido",
+      "partially_paid": "Parcialmente pago",
+      "paid": "Pago",
+      "overdue": "Em atraso",
+      "cancelled": "Cancelado"
+    },
+    "urgency": {
+      "overdue": "{days} dias em atraso",
+      "dueSoon": "Vence em {days} dias"
+    },
+    "milestones": {
+      "title": "Marcos de pagamento",
+      "subtitle": "Acompanhe o que está por emitir e por receber."
+    },
+    "costs": {
+      "title": "Custos do projeto",
+      "subtitle": "Despesas que entram no cálculo da margem."
+    },
+    "table": {
+      "searchPlaceholder": "Procurar marcos…",
+      "emptyTitle": "Ainda não há marcos de pagamento",
+      "emptyDescription": "Crie o primeiro marco para começar a acompanhar recebimentos.",
+      "columns": {
+        "description": "Descrição",
+        "status": "Estado",
+        "amount": "Valor",
+        "received": "Recebido",
+        "expectedDate": "Data prevista",
+        "completionCriteria": "Critério de conclusão",
+        "paidDate": "Recebido em",
+        "externalRef": "Referência externa"
+      }
+    },
+    "costsTable": {
+      "searchPlaceholder": "Procurar custos…",
+      "emptyTitle": "Sem custos registados",
+      "emptyDescription": "Registe custos para refletir a margem real do projeto.",
+      "columns": {
+        "description": "Descrição",
+        "category": "Categoria",
+        "amount": "Valor",
+        "incurredDate": "Data"
+      }
+    },
+    "costCategory": {
+      "subcontracting": "Subcontratação",
+      "software": "Software",
+      "hardware": "Hardware",
+      "travel": "Deslocações",
+      "other": "Outros"
+    },
+    "actions": {
+      "refresh": "Atualizar",
+      "newMilestone": "Novo marco",
+      "newCost": "Novo custo",
+      "recordPayment": "Registar pagamento",
+      "editMilestone": "Editar marco",
+      "cancelMilestone": "Cancelar marco",
+      "deleteCost": "Eliminar custo",
+      "cancel": "Cancelar"
+    },
+    "form": {
+      "createTitle": "Novo marco de pagamento",
+      "editTitle": "Editar marco de pagamento",
+      "subtitle": "Defina o valor, a data prevista e o critério de conclusão.",
+      "project": "Projeto",
+      "projectPlaceholder": "Selecione o projeto",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Ex.: Entrega do design aprovado",
+      "amount": "Valor (€)",
+      "expectedDate": "Data prevista",
+      "completionCriteria": "Critério de conclusão",
+      "completionCriteriaHint": "Obrigatório — o que tem de estar concluído para cobrar este marco.",
+      "completionCriteriaPlaceholder": "Ex.: Maquetes finais aprovadas por escrito pelo cliente.",
+      "externalRef": "Referência externa",
+      "externalRefHint": "Referência opcional (ex.: número de um documento gerado noutro sistema).",
+      "externalRefPlaceholder": "Ex.: REF-2026-021",
+      "saving": "A guardar…",
+      "saveCreate": "Criar marco",
+      "saveEdit": "Guardar alterações"
+    },
+    "recordPayment": {
+      "title": "Registar pagamento",
+      "amount": "Valor do marco",
+      "alreadyReceived": "Já recebido",
+      "remaining": "Em falta",
+      "amountReceived": "Valor recebido (€)",
+      "paidDate": "Data do recebimento",
+      "saving": "A registar…",
+      "confirm": "Confirmar pagamento"
+    },
+    "cost": {
+      "createTitle": "Novo custo do projeto",
+      "subtitle": "Registe uma despesa associada ao projeto.",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Ex.: Licenças de software",
+      "category": "Categoria",
+      "incurredDate": "Data",
+      "save": "Registar custo"
+    },
+    "detail": {
+      "client": "Cliente",
+      "status": "Estado",
+      "amount": "Valor",
+      "received": "Recebido",
+      "expectedDate": "Data prevista",
+      "invoicedDate": "Data de emissão",
+      "paidDate": "Data de recebimento",
+      "externalRef": "Referência externa",
+      "completionCriteria": "Critério de conclusão",
+      "required": "Obrigatório"
+    },
+    "cancelConfirm": {
+      "title": "Cancelar este marco?",
+      "description": "O marco “{name}” deixará de contar para o contratado e para a margem. Pode reverter com Anular.",
+      "confirm": "Cancelar marco"
+    },
+    "deleteCostConfirm": {
+      "title": "Eliminar este custo?",
+      "description": "O custo “{name}” será removido e a margem recalculada. Pode reverter com Anular.",
+      "confirm": "Eliminar custo"
+    },
+    "validation": {
+      "amountRequired": "Indique um valor.",
+      "amountInvalid": "Indique um valor válido superior a zero.",
+      "amountExceedsRemaining": "O valor não pode exceder o montante em falta.",
+      "dateRequired": "Indique uma data.",
+      "dateInvalid": "Indique uma data válida.",
+      "projectRequired": "Selecione um projeto.",
+      "descriptionRequired": "Descreva o marco (mínimo 3 caracteres).",
+      "completionCriteriaRequired": "O critério de conclusão é obrigatório."
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar o financeiro",
+      "loadDescription": "Ocorreu um erro ao obter os dados financeiros. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "toasts": {
+      "milestoneCreated": "Marco de pagamento criado.",
+      "milestoneUpdated": "Marco de pagamento atualizado.",
+      "paymentRecorded": "Pagamento de {amount} registado.",
+      "milestoneCancelled": "Marco “{name}” cancelado.",
+      "costCreated": "Custo registado.",
+      "costDeleted": "Custo “{name}” eliminado."
+    }
   }
 }
