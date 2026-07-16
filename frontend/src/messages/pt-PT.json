@@ -275,5 +275,80 @@
       "thisWeek": "Esta semana",
       "placeholderNote": "Superfície de fundação — o hub diário do membro será construído sobre esta base."
     }
+  },
+  "collaboration": {
+    "title": "Comentários",
+    "composer": {
+      "label": "Escrever um comentário",
+      "placeholder": "Escreve um comentário… usa @ para mencionar alguém.",
+      "attach": "Anexar",
+      "submit": "Comentar",
+      "hint": "Prime ⌘/Ctrl + Enter para enviar."
+    },
+    "comment": {
+      "edited": "editado",
+      "actionsLabel": "Ações do comentário"
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "save": "Guardar",
+      "retry": "Tentar novamente"
+    },
+    "empty": {
+      "title": "Ainda não há comentários",
+      "description": "Sê o primeiro a comentar. Menciona colegas com @ para os notificar."
+    },
+    "delete": {
+      "title": "Eliminar comentário",
+      "description": "Esta ação não pode ser anulada depois de fechares o aviso. Pretendes eliminar este comentário?"
+    },
+    "toast": {
+      "created": "Comentário publicado",
+      "updated": "Comentário atualizado",
+      "deleted": "Comentário eliminado",
+      "mentioned": "{count, plural, one {# pessoa notificada} other {# pessoas notificadas}}"
+    },
+    "attachments": {
+      "remove": "Remover {name}"
+    },
+    "mentionInput": {
+      "label": "Caixa de comentário",
+      "placeholder": "Escreve um comentário…",
+      "suggestionsLabel": "Sugestões de menção"
+    },
+    "errors": {
+      "not_found": "Este comentário já não existe.",
+      "forbidden": "Só podes editar ou eliminar os teus próprios comentários.",
+      "network": "Falha de ligação. Tenta novamente.",
+      "generic": "Algo correu mal. Tenta novamente.",
+      "loadTitle": "Não foi possível carregar os comentários",
+      "loadBody": "Ocorreu um erro ao obter esta conversa. Tenta novamente."
+    },
+    "activity": {
+      "title": "Atividade",
+      "actions": {
+        "created": "criou este registo",
+        "updated": "atualizou {field}",
+        "status_changed": "alterou {field}",
+        "assigned": "definiu {field}",
+        "commented": "adicionou um comentário",
+        "attached": "anexou um ficheiro",
+        "archived": "arquivou este registo",
+        "restored": "restaurou este registo"
+      },
+      "fields": {
+        "status": "o estado",
+        "owner": "o responsável",
+        "comment": "um comentário",
+        "attachment": "um anexo"
+      },
+      "emptyTitle": "Sem atividade ainda",
+      "emptyDescription": "As alterações a este registo aparecerão aqui por ordem cronológica.",
+      "errorTitle": "Não foi possível carregar a atividade",
+      "errorBody": "Ocorreu um erro ao obter o histórico. Tenta novamente.",
+      "retry": "Tentar novamente"
+    }
   }
 }

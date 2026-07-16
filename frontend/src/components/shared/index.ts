@@ -61,6 +61,17 @@ export type {
   AureaToastData,
 } from "./toast";
 
+// Collaboration (issue #40) — reusable across companies/opportunities/projects/tasks
+export { CommentThread } from "./comment-thread";
+export type {
+  CommentThreadProps,
+  CommentThreadCurrentUser,
+} from "./comment-thread";
+export { ActivityFeed } from "./activity-feed";
+export type { ActivityFeedProps } from "./activity-feed";
+export { MentionInput, deriveMentionIds } from "./mention-input";
+export type { MentionInputProps } from "./mention-input";
+
 // Pre-existing shared utilities (foundation)
 export { LocaleSwitcher } from "./locale-switcher";
 export { ThemeToggle } from "./theme-toggle";
