@@ -1332,5 +1332,178 @@
       "description": "We couldn't render this page. Please try again.",
       "retry": "Try again"
     }
+  },
+  "pipeline": {
+    "title": "Sales pipeline",
+    "subtitle": "Drag opportunities between stages to reflect deal progress.",
+    "newOpportunity": "New opportunity",
+    "stages": {
+      "new_contact": "New contact",
+      "qualification": "Qualification",
+      "meeting_scheduled": "Meeting scheduled",
+      "proposal_drafting": "Proposal drafting",
+      "proposal_sent": "Proposal sent",
+      "negotiation": "Negotiation"
+    },
+    "column": {
+      "probability": "{value}% probability",
+      "empty": "No opportunities in this stage"
+    },
+    "summary": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "empty": {
+      "title": "No opportunities yet",
+      "description": "Create the first opportunity to start building the pipeline."
+    },
+    "errors": {
+      "forbiddenTitle": "No pipeline access",
+      "forbiddenDescription": "The sales pipeline is restricted to managers and administrators.",
+      "loadTitle": "Couldn't load the pipeline",
+      "loadDescription": "An error occurred while fetching opportunities. Please try again.",
+      "retry": "Try again"
+    },
+    "toast": {
+      "moved": "“{title}” moved to {stage}.",
+      "lost": "“{title}” marked as lost.",
+      "reopened": "“{title}” reopened.",
+      "created": "Opportunity “{title}” created."
+    },
+    "card": {
+      "actions": "Opportunity actions",
+      "viewDetail": "View detail",
+      "markWon": "Mark as won",
+      "markLost": "Mark as lost",
+      "reopen": "Reopen opportunity",
+      "probability": "{value}%",
+      "valueRestricted": "Value restricted",
+      "noNextAction": "No next action",
+      "overdueSince": "Overdue since {date}",
+      "dragHandle": "Drag “{title}”"
+    },
+    "move": {
+      "title": "Move opportunity",
+      "nextAction": "Next action",
+      "nextActionHint": "Every open opportunity needs a next action.",
+      "nextActionPlaceholder": "e.g. Schedule closing meeting",
+      "dueDate": "Due date",
+      "cancel": "Cancel",
+      "moving": "Moving…",
+      "confirm": "Move"
+    },
+    "lost": {
+      "title": "Mark as lost",
+      "subtitle": "Provide the reason for losing “{title}”.",
+      "reason": "Loss reason",
+      "reasonPlaceholder": "Select a reason",
+      "note": "Note (optional)",
+      "notePlaceholder": "Additional details about the loss",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Mark as lost"
+    },
+    "lostReasons": {
+      "budget": "Budget",
+      "timing": "Timing",
+      "competitor": "Competitor",
+      "no_response": "No response",
+      "scope_mismatch": "Scope mismatch",
+      "internal_decision": "Internal decision",
+      "other": "Other"
+    },
+    "won": {
+      "title": "Mark as won?",
+      "subtitle": "Confirm that “{title}” was won?",
+      "proposalWarning": "This opportunity hasn't reached the “Proposal sent” stage yet. You can still mark it as won (verbal close).",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Mark as won",
+      "successTitle": "Opportunity won!",
+      "successSubtitle": "“{title}” was marked as won.",
+      "companyActivated": "{name} marked as active client.",
+      "close": "Close",
+      "convert": "Convert to project",
+      "convertSoon": "Project conversion is coming soon."
+    },
+    "reopen": {
+      "title": "Reopen opportunity",
+      "subtitle": "Return “{title}” to the active funnel.",
+      "stage": "Target stage",
+      "note": "Reopen note",
+      "notePlaceholder": "Reason for reopening",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Reopen"
+    },
+    "create": {
+      "title": "New opportunity",
+      "subtitle": "Register a new opportunity in the pipeline.",
+      "detailsSection": "Details",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "e.g. Corporate website",
+        "company": "Company",
+        "companyPlaceholder": "Select the company",
+        "noCompanies": "No companies",
+        "owner": "Owner",
+        "ownerPlaceholder": "Select the owner",
+        "stage": "Stage",
+        "value": "Value",
+        "valueHint": "Estimated deal value, in euros.",
+        "valuePlaceholder": "e.g. 25000",
+        "nextAction": "Next action",
+        "nextActionPlaceholder": "e.g. Send first-contact email",
+        "dueDate": "Due date"
+      },
+      "cancel": "Cancel",
+      "saving": "Creating…",
+      "confirm": "Create opportunity"
+    },
+    "validation": {
+      "nextActionRequired": "Set the next action for this opportunity.",
+      "lostReasonRequired": "Provide the loss reason before continuing.",
+      "reopenNoteRequired": "Provide a reopen note.",
+      "titleRequired": "Provide a title.",
+      "companyRequired": "Select the company.",
+      "ownerRequired": "Select the owner.",
+      "valueInvalid": "Provide a valid value."
+    },
+    "detail": {
+      "back": "Back to pipeline",
+      "notFoundTitle": "Opportunity not found",
+      "notFoundDescription": "This opportunity doesn't exist or you don't have access to it.",
+      "errorTitle": "Couldn't load",
+      "errorDescription": "An error occurred while fetching the opportunity. Please try again.",
+      "retry": "Try again",
+      "backToBoard": "Back to pipeline",
+      "statusWon": "Won",
+      "statusLost": "Lost",
+      "ownedBy": "Owner: {name}",
+      "markWon": "Mark as won",
+      "markLost": "Mark as lost",
+      "reopen": "Reopen",
+      "wonBanner": "Opportunity won on {date}. Terminal state.",
+      "lostBanner": "Opportunity lost on {date} — reason: {reason}.",
+      "factsTitle": "Details",
+      "value": "Value",
+      "valueRestricted": "Value restricted",
+      "probability": "Probability",
+      "editProbability": "Edit probability",
+      "save": "Save",
+      "nextAction": "Next action",
+      "overdueSince": "Overdue since {date}",
+      "noNextAction": "No next action",
+      "lostNote": "Loss note",
+      "created": "Created on",
+      "notesTitle": "Notes",
+      "timelineTitle": "Activity",
+      "toast": {
+        "lost": "Opportunity marked as lost.",
+        "reopened": "Opportunity reopened.",
+        "probabilityUpdated": "Probability updated."
+      }
+    }
   }
 }

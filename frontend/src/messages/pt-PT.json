@@ -1332,5 +1332,178 @@
       "description": "Não foi possível apresentar esta página. Tenta novamente.",
       "retry": "Tentar novamente"
     }
+  },
+  "pipeline": {
+    "title": "Pipeline comercial",
+    "subtitle": "Arraste as oportunidades entre etapas para refletir o progresso do negócio.",
+    "newOpportunity": "Nova oportunidade",
+    "stages": {
+      "new_contact": "Novo contacto",
+      "qualification": "Qualificação",
+      "meeting_scheduled": "Reunião marcada",
+      "proposal_drafting": "Proposta em preparação",
+      "proposal_sent": "Proposta enviada",
+      "negotiation": "Negociação"
+    },
+    "column": {
+      "probability": "{value}% de probabilidade",
+      "empty": "Sem oportunidades nesta etapa"
+    },
+    "summary": {
+      "open": "Em aberto",
+      "won": "Ganhas",
+      "lost": "Perdidas"
+    },
+    "empty": {
+      "title": "Ainda sem oportunidades",
+      "description": "Crie a primeira oportunidade para começar a construir o pipeline."
+    },
+    "errors": {
+      "forbiddenTitle": "Sem acesso ao pipeline",
+      "forbiddenDescription": "O pipeline comercial está reservado a gestores e administradores.",
+      "loadTitle": "Não foi possível carregar o pipeline",
+      "loadDescription": "Ocorreu um erro ao obter as oportunidades. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "toast": {
+      "moved": "«{title}» movida para {stage}.",
+      "lost": "«{title}» marcada como perdida.",
+      "reopened": "«{title}» reaberta.",
+      "created": "Oportunidade «{title}» criada."
+    },
+    "card": {
+      "actions": "Ações da oportunidade",
+      "viewDetail": "Ver detalhe",
+      "markWon": "Marcar como ganha",
+      "markLost": "Marcar como perdida",
+      "reopen": "Reabrir oportunidade",
+      "probability": "{value}%",
+      "valueRestricted": "Valor restrito",
+      "noNextAction": "Sem próxima ação",
+      "overdueSince": "Em atraso desde {date}",
+      "dragHandle": "Arrastar «{title}»"
+    },
+    "move": {
+      "title": "Mover oportunidade",
+      "nextAction": "Próxima ação",
+      "nextActionHint": "Toda a oportunidade em aberto precisa de uma próxima ação.",
+      "nextActionPlaceholder": "Ex.: Agendar reunião de fecho",
+      "dueDate": "Data prevista",
+      "cancel": "Cancelar",
+      "moving": "A mover…",
+      "confirm": "Mover"
+    },
+    "lost": {
+      "title": "Marcar como perdida",
+      "subtitle": "Indique o motivo da perda de «{title}».",
+      "reason": "Motivo da perda",
+      "reasonPlaceholder": "Selecione um motivo",
+      "note": "Nota (opcional)",
+      "notePlaceholder": "Detalhes adicionais sobre a perda",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Marcar como perdida"
+    },
+    "lostReasons": {
+      "budget": "Orçamento",
+      "timing": "Timing",
+      "competitor": "Concorrência",
+      "no_response": "Sem resposta",
+      "scope_mismatch": "Âmbito desalinhado",
+      "internal_decision": "Decisão interna",
+      "other": "Outro"
+    },
+    "won": {
+      "title": "Marcar como ganha?",
+      "subtitle": "Confirma que «{title}» foi ganha?",
+      "proposalWarning": "Esta oportunidade ainda não chegou à etapa «Proposta enviada». Pode marcar como ganha na mesma (fecho verbal).",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Marcar como ganha",
+      "successTitle": "Oportunidade ganha!",
+      "successSubtitle": "«{title}» foi marcada como ganha.",
+      "companyActivated": "{name} marcada como cliente ativo.",
+      "close": "Fechar",
+      "convert": "Converter em projeto",
+      "convertSoon": "A conversão em projeto chega em breve."
+    },
+    "reopen": {
+      "title": "Reabrir oportunidade",
+      "subtitle": "Devolva «{title}» ao funil ativo.",
+      "stage": "Etapa de destino",
+      "note": "Nota de reabertura",
+      "notePlaceholder": "Motivo da reabertura",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Reabrir"
+    },
+    "create": {
+      "title": "Nova oportunidade",
+      "subtitle": "Registe uma nova oportunidade no pipeline.",
+      "detailsSection": "Detalhes",
+      "fields": {
+        "title": "Título",
+        "titlePlaceholder": "Ex.: Website institucional",
+        "company": "Empresa",
+        "companyPlaceholder": "Selecione a empresa",
+        "noCompanies": "Sem empresas",
+        "owner": "Responsável",
+        "ownerPlaceholder": "Selecione o responsável",
+        "stage": "Etapa",
+        "value": "Valor",
+        "valueHint": "Valor estimado do negócio, em euros.",
+        "valuePlaceholder": "Ex.: 25000",
+        "nextAction": "Próxima ação",
+        "nextActionPlaceholder": "Ex.: Enviar email de primeiro contacto",
+        "dueDate": "Data prevista"
+      },
+      "cancel": "Cancelar",
+      "saving": "A criar…",
+      "confirm": "Criar oportunidade"
+    },
+    "validation": {
+      "nextActionRequired": "Defina a próxima ação para esta oportunidade.",
+      "lostReasonRequired": "Indique o motivo da perda antes de continuar.",
+      "reopenNoteRequired": "Indique uma nota de reabertura.",
+      "titleRequired": "Indique um título.",
+      "companyRequired": "Selecione a empresa.",
+      "ownerRequired": "Selecione o responsável.",
+      "valueInvalid": "Indique um valor válido."
+    },
+    "detail": {
+      "back": "Voltar ao pipeline",
+      "notFoundTitle": "Oportunidade não encontrada",
+      "notFoundDescription": "Esta oportunidade não existe ou não tem acesso a ela.",
+      "errorTitle": "Não foi possível carregar",
+      "errorDescription": "Ocorreu um erro ao obter a oportunidade. Tente novamente.",
+      "retry": "Tentar novamente",
+      "backToBoard": "Voltar ao pipeline",
+      "statusWon": "Ganha",
+      "statusLost": "Perdida",
+      "ownedBy": "Responsável: {name}",
+      "markWon": "Marcar como ganha",
+      "markLost": "Marcar como perdida",
+      "reopen": "Reabrir",
+      "wonBanner": "Oportunidade ganha em {date}. Estado terminal.",
+      "lostBanner": "Oportunidade perdida em {date} — motivo: {reason}.",
+      "factsTitle": "Detalhes",
+      "value": "Valor",
+      "valueRestricted": "Valor restrito",
+      "probability": "Probabilidade",
+      "editProbability": "Editar probabilidade",
+      "save": "Guardar",
+      "nextAction": "Próxima ação",
+      "overdueSince": "Em atraso desde {date}",
+      "noNextAction": "Sem próxima ação",
+      "lostNote": "Nota da perda",
+      "created": "Criada em",
+      "notesTitle": "Notas",
+      "timelineTitle": "Atividade",
+      "toast": {
+        "lost": "Oportunidade marcada como perdida.",
+        "reopened": "Oportunidade reaberta.",
+        "probabilityUpdated": "Probabilidade atualizada."
+      }
+    }
   }
 }
