@@ -29,6 +29,12 @@ export interface ConfirmDialogProps {
    * surface an error.
    */
   onConfirm: () => void | Promise<void>;
+  /**
+   * Called if `onConfirm` throws. The dialog stays open so the caller can
+   * surface the error. When omitted, the rejection is swallowed (the dialog
+   * simply stays open) rather than bubbling up as an unhandled rejection.
+   */
+  onError?: (error: unknown) => void;
   /** Extra content between the description and the actions. */
   children?: React.ReactNode;
 }
@@ -47,6 +53,7 @@ export function ConfirmDialog({
   cancelLabel,
   variant = "default",
   onConfirm,
+  onError,
   children,
 }: ConfirmDialogProps) {
   const t = useTranslations("shared.confirm");
@@ -57,6 +64,11 @@ export function ConfirmDialog({
       setPending(true);
       await onConfirm();
       onOpenChange(false);
+    } catch (error) {
+      // Keep the dialog open on failure; forward to the caller if it wants to
+      // surface the error, otherwise swallow so we never leak an unhandled
+      // promise rejection.
+      onError?.(error);
     } finally {
       setPending(false);
     }

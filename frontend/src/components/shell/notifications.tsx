@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/shared";
 import { notificationsApi } from "@/lib/api/notifications";
 import {
   CATEGORY_ICON,
@@ -56,8 +57,11 @@ export function Notifications({ user }: { user: Pick<SessionUser, "id" | "role">
   }, [qc, summaryKey, user.id, user.role]);
 
   const handleMarkAllRead = React.useCallback(() => {
-    notificationsApi.markAllRead(user.id, user.role).then(invalidate);
-  }, [invalidate, user.id, user.role]);
+    notificationsApi
+      .markAllRead(user.id, user.role)
+      .then(invalidate)
+      .catch(() => toast({ tone: "destructive", title: t("actionFailed") }));
+  }, [invalidate, t, user.id, user.role]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -132,7 +136,10 @@ export function Notifications({ user }: { user: Pick<SessionUser, "id" | "role">
                     href={n.href}
                     onClick={() => {
                       if (isUnread) {
-                        notificationsApi.markRead(n.id).then(invalidate);
+                        notificationsApi
+                          .markRead(n.id)
+                          .then(invalidate)
+                          .catch(() => toast({ tone: "destructive", title: t("actionFailed") }));
                       }
                       setOpen(false);
                     }}

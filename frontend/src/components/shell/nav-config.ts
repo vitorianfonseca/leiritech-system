@@ -14,6 +14,7 @@ import {
   Wallet,
   ChartColumn,
   Settings,
+  UserPlus,
 } from "lucide-react";
 import type { Role, SessionUser } from "@/lib/session";
 
@@ -51,7 +52,9 @@ export const NAV_SECTIONS: NavSection[] = [
     labelKey: "sectionCommercial",
     items: [
       { key: "crmCompanies", href: "/crm/companies", icon: Building2, roles: ALL },
-      { key: "crmContacts", href: "/crm/contacts", icon: Users, roles: MANAGERS },
+      // BR-002: /crm/contacts serves role-scoped data (a Membro sees only the
+      // clients of their own projects), so the link is visible to everyone.
+      { key: "crmContacts", href: "/crm/contacts", icon: Users, roles: ALL },
       { key: "crmPipeline", href: "/crm/pipeline", icon: GitBranch, roles: MANAGERS },
       { key: "crmProposals", href: "/crm/proposals", icon: FileText, roles: MANAGERS },
     ],
@@ -69,6 +72,9 @@ export const NAV_SECTIONS: NavSection[] = [
     labelKey: "sectionOrg",
     items: [
       { key: "team", href: "/team", icon: UsersRound, roles: ALL },
+      // BR-003 / §3: a Gestor with an explicit invites grant can invite members
+      // without opening full admin settings. Admin always passes.
+      { key: "invite", href: "/settings/members/invite", icon: UserPlus, roles: MANAGERS, grant: "invites" },
       { key: "finance", href: "/finance", icon: Wallet, roles: MANAGERS, grant: "payments" },
       { key: "reports", href: "/reports", icon: ChartColumn, roles: ALL },
       { key: "settings", href: "/settings", icon: Settings, roles: ADMIN },

@@ -8,6 +8,7 @@ export { SettingsNav } from "./settings-nav";
 export { SettingsLanding } from "./settings-landing";
 export { AureaSettingsView } from "./aurea-settings-view";
 export { MembersSettingsView } from "./members-settings-view";
+export { InviteMemberView } from "./invite-member-view";
 export { RolesSettingsView } from "./roles-settings-view";
 export { PipelineStagesView } from "./pipeline-stages-view";
 export { StatesSettingsView } from "./states-settings-view";

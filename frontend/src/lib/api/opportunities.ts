@@ -355,6 +355,16 @@ function present(rec: OpportunityRecord, canFinance: boolean): Opportunity {
   };
 }
 
+/**
+ * Write methods return the record with financial fields stripped (BR-008): the
+ * caller can't safely re-gate a response, and every write is followed by a gated
+ * read (invalidate/refetch) that restores the value for authorised users. This
+ * closes the latent typed-contract hazard of a write emitting ungated financials.
+ */
+function presentAfterWrite(rec: OpportunityRecord): Opportunity {
+  return present(rec, false);
+}
+
 function assertAccess(role: Role): void {
   if (!canAccessPipeline(role)) throw new OpportunityError("forbidden");
 }
@@ -457,7 +467,7 @@ export const opportunitiesApi: OpportunitiesApi = {
       rec.proposalSentReached = true;
     }
     rec.updatedAt = new Date().toISOString();
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async winOpportunity(id, actorId) {
@@ -479,7 +489,7 @@ export const opportunitiesApi: OpportunitiesApi = {
     // "Cliente ativo" is a DERIVED flag (BR-038) — a won deal makes the company
     // active by definition. The CRM read recomputes it; nothing is persisted here.
     return {
-      opportunity: present(rec, true),
+      opportunity: presentAfterWrite(rec),
       companyActivated: true,
       companyId: rec.companyId,
       companyName: rec.companyName,
@@ -497,7 +507,7 @@ export const opportunitiesApi: OpportunitiesApi = {
     rec.projectId = projectId;
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "converted", after: projectId });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async loseOpportunity(id, input, actorId) {
@@ -516,7 +526,7 @@ export const opportunitiesApi: OpportunitiesApi = {
     rec.nextActionAt = null;
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "outcome", after: "lost" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async reopenOpportunity(id, input, actorId) {
@@ -534,7 +544,7 @@ export const opportunitiesApi: OpportunitiesApi = {
     rec.nextAction = input.note.trim() || rec.nextAction;
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "restored", { field: "outcome", before: "lost" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async createOpportunity(input, actorId, canFinance) {
@@ -588,7 +598,7 @@ export const opportunitiesApi: OpportunitiesApi = {
         after: String(clamped),
       });
     }
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 };
 

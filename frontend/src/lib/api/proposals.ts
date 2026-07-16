@@ -330,6 +330,16 @@ function present(rec: ProposalRecord, canFinance: boolean): Proposal {
   return { ...rec, valueCents: canFinance ? rec.valueCents : null };
 }
 
+/**
+ * Write methods return the record with financial fields stripped (BR-008): a
+ * caller can't re-gate a response, and every write is followed by a gated read
+ * (invalidate/refetch) that restores the value for authorised users. This closes
+ * the latent typed-contract hazard of a write emitting ungated financials.
+ */
+function presentAfterWrite(rec: ProposalRecord): Proposal {
+  return present(rec, false);
+}
+
 function assertAccess(role: Role): void {
   if (!canAccessProposals(role)) throw new ProposalError("forbidden");
 }
@@ -475,7 +485,7 @@ export const proposalsApi: ProposalsApi = {
     };
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "attached", { field: "file", after: input.name });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async removePdf(id, actorId) {
@@ -487,7 +497,7 @@ export const proposalsApi: ProposalsApi = {
     rec.file = null;
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "updated", { field: "file", before: previous });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async sendProposal(id, actorId) {
@@ -508,7 +518,7 @@ export const proposalsApi: ProposalsApi = {
     rec.sentAt = today();
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "sent" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async markViewed(id, actorId) {
@@ -521,7 +531,7 @@ export const proposalsApi: ProposalsApi = {
     rec.viewedAt = today();
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "viewed" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async acceptProposal(id, actorId) {
@@ -539,7 +549,7 @@ export const proposalsApi: ProposalsApi = {
     rec.decidedAt = today();
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "accepted" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async rejectProposal(id, input, actorId) {
@@ -557,7 +567,7 @@ export const proposalsApi: ProposalsApi = {
     rec.decidedAt = today();
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "rejected" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async expireProposal(id, actorId) {
@@ -570,7 +580,7 @@ export const proposalsApi: ProposalsApi = {
     rec.state = "expired";
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "expired" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async resendProposal(id, input, actorId) {
@@ -585,7 +595,7 @@ export const proposalsApi: ProposalsApi = {
     rec.viewedAt = null;
     rec.updatedAt = new Date().toISOString();
     pushActivity(id, actorId, "status_changed", { field: "state", after: "sent" });
-    return present(rec, true);
+    return presentAfterWrite(rec);
   },
 
   async archiveProposal(id, actorId) {

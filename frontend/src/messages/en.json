@@ -22,7 +22,8 @@
     "finance": "Finance",
     "reports": "Reports",
     "settings": "Settings",
-    "time": "Time tracking"
+    "time": "Time tracking",
+    "invite": "Invite"
   },
   "shell": {
     "search": {
@@ -56,7 +57,8 @@
       "viewAll": "View all",
       "loading": "Loading notifications…",
       "error": "Couldn't load notifications.",
-      "unreadCount": "{count} unread"
+      "unreadCount": "{count} unread",
+      "actionFailed": "Couldn’t complete the action."
     },
     "help": {
       "label": "Help"
@@ -1097,7 +1099,8 @@
       "cancel": "Cancel",
       "saving": "Saving…",
       "saveEdit": "Save changes",
-      "saveCreate": "Create company"
+      "saveCreate": "Create company",
+      "emailPlaceholder": "hello@company.com"
     },
     "validation": {
       "nameRequired": "Enter a name (min. 2 characters).",
@@ -3178,6 +3181,14 @@
         "emailDuplicate": "A member with this email already exists.",
         "lastAdmin": "You can't remove the last active administrator.",
         "lastAdminTitle": "Action not allowed"
+      },
+      "inviteSurface": {
+        "title": "Invite member",
+        "subtitle": "Send an invitation for a new member to join the team.",
+        "cardTitle": "Invite a new member",
+        "cardDescription": "The invitee gets an email to create their account. Member and role management stays admin-only.",
+        "action": "Invite member",
+        "invited": "Invitation sent to {email}."
       }
     },
     "roles": {
@@ -3606,5 +3617,10 @@
       "loadDescription": "An error occurred loading this information. Please try again.",
       "retry": "Try again"
     }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or has moved. Check the address or head back home.",
+    "backHome": "Back to home"
   }
 }

@@ -281,7 +281,11 @@ function scopedAttention(): AttentionGroup[] {
 function fullMetrics(): DashboardMetric[] {
   return [
     { key: "openOpportunities", value: 12, format: "count", tone: "gold", financial: false, href: "/crm/pipeline" },
-    { key: "pipelineValue", value: 104_000_00, format: "currencyCents", tone: "gold", financial: true, href: "/crm/pipeline" },
+    // Pipeline value is commercial (expected value of open opportunities), NOT in
+    // the BR-008 financial list (contracted/received/pending, margin, payment
+    // milestones, cost rates). It stays visible to Gestor — consistent with the
+    // pipeline-evolution chart, which shows to all management.
+    { key: "pipelineValue", value: 104_000_00, format: "currencyCents", tone: "gold", financial: false, href: "/crm/pipeline" },
     { key: "activeProjects", value: 15, format: "count", tone: "neutral", financial: false, href: "/projects" },
     { key: "projectsAtRisk", value: 2, format: "count", tone: "destructive", financial: false, href: "/projects" },
     { key: "overdueTasks", value: 7, format: "count", tone: "destructive", financial: false, href: "/tasks" },

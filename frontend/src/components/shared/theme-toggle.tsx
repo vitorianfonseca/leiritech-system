@@ -14,7 +14,19 @@ import {
 export function ThemeToggle() {
   const t = useTranslations("theme");
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+
+  // The resolved theme is only known on the client (localStorage / system media
+  // query), so the server can't know which icon to render. Mount detection
+  // without setState-in-effect: false during SSR/hydration, true on the client,
+  // so the first client render matches the server (Sun) and the correct icon
+  // swaps in after hydration — no hydration mismatch warning on dark.
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <Tooltip>
@@ -28,7 +40,7 @@ export function ThemeToggle() {
           />
         }
       >
-        {isDark ? <Moon /> : <Sun />}
+        <span suppressHydrationWarning>{isDark ? <Moon /> : <Sun />}</span>
       </TooltipTrigger>
       <TooltipContent side="bottom">{t("toggle")}</TooltipContent>
     </Tooltip>

@@ -25,11 +25,40 @@ export interface MentionInputProps {
 
 const MAX_SUGGESTIONS = 6;
 
-/** Users whose `@Full Name` token currently appears in the text. */
+/**
+ * Users whose `@Full Name` token currently appears in the text.
+ *
+ * Matches are word-boundary aware and resolved longest-name-first: a matched
+ * span is masked out before shorter names are tested, so "@Ana Silva" does not
+ * spuriously flag a separate "Ana" user (prefix-name false positive). A token
+ * must not be immediately followed by another name character, so "@Ana" won't
+ * match inside "@AnaSilva" either.
+ */
 export function deriveMentionIds(text: string, users: DirectoryUser[]): string[] {
-  const ids = users
-    .filter((u) => text.includes(`@${u.name}`))
-    .map((u) => u.id);
+  const sorted = [...users].sort((a, b) => b.name.length - a.name.length);
+  let working = text;
+  const ids: string[] = [];
+
+  for (const user of sorted) {
+    const token = `@${user.name}`;
+    let matched = false;
+    let idx = working.indexOf(token);
+    while (idx !== -1) {
+      const after = working[idx + token.length];
+      const isBoundary = after === undefined || !/[\p{L}\p{N}]/u.test(after);
+      if (isBoundary) {
+        matched = true;
+        // Mask the span so a shorter (prefix) name can't re-match inside it.
+        working =
+          working.slice(0, idx) +
+          " ".repeat(token.length) +
+          working.slice(idx + token.length);
+      }
+      idx = working.indexOf(token, idx + 1);
+    }
+    if (matched) ids.push(user.id);
+  }
+
   return [...new Set(ids)];
 }
 

@@ -22,7 +22,8 @@
     "finance": "Financeiro",
     "reports": "Relatórios",
     "settings": "Definições",
-    "time": "Cronómetro"
+    "time": "Cronómetro",
+    "invite": "Convidar"
   },
   "shell": {
     "search": {
@@ -56,7 +57,8 @@
       "viewAll": "Ver todas",
       "loading": "A carregar notificações…",
       "error": "Não foi possível carregar as notificações.",
-      "unreadCount": "{count} não lidas"
+      "unreadCount": "{count} não lidas",
+      "actionFailed": "Não foi possível concluir a ação."
     },
     "help": {
       "label": "Ajuda"
@@ -1097,7 +1099,8 @@
       "cancel": "Cancelar",
       "saving": "A guardar…",
       "saveEdit": "Guardar alterações",
-      "saveCreate": "Criar empresa"
+      "saveCreate": "Criar empresa",
+      "emailPlaceholder": "geral@empresa.pt"
     },
     "validation": {
       "nameRequired": "Indica o nome (mín. 2 caracteres).",
@@ -3178,6 +3181,14 @@
         "emailDuplicate": "Já existe um membro com este email.",
         "lastAdmin": "Não pode remover o último administrador ativo.",
         "lastAdminTitle": "Ação não permitida"
+      },
+      "inviteSurface": {
+        "title": "Convidar membro",
+        "subtitle": "Envie um convite para um novo membro se juntar à equipa.",
+        "cardTitle": "Convidar um novo membro",
+        "cardDescription": "O convidado recebe um email para criar a conta. A gestão de membros e de perfis permanece reservada ao administrador.",
+        "action": "Convidar membro",
+        "invited": "Convite enviado para {email}."
       }
     },
     "roles": {
@@ -3606,5 +3617,10 @@
       "loadDescription": "Ocorreu um erro ao carregar esta informação. Tente novamente.",
       "retry": "Tentar novamente"
     }
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "description": "A página que procura não existe ou foi movida. Verifique o endereço ou regresse ao início.",
+    "backHome": "Voltar ao início"
   }
 }

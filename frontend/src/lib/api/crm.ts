@@ -874,7 +874,9 @@ export const crmApi: CrmApi = {
       payments: [],
     };
     companies.set(id, record);
-    return toSummary(record, true);
+    // Strip financial fields from the write response (BR-008); callers refetch
+    // through the gated reads which restore them for authorised users.
+    return toSummary(record, false);
   },
 
   async updateCompany(id, input) {
@@ -897,7 +899,9 @@ export const crmApi: CrmApi = {
       nextAction: input.nextAction,
       nextActionAt: input.nextActionAt,
     });
-    return toSummary(r, true);
+    // Strip financial fields from the write response (BR-008); callers refetch
+    // through the gated reads which restore them for authorised users.
+    return toSummary(r, false);
   },
 
   async archiveCompany(id) {

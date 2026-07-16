@@ -31,6 +31,16 @@ export function canAdministerSettings(role: Role): boolean {
 }
 
 /**
+ * Whether a user may invite members (WORKFLOW_SPEC §3 / BR-003). Admin always
+ * can; a Gestor needs the explicit `invitesGrant`. Everything ELSE under member
+ * management (role changes, deactivation, the directory) stays Admin-only
+ * (BR-004/005) — this predicate gates the invite action alone.
+ */
+export function canInviteMembers(role: Role, invitesGrant: boolean): boolean {
+  return role === "admin" || (role === "gestor" && invitesGrant);
+}
+
+/**
  * Whether a role may reach the /settings section at all. Admin + Gestor pass
  * (Gestor is limited to templates + personal preferences); Membro is blocked
  * entirely — the layout renders not-found (own profile is #43, separate).

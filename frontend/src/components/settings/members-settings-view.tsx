@@ -41,6 +41,7 @@ import { InviteMemberDialog, type InviteMemberValues } from "./invite-member-dia
 
 export interface MembersSettingsViewProps {
   role: Role;
+  invitesGrant: boolean;
 }
 
 const MEMBERS_KEY = ["settings-members"] as const;
@@ -53,7 +54,7 @@ function statusBadgeVariant(status: MemberStatus): "success" | "warning" | "done
   return status === "active" ? "success" : status === "invited" ? "warning" : "done";
 }
 
-export function MembersSettingsView({ role }: MembersSettingsViewProps) {
+export function MembersSettingsView({ role, invitesGrant }: MembersSettingsViewProps) {
   const t = useTranslations("settings.members");
   const tRole = useTranslations("roles");
   const tErr = useTranslations("settings.members.errors");
@@ -83,7 +84,7 @@ export function MembersSettingsView({ role }: MembersSettingsViewProps) {
 
   async function handleInvite(values: InviteMemberValues) {
     try {
-      const member = await settingsApi.inviteMember(role, values);
+      const member = await settingsApi.inviteMember(role, invitesGrant, values);
       await refresh();
       toast({ tone: "success", title: t("invited", { email: member.email }) });
       setInviteOpen(false);

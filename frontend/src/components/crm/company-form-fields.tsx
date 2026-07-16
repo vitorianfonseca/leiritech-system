@@ -126,7 +126,7 @@ export function CompanyFormFields({
         </CrmField>
         <CrmField label={t("email")} error={errors.email?.message}>
           {({ controlProps }) => (
-            <Input {...controlProps} {...register("email")} inputMode="email" placeholder="geral@empresa.pt" />
+            <Input {...controlProps} {...register("email")} inputMode="email" placeholder={t("emailPlaceholder")} />
           )}
         </CrmField>
       </div>

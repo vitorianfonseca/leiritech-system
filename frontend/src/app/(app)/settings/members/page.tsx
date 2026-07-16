@@ -13,5 +13,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function MembersSettingsPage() {
   const session = await getSession();
   if (!session || !canAdministerSettings(session.role)) notFound();
-  return <MembersSettingsView role={session.role} />;
+  return <MembersSettingsView role={session.role} invitesGrant={session.invitesGrant} />;
 }

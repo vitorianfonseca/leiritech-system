@@ -22,6 +22,7 @@ import type { Role } from "@/lib/session";
 import {
   SettingsError,
   canAdministerSettings,
+  canInviteMembers,
   NOTIFICATION_CATEGORIES,
   PRIORITY_IDS,
   type AureaColorToken,
@@ -213,7 +214,7 @@ export interface SettingsApi {
   restoreTag(role: Role, tag: Tag): Promise<Tag>;
 
   getMembers(role: Role): Promise<MembersSnapshot>;
-  inviteMember(role: Role, input: InviteMemberInput): Promise<MemberRecord>;
+  inviteMember(role: Role, invitesGrant: boolean, input: InviteMemberInput): Promise<MemberRecord>;
   updateMemberRole(role: Role, input: UpdateMemberRoleInput): Promise<MembersSnapshot>;
   setMemberStatus(role: Role, id: string, active: boolean): Promise<MembersSnapshot>;
 
@@ -312,8 +313,9 @@ export const settingsApi: SettingsApi = {
     return { members, activeAdminCount: activeAdminCount() };
   },
 
-  async inviteMember(role, input) {
-    assertAdmin(role);
+  async inviteMember(role, invitesGrant, input) {
+    // BR-003 / §3: inviting is permitted for admin OR a gestor with the grant.
+    if (!canInviteMembers(role, invitesGrant)) throw new SettingsError("forbidden");
     seedMembers();
     await delay(MOCK_LATENCY_MS);
     const email = input.email.trim().toLowerCase();
