@@ -14,8 +14,16 @@ export type CsvCell = string | number | null | undefined;
 const DELIMITER = ";";
 const BOM = "﻿";
 
+// CSV formula-injection guard (OWASP): a cell beginning with =, +, -, @, tab or
+// carriage return can be executed as a formula by Excel/Sheets. Neutralise it by
+// prefixing a single quote so spreadsheets treat it as literal text.
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
 function escapeCell(cell: CsvCell): string {
-  const value = cell == null ? "" : String(cell);
+  let value = cell == null ? "" : String(cell);
+  if (FORMULA_TRIGGERS.test(value)) {
+    value = `'${value}`;
+  }
   if (
     value.includes(DELIMITER) ||
     value.includes('"') ||
