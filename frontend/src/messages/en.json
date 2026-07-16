@@ -1003,5 +1003,334 @@
       "w5": "W5",
       "w6": "W6"
     }
+  },
+  "crm": {
+    "clienteAtivo": "Active client",
+    "quickActions": {
+      "email": "Send email",
+      "phone": "Call",
+      "website": "Open website"
+    },
+    "status": {
+      "company": {
+        "potencial": "Prospect",
+        "ativo": "Active",
+        "inativo": "Inactive",
+        "parceiro": "Partner",
+        "arquivada": "Archived"
+      },
+      "contact": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "opportunity": {
+        "qualification": "Qualification",
+        "discovery": "Discovery",
+        "proposal": "Proposal",
+        "negotiation": "Negotiation",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "proposal": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "expired": "Expired"
+      },
+      "project": {
+        "planning": "Planning",
+        "active": "Active",
+        "on_hold": "On hold",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "archived": "Archived"
+      },
+      "health": {
+        "healthy": "Healthy",
+        "attention": "Attention",
+        "at_risk": "At risk"
+      }
+    },
+    "source": {
+      "referral": "Referral",
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "event": "Event",
+      "partner": "Partner",
+      "other": "Other"
+    },
+    "interactionType": {
+      "call": "Call",
+      "meeting": "Meeting",
+      "email": "Email",
+      "message": "Message",
+      "note": "Note",
+      "follow_up": "Follow-up"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Company name",
+      "sector": "Sector",
+      "sectorPlaceholder": "e.g. Retail, Industry",
+      "status": "Status",
+      "owner": "Internal owner",
+      "ownerPlaceholder": "Select owner",
+      "source": "Source",
+      "website": "Website",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "addressPlaceholder": "Street, city",
+      "nextAction": "Next action",
+      "nextActionPlaceholder": "e.g. Send proposal",
+      "nextActionAt": "Next action date",
+      "description": "Description",
+      "descriptionPlaceholder": "Notes about the company and the relationship context",
+      "createTitle": "New company",
+      "editTitle": "Edit company",
+      "subtitle": "Fields marked as required must be filled in.",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "saveEdit": "Save changes",
+      "saveCreate": "Create company"
+    },
+    "validation": {
+      "nameRequired": "Enter a name (min. 2 characters).",
+      "sectorRequired": "Enter the sector.",
+      "ownerRequired": "Select the internal owner.",
+      "companyRequired": "Select the company.",
+      "subjectRequired": "Enter a subject.",
+      "dateRequired": "Enter the date.",
+      "dateInvalid": "Invalid date.",
+      "emailInvalid": "Invalid email.",
+      "urlInvalid": "Invalid URL (must start with http:// or https://)."
+    },
+    "companies": {
+      "title": "Companies",
+      "subtitle": "Your book of companies and clients.",
+      "searchPlaceholder": "Search by name, sector or owner…",
+      "columns": {
+        "name": "Company",
+        "status": "Status",
+        "owner": "Owner",
+        "source": "Source",
+        "opportunities": "Open opps",
+        "projects": "Active projects",
+        "contracted": "Contracted value",
+        "nextAction": "Next action",
+        "lastInteraction": "Last interaction",
+        "contact": "Contact"
+      },
+      "actions": {
+        "new": "New company",
+        "view": "View company",
+        "edit": "Edit",
+        "archive": "Archive",
+        "restore": "Restore",
+        "showArchived": "Show archived",
+        "hideArchived": "Hide archived"
+      },
+      "empty": {
+        "title": "No companies",
+        "description": "Create your first company to start tracking the relationship."
+      },
+      "toasts": {
+        "created": "Company \"{name}\" created.",
+        "updated": "Company \"{name}\" updated.",
+        "restored": "Company \"{name}\" restored."
+      },
+      "errors": {
+        "loadTitle": "Couldn't load companies",
+        "loadDescription": "Something went wrong fetching the data. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "subtitle": "Everyone you work with across companies.",
+      "searchPlaceholder": "Search by name, company or role…",
+      "columns": {
+        "name": "Contact",
+        "company": "Company",
+        "status": "Status",
+        "owner": "Owner",
+        "lastInteraction": "Last interaction",
+        "contact": "Reach out"
+      },
+      "actions": {
+        "view": "View contact"
+      },
+      "empty": {
+        "title": "No contacts",
+        "description": "Company contacts will appear here."
+      },
+      "errors": {
+        "loadTitle": "Couldn't load contacts",
+        "loadDescription": "Something went wrong fetching the data. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "archive": {
+      "confirmTitle": "Archive company?",
+      "confirmDescription": "\"{name}\" will no longer appear in active lists, but nothing is deleted. You can restore it anytime.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "archiving": "Archiving…",
+      "archivedToast": "Company \"{name}\" archived.",
+      "understood": "Understood",
+      "blockedTitle": "Can't archive yet",
+      "blockedDescription": "Resolve the following first before archiving \"{name}\":",
+      "blocker": {
+        "liveProject": "Live projects",
+        "openOpportunity": "Open opportunities",
+        "wonUnconvertedOpportunity": "Won opportunities not converted"
+      }
+    },
+    "interactions": {
+      "title": "Interactions",
+      "logButton": "Log interaction",
+      "toastCreated": "Interaction logged.",
+      "errorTitle": "Couldn't load interactions",
+      "retry": "Try again",
+      "emptyTitle": "No interactions",
+      "emptyDescription": "Log calls, meetings, emails and notes to keep the relationship history.",
+      "logTitle": "Log interaction",
+      "logSubtitle": "Link the interaction to a contact, opportunity or project.",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "save": "Log",
+      "linkedLabel": "Linked records",
+      "fields": {
+        "type": "Type",
+        "date": "Date",
+        "subject": "Subject",
+        "subjectPlaceholder": "e.g. Follow-up call",
+        "contact": "Contact",
+        "opportunity": "Opportunity",
+        "project": "Project",
+        "optional": "(optional)",
+        "noContacts": "No contacts",
+        "noOpportunities": "No opportunities",
+        "noProjects": "No projects",
+        "notes": "Notes",
+        "notesPlaceholder": "Interaction details…"
+      }
+    },
+    "detail": {
+      "back": "Back to companies",
+      "backToList": "View all companies",
+      "retry": "Try again",
+      "notFoundTitle": "Company not found",
+      "notFoundDescription": "This company doesn't exist or you don't have access to it.",
+      "errorTitle": "Couldn't load the company",
+      "errorDescription": "Something went wrong fetching the data. Please try again.",
+      "ownedBy": "Owner: {name}",
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore",
+      "archivedBanner": "Company archived on {date}. Restore it to edit.",
+      "toastUpdated": "Company updated.",
+      "toastRestored": "Company restored.",
+      "info": {
+        "sector": "Sector",
+        "website": "Website",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "owner": "Internal owner",
+        "source": "Source",
+        "lastInteraction": "Last interaction",
+        "openOpportunities": "Open opportunities",
+        "activeProjects": "Active projects",
+        "totalContracted": "Total contracted",
+        "nextAction": "Next action",
+        "noNextAction": "No next action set."
+      }
+    },
+    "tabs": {
+      "information": {
+        "label": "Information"
+      },
+      "contacts": {
+        "label": "Contacts",
+        "emptyTitle": "No contacts",
+        "emptyDescription": "Add contacts to track who decides at this company."
+      },
+      "opportunities": {
+        "label": "Opportunities",
+        "emptyTitle": "No opportunities",
+        "emptyDescription": "This company's opportunities will appear here."
+      },
+      "proposals": {
+        "label": "Proposals",
+        "emptyTitle": "No proposals",
+        "emptyDescription": "Proposals sent to this company will appear here.",
+        "validUntil": "Valid until {date}"
+      },
+      "projects": {
+        "label": "Projects",
+        "emptyTitle": "No projects",
+        "emptyDescription": "This company's projects will appear here.",
+        "progressLabel": "Progress {value}%"
+      },
+      "meetings": {
+        "label": "Meetings",
+        "emptyTitle": "No meetings",
+        "emptyDescription": "Meetings scheduled with this company will appear here.",
+        "attendees": "Attendees: {names}"
+      },
+      "interactions": {
+        "label": "Interactions"
+      },
+      "notes": {
+        "label": "Notes"
+      },
+      "files": {
+        "label": "Files",
+        "emptyTitle": "No files",
+        "emptyDescription": "Files linked to this company will appear here.",
+        "mockNote": "File downloads become available once storage is enabled."
+      },
+      "payments": {
+        "label": "Payments",
+        "emptyTitle": "No payments",
+        "emptyDescription": "Payment milestones for this company's projects will appear here.",
+        "expected": "Expected on {date}"
+      },
+      "timeline": {
+        "label": "Timeline"
+      }
+    },
+    "contactDetail": {
+      "back": "Back to contacts",
+      "backToList": "View all contacts",
+      "retry": "Try again",
+      "notFoundTitle": "Contact not found",
+      "notFoundDescription": "This contact doesn't exist or you don't have access to it.",
+      "errorTitle": "Couldn't load the contact",
+      "errorDescription": "Something went wrong fetching the data. Please try again.",
+      "email": "Email",
+      "phone": "Phone",
+      "owner": "Owner",
+      "lastInteraction": "Last interaction",
+      "notes": "Notes",
+      "interactions": "Interactions",
+      "noInteractionsTitle": "No interactions",
+      "noInteractionsDescription": "Interactions with this contact will appear here.",
+      "nextAction": "Next action",
+      "noNextAction": "No next action set."
+    },
+    "newPage": {
+      "back": "Back to companies",
+      "title": "New company",
+      "subtitle": "Create a company record to start tracking the relationship.",
+      "createdToast": "Company \"{name}\" created."
+    },
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "description": "We couldn't render this page. Please try again.",
+      "retry": "Try again"
+    }
   }
 }

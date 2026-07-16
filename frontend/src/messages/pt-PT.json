@@ -1003,5 +1003,334 @@
       "w5": "S5",
       "w6": "S6"
     }
+  },
+  "crm": {
+    "clienteAtivo": "Cliente ativo",
+    "quickActions": {
+      "email": "Enviar email",
+      "phone": "Telefonar",
+      "website": "Abrir site"
+    },
+    "status": {
+      "company": {
+        "potencial": "Potencial",
+        "ativo": "Ativo",
+        "inativo": "Inativo",
+        "parceiro": "Parceiro",
+        "arquivada": "Arquivada"
+      },
+      "contact": {
+        "active": "Ativo",
+        "inactive": "Inativo"
+      },
+      "opportunity": {
+        "qualification": "Qualificação",
+        "discovery": "Descoberta",
+        "proposal": "Proposta",
+        "negotiation": "Negociação",
+        "won": "Ganha",
+        "lost": "Perdida"
+      },
+      "proposal": {
+        "draft": "Rascunho",
+        "sent": "Enviada",
+        "accepted": "Aceite",
+        "rejected": "Rejeitada",
+        "expired": "Expirada"
+      },
+      "project": {
+        "planning": "Planeamento",
+        "active": "Ativo",
+        "on_hold": "Em pausa",
+        "completed": "Concluído",
+        "cancelled": "Cancelado",
+        "archived": "Arquivado"
+      },
+      "health": {
+        "healthy": "Saudável",
+        "attention": "Atenção",
+        "at_risk": "Em risco"
+      }
+    },
+    "source": {
+      "referral": "Referência",
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "event": "Evento",
+      "partner": "Parceiro",
+      "other": "Outro"
+    },
+    "interactionType": {
+      "call": "Chamada",
+      "meeting": "Reunião",
+      "email": "Email",
+      "message": "Mensagem",
+      "note": "Nota",
+      "follow_up": "Follow-up"
+    },
+    "form": {
+      "name": "Nome",
+      "namePlaceholder": "Nome da empresa",
+      "sector": "Setor",
+      "sectorPlaceholder": "ex.: Retalho, Indústria",
+      "status": "Estado",
+      "owner": "Responsável interno",
+      "ownerPlaceholder": "Selecionar responsável",
+      "source": "Origem",
+      "website": "Website",
+      "email": "Email",
+      "phone": "Telefone",
+      "address": "Morada",
+      "addressPlaceholder": "Rua, localidade",
+      "nextAction": "Próxima ação",
+      "nextActionPlaceholder": "ex.: Enviar proposta",
+      "nextActionAt": "Data da próxima ação",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Notas sobre a empresa e o contexto da relação",
+      "createTitle": "Nova empresa",
+      "editTitle": "Editar empresa",
+      "subtitle": "Os campos assinalados são obrigatórios.",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "saveEdit": "Guardar alterações",
+      "saveCreate": "Criar empresa"
+    },
+    "validation": {
+      "nameRequired": "Indica o nome (mín. 2 caracteres).",
+      "sectorRequired": "Indica o setor.",
+      "ownerRequired": "Seleciona o responsável interno.",
+      "companyRequired": "Seleciona a empresa.",
+      "subjectRequired": "Indica um assunto.",
+      "dateRequired": "Indica a data.",
+      "dateInvalid": "Data inválida.",
+      "emailInvalid": "Email inválido.",
+      "urlInvalid": "URL inválido (deve começar por http:// ou https://)."
+    },
+    "companies": {
+      "title": "Empresas",
+      "subtitle": "O teu livro de empresas e clientes.",
+      "searchPlaceholder": "Procurar por nome, setor ou responsável…",
+      "columns": {
+        "name": "Empresa",
+        "status": "Estado",
+        "owner": "Responsável",
+        "source": "Origem",
+        "opportunities": "Oport. abertas",
+        "projects": "Projetos ativos",
+        "contracted": "Valor contratado",
+        "nextAction": "Próxima ação",
+        "lastInteraction": "Última interação",
+        "contact": "Contacto"
+      },
+      "actions": {
+        "new": "Nova empresa",
+        "view": "Ver empresa",
+        "edit": "Editar",
+        "archive": "Arquivar",
+        "restore": "Restaurar",
+        "showArchived": "Mostrar arquivadas",
+        "hideArchived": "Ocultar arquivadas"
+      },
+      "empty": {
+        "title": "Sem empresas",
+        "description": "Cria a tua primeira empresa para começar a acompanhar a relação."
+      },
+      "toasts": {
+        "created": "Empresa \"{name}\" criada.",
+        "updated": "Empresa \"{name}\" atualizada.",
+        "restored": "Empresa \"{name}\" restaurada."
+      },
+      "errors": {
+        "loadTitle": "Não foi possível carregar as empresas",
+        "loadDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
+        "retry": "Tentar novamente"
+      }
+    },
+    "contacts": {
+      "title": "Contactos",
+      "subtitle": "Todas as pessoas com quem trabalhas nas empresas.",
+      "searchPlaceholder": "Procurar por nome, empresa ou cargo…",
+      "columns": {
+        "name": "Contacto",
+        "company": "Empresa",
+        "status": "Estado",
+        "owner": "Responsável",
+        "lastInteraction": "Última interação",
+        "contact": "Contactar"
+      },
+      "actions": {
+        "view": "Ver contacto"
+      },
+      "empty": {
+        "title": "Sem contactos",
+        "description": "Os contactos das empresas aparecerão aqui."
+      },
+      "errors": {
+        "loadTitle": "Não foi possível carregar os contactos",
+        "loadDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
+        "retry": "Tentar novamente"
+      }
+    },
+    "archive": {
+      "confirmTitle": "Arquivar empresa?",
+      "confirmDescription": "\"{name}\" deixa de aparecer nas listas ativas, mas nada é eliminado. Podes restaurá-la a qualquer momento.",
+      "confirm": "Arquivar",
+      "cancel": "Cancelar",
+      "archiving": "A arquivar…",
+      "archivedToast": "Empresa \"{name}\" arquivada.",
+      "understood": "Compreendido",
+      "blockedTitle": "Não é possível arquivar ainda",
+      "blockedDescription": "Resolve primeiro o seguinte para poderes arquivar \"{name}\":",
+      "blocker": {
+        "liveProject": "Projetos ativos",
+        "openOpportunity": "Oportunidades abertas",
+        "wonUnconvertedOpportunity": "Oportunidades ganhas por converter"
+      }
+    },
+    "interactions": {
+      "title": "Interações",
+      "logButton": "Registar interação",
+      "toastCreated": "Interação registada.",
+      "errorTitle": "Não foi possível carregar as interações",
+      "retry": "Tentar novamente",
+      "emptyTitle": "Sem interações",
+      "emptyDescription": "Regista chamadas, reuniões, emails e notas para manter o histórico da relação.",
+      "logTitle": "Registar interação",
+      "logSubtitle": "Associa a interação a um contacto, oportunidade ou projeto.",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "save": "Registar",
+      "linkedLabel": "Registos associados",
+      "fields": {
+        "type": "Tipo",
+        "date": "Data",
+        "subject": "Assunto",
+        "subjectPlaceholder": "ex.: Chamada de acompanhamento",
+        "contact": "Contacto",
+        "opportunity": "Oportunidade",
+        "project": "Projeto",
+        "optional": "(opcional)",
+        "noContacts": "Sem contactos",
+        "noOpportunities": "Sem oportunidades",
+        "noProjects": "Sem projetos",
+        "notes": "Notas",
+        "notesPlaceholder": "Detalhes da interação…"
+      }
+    },
+    "detail": {
+      "back": "Voltar às empresas",
+      "backToList": "Ver todas as empresas",
+      "retry": "Tentar novamente",
+      "notFoundTitle": "Empresa não encontrada",
+      "notFoundDescription": "A empresa não existe ou não tens acesso a ela.",
+      "errorTitle": "Não foi possível carregar a empresa",
+      "errorDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
+      "ownedBy": "Responsável: {name}",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "restore": "Restaurar",
+      "archivedBanner": "Empresa arquivada a {date}. Restaura-a para editar.",
+      "toastUpdated": "Empresa atualizada.",
+      "toastRestored": "Empresa restaurada.",
+      "info": {
+        "sector": "Setor",
+        "website": "Website",
+        "email": "Email",
+        "phone": "Telefone",
+        "address": "Morada",
+        "owner": "Responsável interno",
+        "source": "Origem",
+        "lastInteraction": "Última interação",
+        "openOpportunities": "Oportunidades abertas",
+        "activeProjects": "Projetos ativos",
+        "totalContracted": "Valor total contratado",
+        "nextAction": "Próxima ação",
+        "noNextAction": "Sem próxima ação definida."
+      }
+    },
+    "tabs": {
+      "information": {
+        "label": "Informação"
+      },
+      "contacts": {
+        "label": "Contactos",
+        "emptyTitle": "Sem contactos",
+        "emptyDescription": "Adiciona contactos para acompanhar quem decide nesta empresa."
+      },
+      "opportunities": {
+        "label": "Oportunidades",
+        "emptyTitle": "Sem oportunidades",
+        "emptyDescription": "As oportunidades desta empresa aparecerão aqui."
+      },
+      "proposals": {
+        "label": "Propostas",
+        "emptyTitle": "Sem propostas",
+        "emptyDescription": "As propostas enviadas a esta empresa aparecerão aqui.",
+        "validUntil": "Válida até {date}"
+      },
+      "projects": {
+        "label": "Projetos",
+        "emptyTitle": "Sem projetos",
+        "emptyDescription": "Os projetos desta empresa aparecerão aqui.",
+        "progressLabel": "Progresso {value}%"
+      },
+      "meetings": {
+        "label": "Reuniões",
+        "emptyTitle": "Sem reuniões",
+        "emptyDescription": "As reuniões agendadas com esta empresa aparecerão aqui.",
+        "attendees": "Participantes: {names}"
+      },
+      "interactions": {
+        "label": "Interações"
+      },
+      "notes": {
+        "label": "Notas"
+      },
+      "files": {
+        "label": "Ficheiros",
+        "emptyTitle": "Sem ficheiros",
+        "emptyDescription": "Os ficheiros associados a esta empresa aparecerão aqui.",
+        "mockNote": "A transferência de ficheiros fica disponível quando o armazenamento estiver ativo."
+      },
+      "payments": {
+        "label": "Pagamentos",
+        "emptyTitle": "Sem pagamentos",
+        "emptyDescription": "Os marcos de pagamento dos projetos desta empresa aparecerão aqui.",
+        "expected": "Previsto para {date}"
+      },
+      "timeline": {
+        "label": "Linha temporal"
+      }
+    },
+    "contactDetail": {
+      "back": "Voltar aos contactos",
+      "backToList": "Ver todos os contactos",
+      "retry": "Tentar novamente",
+      "notFoundTitle": "Contacto não encontrado",
+      "notFoundDescription": "O contacto não existe ou não tens acesso a ele.",
+      "errorTitle": "Não foi possível carregar o contacto",
+      "errorDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
+      "email": "Email",
+      "phone": "Telefone",
+      "owner": "Responsável",
+      "lastInteraction": "Última interação",
+      "notes": "Notas",
+      "interactions": "Interações",
+      "noInteractionsTitle": "Sem interações",
+      "noInteractionsDescription": "As interações com este contacto aparecerão aqui.",
+      "nextAction": "Próxima ação",
+      "noNextAction": "Sem próxima ação definida."
+    },
+    "newPage": {
+      "back": "Voltar às empresas",
+      "title": "Nova empresa",
+      "subtitle": "Cria um registo de empresa para começar a acompanhar a relação.",
+      "createdToast": "Empresa \"{name}\" criada."
+    },
+    "errorBoundary": {
+      "title": "Algo correu mal",
+      "description": "Não foi possível apresentar esta página. Tenta novamente.",
+      "retry": "Tentar novamente"
+    }
   }
 }
