@@ -1507,7 +1507,9 @@
         "lost": "Opportunity marked as lost.",
         "reopened": "Opportunity reopened.",
         "probabilityUpdated": "Probability updated."
-      }
+      },
+      "createProject": "Create project",
+      "viewProject": "View project"
     }
   },
   "proposals": {
@@ -2516,6 +2518,139 @@
       "future": "The entry can't be in the future.",
       "tooLong": "The entry can't exceed 24 hours.",
       "projectInactive": "This task's project is paused or closed."
+    }
+  },
+  "conversion": {
+    "title": "Convert to project",
+    "subtitle": "Turn “{title}” into a project without re-entering any data.",
+    "back": "Back to opportunity",
+    "stepOf": "Step {n} of {total}",
+    "steps": {
+      "details": "Details",
+      "template": "Template",
+      "milestones": "Payments",
+      "team": "Team",
+      "review": "Review"
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Next"
+    },
+    "source": {
+      "won": "Opportunity won",
+      "proposal": "Proposal {reference}",
+      "verbalClose": "Verbal close — no accepted proposal"
+    },
+    "details": {
+      "title": "Project details",
+      "hint": "Pre-filled from the opportunity. Everything is editable.",
+      "name": "Project name",
+      "namePlaceholder": "e.g. Online store — Verdejar Bio",
+      "company": "Company (client)",
+      "clienteAtivo": "Active client",
+      "contacts": "Contacts",
+      "noContacts": "No contacts linked to this company.",
+      "startDate": "Start date",
+      "value": "Contracted value",
+      "valueHint": "Pre-filled from the accepted proposal.",
+      "valueVerbalHint": "No accepted proposal — enter the agreed value.",
+      "valuePlaceholder": "0.00",
+      "proposalValue": "Accepted proposal value: {value}",
+      "description": "Description",
+      "descriptionPlaceholder": "Project scope and notes…",
+      "descriptionFromProposal": "Source: proposal {reference} accepted."
+    },
+    "template": {
+      "title": "Choose a template",
+      "hint": "The template instantiates the project's phases and tasks.",
+      "none": "No active templates. Create one in Settings › Templates.",
+      "phaseCount": "{count} phases",
+      "taskCount": "{count} tasks",
+      "hours": "{hours} h",
+      "preview": "Phases to create",
+      "tasksLabel": "{count} tasks"
+    },
+    "milestones": {
+      "title": "Payment milestones",
+      "hint": "Confirm the milestones before activating the project (required).",
+      "empty": "No milestones yet. Add at least one.",
+      "rowLabel": "Milestone {n}",
+      "remove": "Remove",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Kick-off",
+      "amount": "Amount",
+      "expectedDate": "Expected date",
+      "criteria": "Acceptance criteria",
+      "criteriaHint": "What must be done to invoice.",
+      "criteriaPlaceholder": "e.g. Contract signed",
+      "add": "Add milestone",
+      "total": "Total: {total}",
+      "mismatch": "Milestones total ({total}) does not match the contracted value ({target}).",
+      "confirmLabel": "I confirm the payment milestones",
+      "confirmHint": "Required before the project can go active (BR-037).",
+      "finalPaymentLabel": "Final payment",
+      "defaultCriteria": "Completion of “{phase}”"
+    },
+    "team": {
+      "title": "Team",
+      "hint": "Assign the project manager and members.",
+      "manager": "Project manager",
+      "managerPlaceholder": "Select manager",
+      "noManagers": "No managers available",
+      "members": "Team members",
+      "membersHint": "Optional — you can add more later."
+    },
+    "review": {
+      "title": "Review and create",
+      "hint": "Confirm the details before creating the project.",
+      "name": "Project",
+      "client": "Client",
+      "template": "Template",
+      "phases": "Phases",
+      "phasesValue": "{count} phases",
+      "startDate": "Start",
+      "dueDate": "Expected end",
+      "value": "Contracted value",
+      "milestones": "Payment milestones",
+      "milestonesValue": "{count} milestones",
+      "manager": "Manager",
+      "members": "Team",
+      "noMembers": "Manager only",
+      "linksTitle": "Preserved links",
+      "linkOpportunity": "Opportunity: {title}",
+      "linkProposal": "Proposal {reference}",
+      "linkClient": "{name} becomes an active client",
+      "create": "Create project",
+      "creating": "Creating…",
+      "createdToast": "Project “{name}” created.",
+      "errorToast": "Couldn't create the project. Please try again.",
+      "successTitle": "Project created!",
+      "successSubtitle": "Opening the project…"
+    },
+    "validation": {
+      "nameRequired": "Enter the project name.",
+      "startRequired": "Enter the start date.",
+      "valueRequired": "Enter the contracted value (verbal close).",
+      "valueInvalid": "Invalid amount.",
+      "templateRequired": "Choose a template.",
+      "templateLoading": "Loading the template…",
+      "milestonesInvalid": "Fill in the description, date and criteria for each milestone.",
+      "milestonesConfirmRequired": "Confirm the payment milestones to continue.",
+      "managerRequired": "Enter the project manager.",
+      "milestoneDescriptionRequired": "Enter the description.",
+      "milestoneDateRequired": "Enter the expected date.",
+      "milestoneCriteriaRequired": "Enter the acceptance criteria."
+    },
+    "guard": {
+      "genericTitle": "Couldn't open the conversion",
+      "genericDescription": "Something went wrong preparing the conversion. Please try again.",
+      "alreadyTitle": "Opportunity already converted",
+      "alreadyDescription": "This opportunity already produced a project.",
+      "notWonTitle": "Opportunity not won",
+      "notWonDescription": "Only opportunities marked as won can be converted.",
+      "backToOpportunity": "Back to opportunity",
+      "viewProject": "View project",
+      "retry": "Try again"
     }
   }
 }

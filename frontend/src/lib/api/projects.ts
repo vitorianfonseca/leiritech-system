@@ -43,6 +43,7 @@ import {
   ProjectError,
   effectiveHealth,
   isLiveState,
+  type ConvertToProjectInput,
   type CreateProjectInput,
   type PhaseInput,
   type PhaseState,
@@ -687,6 +688,17 @@ export interface ProjectsApi {
   listProjects(role: Role, userId: string, paymentsGrant: boolean): Promise<ProjectListItem[]>;
   getProject(id: string, role: Role, userId: string, paymentsGrant: boolean): Promise<Project>;
   createProject(input: CreateProjectInput, actorId: string, canFinance: boolean): Promise<Project>;
+  /**
+   * Won → project conversion (#31, BR-035). Instantiates the project from a
+   * template with team + phases, links the source opportunity/proposal (BR-036)
+   * and records payment-milestone confirmation (BR-037). The confirmed payment
+   * milestones themselves are seeded by the caller via the finance API.
+   */
+  convertOpportunity(
+    input: ConvertToProjectInput,
+    actorId: string,
+    canFinance: boolean
+  ): Promise<Project>;
   transition(id: string, input: TransitionInput, actorId: string): Promise<Project>;
   /** Undo-only: revert a project to a prior lifecycle state (bypasses guards). */
   restoreState(id: string, state: ProjectState, actorId: string): Promise<Project>;
@@ -767,6 +779,74 @@ export const projectsApi: ProjectsApi = {
     };
     projects.set(id, rec);
     pushActivity(id, actorId, "created");
+    return present(rec, canFinance);
+  },
+
+  async convertOpportunity(input, actorId, canFinance) {
+    seed();
+    await delay(MOCK_LATENCY_MS);
+    if (!input.name.trim()) throw new ProjectError("guard_failed", "nameRequired");
+    const id = uid("p");
+
+    // Team: gestor first (never duplicated), then the distinct extra members.
+    const team: ProjectMember[] = [member(input.managerId, "Gestor de projeto")];
+    for (const uidMember of input.teamMemberIds) {
+      if (uidMember && uidMember !== input.managerId && !team.some((m) => m.userId === uidMember)) {
+        team.push(member(uidMember, "Membro da equipa"));
+      }
+    }
+
+    // Phases instantiated from the chosen template (order is 1-based).
+    const phases: ProjectPhase[] = input.phases.map((p, i) => ({
+      id: uid(`${id}-ph`),
+      projectId: id,
+      name: p.name.trim(),
+      order: i + 1,
+      state: "not_started",
+      tasksTotal: Math.max(0, Math.round(p.tasksTotal)),
+      tasksDone: 0,
+      dueDate: p.dueDate,
+      blockerReason: null,
+    }));
+
+    const rec: Project = {
+      id,
+      name: input.name.trim(),
+      clientId: input.clientId,
+      clientName: input.clientName || input.clientId,
+      managerId: input.managerId,
+      managerName: userName(input.managerId),
+      teamCount: team.length,
+      state: "planning",
+      suggestedHealth: "healthy",
+      publishedHealth: null,
+      healthReason: null,
+      healthUpdatedAt: null,
+      healthUpdatedBy: null,
+      progress: 0,
+      startDate: input.startDate,
+      dueDate: input.dueDate,
+      contractedValueCents: canFinance ? input.contractedValueCents : null,
+      hoursBudget: input.hoursBudget,
+      hoursUsed: 0,
+      nextDeliveryAt: null,
+      description: input.description.trim(),
+      team,
+      phases,
+      deliveryMilestones: [],
+      attentionTasks: [],
+      risks: [],
+      pauseReason: null,
+      cancelReason: null,
+      // BR-037: only Admin/finance-grant can confirm; a non-finance converter
+      // leaves this false and the milestones step is skipped upstream.
+      paymentMilestonesConfirmed: canFinance ? input.paymentMilestonesConfirmed : false,
+      opportunityId: input.opportunityId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    projects.set(id, rec);
+    pushActivity(id, actorId, "created", { field: "conversion", after: input.opportunityId });
     return present(rec, canFinance);
   },
 

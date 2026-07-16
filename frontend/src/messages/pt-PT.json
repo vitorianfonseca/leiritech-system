@@ -1507,7 +1507,9 @@
         "lost": "Oportunidade marcada como perdida.",
         "reopened": "Oportunidade reaberta.",
         "probabilityUpdated": "Probabilidade atualizada."
-      }
+      },
+      "createProject": "Criar projeto",
+      "viewProject": "Ver projeto"
     }
   },
   "proposals": {
@@ -2516,6 +2518,139 @@
       "future": "A entrada não pode estar no futuro.",
       "tooLong": "A entrada não pode exceder 24 horas.",
       "projectInactive": "O projeto desta tarefa está pausado ou fechado."
+    }
+  },
+  "conversion": {
+    "title": "Converter em projeto",
+    "subtitle": "Transforme «{title}» num projeto sem voltar a introduzir dados.",
+    "back": "Voltar à oportunidade",
+    "stepOf": "Passo {n} de {total}",
+    "steps": {
+      "details": "Detalhes",
+      "template": "Modelo",
+      "milestones": "Pagamentos",
+      "team": "Equipa",
+      "review": "Rever"
+    },
+    "nav": {
+      "back": "Anterior",
+      "next": "Seguinte"
+    },
+    "source": {
+      "won": "Oportunidade ganha",
+      "proposal": "Proposta {reference}",
+      "verbalClose": "Fecho verbal — sem proposta aceite"
+    },
+    "details": {
+      "title": "Detalhes do projeto",
+      "hint": "Pré-preenchido a partir da oportunidade. Tudo é editável.",
+      "name": "Nome do projeto",
+      "namePlaceholder": "Ex.: Loja online — Verdejar Bio",
+      "company": "Empresa (cliente)",
+      "clienteAtivo": "Cliente ativo",
+      "contacts": "Contactos",
+      "noContacts": "Sem contactos associados a esta empresa.",
+      "startDate": "Data de início",
+      "value": "Valor contratado",
+      "valueHint": "Pré-preenchido a partir da proposta aceite.",
+      "valueVerbalHint": "Sem proposta aceite — introduza o valor acordado.",
+      "valuePlaceholder": "0,00",
+      "proposalValue": "Valor da proposta aceite: {value}",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Âmbito e notas do projeto…",
+      "descriptionFromProposal": "Origem: proposta {reference} aceite."
+    },
+    "template": {
+      "title": "Escolher modelo",
+      "hint": "O modelo instancia as fases e tarefas do projeto.",
+      "none": "Não existem modelos ativos. Crie um em Definições › Modelos.",
+      "phaseCount": "{count} fases",
+      "taskCount": "{count} tarefas",
+      "hours": "{hours} h",
+      "preview": "Fases a criar",
+      "tasksLabel": "{count} tarefas"
+    },
+    "milestones": {
+      "title": "Marcos de pagamento",
+      "hint": "Confirme os marcos antes de ativar o projeto (obrigatório).",
+      "empty": "Ainda não há marcos. Adicione pelo menos um.",
+      "rowLabel": "Marco {n}",
+      "remove": "Remover",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Ex.: Adjudicação",
+      "amount": "Valor",
+      "expectedDate": "Data prevista",
+      "criteria": "Critério de aceitação",
+      "criteriaHint": "O que tem de estar concluído para faturar.",
+      "criteriaPlaceholder": "Ex.: Assinatura do contrato",
+      "add": "Adicionar marco",
+      "total": "Total: {total}",
+      "mismatch": "A soma dos marcos ({total}) não iguala o valor contratado ({target}).",
+      "confirmLabel": "Confirmo os marcos de pagamento",
+      "confirmHint": "Necessário para o projeto poder passar a ativo (BR-037).",
+      "finalPaymentLabel": "Pagamento final",
+      "defaultCriteria": "Conclusão de «{phase}»"
+    },
+    "team": {
+      "title": "Equipa",
+      "hint": "Atribua o gestor e os membros do projeto.",
+      "manager": "Gestor de projeto",
+      "managerPlaceholder": "Selecionar gestor",
+      "noManagers": "Sem gestores disponíveis",
+      "members": "Membros da equipa",
+      "membersHint": "Opcional — pode adicionar mais tarde."
+    },
+    "review": {
+      "title": "Rever e criar",
+      "hint": "Confirme os dados antes de criar o projeto.",
+      "name": "Projeto",
+      "client": "Cliente",
+      "template": "Modelo",
+      "phases": "Fases",
+      "phasesValue": "{count} fases",
+      "startDate": "Início",
+      "dueDate": "Conclusão prevista",
+      "value": "Valor contratado",
+      "milestones": "Marcos de pagamento",
+      "milestonesValue": "{count} marcos",
+      "manager": "Gestor",
+      "members": "Equipa",
+      "noMembers": "Apenas o gestor",
+      "linksTitle": "Ligações preservadas",
+      "linkOpportunity": "Oportunidade: {title}",
+      "linkProposal": "Proposta {reference}",
+      "linkClient": "{name} passa a cliente ativo",
+      "create": "Criar projeto",
+      "creating": "A criar…",
+      "createdToast": "Projeto «{name}» criado.",
+      "errorToast": "Não foi possível criar o projeto. Tente novamente.",
+      "successTitle": "Projeto criado!",
+      "successSubtitle": "A abrir o projeto…"
+    },
+    "validation": {
+      "nameRequired": "Indique o nome do projeto.",
+      "startRequired": "Indique a data de início.",
+      "valueRequired": "Introduza o valor contratado (fecho verbal).",
+      "valueInvalid": "Valor inválido.",
+      "templateRequired": "Escolha um modelo.",
+      "templateLoading": "A carregar o modelo…",
+      "milestonesInvalid": "Preencha a descrição, a data e o critério de cada marco.",
+      "milestonesConfirmRequired": "Confirme os marcos de pagamento para continuar.",
+      "managerRequired": "Indique o gestor do projeto.",
+      "milestoneDescriptionRequired": "Indique a descrição.",
+      "milestoneDateRequired": "Indique a data prevista.",
+      "milestoneCriteriaRequired": "Indique o critério de aceitação."
+    },
+    "guard": {
+      "genericTitle": "Não foi possível abrir a conversão",
+      "genericDescription": "Ocorreu um erro ao preparar a conversão. Tente novamente.",
+      "alreadyTitle": "Oportunidade já convertida",
+      "alreadyDescription": "Esta oportunidade já deu origem a um projeto.",
+      "notWonTitle": "Oportunidade não ganha",
+      "notWonDescription": "Só é possível converter oportunidades marcadas como ganhas.",
+      "backToOpportunity": "Voltar à oportunidade",
+      "viewProject": "Ver projeto",
+      "retry": "Tentar novamente"
     }
   }
 }

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +17,8 @@ import {
   Check,
   Pencil,
   GitBranch,
+  FolderPlus,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +34,8 @@ import {
 } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { crmRoutes } from "@/lib/api/crm";
-import { opportunitiesApi, opportunityCollaborationApi } from "@/lib/api/opportunities";
+import { opportunitiesApi, opportunityCollaborationApi, pipelineRoutes } from "@/lib/api/opportunities";
+import { projectRoutes } from "@/lib/api/projects";
 import {
   OpportunityError,
   isNextActionOverdue,
@@ -63,6 +67,7 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
   const tReason = useTranslations("pipeline.lostReasons");
   const locale = useLocale();
   const qc = useQueryClient();
+  const router = useRouter();
   const canManage = user.role === "admin" || user.role === "gestor";
 
   const queryKey = ["pipeline", "opportunity", opportunityId, user.role, user.userId, user.paymentsGrant] as const;
@@ -215,14 +220,38 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
         ) : null}
       </div>
 
-      {/* Won terminal banner (BR-013) */}
+      {/* Won terminal banner (BR-013) + conversion CTA (#31, BR-035) */}
       {o.outcome === "won" ? (
         <div
           role="status"
-          className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-muted px-4 py-3 text-sm text-success"
+          className="flex flex-col gap-3 rounded-xl border border-success/30 bg-success-muted px-4 py-3 text-sm text-success sm:flex-row sm:items-center sm:justify-between"
         >
-          <Trophy className="size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-          {t("wonBanner", { date: o.wonAt ? formatDate(o.wonAt) : "" })}
+          <span className="inline-flex items-center gap-2">
+            <Trophy className="size-4 shrink-0" strokeWidth={1.8} aria-hidden />
+            {t("wonBanner", { date: o.wonAt ? formatDate(o.wonAt) : "" })}
+          </span>
+          {canManage ? (
+            o.converted && o.projectId ? (
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={<Link href={projectRoutes.detail(o.projectId)} />}
+              >
+                <ArrowRight aria-hidden />
+                {t("viewProject")}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                nativeButton={false}
+                render={<Link href={pipelineRoutes.convert(o.id)} />}
+              >
+                <FolderPlus aria-hidden />
+                {t("createProject")}
+              </Button>
+            )
+          ) : null}
         </div>
       ) : null}
       {o.outcome === "lost" ? (
@@ -364,7 +393,8 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
             onOpenChange={setWonOpen}
             opportunity={o}
             onConfirm={confirmWin}
-            convertAvailable={false}
+            convertAvailable
+            onConvert={() => router.push(pipelineRoutes.convert(o.id))}
           />
           <LostDialog open={lostOpen} onOpenChange={setLostOpen} opportunity={o} onConfirm={confirmLose} />
           <ReopenDialog open={reopenOpen} onOpenChange={setReopenOpen} opportunity={o} onConfirm={confirmReopen} />

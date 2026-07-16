@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,7 +20,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState, toast, toastWithUndo } from "@/components/shared";
 import { canAccessFinance } from "@/lib/api/finance-types";
-import { opportunitiesApi } from "@/lib/api/opportunities";
+import { opportunitiesApi, pipelineRoutes } from "@/lib/api/opportunities";
 import {
   OpportunityError,
   type CreateOpportunityInput,
@@ -53,6 +54,7 @@ interface PendingMove {
 export function PipelineBoard({ user }: PipelineBoardProps) {
   const t = useTranslations("pipeline");
   const qc = useQueryClient();
+  const router = useRouter();
   const canManage = user.role === "admin" || user.role === "gestor";
   const canFinance = canAccessFinance(user.role, user.paymentsGrant);
 
@@ -297,7 +299,8 @@ export function PipelineBoard({ user }: PipelineBoardProps) {
             onOpenChange={(o) => !o && setWonOpp(null)}
             opportunity={wonOpp}
             onConfirm={confirmWin}
-            convertAvailable={false}
+            convertAvailable
+            onConvert={(result) => router.push(pipelineRoutes.convert(result.opportunity.id))}
           />
           <LostDialog
             open={lostOpp !== null}

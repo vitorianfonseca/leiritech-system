@@ -196,6 +196,38 @@ export interface CreateProjectInput {
   contractedValueCents: number | null;
 }
 
+/**
+ * A phase instantiated from a template on conversion (#31). Real task records
+ * (#34) are not created here; `tasksTotal` seeds the progress denominator so
+ * the instantiated plan reflects the template's shape (BR-050).
+ */
+export interface InstantiatedPhaseInput {
+  name: string;
+  tasksTotal: number;
+  dueDate: string | null;
+}
+
+/**
+ * Won → project conversion payload (#31, BR-035 zero re-entry). Extends the
+ * plain create input with the template-instantiated phases, the assigned team,
+ * the source opportunity/proposal links (BR-036) and the payment-milestone
+ * confirmation flag (BR-037). The client seeds the confirmed payment milestones
+ * separately through the finance API; this input only records that they were
+ * reviewed.
+ */
+export interface ConvertToProjectInput extends CreateProjectInput {
+  /** Additional members beyond the gestor (may be empty). */
+  teamMemberIds: string[];
+  /** Ordered phases instantiated from the chosen template. */
+  phases: InstantiatedPhaseInput[];
+  /** Source opportunity (BR-036 — preserved read-only). */
+  opportunityId: string;
+  /** Source accepted proposal, or null for a verbal close (BR-035). */
+  proposalId: string | null;
+  /** Whether payment milestones were confirmed in the wizard (BR-037). */
+  paymentMilestonesConfirmed: boolean;
+}
+
 export type ProjectLifecycleAction =
   | "start"
   | "pause"

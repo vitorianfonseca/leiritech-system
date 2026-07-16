@@ -296,6 +296,23 @@ function seed(): void {
       lostReasonNote: "Orçamento público adiado para o próximo ano fiscal.",
       lostAt: isoDate(-10),
     },
+    {
+      // Verbal close (BR-035 fallback) — won WITHOUT an accepted proposal, so the
+      // conversion wizard must require the contracted value to be entered by hand.
+      id: "o-10",
+      title: "Manutenção anual — Metalúrgica Norte",
+      companyId: "c-3",
+      companyName: "Metalúrgica Norte",
+      ownerId: "dev-gestor",
+      valueCents: null,
+      stageId: "negotiation",
+      outcome: "won",
+      nextAction: null,
+      nextActionAt: null,
+      proposalSentReached: false,
+      wonAt: isoDate(-2),
+      converted: false,
+    },
   ];
 
   for (const row of rows) {
@@ -365,6 +382,12 @@ export interface OpportunitiesApi {
     actorId: string
   ): Promise<Opportunity>;
   winOpportunity(id: string, actorId: string): Promise<WinOpportunityResult>;
+  /**
+   * Link a won opportunity to the project it was converted into (#31, BR-036).
+   * Idempotent-ish: throws if the opportunity is not won or already converted so
+   * the wizard can guard the entry point.
+   */
+  markConverted(id: string, projectId: string, actorId: string): Promise<Opportunity>;
   loseOpportunity(
     id: string,
     input: LoseOpportunityInput,
@@ -461,6 +484,20 @@ export const opportunitiesApi: OpportunitiesApi = {
       companyId: rec.companyId,
       companyName: rec.companyName,
     };
+  },
+
+  async markConverted(id, projectId, actorId) {
+    seed();
+    await delay(MOCK_LATENCY_MS);
+    const rec = opportunities.get(id);
+    if (!rec) throw new OpportunityError("not_found");
+    if (rec.outcome !== "won") throw new OpportunityError("invalid_transition");
+    if (rec.converted) throw new OpportunityError("invalid_transition");
+    rec.converted = true;
+    rec.projectId = projectId;
+    rec.updatedAt = new Date().toISOString();
+    pushActivity(id, actorId, "status_changed", { field: "converted", after: projectId });
+    return present(rec, true);
   },
 
   async loseOpportunity(id, input, actorId) {
