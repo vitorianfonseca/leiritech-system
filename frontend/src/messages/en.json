@@ -52,7 +52,10 @@
       "title": "Notifications",
       "markAllRead": "Mark all as read",
       "empty": "No new notifications.",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "loading": "Loading notifications…",
+      "error": "Couldn't load notifications.",
+      "unreadCount": "{count} unread"
     },
     "help": {
       "label": "Help"
@@ -2074,6 +2077,75 @@
     "activityTab": {
       "notesTitle": "Notes",
       "timelineTitle": "Timeline"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Alerts and updates that need your attention.",
+    "refresh": "Refresh",
+    "preferences": "Notification preferences",
+    "markAllRead": "Mark all as read",
+    "filters": {
+      "readLabel": "State",
+      "unread": "Unread",
+      "all": "All",
+      "typeLabel": "Type",
+      "allTypes": "All types"
+    },
+    "categories": {
+      "task": "Task",
+      "payment": "Payment",
+      "opportunity": "Opportunity",
+      "proposal": "Proposal",
+      "project": "Project",
+      "meeting": "Meeting",
+      "workload": "Allocation",
+      "mention": "Mention",
+      "comment": "Comment",
+      "system": "System"
+    },
+    "state": {
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "item": {
+      "open": "Open record",
+      "markRead": "Mark as read",
+      "archive": "Archive",
+      "moreActions": "More actions"
+    },
+    "group": {
+      "expand": "Show {count} more",
+      "collapse": "Show less",
+      "count": "{count} updates"
+    },
+    "count": {
+      "unread": "{count} unread",
+      "total": "{count} total"
+    },
+    "empty": {
+      "title": "No notifications",
+      "description": "When something needs your attention, it shows up here.",
+      "unreadTitle": "You're all caught up",
+      "unreadDescription": "You have no unread notifications.",
+      "filteredTitle": "No results",
+      "filteredDescription": "There are no notifications for this filter."
+    },
+    "toasts": {
+      "read": "Notification marked as read.",
+      "allRead": "All notifications marked as read.",
+      "archived": "Notification archived."
+    },
+    "confirm": {
+      "markAllTitle": "Mark all as read?",
+      "markAllDescription": "All unread notifications will be marked as read. You can undo this.",
+      "markAllConfirm": "Mark all"
+    },
+    "errors": {
+      "loadTitle": "Couldn't load notifications",
+      "loadDescription": "Something went wrong fetching your notifications. Please try again.",
+      "retry": "Try again",
+      "actionFailed": "Couldn't complete the action. Please try again."
     }
   }
 }

@@ -52,7 +52,10 @@
       "title": "Notificações",
       "markAllRead": "Marcar tudo como lido",
       "empty": "Sem notificações novas.",
-      "viewAll": "Ver todas"
+      "viewAll": "Ver todas",
+      "loading": "A carregar notificações…",
+      "error": "Não foi possível carregar as notificações.",
+      "unreadCount": "{count} não lidas"
     },
     "help": {
       "label": "Ajuda"
@@ -2074,6 +2077,75 @@
     "activityTab": {
       "notesTitle": "Notas",
       "timelineTitle": "Cronologia"
+    }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "subtitle": "Alertas e atualizações que precisam da sua atenção.",
+    "refresh": "Atualizar",
+    "preferences": "Preferências de notificações",
+    "markAllRead": "Marcar tudo como lido",
+    "filters": {
+      "readLabel": "Estado",
+      "unread": "Não lidas",
+      "all": "Todas",
+      "typeLabel": "Tipo",
+      "allTypes": "Todos os tipos"
+    },
+    "categories": {
+      "task": "Tarefa",
+      "payment": "Pagamento",
+      "opportunity": "Oportunidade",
+      "proposal": "Proposta",
+      "project": "Projeto",
+      "meeting": "Reunião",
+      "workload": "Alocação",
+      "mention": "Menção",
+      "comment": "Comentário",
+      "system": "Sistema"
+    },
+    "state": {
+      "unread": "Não lida",
+      "read": "Lida"
+    },
+    "item": {
+      "open": "Abrir registo",
+      "markRead": "Marcar como lida",
+      "archive": "Arquivar",
+      "moreActions": "Mais ações"
+    },
+    "group": {
+      "expand": "Ver mais {count}",
+      "collapse": "Ver menos",
+      "count": "{count} atualizações"
+    },
+    "count": {
+      "unread": "{count} por ler",
+      "total": "{count} no total"
+    },
+    "empty": {
+      "title": "Sem notificações",
+      "description": "Quando houver algo que precise da sua atenção, aparece aqui.",
+      "unreadTitle": "Está tudo em dia",
+      "unreadDescription": "Não tem notificações por ler.",
+      "filteredTitle": "Sem resultados",
+      "filteredDescription": "Não há notificações para este filtro."
+    },
+    "toasts": {
+      "read": "Notificação marcada como lida.",
+      "allRead": "Todas as notificações foram marcadas como lidas.",
+      "archived": "Notificação arquivada."
+    },
+    "confirm": {
+      "markAllTitle": "Marcar tudo como lido?",
+      "markAllDescription": "Todas as notificações por ler serão marcadas como lidas. Pode anular esta ação.",
+      "markAllConfirm": "Marcar tudo"
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar as notificações",
+      "loadDescription": "Ocorreu um erro ao obter as suas notificações. Tente novamente.",
+      "retry": "Tentar novamente",
+      "actionFailed": "Não foi possível concluir a ação. Tente novamente."
     }
   }
 }
