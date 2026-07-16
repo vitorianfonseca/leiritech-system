@@ -2147,5 +2147,214 @@
       "retry": "Try again",
       "actionFailed": "Couldn't complete the action. Please try again."
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Manage delivery work as a list, board, or calendar.",
+    "newTask": "New task",
+    "refresh": "Refresh",
+    "state": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "in_review": "In review",
+      "blocked": "Blocked",
+      "done": "Done"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "due": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "overdueBy": "Overdue by {days, plural, one {# day} other {# days}}",
+      "inDays": "In {days, plural, one {# day} other {# days}}",
+      "on": "On {date}",
+      "none": "No date"
+    },
+    "viewSwitcher": {
+      "label": "View mode",
+      "list": "List",
+      "kanban": "Board",
+      "calendar": "Calendar"
+    },
+    "filters": {
+      "label": "Filters",
+      "all": "All",
+      "project": "Project",
+      "assignee": "Assignee",
+      "state": "State",
+      "priority": "Priority",
+      "taskLabel": "Label",
+      "clear": "Clear"
+    },
+    "board": {
+      "columnEmpty": "No tasks"
+    },
+    "card": {
+      "unassigned": "Unassigned",
+      "hasDependencies": "Has unresolved dependencies",
+      "checklist": "{done} of {total} done",
+      "dragHandle": "Drag task: {title}"
+    },
+    "list": {
+      "searchPlaceholder": "Search tasks…",
+      "columns": {
+        "title": "Task",
+        "state": "State",
+        "priority": "Priority",
+        "assignees": "Assignees",
+        "due": "Due"
+      },
+      "actions": {
+        "open": "Open detail",
+        "duplicate": "Duplicate",
+        "archive": "Archive"
+      }
+    },
+    "empty": {
+      "title": "No tasks yet",
+      "description": "Create the first task to start organizing delivery work."
+    },
+    "assignees": {
+      "none": "Unassigned",
+      "add": "Assign",
+      "remove": "Remove {name}"
+    },
+    "create": {
+      "title": "New task",
+      "description": "Add a task to a project and assign who will do it.",
+      "submit": "Create task",
+      "cancel": "Cancel",
+      "processing": "Creating…",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "What needs to be done?",
+        "description": "Description",
+        "descriptionPlaceholder": "Context and details (optional)",
+        "project": "Project",
+        "projectPlaceholder": "Select project",
+        "phase": "Phase",
+        "phasePlaceholder": "Select phase",
+        "phaseSelectProject": "Select a project first",
+        "priority": "Priority",
+        "due": "Due date",
+        "assignees": "Assignees"
+      },
+      "errors": {
+        "titleRequired": "The title is required.",
+        "projectRequired": "Select a project."
+      }
+    },
+    "block": {
+      "title": "Block task",
+      "description": "Explain why “{task}” is blocked. It will be visible to the team.",
+      "descriptionGeneric": "Explain why the task is blocked. It will be visible to the team.",
+      "reasonLabel": "Block reason",
+      "reasonPlaceholder": "e.g. waiting on client access…",
+      "reasonRequired": "The block reason is required.",
+      "confirm": "Block",
+      "cancel": "Cancel",
+      "processing": "Blocking…"
+    },
+    "archive": {
+      "title": "Archive task",
+      "description": "“{title}” will no longer appear on the board. You can undo this next.",
+      "confirm": "Archive"
+    },
+    "timer": {
+      "start": "Start timer",
+      "stop": "Stop ({elapsed})",
+      "started": "Timer started.",
+      "stopped": "Timer stopped — {minutes, plural, one {# minute} other {# minutes}} logged.",
+      "switched": "Previous timer on “{task}” stopped — {minutes, plural, one {# minute} other {# minutes}} logged."
+    },
+    "panel": {
+      "loading": "Loading…",
+      "titleLabel": "Task title",
+      "editTitle": "Edit title",
+      "save": "Save",
+      "cancel": "Cancel",
+      "unblock": "Unblock",
+      "dependencyGate": "This task depends on others that are not done yet and cannot start.",
+      "tabsLabel": "Task sections",
+      "tabs": {
+        "details": "Details",
+        "comments": "Comments"
+      },
+      "moveTo": {
+        "todo": "Move to to-do",
+        "in_progress": "Start",
+        "in_review": "Send to review",
+        "blocked": "Block",
+        "done": "Complete"
+      },
+      "descriptionLabel": "Description",
+      "editDescription": "Edit description",
+      "noDescription": "No description.",
+      "fields": {
+        "priority": "Priority",
+        "due": "Due date",
+        "phase": "Phase",
+        "phasePlaceholder": "No phase",
+        "assignees": "Assignees",
+        "created": "Created",
+        "updated": "Updated"
+      },
+      "checklist": {
+        "title": "Checklist",
+        "progress": "{done}/{total}",
+        "add": "Add",
+        "addPlaceholder": "Add item…",
+        "remove": "Remove item",
+        "empty": "No checklist items."
+      },
+      "dependencies": {
+        "title": "Dependencies",
+        "resolved": "Done",
+        "pending": "Pending",
+        "remove": "Remove dependency",
+        "empty": "No dependencies.",
+        "addPlaceholder": "Add dependency…"
+      }
+    },
+    "toasts": {
+      "created": "Task “{title}” created.",
+      "moved": "“{title}” moved to {state}.",
+      "blocked": "“{title}” blocked.",
+      "unblocked": "“{title}” unblocked.",
+      "duplicated": "“{title}” duplicated.",
+      "archived": "“{title}” archived."
+    },
+    "errors": {
+      "actionFailed": "Could not complete the action. Please try again.",
+      "loadTitle": "Could not load tasks",
+      "loadDescription": "Something went wrong loading tasks. Please try again.",
+      "retry": "Try again"
+    },
+    "transitionErrors": {
+      "sameState": "The task is already in that state.",
+      "cannotBlockDone": "A completed task cannot be blocked.",
+      "unblockFirst": "Unblock the task before completing it.",
+      "projectNotActive": "The project is not active — forward transitions are paused.",
+      "dependencyUnresolved": "Unresolved dependencies are blocking the start.",
+      "todoToReview": "A to-do task cannot move straight to review.",
+      "todoToDone": "A to-do task cannot be completed directly.",
+      "reviewFirst": "The task must go through review before completion.",
+      "approvalOnly": "Only a Manager or Admin can approve and complete.",
+      "returnByManager": "Only a Manager or Admin can send it back to progress.",
+      "reviewBackToTodo": "A task in review cannot go back to to-do.",
+      "reopenByManager": "Only a Manager or Admin can reopen the task.",
+      "projectClosed": "The project is closed — the task cannot be reopened.",
+      "invalid": "Invalid transition.",
+      "titleRequired": "The title is required.",
+      "projectRequired": "Select a project.",
+      "blockerSelf": "A task cannot block itself.",
+      "dependencyCycle": "This dependency would create a cycle.",
+      "notBlocked": "The task is not blocked.",
+      "checklistTextRequired": "Enter the checklist item."
+    }
   }
 }

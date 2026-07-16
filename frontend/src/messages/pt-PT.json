@@ -2147,5 +2147,214 @@
       "retry": "Tentar novamente",
       "actionFailed": "Não foi possível concluir a ação. Tente novamente."
     }
+  },
+  "tasks": {
+    "title": "Tarefas",
+    "subtitle": "Faça a gestão do trabalho de entrega em lista, quadro ou calendário.",
+    "newTask": "Nova tarefa",
+    "refresh": "Atualizar",
+    "state": {
+      "todo": "Por fazer",
+      "in_progress": "Em curso",
+      "in_review": "Em revisão",
+      "blocked": "Bloqueada",
+      "done": "Concluída"
+    },
+    "priority": {
+      "low": "Baixa",
+      "normal": "Normal",
+      "high": "Alta",
+      "urgent": "Urgente"
+    },
+    "due": {
+      "today": "Hoje",
+      "tomorrow": "Amanhã",
+      "overdueBy": "Atrasada há {days, plural, one {# dia} other {# dias}}",
+      "inDays": "Em {days, plural, one {# dia} other {# dias}}",
+      "on": "A {date}",
+      "none": "Sem data"
+    },
+    "viewSwitcher": {
+      "label": "Modo de visualização",
+      "list": "Lista",
+      "kanban": "Quadro",
+      "calendar": "Calendário"
+    },
+    "filters": {
+      "label": "Filtros",
+      "all": "Todos",
+      "project": "Projeto",
+      "assignee": "Responsável",
+      "state": "Estado",
+      "priority": "Prioridade",
+      "taskLabel": "Etiqueta",
+      "clear": "Limpar"
+    },
+    "board": {
+      "columnEmpty": "Sem tarefas"
+    },
+    "card": {
+      "unassigned": "Sem responsável",
+      "hasDependencies": "Tem dependências por concluir",
+      "checklist": "{done} de {total} concluídos",
+      "dragHandle": "Arrastar tarefa: {title}"
+    },
+    "list": {
+      "searchPlaceholder": "Procurar tarefas…",
+      "columns": {
+        "title": "Tarefa",
+        "state": "Estado",
+        "priority": "Prioridade",
+        "assignees": "Responsáveis",
+        "due": "Prazo"
+      },
+      "actions": {
+        "open": "Abrir detalhe",
+        "duplicate": "Duplicar",
+        "archive": "Arquivar"
+      }
+    },
+    "empty": {
+      "title": "Ainda não há tarefas",
+      "description": "Crie a primeira tarefa para começar a organizar o trabalho de entrega."
+    },
+    "assignees": {
+      "none": "Sem responsável",
+      "add": "Atribuir",
+      "remove": "Remover {name}"
+    },
+    "create": {
+      "title": "Nova tarefa",
+      "description": "Adicione uma tarefa a um projeto e atribua a quem a vai executar.",
+      "submit": "Criar tarefa",
+      "cancel": "Cancelar",
+      "processing": "A criar…",
+      "fields": {
+        "title": "Título",
+        "titlePlaceholder": "O que é preciso fazer?",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Contexto e detalhes (opcional)",
+        "project": "Projeto",
+        "projectPlaceholder": "Selecionar projeto",
+        "phase": "Fase",
+        "phasePlaceholder": "Selecionar fase",
+        "phaseSelectProject": "Selecione primeiro um projeto",
+        "priority": "Prioridade",
+        "due": "Prazo",
+        "assignees": "Responsáveis"
+      },
+      "errors": {
+        "titleRequired": "O título é obrigatório.",
+        "projectRequired": "Selecione um projeto."
+      }
+    },
+    "block": {
+      "title": "Bloquear tarefa",
+      "description": "Indique o motivo do bloqueio de «{task}». Ficará visível para a equipa.",
+      "descriptionGeneric": "Indique o motivo do bloqueio. Ficará visível para a equipa.",
+      "reasonLabel": "Motivo do bloqueio",
+      "reasonPlaceholder": "Ex.: a aguardar acesso do cliente…",
+      "reasonRequired": "O motivo do bloqueio é obrigatório.",
+      "confirm": "Bloquear",
+      "cancel": "Cancelar",
+      "processing": "A bloquear…"
+    },
+    "archive": {
+      "title": "Arquivar tarefa",
+      "description": "«{title}» deixa de aparecer no quadro. Pode anular a ação em seguida.",
+      "confirm": "Arquivar"
+    },
+    "timer": {
+      "start": "Iniciar cronómetro",
+      "stop": "Parar ({elapsed})",
+      "started": "Cronómetro iniciado.",
+      "stopped": "Cronómetro parado — {minutes, plural, one {# minuto} other {# minutos}} registados.",
+      "switched": "Cronómetro anterior parado em «{task}» — {minutes, plural, one {# minuto} other {# minutos}} registados."
+    },
+    "panel": {
+      "loading": "A carregar…",
+      "titleLabel": "Título da tarefa",
+      "editTitle": "Editar título",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "unblock": "Desbloquear",
+      "dependencyGate": "Esta tarefa depende de outras ainda por concluir e não pode arrancar.",
+      "tabsLabel": "Secções da tarefa",
+      "tabs": {
+        "details": "Detalhes",
+        "comments": "Comentários"
+      },
+      "moveTo": {
+        "todo": "Mover para por fazer",
+        "in_progress": "Iniciar",
+        "in_review": "Enviar para revisão",
+        "blocked": "Bloquear",
+        "done": "Concluir"
+      },
+      "descriptionLabel": "Descrição",
+      "editDescription": "Editar descrição",
+      "noDescription": "Sem descrição.",
+      "fields": {
+        "priority": "Prioridade",
+        "due": "Prazo",
+        "phase": "Fase",
+        "phasePlaceholder": "Sem fase",
+        "assignees": "Responsáveis",
+        "created": "Criada",
+        "updated": "Atualizada"
+      },
+      "checklist": {
+        "title": "Lista de verificação",
+        "progress": "{done}/{total}",
+        "add": "Adicionar",
+        "addPlaceholder": "Adicionar item…",
+        "remove": "Remover item",
+        "empty": "Sem itens na lista."
+      },
+      "dependencies": {
+        "title": "Dependências",
+        "resolved": "Concluída",
+        "pending": "Pendente",
+        "remove": "Remover dependência",
+        "empty": "Sem dependências.",
+        "addPlaceholder": "Adicionar dependência…"
+      }
+    },
+    "toasts": {
+      "created": "Tarefa «{title}» criada.",
+      "moved": "«{title}» movida para {state}.",
+      "blocked": "«{title}» bloqueada.",
+      "unblocked": "«{title}» desbloqueada.",
+      "duplicated": "«{title}» duplicada.",
+      "archived": "«{title}» arquivada."
+    },
+    "errors": {
+      "actionFailed": "Não foi possível concluir a ação. Tente novamente.",
+      "loadTitle": "Não foi possível carregar as tarefas",
+      "loadDescription": "Ocorreu um erro ao carregar as tarefas. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "transitionErrors": {
+      "sameState": "A tarefa já está nesse estado.",
+      "cannotBlockDone": "Uma tarefa concluída não pode ser bloqueada.",
+      "unblockFirst": "Desbloqueie a tarefa antes de a concluir.",
+      "projectNotActive": "O projeto não está ativo — transições em frente estão suspensas.",
+      "dependencyUnresolved": "Existem dependências por concluir que impedem o arranque.",
+      "todoToReview": "Uma tarefa por fazer não pode passar diretamente para revisão.",
+      "todoToDone": "Uma tarefa por fazer não pode ser concluída diretamente.",
+      "reviewFirst": "A tarefa tem de passar por revisão antes de ser concluída.",
+      "approvalOnly": "Só um Gestor ou Administrador pode aprovar e concluir.",
+      "returnByManager": "Só um Gestor ou Administrador pode devolver para desenvolvimento.",
+      "reviewBackToTodo": "Uma tarefa em revisão não pode voltar para por fazer.",
+      "reopenByManager": "Só um Gestor ou Administrador pode reabrir a tarefa.",
+      "projectClosed": "O projeto está fechado — a tarefa não pode ser reaberta.",
+      "invalid": "Transição inválida.",
+      "titleRequired": "O título é obrigatório.",
+      "projectRequired": "Selecione um projeto.",
+      "blockerSelf": "Uma tarefa não pode bloquear-se a si própria.",
+      "dependencyCycle": "Esta dependência criaria um ciclo.",
+      "notBlocked": "A tarefa não está bloqueada.",
+      "checklistTextRequired": "Escreva o item da lista."
+    }
   }
 }

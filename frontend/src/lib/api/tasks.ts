@@ -763,7 +763,7 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
-  async toggleChecklistItem(id, itemId, _actorId) {
+  async toggleChecklistItem(id, itemId, actorId) {
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
@@ -771,19 +771,21 @@ export const tasksApi: TasksApi = {
     if (!item) throw new TaskError("not_found");
     item.done = !item.done;
     touch(rec);
+    pushActivity(id, actorId, "updated", { field: "checklist" });
     return present(rec);
   },
 
-  async removeChecklistItem(id, itemId, _actorId) {
+  async removeChecklistItem(id, itemId, actorId) {
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
     rec.checklist = rec.checklist.filter((c) => c.id !== itemId);
     touch(rec);
+    pushActivity(id, actorId, "updated", { field: "checklist" });
     return present(rec);
   },
 
-  async reorder(id, toState, toIndex, _actorId) {
+  async reorder(id, toState, toIndex, actorId) {
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
@@ -797,6 +799,7 @@ export const tasksApi: TasksApi = {
       r.order = i;
     });
     touch(rec);
+    pushActivity(id, actorId, "updated", { field: "order" });
     return present(rec);
   },
 
