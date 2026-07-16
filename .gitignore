@@ -1,0 +1,5 @@
+# Forge — internal artifacts
+forge-history.jsonl
+forge-history-*.jsonl
+.forge-cache/
+.forge-context/
