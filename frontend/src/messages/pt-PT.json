@@ -1505,5 +1505,199 @@
         "probabilityUpdated": "Probabilidade atualizada."
       }
     }
+  },
+  "proposals": {
+    "states": {
+      "draft": "Rascunho",
+      "sent": "Enviada",
+      "viewed": "Visualizada",
+      "accepted": "Aceite",
+      "rejected": "Recusada",
+      "expired": "Expirada"
+    },
+    "list": {
+      "title": "Propostas",
+      "subtitle": "Acompanhe o estado de cada proposta enviada aos clientes.",
+      "new": "Nova proposta",
+      "searchPlaceholder": "Procurar por referência, oportunidade ou empresa",
+      "valueRestricted": "Valor restrito",
+      "createdToast": "Proposta {reference} criada.",
+      "archivedToast": "Proposta {reference} arquivada.",
+      "columns": {
+        "reference": "Referência",
+        "opportunity": "Oportunidade",
+        "state": "Estado",
+        "value": "Valor",
+        "sentAt": "Enviada em",
+        "validUntil": "Validade",
+        "createdAt": "Criada em"
+      },
+      "actions": {
+        "view": "Ver detalhe",
+        "archive": "Arquivar"
+      },
+      "empty": {
+        "title": "Ainda sem propostas",
+        "description": "Crie a primeira proposta a partir de uma oportunidade em aberto."
+      },
+      "errors": {
+        "loadTitle": "Não foi possível carregar as propostas",
+        "loadDescription": "Ocorreu um erro ao obter as propostas. Tente novamente.",
+        "retry": "Tentar novamente"
+      }
+    },
+    "create": {
+      "title": "Nova proposta",
+      "subtitle": "Registe uma proposta ligada a uma oportunidade. O PDF é anexado a seguir.",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Criar proposta",
+      "fields": {
+        "opportunity": "Oportunidade",
+        "opportunityPlaceholder": "Selecione a oportunidade",
+        "noOpportunities": "Sem oportunidades em aberto",
+        "contact": "Contacto",
+        "contactPlaceholder": "Selecione o contacto (opcional)",
+        "noContacts": "Sem contactos",
+        "value": "Valor",
+        "valueHint": "Valor da proposta, em euros.",
+        "valuePlaceholder": "Ex.: 25000",
+        "validUntil": "Válida até",
+        "validUntilHint": "Necessária para poder enviar.",
+        "notes": "Notas",
+        "notesPlaceholder": "Notas internas sobre a proposta"
+      }
+    },
+    "validation": {
+      "opportunityRequired": "Selecione a oportunidade associada.",
+      "valueInvalid": "Indique um valor válido.",
+      "rejectNoteRequired": "Indique o motivo da recusa.",
+      "validityRequired": "Defina a nova data de validade."
+    },
+    "pdf": {
+      "dropTitle": "Anexar PDF",
+      "dropHint": "Apenas PDF, até 10 MB.",
+      "uploading": "A carregar…",
+      "replace": "Substituir",
+      "remove": "Remover ficheiro",
+      "download": "Descarregar",
+      "none": "Sem ficheiro anexado.",
+      "uploadedOn": "anexado a {date}",
+      "errorType": "O ficheiro tem de ser um PDF.",
+      "errorSize": "O ficheiro excede o tamanho máximo ({max}).",
+      "errorEmpty": "O ficheiro está vazio."
+    },
+    "send": {
+      "title": "Enviar proposta",
+      "subtitle": "Confirme os requisitos antes de enviar a proposta {reference}.",
+      "checks": {
+        "pdf": "PDF anexado",
+        "value": "Valor definido",
+        "validUntil": "Validade definida"
+      },
+      "sending": "A enviar…",
+      "cancel": "Cancelar",
+      "confirm": "Enviar proposta"
+    },
+    "reject": {
+      "title": "Marcar como recusada",
+      "subtitle": "Registe o motivo da recusa da proposta {reference}.",
+      "note": "Motivo da recusa",
+      "notePlaceholder": "Detalhes sobre a decisão do cliente",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Marcar como recusada"
+    },
+    "resend": {
+      "title": "Reenviar proposta",
+      "subtitle": "Defina uma nova validade para reenviar a proposta {reference}.",
+      "validUntil": "Nova validade",
+      "validUntilHint": "A proposta volta ao estado «Enviada» com esta data.",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "confirm": "Reenviar"
+    },
+    "detail": {
+      "back": "Voltar às propostas",
+      "backToList": "Voltar à lista",
+      "notFoundTitle": "Proposta não encontrada",
+      "notFoundDescription": "A proposta que procura não existe ou já não está disponível.",
+      "errorTitle": "Não foi possível carregar a proposta",
+      "errorDescription": "Ocorreu um erro ao obter a proposta. Tente novamente.",
+      "retry": "Tentar novamente",
+      "viewOpportunity": "Ver oportunidade",
+      "documentTitle": "Documento",
+      "factsTitle": "Detalhes",
+      "value": "Valor",
+      "valueRestricted": "Valor restrito",
+      "contact": "Contacto",
+      "created": "Criada em",
+      "sentAt": "Enviada em",
+      "validUntil": "Válida até",
+      "viewedAt": "Visualizada em",
+      "notes": "Notas",
+      "notesTitle": "Notas e comentários",
+      "timelineTitle": "Histórico",
+      "actions": {
+        "send": "Enviar",
+        "markViewed": "Marcar como visualizada",
+        "accept": "Marcar como aceite",
+        "reject": "Marcar como recusada",
+        "expire": "Marcar como expirada",
+        "resend": "Reenviar",
+        "archive": "Arquivar"
+      },
+      "banners": {
+        "accepted": "Proposta aceite a {date}. Estado final — para renegociar, crie uma nova proposta.",
+        "rejected": "Proposta recusada a {date}.",
+        "rejectedWithNote": "Proposta recusada a {date}: {note}",
+        "expired": "Proposta expirada (validade em {date}). Reenvie com uma nova data para reativar.",
+        "pastValidity": "A validade desta proposta terminou a {date}.",
+        "needsPdf": "Anexe o PDF para poder enviar esta proposta."
+      },
+      "toast": {
+        "uploaded": "PDF anexado.",
+        "removed": "PDF removido.",
+        "sent": "Proposta enviada.",
+        "viewed": "Proposta marcada como visualizada.",
+        "accepted": "Proposta aceite.",
+        "rejected": "Proposta recusada.",
+        "expired": "Proposta marcada como expirada.",
+        "resent": "Proposta reenviada.",
+        "archived": "Proposta {reference} arquivada."
+      },
+      "acceptConfirm": {
+        "title": "Marcar como aceite?",
+        "description": "A proposta {reference} passa a estado final e não poderá ser alterada."
+      },
+      "expireConfirm": {
+        "title": "Marcar como expirada?",
+        "description": "A proposta {reference} deixa de estar ativa. Poderá reenviá-la com uma nova validade."
+      },
+      "archiveConfirm": {
+        "title": "Arquivar proposta?",
+        "description": "A proposta {reference} deixa de aparecer na lista ativa. Pode anular esta ação."
+      }
+    },
+    "errors": {
+      "not_found": "Proposta não encontrada.",
+      "forbidden": "Sem acesso a esta proposta.",
+      "send_requirements_missing": "Anexe o PDF e defina o valor e a validade antes de enviar.",
+      "draft_not_decidable": "A proposta tem de ser enviada antes de poder ser visualizada ou decidida.",
+      "accepted_locked": "Proposta aceite não pode ser alterada. Crie uma nova proposta.",
+      "accepted_not_archivable": "Proposta aceite está associada a um projeto e não pode ser arquivada.",
+      "rejected_not_acceptable": "Proposta recusada não pode ser aceite diretamente. Reenvie uma nova versão.",
+      "reject_note_required": "Indique o motivo da recusa.",
+      "opportunity_lost": "A oportunidade associada foi dada como perdida; a proposta não pode ser aceite.",
+      "not_expired": "Só é possível reenviar propostas expiradas.",
+      "resend_validity_required": "Defina uma nova data de validade para reenviar.",
+      "invalid_transition": "Esta transição não é permitida para o estado atual da proposta."
+    },
+    "errorBoundary": {
+      "title": "Algo correu mal",
+      "description": "Não foi possível apresentar esta página. Tente novamente.",
+      "retry": "Tentar novamente",
+      "backToList": "Voltar à lista"
+    }
   }
 }

@@ -1505,5 +1505,199 @@
         "probabilityUpdated": "Probability updated."
       }
     }
+  },
+  "proposals": {
+    "states": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "viewed": "Viewed",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "list": {
+      "title": "Proposals",
+      "subtitle": "Track the status of every proposal sent to clients.",
+      "new": "New proposal",
+      "searchPlaceholder": "Search by reference, opportunity or company",
+      "valueRestricted": "Value restricted",
+      "createdToast": "Proposal {reference} created.",
+      "archivedToast": "Proposal {reference} archived.",
+      "columns": {
+        "reference": "Reference",
+        "opportunity": "Opportunity",
+        "state": "Status",
+        "value": "Value",
+        "sentAt": "Sent",
+        "validUntil": "Valid until",
+        "createdAt": "Created"
+      },
+      "actions": {
+        "view": "View detail",
+        "archive": "Archive"
+      },
+      "empty": {
+        "title": "No proposals yet",
+        "description": "Create the first proposal from an open opportunity."
+      },
+      "errors": {
+        "loadTitle": "Couldn't load proposals",
+        "loadDescription": "An error occurred while fetching proposals. Please try again.",
+        "retry": "Try again"
+      }
+    },
+    "create": {
+      "title": "New proposal",
+      "subtitle": "Record a proposal linked to an opportunity. The PDF is attached next.",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Create proposal",
+      "fields": {
+        "opportunity": "Opportunity",
+        "opportunityPlaceholder": "Select the opportunity",
+        "noOpportunities": "No open opportunities",
+        "contact": "Contact",
+        "contactPlaceholder": "Select the contact (optional)",
+        "noContacts": "No contacts",
+        "value": "Value",
+        "valueHint": "Proposal value, in euros.",
+        "valuePlaceholder": "e.g. 25000",
+        "validUntil": "Valid until",
+        "validUntilHint": "Required in order to send.",
+        "notes": "Notes",
+        "notesPlaceholder": "Internal notes about the proposal"
+      }
+    },
+    "validation": {
+      "opportunityRequired": "Select the linked opportunity.",
+      "valueInvalid": "Enter a valid value.",
+      "rejectNoteRequired": "Provide the rejection reason.",
+      "validityRequired": "Set the new validity date."
+    },
+    "pdf": {
+      "dropTitle": "Attach PDF",
+      "dropHint": "PDF only, up to 10 MB.",
+      "uploading": "Uploading…",
+      "replace": "Replace",
+      "remove": "Remove file",
+      "download": "Download",
+      "none": "No file attached.",
+      "uploadedOn": "attached on {date}",
+      "errorType": "The file must be a PDF.",
+      "errorSize": "The file exceeds the maximum size ({max}).",
+      "errorEmpty": "The file is empty."
+    },
+    "send": {
+      "title": "Send proposal",
+      "subtitle": "Confirm the requirements before sending proposal {reference}.",
+      "checks": {
+        "pdf": "PDF attached",
+        "value": "Value set",
+        "validUntil": "Validity set"
+      },
+      "sending": "Sending…",
+      "cancel": "Cancel",
+      "confirm": "Send proposal"
+    },
+    "reject": {
+      "title": "Mark as rejected",
+      "subtitle": "Record the rejection reason for proposal {reference}.",
+      "note": "Rejection reason",
+      "notePlaceholder": "Details about the client's decision",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Mark as rejected"
+    },
+    "resend": {
+      "title": "Resend proposal",
+      "subtitle": "Set a new validity date to resend proposal {reference}.",
+      "validUntil": "New validity",
+      "validUntilHint": "The proposal returns to «Sent» with this date.",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "confirm": "Resend"
+    },
+    "detail": {
+      "back": "Back to proposals",
+      "backToList": "Back to list",
+      "notFoundTitle": "Proposal not found",
+      "notFoundDescription": "The proposal you're looking for doesn't exist or is no longer available.",
+      "errorTitle": "Couldn't load the proposal",
+      "errorDescription": "An error occurred while fetching the proposal. Please try again.",
+      "retry": "Try again",
+      "viewOpportunity": "View opportunity",
+      "documentTitle": "Document",
+      "factsTitle": "Details",
+      "value": "Value",
+      "valueRestricted": "Value restricted",
+      "contact": "Contact",
+      "created": "Created",
+      "sentAt": "Sent",
+      "validUntil": "Valid until",
+      "viewedAt": "Viewed on",
+      "notes": "Notes",
+      "notesTitle": "Notes and comments",
+      "timelineTitle": "History",
+      "actions": {
+        "send": "Send",
+        "markViewed": "Mark as viewed",
+        "accept": "Mark as accepted",
+        "reject": "Mark as rejected",
+        "expire": "Mark as expired",
+        "resend": "Resend",
+        "archive": "Archive"
+      },
+      "banners": {
+        "accepted": "Proposal accepted on {date}. Final status — to renegotiate, create a new proposal.",
+        "rejected": "Proposal rejected on {date}.",
+        "rejectedWithNote": "Proposal rejected on {date}: {note}",
+        "expired": "Proposal expired (valid until {date}). Resend with a new date to reactivate.",
+        "pastValidity": "This proposal's validity ended on {date}.",
+        "needsPdf": "Attach the PDF to be able to send this proposal."
+      },
+      "toast": {
+        "uploaded": "PDF attached.",
+        "removed": "PDF removed.",
+        "sent": "Proposal sent.",
+        "viewed": "Proposal marked as viewed.",
+        "accepted": "Proposal accepted.",
+        "rejected": "Proposal rejected.",
+        "expired": "Proposal marked as expired.",
+        "resent": "Proposal resent.",
+        "archived": "Proposal {reference} archived."
+      },
+      "acceptConfirm": {
+        "title": "Mark as accepted?",
+        "description": "Proposal {reference} becomes final and cannot be changed."
+      },
+      "expireConfirm": {
+        "title": "Mark as expired?",
+        "description": "Proposal {reference} is no longer active. You can resend it with a new validity."
+      },
+      "archiveConfirm": {
+        "title": "Archive proposal?",
+        "description": "Proposal {reference} will no longer appear in the active list. You can undo this."
+      }
+    },
+    "errors": {
+      "not_found": "Proposal not found.",
+      "forbidden": "No access to this proposal.",
+      "send_requirements_missing": "Attach the PDF and set the value and validity before sending.",
+      "draft_not_decidable": "The proposal must be sent before it can be viewed or decided.",
+      "accepted_locked": "An accepted proposal cannot be changed. Create a new proposal.",
+      "accepted_not_archivable": "An accepted proposal is linked to a project and cannot be archived.",
+      "rejected_not_acceptable": "A rejected proposal cannot be accepted directly. Resend a new version.",
+      "reject_note_required": "Provide the rejection reason.",
+      "opportunity_lost": "The linked opportunity was marked lost; the proposal cannot be accepted.",
+      "not_expired": "Only expired proposals can be resent.",
+      "resend_validity_required": "Set a new validity date to resend.",
+      "invalid_transition": "This transition isn't allowed for the proposal's current status."
+    },
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "description": "This page couldn't be displayed. Please try again.",
+      "retry": "Try again",
+      "backToList": "Back to list"
+    }
   }
 }

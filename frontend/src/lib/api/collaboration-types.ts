@@ -14,6 +14,7 @@
 export type CollaborationEntityType =
   | "company"
   | "opportunity"
+  | "proposal"
   | "project"
   | "task";
 
