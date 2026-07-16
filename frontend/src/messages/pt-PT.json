@@ -2751,5 +2751,246 @@
       "loadDescription": "Ocorreu um erro ao obter a carga de trabalho da equipa. Tente novamente.",
       "retry": "Tentar novamente"
     }
+  },
+  "reports": {
+    "metaTitle": "Relatórios",
+    "title": "Relatórios",
+    "subtitle": "Indicadores comerciais, de projetos, de equipa e financeiros — derivados dos dados atuais.",
+    "refresh": "Atualizar",
+    "tabsAriaLabel": "Grupos de relatórios",
+    "groups": {
+      "comercial": "Comercial",
+      "projetos": "Projetos",
+      "equipa": "Equipa",
+      "financeiro": "Financeiro"
+    },
+    "export": {
+      "label": "Exportar CSV",
+      "ariaLabel": "Exportar «{report}» em CSV"
+    },
+    "empty": {
+      "title": "Sem dados",
+      "description": "Não há registos que correspondam aos filtros aplicados.",
+      "noGroupsTitle": "Sem relatórios disponíveis",
+      "noGroupsDescription": "O seu perfil não tem acesso a nenhum grupo de relatórios."
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar os relatórios",
+      "loadDescription": "Ocorreu um erro ao obter os dados. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "filters": {
+      "ariaLabel": "Filtros dos relatórios",
+      "from": "De",
+      "to": "Até",
+      "client": "Cliente",
+      "project": "Projeto",
+      "member": "Membro",
+      "state": "Estado",
+      "allClients": "Todos os clientes",
+      "allProjects": "Todos os projetos",
+      "allMembers": "Todos os membros",
+      "allStates": "Todos os estados",
+      "clear": "Limpar filtros"
+    },
+    "comercial": {
+      "byStage": {
+        "title": "Oportunidades por etapa",
+        "description": "Oportunidades em aberto por etapa do pipeline.",
+        "colStage": "Etapa",
+        "colCount": "Oportunidades"
+      },
+      "valueByStage": {
+        "title": "Valor por etapa",
+        "description": "Valor total das oportunidades em aberto por etapa.",
+        "colValue": "Valor"
+      },
+      "conversion": {
+        "title": "Taxa de conversão",
+        "description": "Ganhas face ao total de oportunidades fechadas.",
+        "metric": "Métrica",
+        "value": "Valor",
+        "open": "Em aberto",
+        "won": "Ganhas",
+        "lost": "Perdidas",
+        "rate": "Taxa de conversão"
+      },
+      "wonLost": {
+        "title": "Valor ganho / perdido",
+        "description": "Contagem e valor das oportunidades fechadas.",
+        "metric": "Métrica",
+        "value": "Valor",
+        "wonCount": "Ganhas",
+        "lostCount": "Perdidas",
+        "wonValue": "Valor ganho",
+        "lostValue": "Valor perdido"
+      },
+      "avgClose": {
+        "label": "Tempo médio até fecho",
+        "days": "{days} dias"
+      },
+      "owner": {
+        "title": "Desempenho por responsável",
+        "description": "Oportunidades por responsável comercial.",
+        "name": "Responsável",
+        "open": "Em aberto",
+        "won": "Ganhas",
+        "lost": "Perdidas",
+        "wonValue": "Valor ganho"
+      },
+      "reasons": {
+        "title": "Motivos de perda",
+        "description": "Distribuição das oportunidades perdidas por motivo.",
+        "colReason": "Motivo",
+        "colCount": "Oportunidades"
+      },
+      "sources": {
+        "title": "Origem dos clientes",
+        "description": "Distribuição das empresas por origem da relação.",
+        "colSource": "Origem",
+        "colCount": "Empresas"
+      }
+    },
+    "projetos": {
+      "byState": {
+        "title": "Projetos por estado",
+        "description": "Distribuição dos projetos pelo estado do ciclo de vida.",
+        "colState": "Estado",
+        "colCount": "Projetos",
+        "center": "Projetos"
+      },
+      "byHealth": {
+        "title": "Projetos por saúde",
+        "description": "Distribuição dos projetos pelo indicador de saúde (RAG).",
+        "colHealth": "Saúde",
+        "colCount": "Projetos",
+        "center": "Projetos"
+      },
+      "progress": {
+        "title": "Progresso médio",
+        "description": "Progresso médio dos projetos em curso.",
+        "metric": "Métrica",
+        "value": "Valor",
+        "average": "Progresso médio",
+        "total": "Total de projetos",
+        "atRisk": "Em risco"
+      },
+      "atRisk": {
+        "title": "Projetos em risco",
+        "description": "Projetos com saúde «Em risco».",
+        "empty": "Nenhum projeto em risco.",
+        "name": "Projeto",
+        "client": "Cliente",
+        "manager": "Gestor",
+        "progress": "Progresso",
+        "due": "Entrega"
+      },
+      "taskFlags": {
+        "title": "Tarefas atrasadas / bloqueadas",
+        "description": "Tarefas atrasadas e bloqueadas por projeto.",
+        "empty": "Sem tarefas atrasadas ou bloqueadas.",
+        "project": "Projeto",
+        "overdue": "Atrasadas",
+        "blocked": "Bloqueadas"
+      },
+      "hours": {
+        "title": "Horas estimadas vs. realizadas",
+        "description": "Orçamento de horas face às horas realizadas por projeto.",
+        "project": "Projeto",
+        "budget": "Estimadas",
+        "used": "Realizadas"
+      },
+      "profit": {
+        "title": "Rentabilidade estimada",
+        "description": "Margem estimada por projeto (contratado menos custos).",
+        "project": "Projeto",
+        "contracted": "Contratado",
+        "costs": "Custos",
+        "margin": "Margem",
+        "ratio": "Margem %"
+      }
+    },
+    "equipa": {
+      "load": {
+        "title": "Carga de trabalho",
+        "description": "Utilização de cada membro face à capacidade líquida.",
+        "member": "Membro",
+        "allocated": "Alocadas",
+        "capacity": "Capacidade",
+        "utilization": "Utilização"
+      },
+      "tasks": {
+        "title": "Tarefas concluídas / atrasadas",
+        "description": "Tarefas por membro, por estado.",
+        "member": "Membro",
+        "done": "Concluídas",
+        "open": "Em aberto",
+        "overdue": "Atrasadas"
+      },
+      "logged": {
+        "title": "Horas registadas",
+        "description": "Horas registadas por membro nesta semana.",
+        "member": "Membro",
+        "hours": "Horas"
+      },
+      "billable": {
+        "title": "Horas faturáveis",
+        "description": "Horas faturáveis por membro e respetiva percentagem.",
+        "member": "Membro",
+        "hours": "Faturáveis",
+        "ratio": "% Faturável"
+      },
+      "byProject": {
+        "title": "Distribuição por projeto",
+        "description": "Horas registadas distribuídas por projeto.",
+        "project": "Projeto",
+        "hours": "Horas",
+        "billable": "Faturáveis"
+      }
+    },
+    "financeiro": {
+      "gated": {
+        "title": "Acesso restrito",
+        "description": "Os relatórios financeiros estão disponíveis apenas para perfis autorizados."
+      },
+      "revenue": {
+        "title": "Receita contratada / recebida",
+        "description": "Valor contratado, recebido e por receber.",
+        "metric": "Métrica",
+        "value": "Valor",
+        "contracted": "Contratado",
+        "received": "Recebido",
+        "pending": "Por receber",
+        "overdue": "Em atraso"
+      },
+      "monthly": {
+        "title": "Evolução mensal",
+        "description": "Contratado e recebido por mês.",
+        "month": "Mês",
+        "contracted": "Contratado",
+        "received": "Recebido"
+      },
+      "payments": {
+        "title": "Pagamentos pendentes / vencidos",
+        "description": "Marcos de pagamento por liquidar.",
+        "empty": "Sem pagamentos pendentes.",
+        "project": "Projeto",
+        "client": "Cliente",
+        "amount": "Valor",
+        "outstanding": "Em dívida",
+        "expected": "Data prevista",
+        "status": "Estado"
+      },
+      "margin": {
+        "title": "Margem estimada por projeto",
+        "description": "Contratado, recebido, custos e margem por projeto.",
+        "project": "Projeto",
+        "contracted": "Contratado",
+        "received": "Recebido",
+        "costs": "Custos",
+        "margin": "Margem",
+        "ratio": "Margem %"
+      }
+    }
   }
 }

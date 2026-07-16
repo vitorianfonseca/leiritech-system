@@ -2751,5 +2751,246 @@
       "loadDescription": "An error occurred while fetching team workload. Please try again.",
       "retry": "Try again"
     }
+  },
+  "reports": {
+    "metaTitle": "Reports",
+    "title": "Reports",
+    "subtitle": "Commercial, project, team and financial indicators — derived from current data.",
+    "refresh": "Refresh",
+    "tabsAriaLabel": "Report groups",
+    "groups": {
+      "comercial": "Commercial",
+      "projetos": "Projects",
+      "equipa": "Team",
+      "financeiro": "Financial"
+    },
+    "export": {
+      "label": "Export CSV",
+      "ariaLabel": "Export “{report}” as CSV"
+    },
+    "empty": {
+      "title": "No data",
+      "description": "No records match the applied filters.",
+      "noGroupsTitle": "No reports available",
+      "noGroupsDescription": "Your profile has access to no report groups."
+    },
+    "errors": {
+      "loadTitle": "Couldn’t load the reports",
+      "loadDescription": "Something went wrong fetching the data. Try again.",
+      "retry": "Try again"
+    },
+    "filters": {
+      "ariaLabel": "Report filters",
+      "from": "From",
+      "to": "To",
+      "client": "Client",
+      "project": "Project",
+      "member": "Member",
+      "state": "State",
+      "allClients": "All clients",
+      "allProjects": "All projects",
+      "allMembers": "All members",
+      "allStates": "All states",
+      "clear": "Clear filters"
+    },
+    "comercial": {
+      "byStage": {
+        "title": "Opportunities by stage",
+        "description": "Open opportunities by pipeline stage.",
+        "colStage": "Stage",
+        "colCount": "Opportunities"
+      },
+      "valueByStage": {
+        "title": "Value by stage",
+        "description": "Total value of open opportunities by stage.",
+        "colValue": "Value"
+      },
+      "conversion": {
+        "title": "Conversion rate",
+        "description": "Won against all closed opportunities.",
+        "metric": "Metric",
+        "value": "Value",
+        "open": "Open",
+        "won": "Won",
+        "lost": "Lost",
+        "rate": "Conversion rate"
+      },
+      "wonLost": {
+        "title": "Won / lost value",
+        "description": "Count and value of closed opportunities.",
+        "metric": "Metric",
+        "value": "Value",
+        "wonCount": "Won",
+        "lostCount": "Lost",
+        "wonValue": "Won value",
+        "lostValue": "Lost value"
+      },
+      "avgClose": {
+        "label": "Average time to close",
+        "days": "{days} days"
+      },
+      "owner": {
+        "title": "Performance by owner",
+        "description": "Opportunities by sales owner.",
+        "name": "Owner",
+        "open": "Open",
+        "won": "Won",
+        "lost": "Lost",
+        "wonValue": "Won value"
+      },
+      "reasons": {
+        "title": "Loss reasons",
+        "description": "Lost opportunities broken down by reason.",
+        "colReason": "Reason",
+        "colCount": "Opportunities"
+      },
+      "sources": {
+        "title": "Client sources",
+        "description": "Companies broken down by relationship source.",
+        "colSource": "Source",
+        "colCount": "Companies"
+      }
+    },
+    "projetos": {
+      "byState": {
+        "title": "Projects by state",
+        "description": "Projects broken down by lifecycle state.",
+        "colState": "State",
+        "colCount": "Projects",
+        "center": "Projects"
+      },
+      "byHealth": {
+        "title": "Projects by health",
+        "description": "Projects broken down by health (RAG) indicator.",
+        "colHealth": "Health",
+        "colCount": "Projects",
+        "center": "Projects"
+      },
+      "progress": {
+        "title": "Average progress",
+        "description": "Average progress across active projects.",
+        "metric": "Metric",
+        "value": "Value",
+        "average": "Average progress",
+        "total": "Total projects",
+        "atRisk": "At risk"
+      },
+      "atRisk": {
+        "title": "Projects at risk",
+        "description": "Projects with an “at risk” health.",
+        "empty": "No projects at risk.",
+        "name": "Project",
+        "client": "Client",
+        "manager": "Manager",
+        "progress": "Progress",
+        "due": "Due"
+      },
+      "taskFlags": {
+        "title": "Overdue / blocked tasks",
+        "description": "Overdue and blocked tasks by project.",
+        "empty": "No overdue or blocked tasks.",
+        "project": "Project",
+        "overdue": "Overdue",
+        "blocked": "Blocked"
+      },
+      "hours": {
+        "title": "Estimated vs. actual hours",
+        "description": "Budgeted hours against actual hours by project.",
+        "project": "Project",
+        "budget": "Estimated",
+        "used": "Actual"
+      },
+      "profit": {
+        "title": "Estimated profitability",
+        "description": "Estimated margin by project (contracted minus costs).",
+        "project": "Project",
+        "contracted": "Contracted",
+        "costs": "Costs",
+        "margin": "Margin",
+        "ratio": "Margin %"
+      }
+    },
+    "equipa": {
+      "load": {
+        "title": "Workload",
+        "description": "Each member’s utilization against net capacity.",
+        "member": "Member",
+        "allocated": "Allocated",
+        "capacity": "Capacity",
+        "utilization": "Utilization"
+      },
+      "tasks": {
+        "title": "Completed / overdue tasks",
+        "description": "Tasks per member, by state.",
+        "member": "Member",
+        "done": "Done",
+        "open": "Open",
+        "overdue": "Overdue"
+      },
+      "logged": {
+        "title": "Logged hours",
+        "description": "Hours logged per member this week.",
+        "member": "Member",
+        "hours": "Hours"
+      },
+      "billable": {
+        "title": "Billable hours",
+        "description": "Billable hours per member and their share.",
+        "member": "Member",
+        "hours": "Billable",
+        "ratio": "Billable %"
+      },
+      "byProject": {
+        "title": "Distribution by project",
+        "description": "Logged hours distributed across projects.",
+        "project": "Project",
+        "hours": "Hours",
+        "billable": "Billable"
+      }
+    },
+    "financeiro": {
+      "gated": {
+        "title": "Restricted access",
+        "description": "Financial reports are available only to authorized profiles."
+      },
+      "revenue": {
+        "title": "Contracted / received revenue",
+        "description": "Contracted, received and outstanding value.",
+        "metric": "Metric",
+        "value": "Value",
+        "contracted": "Contracted",
+        "received": "Received",
+        "pending": "Outstanding",
+        "overdue": "Overdue"
+      },
+      "monthly": {
+        "title": "Monthly evolution",
+        "description": "Contracted and received per month.",
+        "month": "Month",
+        "contracted": "Contracted",
+        "received": "Received"
+      },
+      "payments": {
+        "title": "Pending / overdue payments",
+        "description": "Payment milestones still to be settled.",
+        "empty": "No pending payments.",
+        "project": "Project",
+        "client": "Client",
+        "amount": "Amount",
+        "outstanding": "Outstanding",
+        "expected": "Expected date",
+        "status": "Status"
+      },
+      "margin": {
+        "title": "Estimated margin by project",
+        "description": "Contracted, received, costs and margin by project.",
+        "project": "Project",
+        "contracted": "Contracted",
+        "received": "Received",
+        "costs": "Costs",
+        "margin": "Margin",
+        "ratio": "Margin %"
+      }
+    }
   }
 }
