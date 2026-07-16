@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
 from app.core.config import settings
+from app.core.errors import ApiError
 
 structlog.configure(
     processors=[
@@ -49,10 +50,18 @@ def _error_envelope(code: str, message: str, details: Any = None) -> dict[str, A
 async def http_exception_handler(
     request: Request, exc: StarletteHTTPException
 ) -> JSONResponse:
-    code = exc.detail if isinstance(exc.detail, str) else "HTTP_ERROR"
+    # ApiError carries a stable machine code + user-facing message + details.
+    if isinstance(exc, ApiError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=_error_envelope(
+                code=exc.code, message=exc.message, details=exc.details
+            ),
+        )
+    message = exc.detail if isinstance(exc.detail, str) else "Ocorreu um erro."
     return JSONResponse(
         status_code=exc.status_code,
-        content=_error_envelope(code=f"HTTP_{exc.status_code}", message=str(code)),
+        content=_error_envelope(code=f"HTTP_{exc.status_code}", message=str(message)),
     )
 
 

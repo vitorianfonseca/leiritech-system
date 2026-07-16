@@ -5,6 +5,8 @@ Foundation-level utilities; auth endpoints are implemented in a later issue.
 
 from __future__ import annotations
 
+import hashlib
+import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -15,6 +17,25 @@ from argon2.exceptions import VerifyMismatchError
 from app.core.config import settings
 
 _hasher = PasswordHasher()
+
+
+def generate_url_token(nbytes: int = 32) -> str:
+    """Return a cryptographically strong, URL-safe opaque token.
+
+    Used for invitation and password-reset links. The raw value is sent to the
+    user; only its :func:`hash_token` digest is persisted.
+    """
+    return secrets.token_urlsafe(nbytes)
+
+
+def hash_token(token: str) -> str:
+    """Deterministic SHA-256 hex digest for high-entropy tokens.
+
+    Refresh, invitation and reset tokens are already high-entropy secrets, so a
+    fast one-way digest (not Argon2) is the correct trade-off: it allows an
+    indexed lookup by hash while never storing the raw token at rest.
+    """
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def hash_password(password: str) -> str:
@@ -38,6 +59,31 @@ def create_access_token(subject: str, extra_claims: dict[str, Any] | None = None
 
 def create_refresh_token(subject: str, extra_claims: dict[str, Any] | None = None) -> str:
     return _encode(subject, settings.REFRESH_TOKEN_TTL, "refresh", extra_claims)
+
+
+def create_password_reset_token(subject: str, password_fingerprint: str) -> str:
+    """Stateless password-reset token.
+
+    Binds to a fingerprint of the user's CURRENT password hash so the token is
+    single-use: once the password changes, the fingerprint no longer matches and
+    the (and any other outstanding) reset link is dead — no server-side store
+    needed.
+    """
+    return _encode(
+        subject,
+        settings.PASSWORD_RESET_TTL,
+        "reset",
+        {"pwf": password_fingerprint},
+    )
+
+
+def decode_password_reset_token(token: str) -> dict[str, Any]:
+    return decode_token(token, expected_type="reset")
+
+
+def password_fingerprint(password_hash: str) -> str:
+    """Short, non-reversible fingerprint of a password hash for reset binding."""
+    return hashlib.sha256(password_hash.encode("utf-8")).hexdigest()[:16]
 
 
 class TokenTypeError(Exception):
