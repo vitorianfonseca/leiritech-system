@@ -208,7 +208,12 @@ export function NotificationsView({ user }: NotificationsViewProps) {
                 aria-hidden
               />
             </Button>
-            <Button variant="outline" size="lg" render={<Link href="/profile" />}>
+            <Button
+              variant="outline"
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/profile" />}
+            >
               <SlidersHorizontal aria-hidden />
               <span className="hidden sm:inline">{t("preferences")}</span>
             </Button>
