@@ -3606,5 +3606,25 @@
       "loadDescription": "An error occurred loading this information. Please try again.",
       "retry": "Try again"
     }
+  },
+  "preferences": {
+    "textSize": {
+      "title": "Text size",
+      "description": "Adjust the text and interface scale across the whole app.",
+      "options": {
+        "compact": {
+          "title": "Compact",
+          "description": "More content on screen."
+        },
+        "normal": {
+          "title": "Normal",
+          "description": "Recommended balance."
+        },
+        "large": {
+          "title": "Large",
+          "description": "Larger and easier to read."
+        }
+      }
+    }
   }
 }

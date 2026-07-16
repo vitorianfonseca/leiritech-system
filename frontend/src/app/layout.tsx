@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { AppProviders } from "@/components/providers/app-providers";
+import { TEXT_SIZE_COOKIE, parseTextSize } from "@/lib/text-size";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,16 +41,18 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const textSize = parseTextSize((await cookies()).get(TEXT_SIZE_COOKIE)?.value);
 
   return (
     <html
       lang={locale}
+      data-text-size={textSize}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders textSize={textSize}>{children}</AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>

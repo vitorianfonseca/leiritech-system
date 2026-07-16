@@ -75,3 +75,4 @@ export type { MentionInputProps } from "./mention-input";
 // Pre-existing shared utilities (foundation)
 export { LocaleSwitcher } from "./locale-switcher";
 export { ThemeToggle } from "./theme-toggle";
+export { TextSizeSwitcher } from "./text-size-switcher";
