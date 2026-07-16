@@ -40,8 +40,36 @@ def create_refresh_token(subject: str, extra_claims: dict[str, Any] | None = Non
     return _encode(subject, settings.REFRESH_TOKEN_TTL, "refresh", extra_claims)
 
 
-def decode_token(token: str) -> dict[str, Any]:
-    return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGO])
+class TokenTypeError(Exception):
+    """Raised when a token's ``type`` claim does not match what was expected."""
+
+
+def decode_token(token: str, expected_type: str | None = None) -> dict[str, Any]:
+    """Decode and validate a JWT.
+
+    Verifies signature and expiry (via PyJWT) and, when ``expected_type`` is
+    given, that the token's ``type`` claim matches — so a refresh token can
+    never be accepted where an access token is required, and vice versa.
+    """
+    payload: dict[str, Any] = jwt.decode(
+        token,
+        settings.JWT_SECRET,
+        algorithms=[settings.JWT_ALGO],
+        options={"require": ["exp", "sub", "type"]},
+    )
+    if expected_type is not None and payload.get("type") != expected_type:
+        raise TokenTypeError(
+            f"expected a '{expected_type}' token, got '{payload.get('type')}'"
+        )
+    return payload
+
+
+def decode_access_token(token: str) -> dict[str, Any]:
+    return decode_token(token, expected_type="access")
+
+
+def decode_refresh_token(token: str) -> dict[str, Any]:
+    return decode_token(token, expected_type="refresh")
 
 
 def _encode(

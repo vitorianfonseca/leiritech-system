@@ -8,8 +8,13 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Insecure development placeholders that must NEVER be used in production.
+_INSECURE_JWT_SECRETS = {"", "change-me-in-production", "secret", "changeme"}
+_DEV_DATABASE_URL = "postgresql+psycopg://aurea:aurea@localhost:5433/aurea"
+_MIN_JWT_SECRET_LEN = 32
 
 
 class Settings(BaseSettings):
@@ -32,6 +37,8 @@ class Settings(BaseSettings):
     DB_ECHO: bool = False
 
     # --- JWT / Auth ---
+    # Dev placeholder only. In production the app FAILS TO START unless this is
+    # overridden with a strong secret (see _enforce_production_secrets below).
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGO: str = "HS256"
     ACCESS_TOKEN_TTL: int = 900  # seconds (15 min)
@@ -65,6 +72,32 @@ class Settings(BaseSettings):
         if value.startswith("postgresql://"):
             return value.replace("postgresql://", "postgresql+psycopg://", 1)
         return value
+
+    @model_validator(mode="after")
+    def _enforce_production_secrets(self) -> Settings:
+        """Fail fast in production if secrets are missing/weak or dev defaults leak.
+
+        This prevents the app from ever running with the known placeholder JWT
+        secret or the local dev database credentials in a real deployment.
+        """
+        if self.ENVIRONMENT.lower() in {"production", "prod", "staging"}:
+            errors: list[str] = []
+            if self.JWT_SECRET in _INSECURE_JWT_SECRETS:
+                errors.append("JWT_SECRET is unset or a known insecure placeholder")
+            elif len(self.JWT_SECRET) < _MIN_JWT_SECRET_LEN:
+                errors.append(
+                    f"JWT_SECRET must be at least {_MIN_JWT_SECRET_LEN} characters"
+                )
+            if self.DATABASE_URL == _DEV_DATABASE_URL:
+                errors.append("DATABASE_URL is still the local dev default")
+            if self.DEBUG:
+                errors.append("DEBUG must be false in production")
+            if errors:
+                raise ValueError(
+                    "Insecure configuration for a production environment: "
+                    + "; ".join(errors)
+                )
+        return self
 
     @property
     def cors_origins(self) -> list[str]:

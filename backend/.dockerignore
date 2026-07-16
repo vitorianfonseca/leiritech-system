@@ -1,0 +1,25 @@
+# Secrets & local env — must NEVER be baked into the image
+.env
+.env.*
+!.env.example
+
+# VCS / CI
+.git
+.gitignore
+.github
+
+# Python caches / virtualenvs
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Local dev / tooling
+docker-compose.yml
+*.md
+tests/
+.DS_Store
