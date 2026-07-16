@@ -472,5 +472,60 @@
       "retry": "Try again",
       "actionFailed": "That action failed. Try again."
     }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "One view of everything with a deadline — tasks, meetings, milestones, deliveries and commercial actions.",
+    "allDay": "All day",
+    "refresh": "Refresh",
+    "moreEvents": "+{count} more",
+    "noEventsDay": "No events",
+    "nav": {
+      "previous": "Previous period",
+      "next": "Next period",
+      "today": "Today"
+    },
+    "viewSwitcher": {
+      "label": "View mode",
+      "month": "Month",
+      "week": "Week",
+      "agenda": "Agenda"
+    },
+    "types": {
+      "task": "Task",
+      "meeting": "Meeting",
+      "milestone": "Milestone",
+      "delivery": "Delivery",
+      "nextAction": "Commercial action",
+      "proposalExpiry": "Proposal expiry",
+      "payment": "Payment milestone"
+    },
+    "urgency": {
+      "overdue": "Overdue",
+      "due": "Due today",
+      "upcoming": "Upcoming",
+      "done": "Done"
+    },
+    "legend": {
+      "label": "Event type legend"
+    },
+    "detail": {
+      "type": "Type",
+      "when": "When",
+      "project": "Project",
+      "location": "Location",
+      "amount": "Amount",
+      "openRecord": "Open record",
+      "readOnlyNote": "Read-only view. To edit, open the source record."
+    },
+    "empty": {
+      "title": "No events in this period",
+      "description": "Nothing with a deadline here. Try another period or view."
+    },
+    "error": {
+      "title": "Couldn't load the calendar",
+      "description": "Something went wrong fetching events. Try again.",
+      "retry": "Try again"
+    }
   }
 }

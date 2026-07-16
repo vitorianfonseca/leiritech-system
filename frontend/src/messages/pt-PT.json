@@ -472,5 +472,60 @@
       "retry": "Tentar novamente",
       "actionFailed": "A ação falhou. Tenta novamente."
     }
+  },
+  "calendar": {
+    "title": "Calendário",
+    "subtitle": "Uma vista única de tudo com prazo — tarefas, reuniões, marcos, entregas e ações comerciais.",
+    "allDay": "Todo o dia",
+    "refresh": "Atualizar",
+    "moreEvents": "+{count} mais",
+    "noEventsDay": "Sem eventos",
+    "nav": {
+      "previous": "Período anterior",
+      "next": "Período seguinte",
+      "today": "Hoje"
+    },
+    "viewSwitcher": {
+      "label": "Modo de vista",
+      "month": "Mês",
+      "week": "Semana",
+      "agenda": "Agenda"
+    },
+    "types": {
+      "task": "Tarefa",
+      "meeting": "Reunião",
+      "milestone": "Marco",
+      "delivery": "Entrega",
+      "nextAction": "Ação comercial",
+      "proposalExpiry": "Validade de proposta",
+      "payment": "Marco de pagamento"
+    },
+    "urgency": {
+      "overdue": "Em atraso",
+      "due": "Para hoje",
+      "upcoming": "A caminho",
+      "done": "Concluído"
+    },
+    "legend": {
+      "label": "Legenda de tipos de evento"
+    },
+    "detail": {
+      "type": "Tipo",
+      "when": "Quando",
+      "project": "Projeto",
+      "location": "Local",
+      "amount": "Valor",
+      "openRecord": "Abrir registo",
+      "readOnlyNote": "Vista só de leitura. Para editar, abre o registo de origem."
+    },
+    "empty": {
+      "title": "Sem eventos neste período",
+      "description": "Nada com prazo por aqui. Muda de período ou de vista."
+    },
+    "error": {
+      "title": "Não foi possível carregar o calendário",
+      "description": "Ocorreu um erro ao obter os eventos. Tenta novamente.",
+      "retry": "Tentar novamente"
+    }
   }
 }
