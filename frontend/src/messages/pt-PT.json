@@ -21,7 +21,8 @@
     "team": "Equipa",
     "finance": "Financeiro",
     "reports": "Relatórios",
-    "settings": "Definições"
+    "settings": "Definições",
+    "time": "Cronómetro"
   },
   "shell": {
     "search": {
@@ -2355,6 +2356,166 @@
       "dependencyCycle": "Esta dependência criaria um ciclo.",
       "notBlocked": "A tarefa não está bloqueada.",
       "checklistTextRequired": "Escreva o item da lista."
+    }
+  },
+  "time": {
+    "title": "Tempo",
+    "subtitle": "Regista o teu tempo com o cronómetro ou entradas manuais e analisa as horas por projeto, fase e faturação.",
+    "addEntry": "Adicionar entrada",
+    "addEntryShort": "Adicionar",
+    "panelLabel": "Vista de tempo",
+    "scopeLabel": "Âmbito das entradas",
+    "panels": {
+      "entries": "Entradas",
+      "rollups": "Resumos"
+    },
+    "scopes": {
+      "own": "As minhas",
+      "team": "Equipa"
+    },
+    "toasts": {
+      "created": "Entrada de tempo registada.",
+      "updated": "Entrada atualizada.",
+      "deleted": "Entrada eliminada."
+    },
+    "delete": {
+      "title": "Eliminar entrada de tempo?",
+      "description": "Esta entrada será removida dos resumos. Pode anular a ação durante alguns segundos.",
+      "confirm": "Eliminar"
+    },
+    "summary": {
+      "total": {
+        "label": "Total"
+      },
+      "billable": {
+        "label": "Faturável",
+        "share": "{pct}% do total"
+      },
+      "nonBillable": {
+        "label": "Não faturável"
+      },
+      "entries": {
+        "label": "Entradas"
+      }
+    },
+    "activeTimer": {
+      "regionLabel": "Cronómetro ativo",
+      "title": "Cronómetro",
+      "taskLabel": "Tarefa",
+      "taskPlaceholder": "Selecionar tarefa…",
+      "taskHint": "Só é possível cronometrar tarefas de projetos ativos.",
+      "start": "Iniciar",
+      "stop": "Parar",
+      "started": "Cronómetro iniciado em «{task}».",
+      "projectFrozen": "O projeto desta tarefa está pausado ou fechado — pare o cronómetro para registar o tempo.",
+      "logged": {
+        "title": "Tempo registado",
+        "description": "{minutes, plural, one {# minuto} other {# minutos}} em «{task}»."
+      },
+      "switch": {
+        "title": "Já há um cronómetro a decorrer",
+        "description": "«{running}» está a ser cronometrado. Parar e iniciar «{next}»?",
+        "confirm": "Parar e iniciar"
+      }
+    },
+    "billable": {
+      "on": "Faturável",
+      "off": "Não faturável"
+    },
+    "entryForm": {
+      "createTitle": "Nova entrada de tempo",
+      "editTitle": "Editar entrada de tempo",
+      "description": "Atribui o tempo a uma tarefa e indica o intervalo trabalhado.",
+      "duration": "Duração: {hours} h",
+      "cancel": "Cancelar",
+      "submit": "Registar",
+      "save": "Guardar",
+      "processing": "A guardar…",
+      "fields": {
+        "task": "Tarefa",
+        "taskPlaceholder": "Selecionar tarefa…",
+        "start": "Início",
+        "end": "Fim",
+        "description": "Descrição",
+        "descriptionPlaceholder": "O que foi feito (opcional)",
+        "billable": "Faturação"
+      },
+      "errors": {
+        "taskRequired": "Selecione uma tarefa.",
+        "startRequired": "Indique a hora de início.",
+        "endRequired": "Indique a hora de fim.",
+        "endBeforeStart": "O fim tem de ser posterior ao início.",
+        "future": "A entrada não pode estar no futuro.",
+        "tooLong": "A entrada não pode exceder 24 horas.",
+        "projectInactive": "O projeto desta tarefa está pausado ou fechado."
+      }
+    },
+    "table": {
+      "searchPlaceholder": "Procurar por tarefa, projeto…",
+      "columns": {
+        "date": "Data",
+        "task": "Tarefa",
+        "user": "Autor",
+        "billable": "Faturação",
+        "source": "Origem",
+        "duration": "Horas"
+      },
+      "filters": {
+        "billable": "Faturável",
+        "nonBillable": "Não faturável"
+      },
+      "source": {
+        "timer": "Cronómetro",
+        "manual": "Manual"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "empty": {
+        "title": "Sem entradas de tempo",
+        "description": "Inicia o cronómetro ou adiciona uma entrada manual para começar a registar tempo."
+      }
+    },
+    "rollups": {
+      "dimensionLabel": "Agrupar por",
+      "noPhase": "Sem fase",
+      "noBudget": "—",
+      "overBudget": "Acima do orçamento",
+      "budgetValue": "{used} de {budget} h",
+      "budgetBarLabel": "Horas vs. orçamento — {name}",
+      "dimensions": {
+        "project": "Projeto",
+        "phase": "Fase",
+        "task": "Tarefa",
+        "user": "Pessoa"
+      },
+      "columns": {
+        "name": "Nome",
+        "billable": "Faturável",
+        "nonBillable": "Não faturável",
+        "total": "Total",
+        "budget": "Horas vs. orçamento"
+      },
+      "empty": {
+        "title": "Sem dados para resumir",
+        "description": "Regista tempo para veres os totais por projeto, fase, tarefa e pessoa."
+      }
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar o tempo",
+      "loadDescription": "Ocorreu um erro ao obter as entradas de tempo. Tente novamente.",
+      "retry": "Tentar novamente",
+      "logFailed": "Não foi possível registar o tempo",
+      "saveFailed": "Não foi possível guardar a entrada",
+      "validation": "Verifique os campos da entrada.",
+      "taskRequired": "Selecione uma tarefa.",
+      "startRequired": "Indique a hora de início.",
+      "endRequired": "Indique a hora de fim.",
+      "endBeforeStart": "O fim tem de ser posterior ao início.",
+      "future": "A entrada não pode estar no futuro.",
+      "tooLong": "A entrada não pode exceder 24 horas.",
+      "projectInactive": "O projeto desta tarefa está pausado ou fechado."
     }
   }
 }

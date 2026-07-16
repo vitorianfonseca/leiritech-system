@@ -21,7 +21,8 @@
     "team": "Team",
     "finance": "Finance",
     "reports": "Reports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "time": "Time tracking"
   },
   "shell": {
     "search": {
@@ -2355,6 +2356,166 @@
       "dependencyCycle": "This dependency would create a cycle.",
       "notBlocked": "The task is not blocked.",
       "checklistTextRequired": "Enter the checklist item."
+    }
+  },
+  "time": {
+    "title": "Time",
+    "subtitle": "Track your time with the timer or manual entries and analyse hours by project, phase and billing.",
+    "addEntry": "Add entry",
+    "addEntryShort": "Add",
+    "panelLabel": "Time view",
+    "scopeLabel": "Entries scope",
+    "panels": {
+      "entries": "Entries",
+      "rollups": "Rollups"
+    },
+    "scopes": {
+      "own": "Mine",
+      "team": "Team"
+    },
+    "toasts": {
+      "created": "Time entry logged.",
+      "updated": "Entry updated.",
+      "deleted": "Entry deleted."
+    },
+    "delete": {
+      "title": "Delete time entry?",
+      "description": "This entry will be removed from the rollups. You can undo for a few seconds.",
+      "confirm": "Delete"
+    },
+    "summary": {
+      "total": {
+        "label": "Total"
+      },
+      "billable": {
+        "label": "Billable",
+        "share": "{pct}% of total"
+      },
+      "nonBillable": {
+        "label": "Non-billable"
+      },
+      "entries": {
+        "label": "Entries"
+      }
+    },
+    "activeTimer": {
+      "regionLabel": "Active timer",
+      "title": "Timer",
+      "taskLabel": "Task",
+      "taskPlaceholder": "Select a task…",
+      "taskHint": "You can only time tasks on active projects.",
+      "start": "Start",
+      "stop": "Stop",
+      "started": "Timer started on “{task}”.",
+      "projectFrozen": "This task's project is paused or closed — stop the timer to log the time.",
+      "logged": {
+        "title": "Time logged",
+        "description": "{minutes, plural, one {# minute} other {# minutes}} on “{task}”."
+      },
+      "switch": {
+        "title": "A timer is already running",
+        "description": "“{running}” is being timed. Stop it and start “{next}”?",
+        "confirm": "Stop and start"
+      }
+    },
+    "billable": {
+      "on": "Billable",
+      "off": "Non-billable"
+    },
+    "entryForm": {
+      "createTitle": "New time entry",
+      "editTitle": "Edit time entry",
+      "description": "Attribute the time to a task and set the interval worked.",
+      "duration": "Duration: {hours} h",
+      "cancel": "Cancel",
+      "submit": "Log",
+      "save": "Save",
+      "processing": "Saving…",
+      "fields": {
+        "task": "Task",
+        "taskPlaceholder": "Select a task…",
+        "start": "Start",
+        "end": "End",
+        "description": "Description",
+        "descriptionPlaceholder": "What was done (optional)",
+        "billable": "Billing"
+      },
+      "errors": {
+        "taskRequired": "Select a task.",
+        "startRequired": "Enter a start time.",
+        "endRequired": "Enter an end time.",
+        "endBeforeStart": "End must be after start.",
+        "future": "The entry can't be in the future.",
+        "tooLong": "The entry can't exceed 24 hours.",
+        "projectInactive": "This task's project is paused or closed."
+      }
+    },
+    "table": {
+      "searchPlaceholder": "Search by task, project…",
+      "columns": {
+        "date": "Date",
+        "task": "Task",
+        "user": "Author",
+        "billable": "Billing",
+        "source": "Source",
+        "duration": "Hours"
+      },
+      "filters": {
+        "billable": "Billable",
+        "nonBillable": "Non-billable"
+      },
+      "source": {
+        "timer": "Timer",
+        "manual": "Manual"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "empty": {
+        "title": "No time entries",
+        "description": "Start the timer or add a manual entry to begin tracking time."
+      }
+    },
+    "rollups": {
+      "dimensionLabel": "Group by",
+      "noPhase": "No phase",
+      "noBudget": "—",
+      "overBudget": "Over budget",
+      "budgetValue": "{used} of {budget} h",
+      "budgetBarLabel": "Hours vs. budget — {name}",
+      "dimensions": {
+        "project": "Project",
+        "phase": "Phase",
+        "task": "Task",
+        "user": "Person"
+      },
+      "columns": {
+        "name": "Name",
+        "billable": "Billable",
+        "nonBillable": "Non-billable",
+        "total": "Total",
+        "budget": "Hours vs. budget"
+      },
+      "empty": {
+        "title": "Nothing to roll up",
+        "description": "Log time to see totals by project, phase, task and person."
+      }
+    },
+    "errors": {
+      "loadTitle": "Couldn't load time",
+      "loadDescription": "An error occurred loading time entries. Please try again.",
+      "retry": "Try again",
+      "logFailed": "Couldn't log the time",
+      "saveFailed": "Couldn't save the entry",
+      "validation": "Check the entry fields.",
+      "taskRequired": "Select a task.",
+      "startRequired": "Enter a start time.",
+      "endRequired": "Enter an end time.",
+      "endBeforeStart": "End must be after start.",
+      "future": "The entry can't be in the future.",
+      "tooLong": "The entry can't exceed 24 hours.",
+      "projectInactive": "This task's project is paused or closed."
     }
   }
 }

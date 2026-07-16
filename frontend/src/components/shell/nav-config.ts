@@ -9,6 +9,7 @@ import {
   FolderKanban,
   ListChecks,
   CalendarDays,
+  Timer,
   UsersRound,
   Wallet,
   ChartColumn,
@@ -60,6 +61,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { key: "projects", href: "/projects", icon: FolderKanban, roles: ALL },
       { key: "tasks", href: "/tasks", icon: ListChecks, roles: ALL },
+      { key: "time", href: "/time", icon: Timer, roles: ALL },
       { key: "calendar", href: "/calendar", icon: CalendarDays, roles: ALL },
     ],
   },
