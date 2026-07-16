@@ -207,6 +207,52 @@
       "backToLogin": "Back to sign in"
     }
   },
+  "shared": {
+    "table": {
+      "search": "Search…",
+      "columns": "Columns",
+      "columnsLabel": "Visible columns",
+      "clearFilters": "Clear filters",
+      "empty": "Nothing here yet.",
+      "emptyDescription": "When records exist, they will appear here.",
+      "noResults": "No results",
+      "noResultsDescription": "No records match the current search or filters.",
+      "rowActions": "Actions",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending",
+      "sortNone": "Remove sorting",
+      "previous": "Previous",
+      "next": "Next",
+      "pageStatus": "Page {page} of {total}",
+      "resultCount": "{count, plural, =0 {No records} one {# record} other {# records}}"
+    },
+    "combobox": {
+      "placeholder": "Select…",
+      "searchPlaceholder": "Search…",
+      "empty": "No results.",
+      "loading": "Loading…",
+      "clear": "Clear selection"
+    },
+    "confirm": {
+      "defaultTitle": "Confirm action",
+      "defaultDescription": "Are you sure you want to continue?",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "sidePanel": {
+      "close": "Close panel"
+    },
+    "toast": {
+      "undo": "Undo",
+      "dismiss": "Dismiss",
+      "undone": "Action undone",
+      "region": "Notifications"
+    },
+    "emptyState": {
+      "defaultTitle": "Nothing here yet."
+    }
+  },
   "foundation": {
     "dashboard": {
       "greeting": "Good morning, {name}.",

@@ -265,3 +265,13 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Indeterminate progress sweep (shared ProgressBar). Motion-safe only. */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
