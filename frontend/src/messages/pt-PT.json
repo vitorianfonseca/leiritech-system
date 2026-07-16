@@ -869,5 +869,139 @@
       "taskRemoved": "Tarefa “{name}” removida.",
       "reorderFailed": "Não foi possível guardar a nova ordem."
     }
+  },
+  "dashboard": {
+    "metaTitle": "Painel",
+    "greeting": {
+      "morning": "Bom dia, {name}.",
+      "afternoon": "Boa tarde, {name}.",
+      "evening": "Boa noite, {name}."
+    },
+    "subtitle": "Aqui está o estado da operação hoje.",
+    "subtitleScoped": "Aqui está o seu trabalho de hoje.",
+    "actions": {
+      "refresh": "Atualizar"
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar o painel",
+      "loadDescription": "Ocorreu um erro ao obter os dados. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "metrics": {
+      "openOpportunities": {
+        "label": "Oportunidades abertas",
+        "hint": "Em negociação no pipeline"
+      },
+      "pipelineValue": {
+        "label": "Valor do pipeline",
+        "hint": "Total ponderado em aberto"
+      },
+      "activeProjects": {
+        "label": "Projetos ativos",
+        "hint": "Em execução"
+      },
+      "projectsAtRisk": {
+        "label": "Projetos em risco",
+        "hint": "Requerem atenção imediata"
+      },
+      "overdueTasks": {
+        "label": "Tarefas atrasadas",
+        "hint": "Após o prazo, por concluir"
+      },
+      "deliveriesNext7Days": {
+        "label": "Entregas em 7 dias",
+        "hint": "Marcos previstos esta semana"
+      },
+      "pendingPayments": {
+        "label": "Pagamentos pendentes",
+        "hint": "Ainda por receber"
+      },
+      "overduePayments": {
+        "label": "Pagamentos vencidos",
+        "hint": "Recebimento em atraso"
+      },
+      "teamLoad": {
+        "label": "Carga da equipa",
+        "hint": "Alocação média da capacidade"
+      }
+    },
+    "attention": {
+      "title": "Atenção necessária",
+      "subtitle": "Itens que precisam de ação para nada escapar.",
+      "empty": {
+        "title": "Está tudo em dia",
+        "description": "Nada requer a sua atenção neste momento."
+      },
+      "groups": {
+        "overdueTasks": "Tarefas atrasadas",
+        "blockedTasks": "Tarefas bloqueadas",
+        "projectsAtRisk": "Projetos em risco",
+        "lowProgressNearDelivery": "Entregas próximas com baixo progresso",
+        "opportunitiesNoNextAction": "Oportunidades sem próxima ação",
+        "proposalsAwaiting": "Propostas a aguardar ou a expirar",
+        "overloadedMembers": "Membros sobrecarregados",
+        "overduePayments": "Pagamentos vencidos"
+      },
+      "meta": {
+        "overdueTask": "Em {project} · atrasada há {days, plural, one {# dia} other {# dias}}",
+        "blockedTask": "Bloqueada · {reason}",
+        "projectAtRisk": "Em risco · progresso {progress}%",
+        "lowProgressNearDelivery": "Entrega em {days, plural, one {# dia} other {# dias}} · progresso {progress}%",
+        "opportunityNoNextAction": "Sem próxima ação definida",
+        "opportunityStale": "Sem atividade há {days} dias",
+        "proposalExpiring": "Expira em {days, plural, one {# dia} other {# dias}}",
+        "overloadedMember": "Sobrecarga de {alloc}% esta semana",
+        "overduePayment": "Recebimento em atraso há {days, plural, one {# dia} other {# dias}} · {amount}"
+      }
+    },
+    "charts": {
+      "pipeline": {
+        "title": "Evolução do pipeline",
+        "subtitle": "Valor em aberto por mês (k€)"
+      },
+      "projectsByState": {
+        "title": "Projetos por estado",
+        "subtitle": "Distribuição por saúde",
+        "centerLabel": "Projetos"
+      },
+      "taskFlow": {
+        "title": "Tarefas concluídas vs. atrasadas",
+        "subtitle": "Fluxo semanal das últimas 6 semanas",
+        "series": {
+          "done": "Concluídas",
+          "overdue": "Atrasadas"
+        }
+      },
+      "contractedReceived": {
+        "title": "Contratado vs. recebido",
+        "subtitle": "Faturável e recebido por mês (k€)",
+        "series": {
+          "contracted": "Contratado",
+          "received": "Recebido"
+        }
+      },
+      "teamLoad": {
+        "title": "Distribuição de carga da equipa",
+        "subtitle": "Alocação por membro face à capacidade",
+        "tooltip": "{pct}% da capacidade"
+      }
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fev",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "Mai",
+      "jun": "Jun",
+      "jul": "Jul"
+    },
+    "weeks": {
+      "w1": "S1",
+      "w2": "S2",
+      "w3": "S3",
+      "w4": "S4",
+      "w5": "S5",
+      "w6": "S6"
+    }
   }
 }

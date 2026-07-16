@@ -869,5 +869,139 @@
       "taskRemoved": "Task “{name}” removed.",
       "reorderFailed": "Could not save the new order."
     }
+  },
+  "dashboard": {
+    "metaTitle": "Dashboard",
+    "greeting": {
+      "morning": "Good morning, {name}.",
+      "afternoon": "Good afternoon, {name}.",
+      "evening": "Good evening, {name}."
+    },
+    "subtitle": "Here's the state of the operation today.",
+    "subtitleScoped": "Here's your work for today.",
+    "actions": {
+      "refresh": "Refresh"
+    },
+    "errors": {
+      "loadTitle": "Could not load the dashboard",
+      "loadDescription": "Something went wrong fetching the data. Please try again.",
+      "retry": "Try again"
+    },
+    "metrics": {
+      "openOpportunities": {
+        "label": "Open opportunities",
+        "hint": "In negotiation in the pipeline"
+      },
+      "pipelineValue": {
+        "label": "Pipeline value",
+        "hint": "Total open weighted value"
+      },
+      "activeProjects": {
+        "label": "Active projects",
+        "hint": "In progress"
+      },
+      "projectsAtRisk": {
+        "label": "Projects at risk",
+        "hint": "Need immediate attention"
+      },
+      "overdueTasks": {
+        "label": "Overdue tasks",
+        "hint": "Past due, not done"
+      },
+      "deliveriesNext7Days": {
+        "label": "Deliveries in 7 days",
+        "hint": "Milestones due this week"
+      },
+      "pendingPayments": {
+        "label": "Pending payments",
+        "hint": "Still to be received"
+      },
+      "overduePayments": {
+        "label": "Overdue payments",
+        "hint": "Collection overdue"
+      },
+      "teamLoad": {
+        "label": "Team load",
+        "hint": "Average capacity allocation"
+      }
+    },
+    "attention": {
+      "title": "Needs attention",
+      "subtitle": "Items that need action so nothing slips.",
+      "empty": {
+        "title": "You're all caught up",
+        "description": "Nothing needs your attention right now."
+      },
+      "groups": {
+        "overdueTasks": "Overdue tasks",
+        "blockedTasks": "Blocked tasks",
+        "projectsAtRisk": "Projects at risk",
+        "lowProgressNearDelivery": "Near deliveries with low progress",
+        "opportunitiesNoNextAction": "Opportunities without a next action",
+        "proposalsAwaiting": "Proposals awaiting or expiring",
+        "overloadedMembers": "Overloaded members",
+        "overduePayments": "Overdue payments"
+      },
+      "meta": {
+        "overdueTask": "In {project} · overdue by {days, plural, one {# day} other {# days}}",
+        "blockedTask": "Blocked · {reason}",
+        "projectAtRisk": "At risk · {progress}% progress",
+        "lowProgressNearDelivery": "Delivery in {days, plural, one {# day} other {# days}} · {progress}% progress",
+        "opportunityNoNextAction": "No next action defined",
+        "opportunityStale": "No activity for {days} days",
+        "proposalExpiring": "Expires in {days, plural, one {# day} other {# days}}",
+        "overloadedMember": "{alloc}% overload this week",
+        "overduePayment": "Collection overdue by {days, plural, one {# day} other {# days}} · {amount}"
+      }
+    },
+    "charts": {
+      "pipeline": {
+        "title": "Pipeline evolution",
+        "subtitle": "Open value per month (k€)"
+      },
+      "projectsByState": {
+        "title": "Projects by state",
+        "subtitle": "Distribution by health",
+        "centerLabel": "Projects"
+      },
+      "taskFlow": {
+        "title": "Tasks done vs. overdue",
+        "subtitle": "Weekly flow over the last 6 weeks",
+        "series": {
+          "done": "Done",
+          "overdue": "Overdue"
+        }
+      },
+      "contractedReceived": {
+        "title": "Contracted vs. received",
+        "subtitle": "Billable and received per month (k€)",
+        "series": {
+          "contracted": "Contracted",
+          "received": "Received"
+        }
+      },
+      "teamLoad": {
+        "title": "Team load distribution",
+        "subtitle": "Allocation per member against capacity",
+        "tooltip": "{pct}% of capacity"
+      }
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul"
+    },
+    "weeks": {
+      "w1": "W1",
+      "w2": "W2",
+      "w3": "W3",
+      "w4": "W4",
+      "w5": "W5",
+      "w6": "W6"
+    }
   }
 }
