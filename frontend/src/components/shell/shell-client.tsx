@@ -8,6 +8,7 @@ import { MobileNav } from "./mobile-nav";
 import { Topbar } from "./topbar";
 import { Footer } from "./footer";
 import { CommandPalette } from "./command-palette";
+import { TimerBar } from "@/components/timer/timer-bar";
 
 export function ShellClient({
   user,
@@ -34,6 +35,9 @@ export function ShellClient({
         </div>
       </div>
       <CommandPalette user={user} />
+      {/* App-wide timer bar — visible on every authenticated page whenever a
+          timer is running (BR-040). */}
+      <TimerBar />
     </SidebarProvider>
   );
 }

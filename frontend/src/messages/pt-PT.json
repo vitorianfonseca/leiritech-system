@@ -350,5 +350,127 @@
       "errorBody": "Ocorreu um erro ao obter o histórico. Tenta novamente.",
       "retry": "Tentar novamente"
     }
+  },
+  "myWork": {
+    "greeting": {
+      "morning": "Bom dia, {name}.",
+      "afternoon": "Boa tarde, {name}.",
+      "evening": "Boa noite, {name}.",
+      "neutral": "Olá, {name}."
+    },
+    "summary": {
+      "today": "{count, plural, one {# tarefa para hoje} other {# tarefas para hoje}}",
+      "overdue": "{count, plural, one {# atrasada} other {# atrasadas}}",
+      "meetings": "{count, plural, one {# reunião} other {# reuniões}}",
+      "allClear": "Tudo em dia. Nada urgente para já."
+    },
+    "refresh": "Atualizar",
+    "groups": {
+      "today": "Hoje",
+      "overdue": "Atrasadas",
+      "thisWeek": "Esta semana",
+      "noDate": "Sem data",
+      "meetings": "Reuniões de hoje",
+      "mentions": "Menções",
+      "reviews": "Pedidos de revisão",
+      "projects": "Os meus projetos",
+      "recentTime": "Tempo recente"
+    },
+    "empty": {
+      "today": "Sem tarefas para hoje.",
+      "overdue": "Sem tarefas atrasadas. Bom trabalho.",
+      "thisWeek": "Nada agendado para esta semana.",
+      "noDate": "Sem tarefas por agendar.",
+      "meetings": "Sem reuniões hoje.",
+      "mentions": "Ninguém te mencionou.",
+      "reviews": "Sem pedidos de revisão pendentes.",
+      "projects": "Não estás em nenhum projeto.",
+      "recentTime": "Sem registos de tempo recentes."
+    },
+    "taskStatus": {
+      "todo": "Por fazer",
+      "in_progress": "Em curso",
+      "in_review": "Em revisão",
+      "done": "Concluída",
+      "blocked": "Bloqueada"
+    },
+    "priority": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta",
+      "urgent": "Urgente"
+    },
+    "health": {
+      "healthy": "Saudável",
+      "attention": "Atenção",
+      "at_risk": "Em risco"
+    },
+    "due": {
+      "today": "Hoje",
+      "tomorrow": "Amanhã",
+      "overdueBy": "{days, plural, one {há # dia} other {há # dias}}",
+      "inDays": "{days, plural, one {em # dia} other {em # dias}}",
+      "on": "{date}"
+    },
+    "deadline": {
+      "today": "Hoje",
+      "tomorrow": "Amanhã",
+      "nextWeek": "Daqui a uma semana",
+      "clear": "Sem data",
+      "none": "Sem data"
+    },
+    "actions": {
+      "complete": "Concluir tarefa",
+      "submitReview": "Enviar para revisão",
+      "changeStatus": "Alterar estado",
+      "changePriority": "Alterar prioridade",
+      "changeDeadline": "Alterar prazo",
+      "startTimer": "Iniciar cronómetro",
+      "stopTimer": "Parar cronómetro",
+      "openComments": "{count, plural, =0 {Comentar} one {Ver # comentário} other {Ver # comentários}}",
+      "openDetails": "Abrir detalhes",
+      "approve": "Aprovar"
+    },
+    "toasts": {
+      "completed": "Tarefa concluída: {task}",
+      "submittedReview": "Enviada para revisão: {task}",
+      "statusChanged": "Estado alterado para {status}",
+      "priorityChanged": "Prioridade alterada para {priority}",
+      "deadlineChanged": "Prazo atualizado",
+      "approved": "Tarefa aprovada: {task}"
+    },
+    "timer": {
+      "stop": "Parar",
+      "runningFor": "A cronometrar",
+      "stoppedTitle": "Cronómetro parado",
+      "stoppedDescription": "{minutes, plural, one {# minuto registado} other {# minutos registados}} em {task}",
+      "switchedTitle": "Cronómetro trocado",
+      "switchedDescription": "{minutes, plural, one {# minuto registado} other {# minutos registados}} em {task}",
+      "switchConfirmTitle": "Já existe um cronómetro a correr",
+      "switchConfirmDescription": "«{running}» está a ser cronometrada. Parar e iniciar «{next}»?",
+      "switchConfirm": "Parar e iniciar"
+    },
+    "detail": {
+      "tabsLabel": "Vistas de detalhe",
+      "details": "Detalhes",
+      "comments": "Comentários",
+      "noDetails": "Sem detalhes adicionais.",
+      "mentionedBy": "Mencionado por {name}",
+      "project": "Projeto",
+      "status": "Estado",
+      "priority": "Prioridade",
+      "deadline": "Prazo",
+      "client": "Cliente",
+      "health": "Saúde",
+      "progress": "Progresso",
+      "openTasks": "Tarefas abertas"
+    },
+    "projectProgressLabel": "Progresso de {name}",
+    "errors": {
+      "loadTitle": "Não foi possível carregar o teu trabalho",
+      "loadDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
+      "retry": "Tentar novamente",
+      "actionFailed": "A ação falhou. Tenta novamente."
+    }
   }
 }

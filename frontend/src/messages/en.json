@@ -350,5 +350,127 @@
       "errorBody": "There was a problem fetching the history. Try again.",
       "retry": "Try again"
     }
+  },
+  "myWork": {
+    "greeting": {
+      "morning": "Good morning, {name}.",
+      "afternoon": "Good afternoon, {name}.",
+      "evening": "Good evening, {name}.",
+      "neutral": "Hi, {name}."
+    },
+    "summary": {
+      "today": "{count, plural, one {# task today} other {# tasks today}}",
+      "overdue": "{count, plural, one {# overdue} other {# overdue}}",
+      "meetings": "{count, plural, one {# meeting} other {# meetings}}",
+      "allClear": "All caught up. Nothing urgent right now."
+    },
+    "refresh": "Refresh",
+    "groups": {
+      "today": "Today",
+      "overdue": "Overdue",
+      "thisWeek": "This week",
+      "noDate": "No date",
+      "meetings": "Today's meetings",
+      "mentions": "Mentions",
+      "reviews": "Review requests",
+      "projects": "My projects",
+      "recentTime": "Recent time"
+    },
+    "empty": {
+      "today": "No tasks for today.",
+      "overdue": "No overdue tasks. Nice work.",
+      "thisWeek": "Nothing scheduled this week.",
+      "noDate": "No unscheduled tasks.",
+      "meetings": "No meetings today.",
+      "mentions": "No one mentioned you.",
+      "reviews": "No pending review requests.",
+      "projects": "You're not on any projects.",
+      "recentTime": "No recent time entries."
+    },
+    "taskStatus": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "in_review": "In review",
+      "done": "Done",
+      "blocked": "Blocked"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "health": {
+      "healthy": "Healthy",
+      "attention": "Attention",
+      "at_risk": "At risk"
+    },
+    "due": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "overdueBy": "{days, plural, one {# day ago} other {# days ago}}",
+      "inDays": "{days, plural, one {in # day} other {in # days}}",
+      "on": "{date}"
+    },
+    "deadline": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "nextWeek": "In a week",
+      "clear": "No date",
+      "none": "No date"
+    },
+    "actions": {
+      "complete": "Complete task",
+      "submitReview": "Submit for review",
+      "changeStatus": "Change status",
+      "changePriority": "Change priority",
+      "changeDeadline": "Change deadline",
+      "startTimer": "Start timer",
+      "stopTimer": "Stop timer",
+      "openComments": "{count, plural, =0 {Comment} one {View # comment} other {View # comments}}",
+      "openDetails": "Open details",
+      "approve": "Approve"
+    },
+    "toasts": {
+      "completed": "Task completed: {task}",
+      "submittedReview": "Submitted for review: {task}",
+      "statusChanged": "Status changed to {status}",
+      "priorityChanged": "Priority changed to {priority}",
+      "deadlineChanged": "Deadline updated",
+      "approved": "Task approved: {task}"
+    },
+    "timer": {
+      "stop": "Stop",
+      "runningFor": "Timing",
+      "stoppedTitle": "Timer stopped",
+      "stoppedDescription": "{minutes, plural, one {# minute logged} other {# minutes logged}} on {task}",
+      "switchedTitle": "Timer switched",
+      "switchedDescription": "{minutes, plural, one {# minute logged} other {# minutes logged}} on {task}",
+      "switchConfirmTitle": "A timer is already running",
+      "switchConfirmDescription": "“{running}” is being timed. Stop it and start “{next}”?",
+      "switchConfirm": "Stop and start"
+    },
+    "detail": {
+      "tabsLabel": "Detail views",
+      "details": "Details",
+      "comments": "Comments",
+      "noDetails": "No additional details.",
+      "mentionedBy": "Mentioned by {name}",
+      "project": "Project",
+      "status": "Status",
+      "priority": "Priority",
+      "deadline": "Deadline",
+      "client": "Client",
+      "health": "Health",
+      "progress": "Progress",
+      "openTasks": "Open tasks"
+    },
+    "projectProgressLabel": "{name} progress",
+    "errors": {
+      "loadTitle": "Couldn't load your work",
+      "loadDescription": "Something went wrong fetching your data. Try again.",
+      "retry": "Try again",
+      "actionFailed": "That action failed. Try again."
+    }
   }
 }
