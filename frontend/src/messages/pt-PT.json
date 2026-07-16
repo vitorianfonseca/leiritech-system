@@ -115,6 +115,98 @@
     "due": "A vencer",
     "done": "Concluído"
   },
+  "auth": {
+    "login": {
+      "title": "Entrar",
+      "subtitle": "Aceda à sua conta Aurea.",
+      "submit": "Entrar",
+      "submitting": "A entrar…",
+      "forgotLink": "Esqueceu-se da palavra-passe?"
+    },
+    "forgot": {
+      "title": "Recuperar acesso",
+      "subtitle": "Enviamos-lhe um link para redefinir a palavra-passe.",
+      "submit": "Enviar link de recuperação",
+      "submitting": "A enviar…",
+      "successTitle": "Verifique o seu email",
+      "successBody": "Se existir uma conta associada a {email}, enviámos um link para redefinir a palavra-passe."
+    },
+    "reset": {
+      "title": "Definir nova palavra-passe",
+      "subtitle": "Escolha uma nova palavra-passe para a sua conta.",
+      "submit": "Guardar palavra-passe",
+      "submitting": "A guardar…",
+      "successTitle": "Palavra-passe atualizada",
+      "successBody": "A sua palavra-passe foi alterada. Já pode iniciar sessão.",
+      "requestNew": "Pedir um novo link",
+      "missingTokenTitle": "Link inválido",
+      "missingTokenBody": "Este link de recuperação não é válido ou está incompleto."
+    },
+    "invite": {
+      "title": "Aceitar convite",
+      "subtitle": "Complete o seu registo para se juntar à equipa.",
+      "submit": "Criar conta",
+      "submitting": "A criar conta…",
+      "loading": "A validar o convite…",
+      "emailLabel": "Email",
+      "roleLabel": "Função"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "gestor": "Gestor",
+      "membro": "Membro"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Palavra-passe",
+      "newPassword": "Nova palavra-passe",
+      "confirmPassword": "Confirmar palavra-passe",
+      "name": "Nome completo"
+    },
+    "placeholders": {
+      "email": "nome@aurea.pt",
+      "password": "A sua palavra-passe",
+      "newPassword": "Pelo menos 8 caracteres",
+      "confirmPassword": "Repita a palavra-passe",
+      "name": "O seu nome"
+    },
+    "hints": {
+      "passwordPolicy": "Mínimo de 8 caracteres."
+    },
+    "actions": {
+      "showPassword": "Mostrar palavra-passe",
+      "hidePassword": "Ocultar palavra-passe",
+      "backToLogin": "Voltar ao início de sessão",
+      "goToLogin": "Ir para o início de sessão"
+    },
+    "validation": {
+      "emailRequired": "Indique o seu email.",
+      "emailInvalid": "Indique um email válido.",
+      "passwordRequired": "Indique a sua palavra-passe.",
+      "passwordTooShort": "A palavra-passe deve ter pelo menos 8 caracteres.",
+      "confirmRequired": "Confirme a palavra-passe.",
+      "passwordsMustMatch": "As palavras-passe não coincidem.",
+      "nameRequired": "Indique o seu nome."
+    },
+    "errors": {
+      "invalid_credentials": "Email ou palavra-passe incorretos.",
+      "account_deactivated": "Esta conta foi desativada. Contacte um administrador.",
+      "rate_limited": "Demasiadas tentativas. Tente novamente mais tarde.",
+      "invite_invalid": "Este convite não é válido.",
+      "invite_expired": "Este convite expirou. Peça um novo à sua equipa.",
+      "invite_revoked": "Este convite foi revogado.",
+      "invite_accepted": "Este convite já foi utilizado. Inicie sessão.",
+      "reset_invalid": "Este link de recuperação não é válido.",
+      "reset_expired": "Este link de recuperação expirou.",
+      "network": "Não foi possível concluir o pedido. Tente novamente."
+    },
+    "errorBoundary": {
+      "title": "Algo correu mal",
+      "body": "Não foi possível carregar esta página. Tente novamente.",
+      "retry": "Tentar novamente",
+      "backToLogin": "Voltar ao início de sessão"
+    }
+  },
   "foundation": {
     "dashboard": {
       "greeting": "Bom dia, {name}.",

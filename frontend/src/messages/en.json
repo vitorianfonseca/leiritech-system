@@ -115,6 +115,98 @@
     "due": "Due soon",
     "done": "Done"
   },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your Aurea account.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgotLink": "Forgot your password?"
+    },
+    "forgot": {
+      "title": "Recover access",
+      "subtitle": "We'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "successTitle": "Check your email",
+      "successBody": "If an account exists for {email}, we've sent a link to reset your password."
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password for your account.",
+      "submit": "Save password",
+      "submitting": "Saving…",
+      "successTitle": "Password updated",
+      "successBody": "Your password has been changed. You can now sign in.",
+      "requestNew": "Request a new link",
+      "missingTokenTitle": "Invalid link",
+      "missingTokenBody": "This reset link is not valid or is incomplete."
+    },
+    "invite": {
+      "title": "Accept invitation",
+      "subtitle": "Complete your sign-up to join the team.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "loading": "Validating invitation…",
+      "emailLabel": "Email",
+      "roleLabel": "Role"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "gestor": "Manager",
+      "membro": "Member"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "name": "Full name"
+    },
+    "placeholders": {
+      "email": "name@aurea.pt",
+      "password": "Your password",
+      "newPassword": "At least 8 characters",
+      "confirmPassword": "Repeat the password",
+      "name": "Your name"
+    },
+    "hints": {
+      "passwordPolicy": "Minimum of 8 characters."
+    },
+    "actions": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "backToLogin": "Back to sign in",
+      "goToLogin": "Go to sign in"
+    },
+    "validation": {
+      "emailRequired": "Enter your email.",
+      "emailInvalid": "Enter a valid email.",
+      "passwordRequired": "Enter your password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "confirmRequired": "Confirm your password.",
+      "passwordsMustMatch": "Passwords do not match.",
+      "nameRequired": "Enter your name."
+    },
+    "errors": {
+      "invalid_credentials": "Incorrect email or password.",
+      "account_deactivated": "This account has been deactivated. Contact an administrator.",
+      "rate_limited": "Too many attempts. Please try again later.",
+      "invite_invalid": "This invitation is not valid.",
+      "invite_expired": "This invitation has expired. Ask your team for a new one.",
+      "invite_revoked": "This invitation has been revoked.",
+      "invite_accepted": "This invitation has already been used. Please sign in.",
+      "reset_invalid": "This reset link is not valid.",
+      "reset_expired": "This reset link has expired.",
+      "network": "We couldn't complete the request. Please try again."
+    },
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "body": "We couldn't load this page. Please try again.",
+      "retry": "Try again",
+      "backToLogin": "Back to sign in"
+    }
+  },
   "foundation": {
     "dashboard": {
       "greeting": "Good morning, {name}.",
