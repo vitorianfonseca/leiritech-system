@@ -707,5 +707,167 @@
       "costCreated": "Cost recorded.",
       "costDeleted": "Cost “{name}” deleted."
     }
+  },
+  "templates": {
+    "title": "Project templates",
+    "subtitle": "Reusable models of phases, tasks, durations and milestones so new projects start consistently.",
+    "searchPlaceholder": "Search templates…",
+    "durationDays": "{count, plural, one {# day} other {# days}}",
+    "hoursValue": "{count} h",
+    "tasksValue": "{count, plural, =0 {No tasks} one {# task} other {# tasks}}",
+    "types": {
+      "website": "Website",
+      "app": "App",
+      "consulting": "Consulting",
+      "maintenance": "Maintenance"
+    },
+    "roles": {
+      "gestor": "Manager",
+      "designer": "Designer",
+      "developer": "Developer",
+      "qa": "QA",
+      "consultant": "Consultant",
+      "marketing": "Marketing"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Template",
+      "type": "Type",
+      "phases": "Phases",
+      "tasks": "Tasks",
+      "hours": "Hours",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No templates yet",
+      "description": "Templates will appear here once created.",
+      "descriptionAdmin": "Create your first template to standardise how projects start."
+    },
+    "actions": {
+      "new": "New template",
+      "edit": "Edit",
+      "view": "View",
+      "use": "Use",
+      "delete": "Delete",
+      "refresh": "Refresh",
+      "cancel": "Cancel",
+      "editMeta": "Edit details",
+      "addPhase": "Add phase",
+      "addTask": "Add task",
+      "editPhase": "Edit phase “{name}”",
+      "removePhase": "Remove phase “{name}”",
+      "reorderPhase": "Reorder phase “{name}”",
+      "editTask": "Edit task “{name}”",
+      "removeTask": "Remove task “{name}”",
+      "reorderTask": "Reorder task “{name}”"
+    },
+    "form": {
+      "createTitle": "New template",
+      "editTitle": "Edit template",
+      "subtitle": "Set the name, type and expected duration. Phases and tasks are edited next.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Corporate website",
+      "type": "Type",
+      "expectedDuration": "Expected duration (days)",
+      "expectedDurationHint": "Calendar estimate for the project.",
+      "description": "Description",
+      "descriptionPlaceholder": "What this template is for and what it includes.",
+      "active": "Active template",
+      "activeHint": "Available for new projects.",
+      "saving": "Saving…",
+      "saveCreate": "Create template",
+      "saveEdit": "Save changes"
+    },
+    "phaseForm": {
+      "addTitle": "Add phase",
+      "editTitle": "Edit phase",
+      "subtitle": "Phases run in the order defined.",
+      "name": "Phase name",
+      "namePlaceholder": "e.g. Discovery and planning",
+      "expectedDuration": "Expected duration (days)",
+      "isMilestone": "Mark as delivery milestone",
+      "isMilestoneHint": "A client-facing delivery point.",
+      "milestone": "Milestone",
+      "milestoneName": "Milestone name",
+      "milestoneNamePlaceholder": "e.g. Design approved",
+      "add": "Add phase"
+    },
+    "taskForm": {
+      "addTitle": "Add task",
+      "editTitle": "Edit task",
+      "subtitle": "Template task with a responsible role and effort estimate.",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Wireframes for key pages",
+      "role": "Responsible",
+      "estimateHours": "Estimate (hours)",
+      "add": "Add task"
+    },
+    "editor": {
+      "back": "Templates",
+      "metaTitle": "Template editor",
+      "notFoundTitle": "Template not found",
+      "notFoundDescription": "The template you are looking for does not exist or was removed.",
+      "readOnly": "You are viewing this template in read-only mode. Editing is restricted to administrators.",
+      "phaseSummary": "{count, plural, one {# phase} other {# phases}}",
+      "taskSummary": "{count, plural, one {# task} other {# tasks}}",
+      "hoursSummary": "{count} h estimated",
+      "durationSummary": "{count, plural, one {# day} other {# days}} expected"
+    },
+    "phaseEmpty": {
+      "title": "No phases yet",
+      "description": "Add the first phase to structure the template.",
+      "readOnly": "This template has no phases defined yet."
+    },
+    "taskEmpty": {
+      "title": "No tasks in this phase",
+      "description": "Add template tasks to this phase."
+    },
+    "deleteConfirm": {
+      "title": "Delete template",
+      "description": "Are you sure you want to delete “{name}”? Its phases and tasks will also be removed.",
+      "confirm": "Delete template"
+    },
+    "removePhaseConfirm": {
+      "title": "Remove phase",
+      "description": "Remove the phase “{name}” and all of its tasks?",
+      "confirm": "Remove phase"
+    },
+    "removeTaskConfirm": {
+      "title": "Remove task",
+      "description": "Remove the task “{name}”?",
+      "confirm": "Remove task"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "invalidNumber": "Enter a valid number.",
+      "invalidHours": "Enter a valid number of hours.",
+      "nameRequired": "Enter a name (at least 3 characters).",
+      "descriptionRequired": "Describe the template (at least 5 characters).",
+      "phaseNameRequired": "Enter the phase name.",
+      "milestoneNameRequired": "Enter the milestone name.",
+      "taskTitleRequired": "Enter the task title."
+    },
+    "errors": {
+      "loadTitle": "Could not load templates",
+      "loadDescription": "An error occurred loading the templates. Please try again.",
+      "retry": "Try again"
+    },
+    "toasts": {
+      "created": "Template “{name}” created.",
+      "updated": "Template updated.",
+      "deleted": "Template “{name}” deleted.",
+      "used": "Template “{name}” selected.",
+      "usedHint": "It will be used to create a new project in the conversion wizard.",
+      "phaseAdded": "Phase added.",
+      "phaseUpdated": "Phase updated.",
+      "phaseRemoved": "Phase “{name}” removed.",
+      "taskAdded": "Task added.",
+      "taskUpdated": "Task updated.",
+      "taskRemoved": "Task “{name}” removed.",
+      "reorderFailed": "Could not save the new order."
+    }
   }
 }

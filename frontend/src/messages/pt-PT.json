@@ -707,5 +707,167 @@
       "costCreated": "Custo registado.",
       "costDeleted": "Custo “{name}” eliminado."
     }
+  },
+  "templates": {
+    "title": "Templates de projeto",
+    "subtitle": "Modelos reutilizáveis de fases, tarefas, durações e marcos para arrancar projetos de forma consistente.",
+    "searchPlaceholder": "Procurar templates…",
+    "durationDays": "{count, plural, one {# dia} other {# dias}}",
+    "hoursValue": "{count} h",
+    "tasksValue": "{count, plural, =0 {Sem tarefas} one {# tarefa} other {# tarefas}}",
+    "types": {
+      "website": "Website",
+      "app": "Aplicação",
+      "consulting": "Consultoria",
+      "maintenance": "Manutenção"
+    },
+    "roles": {
+      "gestor": "Gestor",
+      "designer": "Designer",
+      "developer": "Programador",
+      "qa": "QA",
+      "consultant": "Consultor",
+      "marketing": "Marketing"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "table": {
+      "name": "Template",
+      "type": "Tipo",
+      "phases": "Fases",
+      "tasks": "Tarefas",
+      "hours": "Horas",
+      "status": "Estado"
+    },
+    "empty": {
+      "title": "Ainda não existem templates",
+      "description": "Quando existirem templates, aparecem aqui.",
+      "descriptionAdmin": "Crie o primeiro template para padronizar o arranque de projetos."
+    },
+    "actions": {
+      "new": "Novo template",
+      "edit": "Editar",
+      "view": "Ver",
+      "use": "Usar",
+      "delete": "Eliminar",
+      "refresh": "Atualizar",
+      "cancel": "Cancelar",
+      "editMeta": "Editar detalhes",
+      "addPhase": "Adicionar fase",
+      "addTask": "Adicionar tarefa",
+      "editPhase": "Editar fase “{name}”",
+      "removePhase": "Remover fase “{name}”",
+      "reorderPhase": "Reordenar fase “{name}”",
+      "editTask": "Editar tarefa “{name}”",
+      "removeTask": "Remover tarefa “{name}”",
+      "reorderTask": "Reordenar tarefa “{name}”"
+    },
+    "form": {
+      "createTitle": "Novo template",
+      "editTitle": "Editar template",
+      "subtitle": "Defina o nome, o tipo e a duração prevista. As fases e tarefas são editadas a seguir.",
+      "name": "Nome",
+      "namePlaceholder": "Ex.: Website institucional",
+      "type": "Tipo",
+      "expectedDuration": "Duração prevista (dias)",
+      "expectedDurationHint": "Estimativa de calendário do projeto.",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Para que serve este template e o que inclui.",
+      "active": "Template ativo",
+      "activeHint": "Disponível para novos projetos.",
+      "saving": "A guardar…",
+      "saveCreate": "Criar template",
+      "saveEdit": "Guardar alterações"
+    },
+    "phaseForm": {
+      "addTitle": "Adicionar fase",
+      "editTitle": "Editar fase",
+      "subtitle": "As fases são executadas pela ordem definida.",
+      "name": "Nome da fase",
+      "namePlaceholder": "Ex.: Descoberta e planeamento",
+      "expectedDuration": "Duração prevista (dias)",
+      "isMilestone": "Marcar como marco de entrega",
+      "isMilestoneHint": "Ponto de entrega ao cliente.",
+      "milestone": "Marco",
+      "milestoneName": "Nome do marco",
+      "milestoneNamePlaceholder": "Ex.: Design aprovado",
+      "add": "Adicionar fase"
+    },
+    "taskForm": {
+      "addTitle": "Adicionar tarefa",
+      "editTitle": "Editar tarefa",
+      "subtitle": "Tarefa-modelo com responsável e estimativa de esforço.",
+      "title": "Título",
+      "titlePlaceholder": "Ex.: Wireframes das páginas principais",
+      "role": "Responsável",
+      "estimateHours": "Estimativa (horas)",
+      "add": "Adicionar tarefa"
+    },
+    "editor": {
+      "back": "Templates",
+      "metaTitle": "Editor de template",
+      "notFoundTitle": "Template não encontrado",
+      "notFoundDescription": "O template que procura não existe ou foi removido.",
+      "readOnly": "Está a ver este template em modo de leitura. A edição está reservada a administradores.",
+      "phaseSummary": "{count, plural, one {# fase} other {# fases}}",
+      "taskSummary": "{count, plural, one {# tarefa} other {# tarefas}}",
+      "hoursSummary": "{count} h estimadas",
+      "durationSummary": "{count, plural, one {# dia} other {# dias}} previstos"
+    },
+    "phaseEmpty": {
+      "title": "Ainda não existem fases",
+      "description": "Adicione a primeira fase para estruturar o template.",
+      "readOnly": "Este template ainda não tem fases definidas."
+    },
+    "taskEmpty": {
+      "title": "Sem tarefas nesta fase",
+      "description": "Adicione tarefas-modelo a esta fase."
+    },
+    "deleteConfirm": {
+      "title": "Eliminar template",
+      "description": "Tem a certeza de que pretende eliminar “{name}”? As fases e tarefas associadas também serão removidas.",
+      "confirm": "Eliminar template"
+    },
+    "removePhaseConfirm": {
+      "title": "Remover fase",
+      "description": "Remover a fase “{name}” e todas as suas tarefas?",
+      "confirm": "Remover fase"
+    },
+    "removeTaskConfirm": {
+      "title": "Remover tarefa",
+      "description": "Remover a tarefa “{name}”?",
+      "confirm": "Remover tarefa"
+    },
+    "validation": {
+      "required": "Campo obrigatório.",
+      "invalidNumber": "Indique um número válido.",
+      "invalidHours": "Indique um número de horas válido.",
+      "nameRequired": "Indique um nome (mínimo 3 caracteres).",
+      "descriptionRequired": "Descreva o template (mínimo 5 caracteres).",
+      "phaseNameRequired": "Indique o nome da fase.",
+      "milestoneNameRequired": "Indique o nome do marco.",
+      "taskTitleRequired": "Indique o título da tarefa."
+    },
+    "errors": {
+      "loadTitle": "Não foi possível carregar os templates",
+      "loadDescription": "Ocorreu um erro ao obter os templates. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
+    "toasts": {
+      "created": "Template “{name}” criado.",
+      "updated": "Template atualizado.",
+      "deleted": "Template “{name}” eliminado.",
+      "used": "Template “{name}” selecionado.",
+      "usedHint": "Será usado para criar um novo projeto no assistente de conversão.",
+      "phaseAdded": "Fase adicionada.",
+      "phaseUpdated": "Fase atualizada.",
+      "phaseRemoved": "Fase “{name}” removida.",
+      "taskAdded": "Tarefa adicionada.",
+      "taskUpdated": "Tarefa atualizada.",
+      "taskRemoved": "Tarefa “{name}” removida.",
+      "reorderFailed": "Não foi possível guardar a nova ordem."
+    }
   }
 }
