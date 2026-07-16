@@ -48,7 +48,7 @@ export function Topbar({ user }: { user: SessionUser }) {
       <div className="ml-auto flex items-center gap-1">
         <QuickCreate user={user} />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
-        <Notifications unread={3} />
+        <Notifications user={user} />
         <Tooltip>
           <TooltipTrigger
             render={
