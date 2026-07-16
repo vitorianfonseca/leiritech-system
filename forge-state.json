@@ -1,11 +1,20 @@
 {
   "repo": "vitorianfonseca/aurea-system",
   "app_name": "Aurea System",
-  "phase": "ready",
+  "phase": "frontend-review",
   "visibility": "private",
   "default_branch": "master",
   "locale": "pt-PT",
   "currency": "EUR",
+  "frontend": {
+    "issues_built": [25,7,40,27,36,38,33,26,28,29,30,32,39,34,35,31,37,41,42,43],
+    "issues_built_count": 20,
+    "head_commit": "6e3e683",
+    "review": { "high": 0, "med": 2, "low": 5 },
+    "fixes_applied": ["locale-switcher-crash(7b62719)", "csv-injection-#59(6e3e683)"],
+    "open_findings": [56, 57, 58, 60, 61],
+    "gates": { "tsc": "clean", "lint": "clean", "build": "clean", "visual": "pass" }
+  },
   "issues_created": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54],
   "issues_by_phase": {
     "frontend": 19,
