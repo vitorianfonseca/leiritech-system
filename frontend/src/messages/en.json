@@ -3489,5 +3489,122 @@
         "retry": "Try again"
       }
     }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your personal details, preferences, and account security.",
+    "personal": {
+      "title": "Personal profile",
+      "subtitle": "Your identity details in Aurea.",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Profile updated.",
+      "avatar": {
+        "previewAlt": "Your profile picture",
+        "upload": "Upload picture",
+        "remove": "Remove"
+      },
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "phoneHint": "Optional. Used for internal contact.",
+        "role": "Role",
+        "roleNote": "Managed by the Administrator"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Theme, language, and notifications.",
+      "appearance": {
+        "title": "Appearance",
+        "description": "Choose the interface theme. Light mode is the default.",
+        "options": {
+          "light": {
+            "title": "Light",
+            "description": "Warm paper and soft ink."
+          },
+          "dark": {
+            "title": "Dark",
+            "description": "Warm charcoal for low-light settings."
+          },
+          "system": {
+            "title": "System",
+            "description": "Follows your device setting."
+          }
+        }
+      },
+      "language": {
+        "title": "Language",
+        "description": "Sets the interface language. It does not change the page URL.",
+        "label": "Interface language"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Choose how you are notified on each channel.",
+        "save": "Save preferences",
+        "saving": "Saving…",
+        "saved": "Notification preferences saved.",
+        "columns": {
+          "category": "Category",
+          "inApp": "In-app",
+          "email": "Email"
+        },
+        "toggle": {
+          "inApp": "In-app notifications for {category}",
+          "email": "Email notifications for {category}"
+        },
+        "adminLink": {
+          "title": "Team notifications",
+          "description": "As an Administrator, manage the defaults in Settings.",
+          "action": "Open settings"
+        }
+      }
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Password and session.",
+      "changed": "Password changed.",
+      "password": {
+        "title": "Change password",
+        "description": "Choose a strong password you do not use elsewhere.",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm new password",
+        "hint": "At least 8 characters.",
+        "submit": "Change password",
+        "show": "Show password",
+        "hide": "Hide password",
+        "confirmTitle": "Change your password?",
+        "confirmDescription": "You will need the new password the next time you sign in."
+      },
+      "session": {
+        "title": "Session",
+        "description": "The active session on this device.",
+        "active": "Active session",
+        "logout": "Sign out"
+      },
+      "deactivate": {
+        "note": "Account deactivation is managed by the Administrator. Contact an Administrator if you need to deactivate your account."
+      }
+    },
+    "validation": {
+      "nameRequired": "Enter your name (at least 2 characters).",
+      "emailInvalid": "Enter a valid email.",
+      "currentPasswordRequired": "Enter your current password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "confirmPasswordRequired": "Confirm your new password.",
+      "passwordsMustMatch": "Passwords do not match.",
+      "passwordSameAsCurrent": "The new password must differ from the current one."
+    },
+    "errors": {
+      "avatarType": "Select an image file.",
+      "avatarSize": "The image is too large (max 512 KB).",
+      "saveFailed": "Could not save. Please try again.",
+      "passwordFailed": "Could not change the password.",
+      "loadTitle": "Could not load the profile",
+      "loadDescription": "An error occurred loading this information. Please try again.",
+      "retry": "Try again"
+    }
   }
 }

@@ -3489,5 +3489,122 @@
         "retry": "Tentar novamente"
       }
     }
+  },
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Faça a gestão dos seus dados pessoais, preferências e segurança da conta.",
+    "personal": {
+      "title": "Perfil pessoal",
+      "subtitle": "Os seus dados de identificação na Aurea.",
+      "save": "Guardar alterações",
+      "saving": "A guardar…",
+      "saved": "Perfil atualizado.",
+      "avatar": {
+        "previewAlt": "A sua fotografia de perfil",
+        "upload": "Carregar fotografia",
+        "remove": "Remover"
+      },
+      "fields": {
+        "name": "Nome",
+        "email": "Email",
+        "phone": "Telefone",
+        "phoneHint": "Opcional. Usado para contactos internos.",
+        "role": "Função",
+        "roleNote": "Gerida pelo Administrador"
+      }
+    },
+    "preferences": {
+      "title": "Preferências",
+      "subtitle": "Tema, idioma e notificações.",
+      "appearance": {
+        "title": "Aparência",
+        "description": "Escolha o tema da interface. O modo claro é a predefinição.",
+        "options": {
+          "light": {
+            "title": "Claro",
+            "description": "Papel quente e tinta suave."
+          },
+          "dark": {
+            "title": "Escuro",
+            "description": "Carvão quente para ambientes com pouca luz."
+          },
+          "system": {
+            "title": "Sistema",
+            "description": "Acompanha a definição do seu dispositivo."
+          }
+        }
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Define o idioma da interface. Não altera o endereço da página.",
+        "label": "Idioma da interface"
+      },
+      "notifications": {
+        "title": "Notificações",
+        "description": "Escolha como quer ser avisado em cada canal.",
+        "save": "Guardar preferências",
+        "saving": "A guardar…",
+        "saved": "Preferências de notificação guardadas.",
+        "columns": {
+          "category": "Categoria",
+          "inApp": "Na app",
+          "email": "Email"
+        },
+        "toggle": {
+          "inApp": "Notificações na app para {category}",
+          "email": "Notificações por email para {category}"
+        },
+        "adminLink": {
+          "title": "Notificações da equipa",
+          "description": "Enquanto Administrador, faça a gestão das predefinições em Definições.",
+          "action": "Abrir definições"
+        }
+      }
+    },
+    "security": {
+      "title": "Segurança",
+      "subtitle": "Palavra-passe e sessão.",
+      "changed": "Palavra-passe alterada.",
+      "password": {
+        "title": "Alterar palavra-passe",
+        "description": "Escolha uma palavra-passe forte que não use noutro serviço.",
+        "current": "Palavra-passe atual",
+        "new": "Nova palavra-passe",
+        "confirm": "Confirmar nova palavra-passe",
+        "hint": "Mínimo de 8 caracteres.",
+        "submit": "Alterar palavra-passe",
+        "show": "Mostrar palavra-passe",
+        "hide": "Ocultar palavra-passe",
+        "confirmTitle": "Alterar a palavra-passe?",
+        "confirmDescription": "Vai precisar da nova palavra-passe no próximo início de sessão."
+      },
+      "session": {
+        "title": "Sessão",
+        "description": "A sessão ativa neste dispositivo.",
+        "active": "Sessão ativa",
+        "logout": "Terminar sessão"
+      },
+      "deactivate": {
+        "note": "A desativação da conta é gerida pelo Administrador. Contacte um Administrador se precisar de desativar a sua conta."
+      }
+    },
+    "validation": {
+      "nameRequired": "Introduza o seu nome (mínimo 2 caracteres).",
+      "emailInvalid": "Introduza um email válido.",
+      "currentPasswordRequired": "Introduza a palavra-passe atual.",
+      "passwordTooShort": "A palavra-passe deve ter pelo menos 8 caracteres.",
+      "confirmPasswordRequired": "Confirme a nova palavra-passe.",
+      "passwordsMustMatch": "As palavras-passe não coincidem.",
+      "passwordSameAsCurrent": "A nova palavra-passe deve ser diferente da atual."
+    },
+    "errors": {
+      "avatarType": "Selecione um ficheiro de imagem.",
+      "avatarSize": "A imagem é demasiado grande (máx. 512 KB).",
+      "saveFailed": "Não foi possível guardar. Tente novamente.",
+      "passwordFailed": "Não foi possível alterar a palavra-passe.",
+      "loadTitle": "Não foi possível carregar o perfil",
+      "loadDescription": "Ocorreu um erro ao carregar esta informação. Tente novamente.",
+      "retry": "Tentar novamente"
+    }
   }
 }
