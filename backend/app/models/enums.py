@@ -21,6 +21,10 @@ PROPOSAL_STATUSES = ("draft", "sent", "viewed", "accepted", "rejected", "expired
 INTERACTION_TYPES = ("call", "meeting", "email", "message", "note", "followup")
 MEETING_STATUSES = ("scheduled", "held", "cancelled", "no_show")
 
+# --- Catalog / proposal content ---
+CATALOG_UNITS = ("unit", "hour", "day", "month", "m2", "license", "fixed")
+BILLING_TYPES = ("one_time", "monthly", "annual")
+
 # --- Projects / tasks ---
 PROJECT_STATUSES = ("planning", "active", "on_hold", "completed", "cancelled", "archived")
 PROJECT_HEALTH = ("healthy", "attention", "at_risk")
