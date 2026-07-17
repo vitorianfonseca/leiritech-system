@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import storage
 from app.api.dependencies.auth import CurrentUser
 from app.core.errors import ApiError
 from app.database.session import get_db
@@ -26,7 +27,7 @@ from app.schemas.attachments import (
     AttachmentUploadRequest,
     AttachmentUploadResponse,
 )
-from app import storage
+from app.services import attachment_service
 
 router = APIRouter()
 
@@ -51,6 +52,10 @@ def create_upload_url(
     user: CurrentUser,
     db: DbSession,
 ) -> AttachmentUploadResponse:
+    # IDOR guard: may this caller write a file to the parent entity? (BR-002)
+    attachment_service.authorize_entity_access(
+        db, user, payload.entity_type, payload.entity_id
+    )
     if not storage.is_configured():
         raise _storage_unavailable()
 
@@ -93,6 +98,10 @@ def create_download_url(
         raise ApiError(
             status.HTTP_404_NOT_FOUND, "NOT_FOUND", "Anexo não encontrado."
         )
+    # IDOR guard: may this caller read the parent this attachment belongs to?
+    attachment_service.authorize_entity_access(
+        db, user, attachment.entity_type, attachment.entity_id
+    )
     if not storage.is_configured():
         raise _storage_unavailable()
     try:
@@ -111,6 +120,8 @@ def list_attachments(
     entity_type: Annotated[str, Query(min_length=1, max_length=64)],
     entity_id: Annotated[uuid.UUID, Query()],
 ) -> list[Attachment]:
+    # IDOR guard: only list attachments of a parent the caller may see (BR-002).
+    attachment_service.authorize_entity_access(db, user, entity_type, entity_id)
     rows = db.execute(
         select(Attachment)
         .where(
