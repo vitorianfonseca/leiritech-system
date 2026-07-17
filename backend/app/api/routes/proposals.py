@@ -20,6 +20,9 @@ from app.api.dependencies.auth import CurrentUser, RequireGestor
 from app.database.session import get_db
 from app.schemas.common import Page
 from app.schemas.proposals import (
+    ApplyTemplateInput,
+    ProposalContentInput,
+    ProposalContentResponse,
     ProposalCreate,
     ProposalReject,
     ProposalResend,
@@ -180,3 +183,36 @@ def restore_proposal(
 ) -> ProposalResponse:
     proposal = proposal_service.restore_proposal(db, user, proposal_id)
     return ProposalResponse.model_validate(proposal)
+
+
+@router.post("/{proposal_id}/apply-template", response_model=ProposalResponse)
+def apply_template(
+    proposal_id: uuid.UUID,
+    payload: ApplyTemplateInput,
+    user: RequireGestor,
+    db: DbSession,
+) -> ProposalResponse:
+    proposal = proposal_service.apply_template(
+        db, user, proposal_id, payload.template_id
+    )
+    return ProposalResponse.model_validate(proposal)
+
+
+@router.get("/{proposal_id}/content", response_model=ProposalContentResponse)
+def get_content(
+    proposal_id: uuid.UUID,
+    user: CurrentUser,
+    db: DbSession,
+) -> ProposalContentResponse:
+    return proposal_service.get_content(db, user, proposal_id)
+
+
+@router.put("/{proposal_id}/content", response_model=ProposalContentResponse)
+def set_content(
+    proposal_id: uuid.UUID,
+    payload: ProposalContentInput,
+    user: RequireGestor,
+    db: DbSession,
+) -> ProposalContentResponse:
+    proposal_service.set_content(db, user, proposal_id, payload)
+    return proposal_service.get_content(db, user, proposal_id)

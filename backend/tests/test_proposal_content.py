@@ -195,3 +195,104 @@ def test_apply_template_on_non_draft_conflicts(make_user, track):
         db.commit()
     finally:
         db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Task 14 — content endpoints (HTTP integration)
+# --------------------------------------------------------------------------- #
+def _create_company_api(client, token, track) -> str:
+    resp = client.post(
+        f"{API}/companies",
+        json={"name": f"Acme {uuid.uuid4().hex[:8]}"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 201, resp.text
+    cid = resp.json()["id"]
+    track["company"].append(uuid.UUID(cid))
+    return cid
+
+
+def _create_template_api(client, token, track) -> str:
+    body = {
+        "name": f"Template {uuid.uuid4().hex[:8]}",
+        "default_validity_days": 30,
+        "default_discount_bps": 0,
+        "terms": "Termos {{cliente}}",
+        "sections": [{"heading": "Intro", "body": "Olá {{cliente}}"}],
+        "items": [
+            {"name": "Website", "unit": "fixed", "unit_price": 500000,
+             "tax_rate": "23.00", "billing_type": "one_time", "quantity": "1"},
+            {"name": "Manutenção", "unit": "month", "unit_price": 20000,
+             "tax_rate": "23.00", "billing_type": "monthly", "quantity": "1"},
+        ],
+    }
+    resp = client.post(f"{API}/proposal-templates", json=body, headers=_auth(token))
+    assert resp.status_code == 201, resp.text
+    tid = resp.json()["id"]
+    track["template"].append(uuid.UUID(tid))
+    return tid
+
+
+def test_content_endpoints(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    company_id = _create_company_api(client, token, track)
+    tid = _create_template_api(client, token, track)
+
+    resp = client.post(
+        f"{API}/proposals",
+        json={"reference": f"PROP-API-{uuid.uuid4().hex[:8]}", "company_id": company_id},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 201, resp.text
+    pid = resp.json()["id"]
+    track["proposal"].append(uuid.UUID(pid))
+
+    resp = client.post(
+        f"{API}/proposals/{pid}/apply-template",
+        json={"template_id": tid},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["value"] == 500000  # one-time net
+
+    resp = client.get(f"{API}/proposals/{pid}/content", headers=_auth(token))
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert len(body["items"]) == 2
+    assert body["totals"]["one_time"]["net"] == 500000
+    assert body["totals"]["monthly"]["net"] == 20000
+    assert body["sections"][0]["body"].startswith("Olá ")
+
+
+def test_set_content_recomputes_value(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    company_id = _create_company_api(client, token, track)
+
+    resp = client.post(
+        f"{API}/proposals",
+        json={"reference": f"PROP-SC-{uuid.uuid4().hex[:8]}", "company_id": company_id},
+        headers=_auth(token),
+    )
+    pid = resp.json()["id"]
+    track["proposal"].append(uuid.UUID(pid))
+
+    resp = client.put(
+        f"{API}/proposals/{pid}/content",
+        json={
+            "discount_bps": 1000,  # 10% discount
+            "terms": "Termos",
+            "sections": [],
+            "items": [
+                {"name": "Serviço", "unit": "unit", "unit_price": 100000,
+                 "tax_rate": "23.00", "billing_type": "one_time", "quantity": "1"}
+            ],
+        },
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["totals"]["value"] == 90000  # 100000 - 10%
+
+    resp = client.get(f"{API}/proposals/{pid}", headers=_auth(token))
+    assert resp.json()["value"] == 90000  # persisted on the proposal
