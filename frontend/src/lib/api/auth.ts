@@ -1,19 +1,24 @@
 /**
- * Auth API client — MOCK implementation (F1).
+ * Auth API client — REAL implementation (integration issue #44 / F1).
  *
- * Backend is not wired yet. This module exports a typed `authApi` object whose
- * methods return promises exactly as the real HTTP client will. The integration
- * agent replaces the bodies with real `fetch` calls to FastAPI WITHOUT changing
- * the signatures. UI code (via TanStack Query mutations) depends only on the
- * `AuthApi` interface below.
+ * Signatures are unchanged from the mock: UI code (TanStack Query mutations)
+ * depends only on the `AuthApi` interface and the typed `ApiError` from
+ * `./types`.
  *
- * Deterministic dev fixtures let the flows be exercised end to end:
- *   - Login accepts the seeded dev users (password: `aurea`).
- *   - `deactivated@aurea.pt` reproduces the deactivated-account path (BR-006).
- *   - Invite/reset tokens `expired` / `revoked` / `accepted` / `invalid`
- *     reproduce the failure branches; any other token is treated as valid.
+ * Token storage is handled server-side by the /api/auth/* route handlers
+ * (httpOnly refresh cookie + browser-readable access cookie), so `login`/
+ * `acceptInvite` post to those handlers rather than talking to the backend
+ * directly. Password reset/forgot go straight to the backend (no session).
+ *
+ * KNOWN BACKEND GAPS (flagged for the integration report):
+ *  - There is no `GET invitation-by-token` endpoint, so `getInvite` cannot be
+ *    fully wired; it returns minimal metadata and defers validation to accept.
+ *  - `POST /invitations/accept` returns a user, NOT tokens — after accepting an
+ *    invite the user must log in. `acceptInvite` returns identity only and does
+ *    NOT establish a session.
  */
 
+import { http, HttpError } from "./http";
 import {
   ApiError,
   type AcceptInviteInput,
@@ -25,28 +30,34 @@ import {
   type ResetPasswordInput,
 } from "./types";
 
-const MOCK_LATENCY_MS = 650;
-const DEV_PASSWORD = "aurea";
-
-interface DevAccount {
-  userId: string;
-  role: AuthRole;
-  active: boolean;
+function normalizeRole(role: string): AuthRole {
+  return role === "admin" || role === "gestor" || role === "membro"
+    ? role
+    : "membro";
 }
 
-const DEV_ACCOUNTS: Record<string, DevAccount> = {
-  "rita@aurea.pt": { userId: "dev-admin", role: "admin", active: true },
-  "bruno@aurea.pt": { userId: "dev-gestor", role: "gestor", active: true },
-  "carla@aurea.pt": { userId: "dev-membro", role: "membro", active: true },
-  "deactivated@aurea.pt": {
-    userId: "dev-deactivated",
-    role: "membro",
-    active: false,
-  },
-};
+/** Map a backend/route-handler error (status + machine code) to an AuthErrorCode. */
+function toAuthError(status: number, code: string | undefined): ApiError {
+  if (status === 429) return new ApiError("rate_limited");
+  switch (code) {
+    case "INVALID_CREDENTIALS":
+      return new ApiError("invalid_credentials");
+    case "ACCOUNT_DEACTIVATED":
+      return new ApiError("account_deactivated");
+    case "INVALID_RESET_TOKEN":
+      return new ApiError("reset_invalid");
+    case "NETWORK":
+      return new ApiError("network");
+    default:
+      if (status === 401) return new ApiError("invalid_credentials");
+      if (status === 403) return new ApiError("account_deactivated");
+      return new ApiError("network");
+  }
+}
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function authErrorFromHttp(err: unknown): ApiError {
+  if (err instanceof HttpError) return toAuthError(err.status, err.code);
+  return new ApiError("network");
 }
 
 export interface AuthApi {
@@ -59,71 +70,67 @@ export interface AuthApi {
 
 export const authApi: AuthApi = {
   async login({ email, password }) {
-    await delay(MOCK_LATENCY_MS);
-    const account = DEV_ACCOUNTS[email.trim().toLowerCase()];
-    if (!account || password !== DEV_PASSWORD) {
-      throw new ApiError("invalid_credentials");
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch {
+      throw new ApiError("network");
     }
-    if (!account.active) {
-      // Deactivated users cannot authenticate (BR-006).
-      throw new ApiError("account_deactivated");
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw toAuthError(res.status, body?.error?.code);
     }
-    return { userId: account.userId, role: account.role };
+    return {
+      userId: String(body.userId),
+      role: normalizeRole(body.role),
+    };
   },
 
-  async forgotPassword() {
-    await delay(MOCK_LATENCY_MS);
-    // Always resolves: never disclose whether an email is registered.
+  async forgotPassword({ email }) {
+    // Always resolves for the caller — never disclose whether the email exists.
+    try {
+      await http.post("/auth/password/forgot", { email });
+    } catch {
+      /* swallow: the UI shows the same neutral confirmation regardless */
+    }
   },
 
-  async resetPassword({ token }) {
-    await delay(MOCK_LATENCY_MS);
-    const normalized = token.trim().toLowerCase();
-    if (!normalized || normalized === "invalid") {
-      throw new ApiError("reset_invalid");
-    }
-    if (normalized === "expired") {
-      throw new ApiError("reset_expired");
+  async resetPassword({ token, password }) {
+    try {
+      await http.post("/auth/password/reset", { token, newPassword: password });
+    } catch (err) {
+      throw authErrorFromHttp(err);
     }
   },
 
   async getInvite(token) {
-    await delay(MOCK_LATENCY_MS);
-    const normalized = token.trim().toLowerCase();
-    if (!normalized || normalized === "invalid") {
-      throw new ApiError("invite_invalid");
-    }
-    if (normalized === "expired") {
-      throw new ApiError("invite_expired");
-    }
-    if (normalized === "revoked") {
-      throw new ApiError("invite_revoked");
-    }
-    if (normalized === "accepted") {
-      throw new ApiError("invite_accepted");
-    }
+    // No backend GET-invite endpoint exists yet (flagged). Treat empty tokens as
+    // invalid; otherwise surface minimal metadata so the accept screen renders.
+    const normalized = token.trim();
+    if (!normalized) throw new ApiError("invite_invalid");
     return {
-      email: "novo.membro@aurea.pt",
-      role: "membro",
-      invitedBy: "Rita Andrade",
-    };
+      email: "",
+      role: "membro" as AuthRole,
+      invitedBy: "",
+    } satisfies InviteInfo;
   },
 
-  async acceptInvite({ token }) {
-    await delay(MOCK_LATENCY_MS);
-    const normalized = token.trim().toLowerCase();
-    if (!normalized || normalized === "invalid") {
-      throw new ApiError("invite_invalid");
+  async acceptInvite({ token, name, password }) {
+    try {
+      const user = await http.post<{ id: string; role: string }>(
+        "/invitations/accept",
+        { token, name, password },
+      );
+      return { userId: user.id, role: normalizeRole(user.role) };
+    } catch (err) {
+      if (err instanceof HttpError && (err.status === 400 || err.status === 404)) {
+        throw new ApiError("invite_invalid");
+      }
+      throw authErrorFromHttp(err);
     }
-    if (normalized === "expired") {
-      throw new ApiError("invite_expired");
-    }
-    if (normalized === "revoked") {
-      throw new ApiError("invite_revoked");
-    }
-    if (normalized === "accepted") {
-      throw new ApiError("invite_accepted");
-    }
-    return { userId: "dev-membro", role: "membro" };
   },
 };
