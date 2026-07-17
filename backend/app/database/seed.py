@@ -155,12 +155,15 @@ def seed_members(db: Session, *, default_password: str) -> dict[str, User]:
 # --------------------------------------------------------------------------- #
 # Pipeline stages
 # --------------------------------------------------------------------------- #
+# Canonical 6 buyer-progress stages (WORKFLOW_SPEC §1.1). Codes match the
+# frontend `PipelineStageId` enum so CRM and pipeline share one taxonomy (#57).
 _STAGES = [
-    ("Lead", "lead", "#94a3b8", 0, 10),
-    ("Qualificado", "qualified", "#60a5fa", 1, 25),
-    ("Proposta", "proposal", "#a78bfa", 2, 50),
-    ("Negociação", "negotiation", "#fbbf24", 3, 75),
-    ("Fechado", "closing", "#34d399", 4, 90),
+    ("Primeiro contacto", "new_contact", "#94a3b8", 0, 10),
+    ("Qualificação", "qualification", "#60a5fa", 1, 25),
+    ("Reunião agendada", "meeting_scheduled", "#38bdf8", 2, 40),
+    ("Elaboração de proposta", "proposal_drafting", "#a78bfa", 3, 55),
+    ("Proposta enviada", "proposal_sent", "#c084fc", 4, 70),
+    ("Negociação", "negotiation", "#fbbf24", 5, 85),
 ]
 
 
@@ -256,16 +259,16 @@ def seed_companies(
 # --------------------------------------------------------------------------- #
 # (title, company, stage_code, value_eur, probability, outcome, days_to_close)
 _OPPORTUNITIES = [
-    ("Rebranding Miolo 2026", "Miolo Editora", "closing", 18000, 90, "won", 5),
-    ("Website Verde Café", "Verde Café", "proposal", 9500, 50, "open", 20),
-    ("Campanha Nortada Verão", "Nortada Surf", "qualified", 12000, 30, "open", 35),
+    ("Rebranding Miolo 2026", "Miolo Editora", "negotiation", 18000, 90, "won", 5),
+    ("Website Verde Café", "Verde Café", "proposal_sent", 9500, 50, "open", 20),
+    ("Campanha Nortada Verão", "Nortada Surf", "qualification", 12000, 30, "open", 35),
     ("Identidade Clínica Serena", "Clínica Serena", "negotiation", 14000, 75, "open", 12),
-    ("Consultoria Fábrica", "Fábrica de Ideias", "closing", 22000, 90, "won", 3),
-    ("Packaging Doce Lima", "Doce Lima", "lead", 6000, 10, "open", 45),
-    ("Portal Atlântico", "Atlântico Imobiliária", "qualified", 16000, 25, "lost", 60),
-    ("Brochura Lumen", "Lumen Arquitetos", "proposal", 7500, 50, "open", 18),
-    ("App Verde Café Fidelização", "Verde Café", "lead", 20000, 15, "open", 70),
-    ("Sinalética Clínica Serena", "Clínica Serena", "negotiation", 5400, 70, "open", 15),
+    ("Consultoria Fábrica", "Fábrica de Ideias", "negotiation", 22000, 90, "won", 3),
+    ("Packaging Doce Lima", "Doce Lima", "new_contact", 6000, 10, "open", 45),
+    ("Portal Atlântico", "Atlântico Imobiliária", "qualification", 16000, 25, "lost", 60),
+    ("Brochura Lumen", "Lumen Arquitetos", "proposal_drafting", 7500, 50, "open", 18),
+    ("App Verde Café Fidelização", "Verde Café", "new_contact", 20000, 15, "open", 70),
+    ("Sinalética Clínica Serena", "Clínica Serena", "meeting_scheduled", 5400, 70, "open", 15),
 ]
 
 

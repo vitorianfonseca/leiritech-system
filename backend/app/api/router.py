@@ -9,6 +9,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.api.routes import (
+    attachments,
     auth,
     companies,
     contacts,
@@ -67,4 +68,7 @@ api_router.include_router(search.router, prefix="/search", tags=["search"])
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(
     dashboard.router, prefix="/dashboard", tags=["dashboard"]
+)
+api_router.include_router(
+    attachments.router, prefix="/attachments", tags=["attachments"]
 )

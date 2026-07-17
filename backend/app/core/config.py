@@ -115,7 +115,21 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
+        # Configured origins plus the local Next.js dev ports (3000 default,
+        # 3100 fallback when 3000 is taken). allow_credentials=True forbids the
+        # "*" wildcard, so origins must be enumerated explicitly.
         origins = {self.FRONTEND_URL, self.BACKEND_URL}
+        if self.ENVIRONMENT.lower() in {"development", "dev", "local", "test"}:
+            origins.update(
+                {
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000",
+                    "http://localhost:3100",
+                    "http://127.0.0.1:3100",
+                    "http://localhost:3200",
+                    "http://127.0.0.1:3200",
+                }
+            )
         return [o for o in origins if o]
 
 
