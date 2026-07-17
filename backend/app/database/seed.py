@@ -653,7 +653,18 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="also seed Aurea demo data (default in development; opt-in elsewhere)",
     )
+    parser.add_argument(
+        "--rich",
+        action="store_true",
+        help="wipe business rows and regenerate a rich ~12-month demo dataset "
+        "(dev only; delegates to app.database.seed_rich)",
+    )
     args = parser.parse_args(argv)
+
+    if args.rich:
+        from app.database import seed_rich
+
+        return seed_rich.main([])
     name, email, password, generated = _resolve_admin_credentials(args)
     include_demo, demo_password, demo_generated = _resolve_demo(args)
 
