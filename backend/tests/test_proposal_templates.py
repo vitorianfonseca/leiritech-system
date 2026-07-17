@@ -86,3 +86,25 @@ def test_template_with_children_persists():
             db.execute(delete(ProposalTemplate).where(ProposalTemplate.id == created))
             db.commit()
         db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Task 10 — schemas (pure)
+# --------------------------------------------------------------------------- #
+def test_template_create_schema_accepts_children():
+    from app.schemas.proposal_templates import ItemInput, ProposalTemplateCreate
+
+    payload = ProposalTemplateCreate(
+        name="T",
+        default_discount_bps=0,
+        sections=[{"heading": "Intro", "body": "x"}],
+        items=[
+            ItemInput(
+                name="Website", unit="fixed", unit_price=500000,
+                tax_rate=Decimal("23.00"), billing_type="one_time",
+                quantity=Decimal("1"),
+            )
+        ],
+    )
+    assert payload.items[0].unit_price == 500000
+    assert payload.sections[0].heading == "Intro"
