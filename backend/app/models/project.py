@@ -6,11 +6,12 @@ Money fields are integer EUR cents.
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import (
     BigInteger,
     Date,
+    DateTime,
     Enum,
     ForeignKey,
     Index,
@@ -71,6 +72,19 @@ class Project(AuditBase, ArchiveMixin):
         Enum(*enums.PROJECT_HEALTH, name="project_published_health", native_enum=False),
         nullable=True,
     )
+    # BR-031: when a human publishes a health that differs from the suggestion,
+    # the override reason is captured here so the project detail can explain
+    # "why Amber/Red". Denormalised publish audit (who/when) so the detail header
+    # renders without walking the activity log.
+    health_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    health_published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    health_published_by: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    # BR-053 / §1.3: reason captured when a project is paused or cancelled.
+    status_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class ProjectMember(AuditBase):
