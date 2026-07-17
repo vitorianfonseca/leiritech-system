@@ -43,6 +43,23 @@ def _create_admin(args: argparse.Namespace) -> int:
     return 0
 
 
+def _seed(args: argparse.Namespace) -> int:
+    from app.database import seed as seed_module
+
+    return seed_module.main(
+        [
+            arg
+            for pair in (
+                ("--name", args.name),
+                ("--email", args.email),
+                ("--password", args.password),
+            )
+            for arg in pair
+            if pair[1] is not None
+        ]
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -52,6 +69,14 @@ def main(argv: list[str] | None = None) -> int:
     admin.add_argument("--email", required=True)
     admin.add_argument("--password", default=None, help="omit to enter interactively")
     admin.set_defaults(func=_create_admin)
+
+    seed = sub.add_parser(
+        "seed", help="Idempotent seed: first admin + Aurea demo data (Issue #11)"
+    )
+    seed.add_argument("--name", default=None)
+    seed.add_argument("--email", default=None)
+    seed.add_argument("--password", default=None, help="admin password; or SEED_ADMIN_PASSWORD env")
+    seed.set_defaults(func=_seed)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

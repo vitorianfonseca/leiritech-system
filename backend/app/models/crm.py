@@ -143,6 +143,14 @@ class Opportunity(AuditBase, ArchiveMixin):
 
 class Proposal(AuditBase, ArchiveMixin):
     __tablename__ = "proposals"
+    __table_args__ = (
+        Index(
+            "ix_proposals_reference_trgm",
+            "reference",
+            postgresql_using="gin",
+            postgresql_ops={"reference": "gin_trgm_ops"},
+        ),
+    )
 
     opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
         PG_UUID(as_uuid=True), ForeignKey("opportunities.id", ondelete="SET NULL"), index=True
@@ -171,6 +179,14 @@ class Proposal(AuditBase, ArchiveMixin):
 
 class Interaction(AuditBase):
     __tablename__ = "interactions"
+    __table_args__ = (
+        Index(
+            "ix_interactions_body_trgm",
+            "body",
+            postgresql_using="gin",
+            postgresql_ops={"body": "gin_trgm_ops"},
+        ),
+    )
 
     type: Mapped[str] = mapped_column(
         Enum(*enums.INTERACTION_TYPES, name="interaction_type", native_enum=False),
