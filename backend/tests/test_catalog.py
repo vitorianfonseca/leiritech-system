@@ -99,3 +99,26 @@ def test_catalog_item_persists():
             db.execute(delete(CatalogItem).where(CatalogItem.id == created))
             db.commit()
         db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Task 3 — schemas (pure)
+# --------------------------------------------------------------------------- #
+def test_catalog_create_rejects_negative_price():
+    from pydantic import ValidationError
+
+    from app.schemas.catalog import CatalogItemCreate
+
+    with pytest.raises(ValidationError):
+        CatalogItemCreate(
+            name="x", unit="unit", unit_price=-1, billing_type="one_time"
+        )
+
+
+def test_catalog_create_defaults_tax_23():
+    from app.schemas.catalog import CatalogItemCreate
+
+    payload = CatalogItemCreate(
+        name="x", unit="unit", unit_price=1000, billing_type="one_time"
+    )
+    assert str(payload.tax_rate) == "23.00"
