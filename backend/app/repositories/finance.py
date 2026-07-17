@@ -12,6 +12,7 @@ so a Membro never reaches these queries at all.
 from __future__ import annotations
 
 import uuid
+from datetime import date, timedelta
 
 from sqlalchemy import ColumnElement, Select, and_, func, select
 from sqlalchemy.orm import Session
@@ -146,3 +147,49 @@ def logged_seconds(db: Session, project_id: uuid.UUID) -> float:
         .where(Task.project_id == project_id, TimeEntry.ended_at.is_not(None))
     )
     return float(seconds or 0.0)
+
+
+# --------------------------------------------------------------------------- #
+# Automation reads (AUTO-02 overdue / AUTO-08 due-soon)
+# --------------------------------------------------------------------------- #
+# A milestone is still "open" (money outstanding) while planned/invoiced/
+# partially_paid; paid and cancelled are settled/void and never flagged.
+_OPEN_MILESTONE_STATUSES = ("planned", "invoiced", "partially_paid")
+
+
+def overdue_open_milestones(db: Session, *, today: date) -> list[PaymentMilestone]:
+    """Open milestones whose ``expected_date`` is strictly before ``today`` — the
+    AUTO-02 set. Runs regardless of project state (external reconciliation may
+    outlive delivery, BR-054)."""
+    return list(
+        db.execute(
+            select(PaymentMilestone).where(
+                PaymentMilestone.status.in_(_OPEN_MILESTONE_STATUSES),
+                PaymentMilestone.expected_date.is_not(None),
+                PaymentMilestone.expected_date < today,
+            )
+        ).scalars()
+    )
+
+
+def due_soon_milestones(
+    db: Session, *, today: date, within_days: int, live_statuses: tuple[str, ...]
+) -> list[PaymentMilestone]:
+    """Open milestones due within ``within_days`` (inclusive) on a LIVE project —
+    the AUTO-08 set (BR-067, live project only per BR-054)."""
+    from app.models.project import Project
+
+    horizon = today + timedelta(days=within_days)
+    return list(
+        db.execute(
+            select(PaymentMilestone)
+            .join(Project, PaymentMilestone.project_id == Project.id)
+            .where(
+                PaymentMilestone.status.in_(_OPEN_MILESTONE_STATUSES),
+                PaymentMilestone.expected_date.is_not(None),
+                PaymentMilestone.expected_date >= today,
+                PaymentMilestone.expected_date <= horizon,
+                Project.status.in_(live_statuses),
+            )
+        ).scalars()
+    )

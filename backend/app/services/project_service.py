@@ -56,7 +56,7 @@ from app.schemas.projects import (
     ProjectTemplateCreate,
     ProjectUpdate,
 )
-from app.services import activity_service, opportunity_service
+from app.services import activity_service, notification_service, opportunity_service
 
 logger = structlog.get_logger("aurea.project")
 
@@ -504,6 +504,21 @@ def publish_health(
             "override": is_override,
             "reason": project.health_reason,
         },
+    )
+    # Event notification (F15 'project health published'): inform the project's
+    # members (other than the publisher) that a health was published.
+    member_ids = [
+        m.user_id
+        for m in project_repo.list_members(db, project.id)
+        if m.user_id != user.id
+    ]
+    notification_service.notify_many(
+        db,
+        user_ids=member_ids,
+        type="project_health_published",
+        body=f"Saúde do projeto «{project.name}» publicada: {payload.health}.",
+        entity_type=ENTITY_TYPE,
+        entity_id=project.id,
     )
     logger.info(
         "project_health_published",

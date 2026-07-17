@@ -15,6 +15,7 @@ from app.api.routes import (
     finance,
     interactions,
     invitations,
+    notifications,
     opportunities,
     phases,
     pipeline_stages,
@@ -57,4 +58,7 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(time.router, prefix="/time", tags=["time"])
 api_router.include_router(finance.router, prefix="/finance", tags=["finance"])
 api_router.include_router(workload.router, prefix="/workload", tags=["workload"])
+api_router.include_router(
+    notifications.router, prefix="/notifications", tags=["notifications"]
+)
 api_router.include_router(search.router, prefix="/search", tags=["search"])

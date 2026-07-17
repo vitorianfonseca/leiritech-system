@@ -37,7 +37,7 @@ from app.schemas.finance import (
     ProjectCostUpdate,
     ProjectFinancialSummary,
 )
-from app.services import activity_service
+from app.services import activity_service, notification_service
 
 logger = structlog.get_logger("aurea.finance")
 
@@ -267,6 +267,27 @@ def change_milestone_status(
         before=before,
         after=_snapshot(milestone),
     )
+    # Event notification (F15 'payment confirmed'): tell the project manager when
+    # money is received (partial or full).
+    if target in ("paid", "partially_paid"):
+        project = db.get(Project, milestone.project_id)
+        if (
+            project is not None
+            and project.manager_id is not None
+            and project.manager_id != user.id
+        ):
+            amount = (milestone.received_amount or milestone.amount or 0) / 100
+            notification_service.create_notification(
+                db,
+                user_id=project.manager_id,
+                type="payment_confirmed",
+                body=(
+                    f"Pagamento registado no projeto «{project.name}» "
+                    f"({amount:.2f}€)."
+                ),
+                entity_type=MILESTONE_ENTITY,
+                entity_id=milestone.id,
+            )
     logger.info(
         "payment_milestone_status_changed",
         milestone_id=str(milestone.id),
@@ -480,3 +501,45 @@ def financial_summary(
         margin=margin,
         milestone_count=milestone_count,
     )
+
+
+# --------------------------------------------------------------------------- #
+# Auto-overdue (AUTO-02 / BR-068) — callable from the cron entrypoint
+# --------------------------------------------------------------------------- #
+def expire_overdue_milestones(
+    db: Session, *, today: date | None = None
+) -> list[PaymentMilestone]:
+    """Transition every open payment milestone past its ``expected_date`` to
+    ``overdue`` (AUTO-02 / BR-068). Runs regardless of project state.
+
+    Returns the milestones transitioned by THIS run (used by the automation to
+    notify exactly once, at transition). Idempotent by state: a milestone already
+    ``overdue`` is not re-selected. Does NOT commit — the caller owns the
+    transaction. Notification is the automation layer's job, not this function's.
+    """
+    today = today or datetime.now(tz=UTC).date()
+    overdue = finance_repo.overdue_open_milestones(db, today=today)
+    for milestone in overdue:
+        before = _snapshot(milestone)
+        milestone.status = "overdue"
+        db.flush()
+        activity_service.record(
+            db,
+            entity_type=MILESTONE_ENTITY,
+            entity_id=milestone.id,
+            action="payment_milestone.overdue",
+            actor_id=None,  # system action (AUTO-02)
+            before=before,
+            after=_snapshot(milestone),
+        )
+        logger.info(
+            "payment_milestone_auto_overdue",
+            milestone_id=str(milestone.id),
+            expected_date=str(milestone.expected_date),
+        )
+    logger.info(
+        "payment_milestone_overdue_run",
+        overdue_count=len(overdue),
+        run_date=str(today),
+    )
+    return overdue

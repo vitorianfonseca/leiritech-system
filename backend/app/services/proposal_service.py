@@ -37,7 +37,7 @@ from app.schemas.proposals import (
     ProposalResend,
     ProposalUpdate,
 )
-from app.services import activity_service
+from app.services import activity_service, notification_service
 
 logger = structlog.get_logger("aurea.proposal")
 
@@ -353,9 +353,21 @@ def accept_proposal(db: Session, user: User, proposal_id: uuid.UUID) -> Proposal
             code="PROPOSAL_INVALID_TRANSITION",
         )
     _assert_opportunity_not_lost(db, proposal)
-    return _transition(
+    result = _transition(
         db, user, proposal, new_status="accepted", action="proposal.accepted"
     )
+    # Event notification (F15): tell the proposal owner it was accepted.
+    owner_id = _owner_id(db, proposal)
+    if owner_id is not None and owner_id != user.id:
+        notification_service.create_notification(
+            db,
+            user_id=owner_id,
+            type="proposal_accepted",
+            body=f"Proposta «{proposal.reference}» foi aceite.",
+            entity_type=ENTITY_TYPE,
+            entity_id=proposal.id,
+        )
+    return result
 
 
 def reject_proposal(

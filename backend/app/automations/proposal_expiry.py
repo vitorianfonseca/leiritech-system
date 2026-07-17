@@ -1,33 +1,47 @@
 """AUTO-04 — proposal auto-expiry job (BR-027).
 
-A daily job that transitions every ``sent``/``viewed`` proposal past its
-``valid_until`` to ``expired`` and notifies the owner. The business logic lives
-in ``proposal_service.expire_overdue_proposals``; this module is only the
-invokable entrypoint — a scheduler (e.g. Railway Cron) runs::
+Transitions every ``sent``/``viewed`` proposal past its ``valid_until`` to
+``expired`` and notifies the owner. The business logic lives in
+``proposal_service.expire_overdue_proposals`` (which also inserts the owner
+notification); this module is only the invokable entrypoint.
+
+Idempotent by state: once a proposal is ``expired`` the source query no longer
+selects it, so a re-run does nothing. Runnable standalone::
 
     python -m app.automations.proposal_expiry
 
-Kept intentionally minimal; issue #22 expands the automations layer.
+or through the unified dispatcher (``python -m app.automations.run AUTO-04``).
 """
 
 from __future__ import annotations
 
-import structlog
+from datetime import datetime
 
+import structlog
+from sqlalchemy.orm import Session
+
+from app.automations._helpers import resolve_today
 from app.database.session import SessionLocal
 from app.services import proposal_service
 
 logger = structlog.get_logger("aurea.automation.proposal_expiry")
 
+CODE = "AUTO-04"
+
+
+def execute(db: Session, *, now: datetime | None = None) -> int:
+    """Expire overdue proposals in the caller's transaction. Returns the count."""
+    expired = proposal_service.expire_overdue_proposals(db, today=resolve_today(now))
+    return len(expired)
+
 
 def run() -> int:
-    """Execute the expiry sweep in its own transaction. Returns the number of
-    proposals expired (useful for the CLI exit banner and monitoring)."""
+    """Session-managed entrypoint (opens, commits, closes its own session)."""
     db = SessionLocal()
     try:
-        expired = proposal_service.expire_overdue_proposals(db)
+        count = execute(db)
         db.commit()
-        return len(expired)
+        return count
     except Exception:
         db.rollback()
         raise

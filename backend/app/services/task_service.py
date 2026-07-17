@@ -39,7 +39,7 @@ from app.schemas.tasks import (
     TaskUnblock,
     TaskUpdate,
 )
-from app.services import activity_service, project_service
+from app.services import activity_service, notification_service, project_service
 
 logger = structlog.get_logger("aurea.task")
 
@@ -224,8 +224,27 @@ def create_task(db: Session, user: User, payload: TaskCreate) -> Task:
         actor_id=user.id,
         after=_snapshot(task),
     )
+    # Event notification (F15): tell an assignee (other than the actor) a task
+    # was assigned to them.
+    _notify_assignee(db, task, actor_id=user.id)
     logger.info("task_created", task_id=str(task.id), actor_id=str(user.id))
     return task
+
+
+def _notify_assignee(db: Session, task: Task, *, actor_id: uuid.UUID) -> None:
+    """Notify a task's primary assignee (F15 'task assigned to you'), unless the
+    assignee is the actor or the task is unassigned."""
+    assignee = task.primary_assignee_id
+    if assignee is None or assignee == actor_id:
+        return
+    notification_service.create_notification(
+        db,
+        user_id=assignee,
+        type="task_assigned",
+        body=f"Foi-lhe atribuída a tarefa «{task.title}».",
+        entity_type=ENTITY_TYPE,
+        entity_id=task.id,
+    )
 
 
 def _validate_phase(db: Session, project_id: uuid.UUID, phase_id: uuid.UUID) -> None:
@@ -292,6 +311,7 @@ def assign_task(
         before=before,
         after=_snapshot(task),
     )
+    _notify_assignee(db, task, actor_id=user.id)  # F15 'task assigned to you'
     logger.info(
         "task_assigned",
         task_id=str(task.id),
@@ -402,6 +422,16 @@ def transition_task(
         to_status=target,
         actor_id=str(user.id),
     )
+    # AUTO-07 event (BR-051): completing the last open task in a phase suggests
+    # phase completion. Single reusable call into the phase domain; the phase
+    # service owns the "is the phase ready?" rule and the notification.
+    if source != "done" and target == "done" and task.phase_id is not None:
+        from app.models.project import ProjectPhase
+        from app.services import phase_service
+
+        phase = db.get(ProjectPhase, task.phase_id)
+        if phase is not None:
+            phase_service.suggest_completion_if_ready(db, phase)
     return task
 
 

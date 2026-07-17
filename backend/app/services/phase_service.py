@@ -30,12 +30,16 @@ from app.schemas.phases import (
     PhaseCreate,
     PhaseUpdate,
 )
-from app.services import activity_service, project_service
+from app.services import activity_service, notification_service, project_service
 
 logger = structlog.get_logger("aurea.phase")
 
 PHASE_ENTITY = "phase"
 MILESTONE_ENTITY = "milestone"
+
+# BR-054 — a phase-completion suggestion (AUTO-07) is only meaningful for a live
+# project. Kept local so the phase domain does not read a service private name.
+_LIVE_PROJECT_STATUSES = ("planning", "active", "on_hold")
 
 # Phase state machine (§1.5).
 _PHASE_TRANSITIONS: dict[str, tuple[str, ...]] = {
@@ -246,6 +250,51 @@ def complete_phase(db: Session, user: User, phase_id: uuid.UUID) -> ProjectPhase
     """POST /phases/{id}/complete — convenience wrapper over the ``completed``
     transition (BR-051)."""
     return transition_phase(db, user, phase_id, "completed")
+
+
+# --------------------------------------------------------------------------- #
+# AUTO-07 — phase-completion suggestion (BR-051, event + daily reconciliation)
+# --------------------------------------------------------------------------- #
+def suggest_completion_if_ready(
+    db: Session, phase: ProjectPhase, *, run_date=None
+) -> bool:
+    """If every non-archived task in ``phase`` is done but the phase is not yet
+    ``completed`` (on a live project), notify the phase/project owner suggesting
+    completion (AUTO-07 — never auto-completes, BR-051/C2). Idempotent per day
+    via ``group_key``. Returns True when a notification was created.
+
+    Called both as an EVENT (from the task service when a task reaches ``done``)
+    and as a daily reconciliation sweep. Does NOT commit.
+    """
+    from datetime import UTC, datetime
+
+    if phase.status == "completed":
+        return False
+    project = db.get(Project, phase.project_id)
+    if project is None or project.status not in _LIVE_PROJECT_STATUSES:
+        return False
+    total, done = phase_repo.phase_task_counts(db, phase.id)
+    if total == 0 or total != done:
+        return False
+    recipient = phase.owner_id or project.manager_id
+    if recipient is None:
+        return False
+    today = run_date or datetime.now(tz=UTC).date()
+    return (
+        notification_service.create_notification(
+            db,
+            user_id=recipient,
+            type="phase_completion_suggestion",
+            body=(
+                f"Todas as tarefas da fase «{phase.name}» estão concluídas. "
+                f"Concluir a fase?"
+            ),
+            entity_type="phase",
+            entity_id=phase.id,
+            group_key=f"AUTO-07:{phase.id}:{today.isoformat()}",
+        )
+        is not None
+    )
 
 
 # --------------------------------------------------------------------------- #
