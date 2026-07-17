@@ -11,6 +11,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     attachments,
     auth,
+    comments,
     companies,
     contacts,
     dashboard,
@@ -71,4 +72,7 @@ api_router.include_router(
 )
 api_router.include_router(
     attachments.router, prefix="/attachments", tags=["attachments"]
+)
+api_router.include_router(
+    comments.router, prefix="/comments", tags=["collaboration"]
 )
