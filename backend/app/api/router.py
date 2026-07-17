@@ -12,6 +12,7 @@ from app.api.routes import (
     auth,
     companies,
     contacts,
+    finance,
     interactions,
     invitations,
     opportunities,
@@ -52,3 +53,4 @@ api_router.include_router(
 )
 api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(time.router, prefix="/time", tags=["time"])
+api_router.include_router(finance.router, prefix="/finance", tags=["finance"])

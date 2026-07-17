@@ -124,6 +124,18 @@ def require_invite_capability(user: CurrentUser) -> User:
     return user
 
 
+def require_finance_capability(user: CurrentUser) -> User:
+    """Financial data gate (BR-008): Admin always, Gestor only with the payments
+    grant, Membro never. Enforced backend-side on every finance endpoint."""
+    if not permissions.can_manage_financials(user):
+        raise errors.forbidden(
+            "Não tem permissão para aceder a dados financeiros.",
+            code="FINANCE_NOT_PERMITTED",
+        )
+    return user
+
+
 RequireAdmin = Annotated[User, Depends(require_admin)]
 RequireGestor = Annotated[User, Depends(require_gestor)]
 RequireInviteCapability = Annotated[User, Depends(require_invite_capability)]
+RequireFinance = Annotated[User, Depends(require_finance_capability)]
