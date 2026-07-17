@@ -6,6 +6,7 @@ from typing import Any
 
 import structlog
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -74,7 +75,10 @@ async def validation_exception_handler(
         content=_error_envelope(
             code="VALIDATION_ERROR",
             message="Os dados enviados são inválidos.",
-            details={"errors": exc.errors()},
+            # jsonable_encoder flattens non-serializable ctx values (e.g. the
+            # ValueError raised by a Pydantic model validator) that json.dumps
+            # would otherwise choke on, yielding a 500 instead of this 422.
+            details={"errors": jsonable_encoder(exc.errors())},
         ),
     )
 

@@ -8,7 +8,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.routes import auth, invitations, users
+from app.api.routes import (
+    auth,
+    companies,
+    contacts,
+    interactions,
+    invitations,
+    users,
+)
 
 api_router = APIRouter()
 
@@ -17,3 +24,8 @@ api_router.include_router(
     invitations.router, prefix="/invitations", tags=["invitations"]
 )
 api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(companies.router, prefix="/companies", tags=["crm"])
+api_router.include_router(contacts.router, prefix="/contacts", tags=["crm"])
+api_router.include_router(
+    interactions.router, prefix="/interactions", tags=["crm"]
+)
