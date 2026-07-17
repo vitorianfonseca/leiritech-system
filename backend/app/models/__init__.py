@@ -23,6 +23,11 @@ from app.models.crm import (
     Proposal,
 )
 from app.models.finance import PaymentMilestone, ProjectCost
+from app.models.proposal_content import (
+    ProposalTemplate,
+    ProposalTemplateItem,
+    ProposalTemplateSection,
+)
 from app.models.project import (
     Milestone,
     Project,
@@ -55,6 +60,9 @@ __all__ = [
     "Proposal",
     "PaymentMilestone",
     "ProjectCost",
+    "ProposalTemplate",
+    "ProposalTemplateItem",
+    "ProposalTemplateSection",
     "Milestone",
     "Project",
     "ProjectMember",
