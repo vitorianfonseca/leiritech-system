@@ -65,7 +65,7 @@ export function AgendaCard({
 
   const range = React.useMemo(() => {
     const now = new Date();
-    return { start: format(now, "yyyy-MM-dd"), end: format(addDays(now, 14), "yyyy-MM-dd") };
+    return { start: format(now, "yyyy-MM-dd"), end: format(addDays(now, 7), "yyyy-MM-dd") };
   }, []);
 
   const { data, isLoading } = useQuery({
@@ -90,7 +90,7 @@ export function AgendaCard({
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
-      <CardContent className="min-h-0 flex-1 overflow-y-auto">
+      <CardContent className="max-h-[20rem] overflow-y-auto">
         {isLoading ? (
           <ul className="space-y-3" aria-hidden>
             {Array.from({ length: 6 }).map((_, i) => (

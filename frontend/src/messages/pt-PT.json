@@ -964,7 +964,7 @@
     },
     "weekAgenda": {
       "title": "Agenda da semana",
-      "subtitle": "Tudo com prazo nos próximos 14 dias",
+      "subtitle": "Tudo com prazo nos próximos 7 dias",
       "empty": "Nada agendado para os próximos dias."
     },
     "charts": {

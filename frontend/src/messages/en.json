@@ -964,7 +964,7 @@
     },
     "weekAgenda": {
       "title": "This week's agenda",
-      "subtitle": "Everything due in the next 14 days",
+      "subtitle": "Everything due in the next 7 days",
       "empty": "Nothing scheduled for the coming days."
     },
     "charts": {

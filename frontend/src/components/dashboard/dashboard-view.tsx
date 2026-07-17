@@ -99,7 +99,7 @@ export function DashboardView({ user }: DashboardViewProps) {
       <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
 
       {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         <AttentionPanel
           groups={data?.attention ?? []}
           loading={isLoading}
@@ -109,7 +109,7 @@ export function DashboardView({ user }: DashboardViewProps) {
           {isLoading || showTaskFlow ? (
             <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
           ) : null}
-          <AgendaCard user={{ id: user.id, role: user.role }} className="flex-1" />
+          <AgendaCard user={{ id: user.id, role: user.role }} />
         </div>
       </div>
 
