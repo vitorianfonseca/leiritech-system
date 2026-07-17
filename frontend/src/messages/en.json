@@ -960,6 +960,11 @@
         "overduePayment": "Collection overdue by {days, plural, one {# day} other {# days}} · {amount}"
       }
     },
+    "weekAgenda": {
+      "title": "This week's agenda",
+      "subtitle": "Everything due in the next 14 days",
+      "empty": "Nothing scheduled for the coming days."
+    },
     "charts": {
       "pipeline": {
         "title": "Pipeline evolution",

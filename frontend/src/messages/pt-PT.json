@@ -960,6 +960,11 @@
         "overduePayment": "Recebimento em atraso há {days, plural, one {# dia} other {# dias}} · {amount}"
       }
     },
+    "weekAgenda": {
+      "title": "Agenda da semana",
+      "subtitle": "Tudo com prazo nos próximos 14 dias",
+      "empty": "Nada agendado para os próximos dias."
+    },
     "charts": {
       "pipeline": {
         "title": "Evolução do pipeline",

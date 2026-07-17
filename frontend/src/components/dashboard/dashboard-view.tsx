@@ -11,6 +11,7 @@ import { dashboardApi } from "@/lib/api/dashboard";
 import type { Role } from "@/lib/session";
 import { StatTiles } from "./stat-tiles";
 import { AttentionPanel } from "./attention-panel";
+import { AgendaCard } from "./agenda-card";
 import {
   PipelineEvolutionChart,
   TaskFlowChart,
@@ -97,24 +98,29 @@ export function DashboardView({ user }: DashboardViewProps) {
 
       <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
 
-      {/* Attention — full width (project-health card removed per request) */}
-      <AttentionPanel groups={data?.attention ?? []} loading={isLoading} />
+      {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+        <AttentionPanel
+          groups={data?.attention ?? []}
+          loading={isLoading}
+          className="lg:col-span-2"
+        />
+        <div className="flex flex-col gap-6">
+          {isLoading || showTaskFlow ? (
+            <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
+          ) : null}
+          <AgendaCard user={{ id: user.id, role: user.role }} className="flex-1" />
+        </div>
+      </div>
 
       {/* Pipeline evolution */}
       {(isLoading && managementView) || showPipeline ? (
         <PipelineEvolutionChart data={charts?.pipeline ?? []} loading={isLoading} />
       ) : null}
 
-      {/* Throughput + team load */}
-      {isLoading || showTaskFlow || showTeamLoad ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {isLoading || showTaskFlow ? (
-            <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
-          ) : null}
-          {(isLoading && managementView) || showTeamLoad ? (
-            <TeamLoadChart data={charts?.teamLoad ?? []} loading={isLoading} />
-          ) : null}
-        </div>
+      {/* Team load — full width */}
+      {(isLoading && managementView) || showTeamLoad ? (
+        <TeamLoadChart data={charts?.teamLoad ?? []} loading={isLoading} />
       ) : null}
 
       {/* Contracted vs received — GATED (BR-008) */}
