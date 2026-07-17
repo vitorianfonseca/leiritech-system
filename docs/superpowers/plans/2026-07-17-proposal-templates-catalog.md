@@ -22,6 +22,38 @@
 
 ---
 
+## ⚠️ TEST CONVENTIONS — REVISED 2026-07-17 (overrides all task test code below)
+
+The plan's task code was drafted against assumed fixtures (`db_session`, `gestor_client`,
+`membro_client`, `company_factory`) and error classes (`NotFoundError`, `ConflictError`)
+that **do not exist** in this repo. The real conventions (confirmed against
+`backend/tests/conftest.py` + `backend/tests/test_proposals.py`) are:
+
+- **Tests are HTTP-integration against the real Docker Postgres (:5433)** — there is no
+  ORM `db_session` fixture and no per-test rollback. The backend returns **snake_case
+  JSON** (assert `one_time`, `unit_price`, not camelCase — the frontend maps).
+- **Fixtures:** `client` (TestClient), `make_user(role="gestor"|"membro")` (commits a
+  user, cleans up at teardown). Helpers (define per test module, mirroring
+  `test_proposals.py`): `API = "/api/v1"`, `_token(client, email)`, `_auth(token)`.
+- **Cleanup:** each new test module defines a `track` fixture that deletes created rows
+  by id via `SessionLocal()` at teardown (mirror `test_proposals.py::track`). Track the
+  new entity tables it creates (`catalog_items`, `proposal_templates`, `proposals`, …).
+- **Direct-ORM checks** (model persistence, repos) may open `SessionLocal()` directly
+  like the `_add_attachment` helper does — create, commit, assert, delete. No fixture.
+- **Errors are factory functions, not classes:** services call `raise errors.not_found(msg)`,
+  `raise errors.conflict(msg)`, `raise errors.forbidden(msg)` (all return `ApiError`,
+  an `HTTPException`). Wherever a task says `errors.NotFoundError`/`errors.ConflictError`,
+  use `errors.not_found(...)`/`errors.conflict(...)`. In tests, assert on the **HTTP
+  status** (404/409) via the `client`, or catch `app.core.errors.ApiError` for a
+  direct service call.
+- Wherever task code shows `db_session`, `gestor_client`, `membro_client`,
+  `gestor_user`, or `company_factory`, translate to the pattern above. Pure-function
+  tests (Tasks 7 & 8 — totals, placeholders) need no fixtures and stay as written.
+- **Migrations apply to the live dev DB** (`alembic upgrade head` targets :5433). Adding
+  tables/columns is additive and safe; the running app keeps working.
+
+---
+
 ## File Structure
 
 **Backend (new):**
