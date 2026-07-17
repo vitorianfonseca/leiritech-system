@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Manrope, Geist_Mono, Marcellus } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const marcellus = Marcellus({
+  variable: "--font-marcellus",
   subsets: ["latin"],
   weight: "400",
 });
@@ -48,7 +48,7 @@ export default async function RootLayout({
       lang={locale}
       data-text-size={textSize}
       suppressHydrationWarning
-      className={`${manrope.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${manrope.variable} ${geistMono.variable} ${marcellus.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <NextIntlClientProvider locale={locale} messages={messages}>

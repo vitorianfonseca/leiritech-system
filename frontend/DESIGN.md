@@ -130,8 +130,8 @@ Full dark values live in `globals.css` under `.dark`.
 ## Typography
 
 - **Body / UI**: **Manrope** (`--font-sans`). Geometric, clean, numeric-friendly.
-- **Headings / editorial moments**: **Instrument Serif** (`--font-heading`), a high-contrast
-  display serif. Used for page titles, greeting headers, big metric labels — the "editorial"
+- **Headings / editorial moments**: **Marcellus** (`--font-heading`), an elegant classical
+  serif. Used for page titles, greeting headers, big metric labels — the "editorial"
   voice of Aurea. Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
 - **Mono**: Geist Mono (`--font-mono`) for references, IDs, code, keyboard hints.
 
