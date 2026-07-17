@@ -9,6 +9,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.api.routes import (
+    activity,
     attachments,
     auth,
     calendar,
@@ -80,3 +81,4 @@ api_router.include_router(
 )
 api_router.include_router(calendar.router, prefix="/calendar", tags=["calendar"])
 api_router.include_router(my_work.router, prefix="/my-work", tags=["my-work"])
+api_router.include_router(activity.router, prefix="/activity", tags=["activity"])

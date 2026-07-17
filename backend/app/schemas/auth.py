@@ -108,3 +108,19 @@ class InvitationAccept(BaseModel):
     token: str = Field(min_length=1)
     name: str = Field(min_length=1, max_length=255)
     password: str = Password
+
+
+class InvitationPublicResponse(BaseModel):
+    """Public, tokenized metadata for the accept-invite screen (no auth).
+
+    Deliberately minimal — only what the screen needs to render (who invited you,
+    for what role, at what email, until when). Carries NO ids or grant flags, so a
+    leaked/guessed token reveals nothing an accept flow would not already show.
+    ``invited_by`` is the inviter's display name ("" when the inviter was removed).
+    """
+
+    email: EmailStr
+    role: str
+    invited_by: str
+    expires_at: datetime
+    status: str

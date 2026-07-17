@@ -75,3 +75,21 @@ def mark_read(
 def mark_all_read(user: CurrentUser, db: DbSession) -> MarkAllReadResponse:
     """Mark all of the caller's unread notifications read."""
     return MarkAllReadResponse(marked=notification_service.mark_all_read(db, user))
+
+
+@router.post("/{notification_id}/archive", response_model=NotificationResponse)
+def archive_notification(
+    notification_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> NotificationResponse:
+    """Archive one of the caller's notifications (404 if not theirs, idempotent)."""
+    notification = notification_service.archive(db, user, notification_id)
+    return NotificationResponse.model_validate(notification)
+
+
+@router.post("/{notification_id}/unarchive", response_model=NotificationResponse)
+def unarchive_notification(
+    notification_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> NotificationResponse:
+    """Restore one of the caller's archived notifications (404 if not theirs)."""
+    notification = notification_service.unarchive(db, user, notification_id)
+    return NotificationResponse.model_validate(notification)

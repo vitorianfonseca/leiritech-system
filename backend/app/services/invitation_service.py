@@ -83,6 +83,48 @@ def create_invitation(
     return invite, raw_token
 
 
+def get_invitation_by_token(db: Session, token: str) -> tuple[Invitation, str]:
+    """Resolve a raw invite token to its (still-valid) invitation for the public
+    accept screen. Returns ``(invitation, inviter_name)``.
+
+    Mirrors the acceptance guards so the metadata read and the accept POST agree:
+    an unknown token is **404** (never existed / wrong token — enumeration-safe),
+    while a token that existed but is spent (accepted/revoked/expired) is **410**
+    (gone). The token is matched by hash — the raw token never touches the DB.
+    """
+    invite = db.execute(
+        select(Invitation).where(
+            Invitation.token_hash == security.hash_token(token)
+        )
+    ).scalar_one_or_none()
+
+    if invite is None:
+        raise errors.not_found(
+            "Convite inválido ou expirado. Peça um novo convite.",
+            code="INVALID_INVITATION",
+        )
+    if invite.status == "accepted":
+        raise errors.gone(
+            "Convite já aceite. Inicie sessão para continuar.",
+            code="INVITATION_ALREADY_ACCEPTED",
+        )
+    if invite.status == "revoked":
+        raise errors.gone(
+            "Este convite foi revogado.", code="INVITATION_REVOKED"
+        )
+    if invite.status == "expired" or invite.expires_at <= _now():
+        raise errors.gone(
+            "Convite expirado. Peça um novo convite.", code="INVITATION_EXPIRED"
+        )
+
+    inviter_name = ""
+    if invite.invited_by is not None:
+        inviter = db.get(User, invite.invited_by)
+        if inviter is not None:
+            inviter_name = inviter.name
+    return invite, inviter_name
+
+
 def accept_invitation(db: Session, payload: InvitationAccept) -> User:
     """Consume a valid invitation token: create + activate the user (§1.10)."""
     invite = db.execute(

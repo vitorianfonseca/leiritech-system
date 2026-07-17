@@ -165,3 +165,42 @@ def mark_all_read(db: Session, user: User) -> int:
     marked = notification_repo.mark_all_read(db, user.id)
     logger.info("notifications_read_all", user_id=str(user.id), marked=marked)
     return marked
+
+
+def archive(db: Session, user: User, notification_id: uuid.UUID) -> Notification:
+    """Archive one of the caller's notifications (idempotent). A notification that
+    does not belong to the caller yields 404 (enumeration-safe), exactly like
+    ``mark_read`` — a user can only ever touch their own rows (BR-002)."""
+    notification = notification_repo.get_for_user(db, user.id, notification_id)
+    if notification is None:
+        raise errors.not_found(
+            "Notificação não encontrada.", code="NOTIFICATION_NOT_FOUND"
+        )
+    if notification.archived_at is None:
+        notification.archived_at = datetime.now(tz=UTC)
+        db.flush()
+        logger.info(
+            "notification_archived",
+            notification_id=str(notification.id),
+            user_id=str(user.id),
+        )
+    return notification
+
+
+def unarchive(db: Session, user: User, notification_id: uuid.UUID) -> Notification:
+    """Restore one of the caller's archived notifications (idempotent). Same
+    own-scoped 404 guard as :func:`archive`."""
+    notification = notification_repo.get_for_user(db, user.id, notification_id)
+    if notification is None:
+        raise errors.not_found(
+            "Notificação não encontrada.", code="NOTIFICATION_NOT_FOUND"
+        )
+    if notification.archived_at is not None:
+        notification.archived_at = None
+        db.flush()
+        logger.info(
+            "notification_unarchived",
+            notification_id=str(notification.id),
+            user_id=str(user.id),
+        )
+    return notification

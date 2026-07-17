@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.core import errors, security
 from app.core.permissions import Role
 from app.models.time_entry import TimeEntry
-from app.models.user import User
+from app.models.user import User, UserPreference
 from app.services import auth_service
 
 logger = structlog.get_logger("aurea.users")
@@ -38,6 +38,67 @@ def get_user_or_404(db: Session, user_id: uuid.UUID) -> User:
     if user is None:
         raise errors.not_found("Utilizador não encontrado.", code="USER_NOT_FOUND")
     return user
+
+
+# --------------------------------------------------------------------------- #
+# Directory (team members) — role-scoped read (BR-002)
+# --------------------------------------------------------------------------- #
+def list_directory(
+    db: Session, *, include_inactive: bool = False
+) -> list[User]:
+    """Team directory, ordered by name. ``include_inactive`` widens the list to
+    deactivated accounts (management uses it to reactivate); the default is the
+    active roster only. Row-level field redaction for a Membro caller is applied
+    by the route, not here — this is a pure read."""
+    stmt = select(User)
+    if not include_inactive:
+        stmt = stmt.where(User.status == "active")
+    stmt = stmt.order_by(User.name.asc())
+    return list(db.execute(stmt).scalars())
+
+
+def active_admin_count(db: Session) -> int:
+    """Public wrapper over the last-admin guard count (BR-005), for the directory
+    snapshot the settings members table shows."""
+    return _active_admin_count(db)
+
+
+# --------------------------------------------------------------------------- #
+# Per-user preferences — always OWN-scoped (BR-002)
+# --------------------------------------------------------------------------- #
+def get_or_create_preferences(db: Session, user: User) -> UserPreference:
+    """Return the caller's ``user_preferences`` row, creating a default one on
+    first read so the client always gets a concrete object. Own-scoped: the row
+    is looked up by ``user.id`` (from the token), never a client id."""
+    prefs = db.execute(
+        select(UserPreference).where(UserPreference.user_id == user.id)
+    ).scalar_one_or_none()
+    if prefs is None:
+        prefs = UserPreference(user_id=user.id, notification_channels={})
+        db.add(prefs)
+        db.flush()
+    return prefs
+
+
+def update_preferences(
+    db: Session,
+    user: User,
+    *,
+    theme: str | None = None,
+    locale: str | None = None,
+    notification_channels: dict | None = None,
+) -> UserPreference:
+    """Patch the caller's own preferences. Only provided fields are written."""
+    prefs = get_or_create_preferences(db, user)
+    if theme is not None:
+        prefs.theme = theme
+    if locale is not None:
+        prefs.locale = locale
+    if notification_channels is not None:
+        prefs.notification_channels = notification_channels
+    db.flush()
+    logger.info("preferences_updated", user_id=str(user.id))
+    return prefs
 
 
 def _stop_running_timers(db: Session, user_id: uuid.UUID) -> int:

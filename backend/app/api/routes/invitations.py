@@ -12,6 +12,7 @@ from app.database.session import get_db
 from app.schemas.auth import (
     InvitationAccept,
     InvitationCreate,
+    InvitationPublicResponse,
     InvitationResponse,
     UserResponse,
 )
@@ -47,3 +48,19 @@ def accept_invitation(payload: InvitationAccept, db: DbSession) -> UserResponse:
     # Public, tokenized — no auth. The token is the credential.
     user = invitation_service.accept_invitation(db, payload)
     return UserResponse.model_validate(user)
+
+
+@router.get("/{token}", response_model=InvitationPublicResponse)
+def get_invitation(token: str, db: DbSession) -> InvitationPublicResponse:
+    """Public, tokenized metadata for the accept-invite screen (no auth).
+
+    Unknown token → 404; a spent (accepted/revoked/expired) token → 410.
+    """
+    invite, inviter_name = invitation_service.get_invitation_by_token(db, token)
+    return InvitationPublicResponse(
+        email=invite.email,
+        role=invite.role,
+        invited_by=inviter_name,
+        expires_at=invite.expires_at,
+        status=invite.status,
+    )

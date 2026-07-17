@@ -53,6 +53,13 @@ def conflict(message: str, code: str = "CONFLICT") -> ApiError:
     return ApiError(status.HTTP_409_CONFLICT, code, message)
 
 
+def gone(message: str, code: str = "GONE") -> ApiError:
+    """410 — the resource existed but is no longer available (e.g. an invitation
+    that has expired or already been consumed). Distinct from 404 so the caller
+    can tell "never existed" from "existed, now spent"."""
+    return ApiError(status.HTTP_410_GONE, code, message)
+
+
 def bad_request(message: str, code: str = "BAD_REQUEST") -> ApiError:
     return ApiError(status.HTTP_400_BAD_REQUEST, code, message)
 
