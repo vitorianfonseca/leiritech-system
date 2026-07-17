@@ -28,11 +28,8 @@ import {
   TeamError,
   canConfigureCapacity,
   canSeeFullTeam,
-  deriveAvailability,
-  netCapacityHours,
   type AvailabilityState,
   type FunctionCapacityConfig,
-  type HeatmapDay,
   type TeamFunction,
   type TeamMemberWorkload,
   type TeamWorkload,
@@ -112,146 +109,7 @@ function configFor(fn: TeamFunction): FunctionCapacityConfig {
 }
 
 /* ------------------------------------------------------------------ *
- * Member seed (ids aligned with projects.ts / tasks.ts / time.ts)
- * ------------------------------------------------------------------ */
-
-interface MemberSeed {
-  userId: string;
-  name: string;
-  avatarUrl: string | null;
-  function: TeamFunction;
-  accessRole: Role;
-  activeProjects: number;
-  openTasks: number;
-  overdueTasks: number;
-  /** Manual PTO for the week (BR-082 `ausente`). */
-  away: boolean;
-  awayNote: string | null;
-  /** Allocated hours Mon–Fri (drives the heatmap + carga estimada). */
-  dayHours: [number, number, number, number, number];
-  /** Hours logged this week. */
-  loggedHours: number;
-  /** Billable share of the logged hours (BR-083). */
-  billableHours: number;
-}
-
-const MEMBER_SEED: MemberSeed[] = [
-  {
-    userId: "dev-admin",
-    name: "Rita Andrade",
-    avatarUrl: null,
-    function: "leadership",
-    accessRole: "admin",
-    activeProjects: 2,
-    openTasks: 3,
-    overdueTasks: 0,
-    away: false,
-    awayNote: null,
-    // net ≈ (40−16)×0.35 = 8.4h → 5h allocated → ~0.60 → disponível
-    dayHours: [1, 2, 1, 1, 0],
-    loggedHours: 6,
-    billableHours: 2,
-  },
-  {
-    userId: "dev-gestor",
-    name: "Bruno Salgado",
-    avatarUrl: null,
-    function: "management",
-    accessRole: "gestor",
-    activeProjects: 4,
-    openTasks: 6,
-    overdueTasks: 1,
-    away: false,
-    awayNote: null,
-    // net ≈ (40−12)×0.42 = 11.76h → 11h → ~0.94 → equilibrado
-    dayHours: [2, 3, 2, 2, 2],
-    loggedHours: 12,
-    billableHours: 7,
-  },
-  {
-    userId: "dev-membro",
-    name: "Carla Nunes",
-    avatarUrl: null,
-    function: "design",
-    accessRole: "membro",
-    activeProjects: 2,
-    openTasks: 5,
-    overdueTasks: 1,
-    away: false,
-    awayNote: null,
-    // net ≈ (40−5)×0.75 = 26.25h → 25h → ~0.95 → equilibrado
-    dayHours: [5, 6, 5, 5, 4],
-    loggedHours: 24,
-    billableHours: 20,
-  },
-  {
-    userId: "u-sofia",
-    name: "Sofia Marques",
-    avatarUrl: null,
-    function: "design",
-    accessRole: "gestor",
-    activeProjects: 3,
-    openTasks: 7,
-    overdueTasks: 0,
-    away: false,
-    awayNote: null,
-    // net ≈ 26.25h → 24h → ~0.91 → equilibrado
-    dayHours: [5, 5, 5, 5, 4],
-    loggedHours: 26,
-    billableHours: 22,
-  },
-  {
-    userId: "u-diogo",
-    name: "Diogo Ferreira",
-    avatarUrl: null,
-    function: "engineering",
-    accessRole: "membro",
-    activeProjects: 3,
-    openTasks: 9,
-    overdueTasks: 3,
-    away: false,
-    awayNote: null,
-    // net ≈ (40−5)×0.78 = 27.3h → 33h → ~1.21 → SOBRECARREGADO
-    dayHours: [7, 7, 6, 7, 6],
-    loggedHours: 34,
-    billableHours: 31,
-  },
-  {
-    userId: "u-ines",
-    name: "Inês Duarte",
-    avatarUrl: null,
-    function: "engineering",
-    accessRole: "membro",
-    activeProjects: 2,
-    openTasks: 6,
-    overdueTasks: 1,
-    away: false,
-    awayNote: null,
-    // net ≈ 27.3h → 27h → ~0.99 → equilibrado
-    dayHours: [6, 6, 5, 5, 5],
-    loggedHours: 28,
-    billableHours: 24,
-  },
-  {
-    userId: "u-tiago",
-    name: "Tiago Lopes",
-    avatarUrl: null,
-    function: "qa",
-    accessRole: "membro",
-    activeProjects: 1,
-    openTasks: 2,
-    overdueTasks: 0,
-    away: true,
-    awayNote: "Férias",
-    // PTO — no allocation this week → ausente
-    dayHours: [0, 0, 0, 0, 0],
-    loggedHours: 0,
-    billableHours: 0,
-  },
-];
-
-/* ------------------------------------------------------------------ *
- * Derivation
+ * Derivation helpers
  * ------------------------------------------------------------------ */
 
 function round1(n: number): number {
@@ -269,48 +127,6 @@ function weekStartFor(weekOffset: number): Date {
  *  back to Sun–Thu. */
 function isoDay(date: Date): string {
   return format(date, "yyyy-MM-dd");
-}
-
-function present(seed: MemberSeed, weekStart: Date): TeamMemberWorkload {
-  const cfg = configFor(seed.function);
-  const net = netCapacityHours(
-    cfg.weeklyCapacityHours,
-    cfg.nonProjectHours,
-    cfg.utilizationTarget
-  );
-
-  const days: HeatmapDay[] = seed.dayHours.map((hours, index) => ({
-    index,
-    date: isoDay(addDays(weekStart, index)),
-    allocatedHours: hours,
-  }));
-
-  const allocatedHours = seed.dayHours.reduce((s, h) => s + h, 0);
-  const utilizationRatio = net > 0 ? allocatedHours / net : allocatedHours > 0 ? 2 : 0;
-  const availableHours = net; // net delivery capacity is the available-for-billing base
-  const billableUtilization =
-    availableHours > 0 ? seed.billableHours / availableHours : 0;
-
-  return {
-    userId: seed.userId,
-    name: seed.name,
-    avatarUrl: seed.avatarUrl,
-    function: seed.function,
-    accessRole: seed.accessRole,
-    availability: deriveAvailability(utilizationRatio, seed.away),
-    awayNote: seed.away ? seed.awayNote : null,
-    activeProjects: seed.activeProjects,
-    openTasks: seed.openTasks,
-    overdueTasks: seed.overdueTasks,
-    allocatedHours,
-    loggedHours: seed.loggedHours,
-    billableHours: seed.billableHours,
-    weeklyCapacityHours: cfg.weeklyCapacityHours,
-    netCapacityHours: round1(net),
-    utilizationRatio,
-    billableUtilization,
-    days,
-  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -335,17 +151,28 @@ interface RawWorkloadEntry {
   availabilityOverride: string | null;
 }
 
+/** Backend `UserDirectoryEntry` (camelCased) — used to enrich avatars. */
+interface RawDirectoryUser {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
 /**
- * Map a backend workload entry to the client `TeamMemberWorkload`. Several
+ * Map a backend workload entry to the client `TeamMemberWorkload`. The avatar is
+ * enriched from the `/users` directory (keyed by user id); the remaining
  * enrichment fields have no source in `/workload` and are defaulted (never
  * fabricated) — see the INTEGRATION-GAP notes.
  */
-function toMemberWorkload(e: RawWorkloadEntry): TeamMemberWorkload {
+function toMemberWorkload(
+  e: RawWorkloadEntry,
+  avatarById: Map<string, string | null>
+): TeamMemberWorkload {
   return {
     userId: e.userId,
     name: e.name,
-    // INTEGRATION-GAP: avatarUrl — not provided by /workload.
-    avatarUrl: null,
+    // Enriched from GET /users (directory avatar); null when the user has none.
+    avatarUrl: avatarById.get(e.userId) ?? null,
     // INTEGRATION-GAP: function — professional function (engineering/design/…)
     // is not provided by /workload; placeholder pending a members endpoint.
     function: "engineering",
@@ -406,9 +233,18 @@ export const teamApi: TeamApi = {
     const full = canSeeFullTeam(role);
     const canConfigure = canConfigureCapacity(role);
 
-    const data = await http.get<{ items: RawWorkloadEntry[] }>("/workload");
+    const [data, directory] = await Promise.all([
+      http.get<{ items: RawWorkloadEntry[] }>("/workload"),
+      // Directory avatars (BR-002: a Membro's directory is their own row only).
+      http
+        .get<{ items: RawDirectoryUser[] }>("/users")
+        .catch(() => ({ items: [] as RawDirectoryUser[] })),
+    ]);
+    const avatarById = new Map<string, string | null>(
+      directory.items.map((u) => [u.id, u.avatarUrl])
+    );
     const members = data.items
-      .map(toMemberWorkload)
+      .map((e) => toMemberWorkload(e, avatarById))
       .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
 
     return {

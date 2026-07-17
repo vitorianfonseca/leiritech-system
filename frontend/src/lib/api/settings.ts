@@ -119,28 +119,54 @@ function seedTags(): void {
   for (const tag of seed) tagStore.set(tag.id, tag);
 }
 
-const memberStore = new Map<string, MemberRecord>();
-function seedMembers(): void {
-  if (memberStore.size > 0) return;
-  const seed: MemberRecord[] = [
-    { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", role: "admin", status: "active", lastActiveAt: isoDaysAgo(0) },
-    { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", role: "gestor", status: "active", lastActiveAt: isoDaysAgo(0) },
-    { id: "dev-membro", name: "Carla Nunes", email: "carla@aurea.pt", role: "membro", status: "active", lastActiveAt: isoDaysAgo(1) },
-    { id: "u-sofia", name: "Sofia Marques", email: "sofia@aurea.pt", role: "gestor", status: "active", lastActiveAt: isoDaysAgo(2) },
-    { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@aurea.pt", role: "membro", status: "active", lastActiveAt: isoDaysAgo(1) },
-    { id: "u-ines", name: "Inês Duarte", email: "ines@aurea.pt", role: "membro", status: "active", lastActiveAt: isoDaysAgo(3) },
-    { id: "u-tiago", name: "Tiago Lopes", email: "tiago@aurea.pt", role: "membro", status: "inactive", lastActiveAt: isoDaysAgo(48) },
-    { id: "u-marta", name: "Marta Ribeiro", email: "marta@aurea.pt", role: "membro", status: "invited", lastActiveAt: null },
-  ];
-  for (const m of seed) memberStore.set(m.id, m);
+/** Backend `UserDirectoryEntry` (camelCased by the HTTP client). */
+interface RawDirectoryUser {
+  id: string;
+  name: string;
+  role: Role;
+  avatarUrl: string | null;
+  email: string | null;
+  status: string | null;
+  lastLoginAt: string | null;
 }
 
-function activeAdminCount(): number {
-  let n = 0;
-  for (const m of memberStore.values()) {
-    if (m.role === "admin" && m.status === "active") n += 1;
-  }
-  return n;
+/**
+ * Session-only role overrides. Role changes have NO backend route (there is no
+ * `PATCH /users/{id}/role`), so the change is applied on top of the real
+ * directory for the session and is NOT persisted server-side — see the
+ * INTEGRATION-GAP on `updateMemberRole`.
+ */
+const roleOverrides = new Map<string, Role>();
+
+/** Map a backend directory entry to the members-table `MemberRecord`. */
+function toMemberRecord(raw: RawDirectoryUser): MemberRecord {
+  const status = raw.status === "deactivated" ? "inactive" : "active";
+  return {
+    id: raw.id,
+    name: raw.name,
+    email: raw.email ?? "",
+    role: roleOverrides.get(raw.id) ?? raw.role,
+    status,
+    lastActiveAt: raw.lastLoginAt ?? null,
+  };
+}
+
+function activeAdminCountOf(members: MemberRecord[]): number {
+  return members.filter((m) => m.role === "admin" && m.status === "active").length;
+}
+
+/** Fetch the real directory (incl. inactive), mapped + sorted for the table. */
+async function fetchMembers(): Promise<MemberRecord[]> {
+  const data = await http.get<{ items: RawDirectoryUser[] }>("/users", {
+    query: { include_inactive: true },
+  });
+  return data.items
+    .map(toMemberRecord)
+    .sort((a, b) => {
+      const order = { active: 0, invited: 1, inactive: 2 } as const;
+      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+      return a.name.localeCompare(b.name, "pt-PT");
+    });
 }
 
 let notifications: NotificationPreferences = {
@@ -305,18 +331,12 @@ export const settingsApi: SettingsApi = {
     return { ...tag };
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no
-  // `GET /users` directory list; the members table has no real data source.
+  // WIRED — GET /users?include_inactive=true. The backend directory is the real
+  // source; invited users live in the invitations table and are not listed here.
   async getMembers(role) {
     assertAdmin(role);
-    seedMembers();
-    await delay(MOCK_LATENCY_MS);
-    const members = [...memberStore.values()].sort((a, b) => {
-      const order = { active: 0, invited: 1, inactive: 2 } as const;
-      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
-      return a.name.localeCompare(b.name, "pt-PT");
-    });
-    return { members, activeAdminCount: activeAdminCount() };
+    const members = await fetchMembers();
+    return { members, activeAdminCount: activeAdminCountOf(members) };
   },
 
   // WIRED — POST /invitations. The grant gate is kept as defence-in-depth; the
@@ -356,41 +376,49 @@ export const settingsApi: SettingsApi = {
     }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock (no role-change route).
+  // INTEGRATION-GAP: no backend endpoint — there is no role-change route
+  // (`PATCH /users/{id}/role`). The change is validated against the real
+  // directory and applied as a SESSION-ONLY override (not persisted); BR-005 is
+  // still enforced client-side against live data.
   async updateMemberRole(role, input) {
     assertAdmin(role);
-    seedMembers();
-    await delay(MOCK_LATENCY_MS);
-    const member = memberStore.get(input.id);
+    const members = await fetchMembers();
+    const member = members.find((m) => m.id === input.id);
     if (!member) throw new SettingsError("not_found");
     // BR-005: never demote the last active admin.
     if (
       member.role === "admin" &&
       member.status === "active" &&
       input.role !== "admin" &&
-      activeAdminCount() <= 1
+      activeAdminCountOf(members) <= 1
     ) {
       throw new SettingsError("last_admin");
     }
-    memberStore.set(member.id, { ...member, role: input.role });
+    roleOverrides.set(input.id, input.role);
     return this.getMembers(role);
   },
 
-  // INTEGRATION-GAP: left on mock. POST /users/{id}/activate|deactivate DO
-  // exist, but the member directory (getMembers) has no backend list, so the
-  // ids surfaced here are mock ids (not real UUIDs) — wiring the mutation alone
-  // would 404/422. Blocked pending a `GET /users` directory endpoint.
+  // WIRED — POST /users/{id}/activate | /users/{id}/deactivate. The backend
+  // enforces the last-admin guard (BR-005); a rejection is mapped back to it.
   async setMemberStatus(role, id, active) {
     assertAdmin(role);
-    seedMembers();
-    await delay(MOCK_LATENCY_MS);
-    const member = memberStore.get(id);
+    const members = await fetchMembers();
+    const member = members.find((m) => m.id === id);
     if (!member) throw new SettingsError("not_found");
-    // BR-005: never deactivate the last active admin.
-    if (!active && member.role === "admin" && member.status === "active" && activeAdminCount() <= 1) {
+    // BR-005: never deactivate the last active admin (client-side pre-check).
+    if (!active && member.role === "admin" && member.status === "active" && activeAdminCountOf(members) <= 1) {
       throw new SettingsError("last_admin");
     }
-    memberStore.set(id, { ...member, status: active ? "active" : "inactive" });
+    try {
+      await http.post(`/users/${id}/${active ? "activate" : "deactivate"}`);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        if (err.code === "LAST_ADMIN" || err.status === 409) throw new SettingsError("last_admin");
+        if (err.status === 404) throw new SettingsError("not_found");
+        if (err.status === 403) throw new SettingsError("forbidden");
+      }
+      throw err;
+    }
     return this.getMembers(role);
   },
 

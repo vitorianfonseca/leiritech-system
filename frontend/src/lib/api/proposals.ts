@@ -33,8 +33,6 @@ import type {
 import {
   ProposalError,
   canAccessProposals,
-  isPastValidity,
-  meetsSendRequirements,
   type CreateProposalInput,
   type Proposal,
   type ProposalState,
@@ -43,27 +41,15 @@ import {
   type UploadPdfInput,
 } from "./proposals-types";
 
-const MOCK_LATENCY_MS = 360;
 /** Max upload size accepted by the mock (10 MB), mirroring the planned backend. */
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
-let counter = 0;
-function uid(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${Date.now().toString(36)}-${counter}`;
-}
 
 function isoDate(offsetDays: number): string {
   return format(addDays(startOfDay(new Date()), offsetDays), "yyyy-MM-dd");
 }
 
-function today(): string {
-  return format(startOfDay(new Date()), "yyyy-MM-dd");
-}
 
 /* ------------------------------------------------------------------ *
  * Canonical routes
@@ -103,29 +89,8 @@ function mockSignedUrl(proposalId: string, fileName: string): string {
 type ProposalRecord = Proposal;
 
 const proposals: Map<string, ProposalRecord> = new Map();
-/** Live activity log, keyed by proposal id (newest pushed last). */
+/** Seeded proposal activity, keyed by proposal id (merged with live entries). */
 const activityByProposal: Map<string, ActivityLog[]> = new Map();
-
-function pushActivity(
-  proposalId: string,
-  actorId: string,
-  action: ActivityLog["action"],
-  extra: Partial<ActivityLog> = {}
-): void {
-  const list = activityByProposal.get(proposalId) ?? [];
-  list.push({
-    id: uid("pa"),
-    entityType: "proposal",
-    entityId: proposalId,
-    actor: actor(actorId),
-    action,
-    before: null,
-    after: null,
-    createdAt: new Date().toISOString(),
-    ...extra,
-  });
-  activityByProposal.set(proposalId, list);
-}
 
 function seed(): void {
   if (proposals.size > 0) return;
@@ -307,49 +272,14 @@ function seed(): void {
 }
 
 /* ------------------------------------------------------------------ *
- * Auto-expire on read (BR-027 / AUTO-04). The real backend runs this as a cron;
- * here we lazily transition live proposals whose validity has passed whenever
- * they are read, so the UI never shows an over-validity "sent" proposal.
- * ------------------------------------------------------------------ */
-
-function applyAutoExpire(rec: ProposalRecord): void {
-  if ((rec.state === "sent" || rec.state === "viewed") && isPastValidity(rec)) {
-    rec.state = "expired";
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(rec.id, "system", "status_changed", {
-      field: "state",
-      after: "expired",
-    });
-  }
-}
-
-/* ------------------------------------------------------------------ *
  * Serialization (finance gating — BR-008)
  * ------------------------------------------------------------------ */
 
-function present(rec: ProposalRecord, canFinance: boolean): Proposal {
-  return { ...rec, valueCents: canFinance ? rec.valueCents : null };
-}
-
-/**
- * Write methods return the record with financial fields stripped (BR-008): a
- * caller can't re-gate a response, and every write is followed by a gated read
- * (invalidate/refetch) that restores the value for authorised users. This closes
- * the latent typed-contract hazard of a write emitting ungated financials.
- */
-function presentAfterWrite(rec: ProposalRecord): Proposal {
-  return present(rec, false);
-}
 
 function assertAccess(role: Role): void {
   if (!canAccessProposals(role)) throw new ProposalError("forbidden");
 }
 
-function get(id: string): ProposalRecord {
-  const rec = proposals.get(id);
-  if (!rec) throw new ProposalError("not_found");
-  return rec;
-}
 
 /* ------------------------------------------------------------------ *
  * Backend wiring (F6). The state machine (send/view/accept/reject/expire/

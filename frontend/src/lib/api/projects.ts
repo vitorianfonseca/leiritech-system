@@ -42,8 +42,6 @@ import type {
 } from "@/lib/api/collaboration-types";
 import {
   ProjectError,
-  effectiveHealth,
-  isLiveState,
   type ConvertToProjectInput,
   type CreateProjectInput,
   type DeliveryMilestone,
@@ -106,9 +104,6 @@ const DIRECTORY: Record<string, DirectoryUser> = {
 
 function actor(id: string): DirectoryUser {
   return DIRECTORY[id] ?? { id, name: id, email: "", avatarUrl: null };
-}
-function userName(id: string): string {
-  return actor(id).name;
 }
 
 /** Managers selectable in the create form. */
@@ -522,37 +517,8 @@ export function phaseCompletable(p: ProjectPhase): boolean {
   );
 }
 
-function isMember(p: Project, userId: string): boolean {
-  return p.managerId === userId || p.team.some((m) => m.userId === userId);
-}
 
-/** Membro is row-scoped (BR-002). */
-function visibleTo(p: Project, role: Role, userId: string): boolean {
-  if (role === "admin" || role === "gestor") return true;
-  return isMember(p, userId);
-}
 
-function presentList(p: Project, canFinance: boolean): ProjectListItem {
-  return {
-    id: p.id,
-    name: p.name,
-    clientId: p.clientId,
-    clientName: p.clientName,
-    managerId: p.managerId,
-    managerName: p.managerName,
-    teamCount: p.team.length,
-    state: p.state,
-    suggestedHealth: p.suggestedHealth,
-    publishedHealth: p.publishedHealth,
-    progress: deriveProgress(p.phases),
-    startDate: p.startDate,
-    dueDate: p.dueDate,
-    contractedValueCents: canFinance ? p.contractedValueCents : null,
-    hoursBudget: p.hoursBudget,
-    hoursUsed: p.hoursUsed,
-    nextDeliveryAt: p.nextDeliveryAt,
-  };
-}
 
 function present(p: Project, canFinance: boolean): Project {
   return {
@@ -573,115 +539,7 @@ function present(p: Project, canFinance: boolean): Project {
  * Transition guards (§1.3)
  * ------------------------------------------------------------------ */
 
-function applyLifecycle(p: Project, input: TransitionInput, actorId: string): void {
-  const { action, reason } = input;
-  switch (action) {
-    case "start": {
-      if (p.state !== "planning")
-        throw new ProjectError("invalid_transition", "startNotPlanning");
-      if (p.phases.length < 1 || p.team.length < 1)
-        throw new ProjectError("guard_failed", "startNeedsPhaseAndMember");
-      if (!p.paymentMilestonesConfirmed)
-        throw new ProjectError("guard_failed", "startNeedsMilestones");
-      p.state = "active";
-      break;
-    }
-    case "pause": {
-      if (p.state !== "active")
-        throw new ProjectError("invalid_transition", "pauseNotActive");
-      if (!reason?.trim()) throw new ProjectError("reason_required");
-      p.state = "on_hold";
-      p.pauseReason = reason.trim();
-      break;
-    }
-    case "resume": {
-      if (p.state !== "on_hold")
-        throw new ProjectError("invalid_transition", "resumeNotOnHold");
-      p.state = "active";
-      p.pauseReason = null;
-      break;
-    }
-    case "complete": {
-      if (p.state !== "active" && p.state !== "on_hold")
-        throw new ProjectError("invalid_transition", "completeNotActive");
-      const openPhases = p.phases.filter((ph) => ph.state !== "completed");
-      if (openPhases.length > 0)
-        throw new ProjectError("guard_failed", "completeOpenPhases");
-      p.state = "completed";
-      break;
-    }
-    case "cancel": {
-      if (!isLiveState(p.state))
-        throw new ProjectError("invalid_transition", "cancelNotLive");
-      if (!reason?.trim()) throw new ProjectError("reason_required");
-      p.state = "cancelled";
-      p.cancelReason = reason.trim();
-      break;
-    }
-    case "archive": {
-      if (p.state !== "completed" && p.state !== "cancelled")
-        throw new ProjectError("invalid_transition", "archiveNotClosed");
-      p.state = "archived";
-      break;
-    }
-    default:
-      throw new ProjectError("invalid_transition");
-  }
-  p.updatedAt = new Date().toISOString();
-  pushActivity(p.id, actorId, "status_changed", { field: "state", after: p.state });
-}
 
-function applyPhaseTransition(
-  ph: ProjectPhase,
-  project: Project,
-  input: PhaseTransitionInput
-): void {
-  const { transition, reason } = input;
-  switch (transition) {
-    case "start": {
-      if (ph.state !== "not_started")
-        throw new ProjectError("invalid_transition", "phaseStartInvalid");
-      if (project.state !== "active")
-        throw new ProjectError("guard_failed", "phaseNeedsActiveProject");
-      ph.state = "in_progress";
-      break;
-    }
-    case "block": {
-      if (ph.state !== "in_progress")
-        throw new ProjectError("invalid_transition", "phaseBlockInvalid");
-      if (!reason?.trim()) throw new ProjectError("reason_required");
-      ph.state = "blocked";
-      ph.blockerReason = reason.trim();
-      break;
-    }
-    case "unblock": {
-      if (ph.state !== "blocked")
-        throw new ProjectError("invalid_transition", "phaseUnblockInvalid");
-      ph.state = "in_progress";
-      ph.blockerReason = null;
-      break;
-    }
-    case "complete": {
-      if (ph.state !== "in_progress" && ph.state !== "blocked")
-        throw new ProjectError("invalid_transition", "phaseCompleteInvalid");
-      if (ph.tasksTotal > 0 && ph.tasksDone < ph.tasksTotal)
-        throw new ProjectError("guard_failed", "phaseOpenTasks");
-      ph.state = "completed";
-      ph.blockerReason = null;
-      break;
-    }
-    case "reopen": {
-      if (ph.state !== "completed")
-        throw new ProjectError("invalid_transition", "phaseReopenInvalid");
-      if (project.state === "completed")
-        throw new ProjectError("guard_failed", "phaseReopenProjectClosed");
-      ph.state = "in_progress";
-      break;
-    }
-    default:
-      throw new ProjectError("invalid_transition");
-  }
-}
 
 /* ------------------------------------------------------------------ *
  * Backend integration (F8/F10 real HTTP wiring)

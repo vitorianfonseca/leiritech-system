@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 from app.core import permissions
 from app.core.permissions import Role
 from app.models.user import User
+from app.repositories import my_work as my_work_repo
 from app.repositories import reports as repo
 from app.schemas.dashboard import (
     AttentionGroup,
@@ -185,6 +186,10 @@ def _full_attention(db: Session, today: date) -> list[AttentionGroup]:
     ]
     groups.append(AttentionGroup(key="blockedTasks", financial=False, items=blocked_items))
 
+    at_risk_projects = repo.projects_at_risk(db, None)
+    at_risk_progress = my_work_repo.avg_phase_progress(
+        db, [p.id for p in at_risk_projects]
+    )
     at_risk_items = [
         AttentionItem(
             id=f"project-{p.id}",
@@ -192,13 +197,18 @@ def _full_attention(db: Session, today: date) -> list[AttentionGroup]:
             entity_id=str(p.id),
             title=p.name,
             meta_key="projectAtRisk",
+            meta_params={"progress": at_risk_progress.get(p.id, 0)},
             severity="atRisk",
         )
-        for p in repo.projects_at_risk(db, None)
+        for p in at_risk_projects
     ]
     groups.append(AttentionGroup(key="projectsAtRisk", financial=False, items=at_risk_items))
 
     end7 = today + timedelta(days=7)
+    near_delivery_projects = repo.low_progress_near_delivery(db, today, end7, None)
+    near_delivery_progress = my_work_repo.avg_phase_progress(
+        db, [p.id for p in near_delivery_projects]
+    )
     low_progress_items = [
         AttentionItem(
             id=f"project-{p.id}",
@@ -206,10 +216,13 @@ def _full_attention(db: Session, today: date) -> list[AttentionGroup]:
             entity_id=str(p.id),
             title=p.name,
             meta_key="lowProgressNearDelivery",
-            meta_params={"days": (p.deadline - today).days},
+            meta_params={
+                "days": (p.deadline - today).days,
+                "progress": near_delivery_progress.get(p.id, 0),
+            },
             severity="due",
         )
-        for p in repo.low_progress_near_delivery(db, today, end7, None)
+        for p in near_delivery_projects
     ]
     groups.append(
         AttentionGroup(key="lowProgressNearDelivery", financial=False, items=low_progress_items)

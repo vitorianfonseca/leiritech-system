@@ -108,15 +108,30 @@ export const authApi: AuthApi = {
   },
 
   async getInvite(token) {
-    // No backend GET-invite endpoint exists yet (flagged). Treat empty tokens as
-    // invalid; otherwise surface minimal metadata so the accept screen renders.
+    // WIRED — GET /invitations/{token} (public, tokenized). Unknown token → 404;
+    // a spent token (accepted/revoked/expired) → 410; both surface as invalid.
     const normalized = token.trim();
     if (!normalized) throw new ApiError("invite_invalid");
-    return {
-      email: "",
-      role: "membro" as AuthRole,
-      invitedBy: "",
-    } satisfies InviteInfo;
+    try {
+      const invite = await http.get<{
+        email: string;
+        role: string;
+        invitedBy: string;
+        status: string;
+      }>(`/invitations/${encodeURIComponent(normalized)}`, { token: null });
+      if (invite.status !== "pending") throw new ApiError("invite_invalid");
+      return {
+        email: invite.email,
+        role: normalizeRole(invite.role),
+        invitedBy: invite.invitedBy,
+      } satisfies InviteInfo;
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      if (err instanceof HttpError && (err.status === 404 || err.status === 410 || err.status === 400)) {
+        throw new ApiError("invite_invalid");
+      }
+      throw authErrorFromHttp(err);
+    }
   },
 
   async acceptInvite({ token, name, password }) {

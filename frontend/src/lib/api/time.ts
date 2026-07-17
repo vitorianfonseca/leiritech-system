@@ -21,19 +21,16 @@
  * denormalized here for the hours-vs-budget rollups.
  */
 
-import { addMinutes, formatISO, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
 import { http, HttpError } from "@/lib/api/http";
 import {
   TimeError,
   computeRollups,
   sumTotals,
-  validateTimeEntry,
   type CreateTimeEntryInput,
   type RollupDimension,
   type RollupRow,
   type StopTimerInput,
-  type TimeDirectoryUser,
   type TimeEntry,
   type TimeScope,
   type TimeTaskOption,
@@ -47,11 +44,6 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let counter = 0;
-function uid(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${Date.now().toString(36)}-${counter}`;
-}
 
 /* ------------------------------------------------------------------ *
  * Canonical routes
@@ -65,19 +57,7 @@ export const timeRoutes = {
  * Directory (aligned with tasks.ts #34)
  * ------------------------------------------------------------------ */
 
-const DIRECTORY: Record<string, TimeDirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", avatarUrl: null },
-  "dev-membro": { id: "dev-membro", name: "Carla Nunes", avatarUrl: null },
-  "u-sofia": { id: "u-sofia", name: "Sofia Marques", avatarUrl: null },
-  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", avatarUrl: null },
-  "u-tiago": { id: "u-tiago", name: "Tiago Lopes", avatarUrl: null },
-  "u-ines": { id: "u-ines", name: "Inês Duarte", avatarUrl: null },
-};
 
-function userName(userId: string): string {
-  return DIRECTORY[userId]?.name ?? userId;
-}
 
 /* ------------------------------------------------------------------ *
  * Projects / phases / tasks (aligned with tasks.ts #34) + budgets
@@ -175,9 +155,6 @@ const TASKS: TaskRef[] = [
   { id: "t-8", title: "Mapa de requisitos", projectId: "p-3", phaseId: "p-3-ph1" },
 ];
 
-function taskRef(taskId: string): TaskRef | undefined {
-  return TASKS.find((t) => t.id === taskId);
-}
 
 function phaseRef(projectId: string, phaseId: string | null): PhaseRef | null {
   if (!phaseId) return null;
@@ -219,101 +196,15 @@ const budgetLookup = {
  * ------------------------------------------------------------------ */
 
 const store = new Map<string, TimeEntry>();
-let seeded = false;
 
-function iso(date: Date): string {
-  return formatISO(date);
-}
 
-/** Build an entry at `dayOffset` days ago, starting at `hour:00` for `mins`. */
-function seedEntry(
-  taskId: string,
-  userId: string,
-  dayOffset: number,
-  hour: number,
-  mins: number,
-  billable: boolean,
-  description: string
-): TimeEntry {
-  const t = taskRef(taskId)!;
-  const project = PROJECTS[t.projectId];
-  const phase = phaseRef(t.projectId, t.phaseId);
-  const start = subDays(new Date(), dayOffset);
-  start.setHours(hour, 0, 0, 0);
-  const end = addMinutes(start, mins);
-  const id = uid("te");
-  return {
-    id,
-    taskId,
-    taskTitle: t.title,
-    projectId: t.projectId,
-    projectName: project?.name ?? t.projectId,
-    phaseId: t.phaseId,
-    phaseName: phase?.name ?? null,
-    userId,
-    userName: userName(userId),
-    startedAt: iso(start),
-    endedAt: iso(end),
-    durationMinutes: mins,
-    description,
-    billable,
-    source: "manual",
-    createdAt: iso(end),
-  };
-}
 
-function seed(): void {
-  if (seeded) return;
-  seeded = true;
-  const rows: TimeEntry[] = [
-    seedEntry("t-1", "dev-membro", 0, 9, 95, true, "Revisão dos wireframes e ajustes de layout"),
-    seedEntry("t-4", "dev-membro", 1, 10, 130, true, "Integração inicial do gateway"),
-    seedEntry("t-3", "dev-membro", 1, 14, 45, false, "Exportação de assets (interno)"),
-    seedEntry("t-7", "dev-membro", 2, 9, 180, true, "Protótipo de alta fidelidade"),
-    seedEntry("t-6", "dev-gestor", 0, 11, 60, true, "Facilitação do workshop"),
-    seedEntry("t-5", "dev-gestor", 2, 15, 75, false, "Preparação do guia de tom de voz"),
-    seedEntry("t-1", "u-sofia", 1, 9, 120, true, "Apoio à revisão de UI"),
-    seedEntry("t-2", "u-ines", 3, 10, 150, true, "Definição de arquitetura de informação"),
-    seedEntry("t-4", "dev-gestor", 3, 13, 90, true, "Revisão de integração"),
-    seedEntry("t-7", "u-sofia", 4, 9, 200, true, "Iteração do protótipo"),
-    seedEntry("t-3", "dev-admin", 5, 16, 40, false, "Coordenação (interno)"),
-  ];
-  for (const r of rows) store.set(r.id, r);
-}
 
 /* ------------------------------------------------------------------ *
  * Scoping (WORKFLOW_SPEC §3 — Time rows)
  * ------------------------------------------------------------------ */
 
-/** Project ids the actor manages / belongs to (for the team view). */
-function actorProjectIds(role: Role, userId: string): Set<string> {
-  const ids = new Set<string>();
-  for (const p of Object.values(PROJECTS)) {
-    if (role === "admin") ids.add(p.id);
-    else if (p.memberIds.includes(userId)) ids.add(p.id);
-  }
-  return ids;
-}
 
-/**
- * Entries visible to the actor for the requested scope.
- * - `own` — the actor's own entries only.
- * - `team` — Admin: everything; Gestor: entries by members on the actor's own
- *   projects (👤). Membro may never request `team`.
- */
-function visibleEntries(role: Role, userId: string, scope: TimeScope): TimeEntry[] {
-  seed();
-  const all = [...store.values()];
-  if (scope === "own") return all.filter((e) => e.userId === userId);
-
-  if (role === "admin") return all;
-  if (role === "gestor") {
-    const projectIds = actorProjectIds(role, userId);
-    return all.filter((e) => projectIds.has(e.projectId));
-  }
-  // Membro cannot view others — degrade to own (defensive; UI hides the toggle).
-  return all.filter((e) => e.userId === userId);
-}
 
 /* ------------------------------------------------------------------ *
  * Public API surface
@@ -341,49 +232,6 @@ export interface TimeApi {
   ): Promise<RollupRow[]>;
 }
 
-function buildEntry(
-  taskId: string,
-  userId: string,
-  startedAt: string,
-  endedAt: string,
-  description: string,
-  billable: boolean,
-  source: TimeEntry["source"]
-): TimeEntry {
-  const t = taskRef(taskId);
-  if (!t) throw new TimeError("not_found");
-  const project = PROJECTS[t.projectId];
-  const active = (project?.active ?? false) && !(project?.closed ?? false);
-  const check = validateTimeEntry(
-    { taskId, startedAt, endedAt, projectActive: active },
-    new Date()
-  );
-  if (!check.ok || check.durationMinutes == null) {
-    const key =
-      check.errors.task ?? check.errors.start ?? check.errors.end ?? "validation";
-    if (key === "projectInactive") throw new TimeError("project_inactive", key);
-    throw new TimeError("validation", key);
-  }
-  const phase = phaseRef(t.projectId, t.phaseId);
-  return {
-    id: uid("te"),
-    taskId,
-    taskTitle: t.title,
-    projectId: t.projectId,
-    projectName: project?.name ?? t.projectId,
-    phaseId: t.phaseId,
-    phaseName: phase?.name ?? null,
-    userId,
-    userName: userName(userId),
-    startedAt,
-    endedAt,
-    durationMinutes: check.durationMinutes,
-    description: description.trim(),
-    billable,
-    source,
-    createdAt: iso(new Date()),
-  };
-}
 
 /* ------------------------------------------------------------------ *
  * Backend wiring (F11 routes). Response DTO is camelCased by `http`.

@@ -17,6 +17,7 @@ import type { Role, SessionUser } from "@/lib/session";
 import { http, HttpError } from "@/lib/api/http";
 import {
   NOTIFICATION_CATEGORIES,
+  type NotificationChannelPref,
   type NotificationPreferences,
 } from "@/lib/api/settings-types";
 import {
@@ -28,20 +29,7 @@ import {
   type UserPreferences,
 } from "@/lib/api/profile-types";
 
-const MOCK_LATENCY_MS = 300;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/** Deterministic seed phone per dev user so the directory reads consistently. */
-const SEED_PHONE: Record<string, string> = {
-  "dev-admin": "+351 912 000 001",
-  "dev-gestor": "+351 912 000 002",
-  "dev-membro": "+351 912 000 003",
-};
-
-/** Personal notification channel defaults for a fresh user_preferences row. */
+/** Personal notification channel defaults for an empty user_preferences row. */
 function defaultChannels(): NotificationPreferences {
   return {
     mentions: { inApp: true, email: true },
@@ -52,34 +40,28 @@ function defaultChannels(): NotificationPreferences {
   };
 }
 
-const profileStore = new Map<string, PersonalProfile>();
-const prefsStore = new Map<string, UserPreferences>();
-
-function seedProfile(user: SessionUser): PersonalProfile {
-  const existing = profileStore.get(user.id);
-  if (existing) return existing;
-  const seeded: PersonalProfile = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: SEED_PHONE[user.id] ?? "",
-    role: user.role,
-    avatarDataUrl: user.avatarUrl,
-  };
-  profileStore.set(user.id, seeded);
-  return seeded;
+/** Backend `UserPreferencesResponse` (camelCased by the HTTP client). */
+interface RawPreferences {
+  theme: string;
+  locale: string;
+  notificationChannels: Partial<Record<string, NotificationChannelPref>>;
 }
 
-function seedPrefs(user: SessionUser): UserPreferences {
-  const existing = prefsStore.get(user.id);
-  if (existing) return existing;
-  const seeded: UserPreferences = {
-    theme: "light",
-    locale: user.locale,
-    notificationChannels: defaultChannels(),
+/**
+ * Map the backend preferences to the UI contract, merging any stored channels
+ * over the category defaults so a fresh (empty) `{}` row still renders every row.
+ */
+function toPreferences(raw: RawPreferences): UserPreferences {
+  const channels = defaultChannels();
+  for (const cat of NOTIFICATION_CATEGORIES) {
+    const incoming = raw.notificationChannels?.[cat];
+    if (incoming) channels[cat] = { inApp: !!incoming.inApp, email: !!incoming.email };
+  }
+  return {
+    theme: (raw.theme as UserPreferences["theme"]) ?? "light",
+    locale: raw.locale,
+    notificationChannels: channels,
   };
-  prefsStore.set(user.id, seeded);
-  return seeded;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -150,31 +132,23 @@ export const profileApi: ProfileApi = {
     }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no
-  // user_preferences endpoint (theme/locale/notification channels are not
-  // persisted server-side yet); resolved from the session for now.
+  // WIRED — GET /users/me/preferences. The token identifies the caller.
   async getPreferences(user) {
-    await delay(MOCK_LATENCY_MS);
-    return structuredClone(seedPrefs(user));
+    void user;
+    const raw = await http.get<RawPreferences>("/users/me/preferences");
+    return toPreferences(raw);
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock (no user_preferences write).
+  // WIRED — PATCH /users/me/preferences. Only the provided fields are written;
+  // notification channels are stored verbatim (the frontend owns the vocabulary).
   async updatePreferences(user, input) {
-    await delay(MOCK_LATENCY_MS);
-    const current = seedPrefs(user);
-    const next: UserPreferences = { ...current };
-    if (input.theme) next.theme = input.theme;
-    if (input.locale) next.locale = input.locale;
-    if (input.notificationChannels) {
-      const channels = structuredClone(current.notificationChannels);
-      for (const cat of NOTIFICATION_CATEGORIES) {
-        const incoming = input.notificationChannels[cat];
-        if (incoming) channels[cat] = { inApp: !!incoming.inApp, email: !!incoming.email };
-      }
-      next.notificationChannels = channels;
-    }
-    prefsStore.set(user.id, next);
-    return structuredClone(next);
+    void user;
+    const body: Record<string, unknown> = {};
+    if (input.theme) body.theme = input.theme;
+    if (input.locale) body.locale = input.locale;
+    if (input.notificationChannels) body.notificationChannels = input.notificationChannels;
+    const raw = await http.patch<RawPreferences>("/users/me/preferences", body);
+    return toPreferences(raw);
   },
 
   // WIRED — POST /auth/me/password. Client-side guards preserve the mock's error

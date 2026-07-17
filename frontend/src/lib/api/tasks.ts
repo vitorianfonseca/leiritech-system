@@ -37,8 +37,6 @@ import type {
 } from "@/lib/api/collaboration-types";
 import {
   TaskError,
-  checkTaskTransition,
-  priorityRank,
   type BlockTaskInput,
   type CreateTaskInput,
   type Task,
@@ -527,13 +525,6 @@ function present(rec: StoredTask): Task {
   };
 }
 
-/** Membro is row-scoped to member projects (BR-002 / H7). */
-function visibleTo(rec: StoredTask, role: Role, userId: string): boolean {
-  if (role === "admin" || role === "gestor") return true;
-  const project = PROJECTS[rec.projectId];
-  if (!project) return false;
-  return project.memberIds.includes(userId) || rec.assigneeIds.includes(userId);
-}
 
 /** Can this user edit the task? Membro only on member projects (H7). */
 export function canEditTask(task: Task, role: Role, userId: string): boolean {
@@ -544,25 +535,6 @@ export function canEditTask(task: Task, role: Role, userId: string): boolean {
 
 /* ------------------------------------------------------------------ *
  * Cycle detection (BR-047)
- * ------------------------------------------------------------------ */
-
-/** True when `from` can reach `to` following dependency edges. */
-function dependsOnTransitively(fromId: string, toId: string): boolean {
-  const visited = new Set<string>();
-  const stack = [fromId];
-  while (stack.length) {
-    const current = stack.pop()!;
-    if (current === toId) return true;
-    if (visited.has(current)) continue;
-    visited.add(current);
-    const rec = store.get(current);
-    if (rec) stack.push(...rec.dependencyIds);
-  }
-  return false;
-}
-
-/* ------------------------------------------------------------------ *
- * Public interface
  * ------------------------------------------------------------------ */
 
 export interface TasksApi {

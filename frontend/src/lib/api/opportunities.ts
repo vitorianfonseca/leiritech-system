@@ -109,16 +109,6 @@ const STAGE_PROBABILITY: Record<PipelineStageId, number> = {
   negotiation: 85,
 };
 
-const STAGES: PipelineStage[] = PIPELINE_STAGE_IDS.map((id, i) => ({
-  id,
-  order: i + 1,
-  winProbability: STAGE_PROBABILITY[id],
-}));
-
-function stageOrder(id: PipelineStageId): number {
-  return STAGES.findIndex((s) => s.id === id);
-}
-
 /* ------------------------------------------------------------------ *
  * Seed
  * ------------------------------------------------------------------ */

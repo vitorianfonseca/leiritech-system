@@ -890,6 +890,9 @@ function mapProposalStatus(status: string): ProposalStatus {
  * the relationship sub-queries.
  */
 function mapCompanySummary(c: BackendCompany, canFinance: boolean): CompanySummary {
+  // canFinance is part of the caller contract but the financial summary fields
+  // are defaulted here regardless (see INTEGRATION-GAPs below).
+  void canFinance;
   return {
     id: c.id,
     name: c.name,
