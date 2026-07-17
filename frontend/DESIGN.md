@@ -129,10 +129,10 @@ Full dark values live in `globals.css` under `.dark`.
 
 ## Typography
 
-- **Body / UI**: **Geist Sans** (`--font-sans`). Numeric-friendly, precise, neutral.
-- **Headings / editorial moments**: **Fraunces** (`--font-heading`), an optical-size serif.
-  Used for page titles, greeting headers, big metric labels — the "editorial" voice of Aurea.
-  Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
+- **Body / UI**: **Manrope** (`--font-sans`). Geometric, clean, numeric-friendly.
+- **Headings / editorial moments**: **Instrument Serif** (`--font-heading`), a high-contrast
+  display serif. Used for page titles, greeting headers, big metric labels — the "editorial"
+  voice of Aurea. Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
 - **Mono**: Geist Mono (`--font-mono`) for references, IDs, code, keyboard hints.
 
 Scale (max 3 sizes per view — HIG): title `text-2xl/3xl` heading serif, body `text-sm/base`,
