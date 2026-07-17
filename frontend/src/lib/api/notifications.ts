@@ -27,6 +27,7 @@ import {
   type NotificationEntityType,
 } from "./notifications-types";
 import type { Role } from "@/lib/session";
+import { http, HttpError } from "./http";
 
 const MOCK_LATENCY_MS = 400;
 
@@ -98,7 +99,52 @@ function hrefFor(entityType: NotificationEntityType, entityId: string): string {
 }
 
 /* ------------------------------------------------------------------ *
- * Seed
+ * Backend mapping (real endpoints)
+ * ------------------------------------------------------------------ */
+
+/** Backend notification row (camelCased by the HTTP client). */
+interface RawNotification {
+  id: string;
+  type: string;
+  entityType: string | null;
+  entityId: string | null;
+  body: string | null;
+  readAt: string | null;
+  archivedAt: string | null;
+  groupKey: string | null;
+  createdAt: string;
+}
+
+/**
+ * Map a backend row to the client `Notification`. The backend does not return
+ * `category`/`financial`/`href`; those are DERIVED from `type` via TYPE_META +
+ * hrefFor (deterministic, not fabricated).
+ */
+function toNotification(raw: RawNotification, userId: string): Notification {
+  const type = raw.type as NotificationType;
+  const meta =
+    TYPE_META[type] ?? { category: "system" as NotificationCategory, financial: false, entityType: "task" as NotificationEntityType };
+  const entityType = (raw.entityType as NotificationEntityType | null) ?? meta.entityType;
+  const entityId = raw.entityId ?? "";
+  return {
+    id: raw.id,
+    userId,
+    type,
+    category: meta.category,
+    financial: meta.financial,
+    entityType,
+    entityId,
+    href: entityId ? hrefFor(entityType, entityId) : "/",
+    body: raw.body ?? "",
+    groupKey: raw.groupKey ?? "",
+    createdAt: raw.createdAt,
+    readAt: raw.readAt,
+    archivedAt: raw.archivedAt,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Seed (still backs the not-yet-wired archive / unarchive / markUnread)
  * ------------------------------------------------------------------ */
 
 interface SeedInput {
@@ -375,49 +421,59 @@ export interface NotificationsApi {
 }
 
 export const notificationsApi: NotificationsApi = {
+  // WIRED — GET /notifications. `role` kept for signature/defence-in-depth; the
+  // backend already own-scopes. Financial rows re-filtered for Membro (BR-008).
   async list(userId, role) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    return visibleFor(userId, role).slice().sort(byNewest);
+    const page = await http.get<{ items: RawNotification[] }>("/notifications", {
+      query: { page_size: 100 },
+    });
+    const rows = page.items.map((r) => toNotification(r, userId));
+    const visible = role === "membro" ? rows.filter((n) => !n.financial) : rows;
+    return visible.sort(byNewest);
   },
 
+  // WIRED — GET /notifications/unread-count + GET /notifications (recent slice).
   async summary(userId, role, limit = 5) {
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const visible = visibleFor(userId, role).slice().sort(byNewest);
-    return {
-      unreadCount: visible.filter((n) => !n.readAt).length,
-      recent: visible.slice(0, limit),
-    };
+    const [count, page] = await Promise.all([
+      http.get<{ unread: number }>("/notifications/unread-count"),
+      http.get<{ items: RawNotification[] }>("/notifications", {
+        query: { page_size: limit },
+      }),
+    ]);
+    const rows = page.items.map((r) => toNotification(r, userId));
+    const recent = role === "membro" ? rows.filter((n) => !n.financial) : rows;
+    return { unreadCount: count.unread, recent: recent.sort(byNewest) };
   },
 
+  // WIRED — POST /notifications/{id}/read.
   async markRead(id) {
-    await delay(MOCK_LATENCY_MS / 2);
-    const found = locate(id);
-    if (!found) throw new NotificationError("not_found");
-    const current = store.get(found.userId)![found.index];
-    if (current.readAt) return current;
-    const updated: Notification = { ...current, readAt: new Date().toISOString() };
-    store.get(found.userId)![found.index] = updated;
-    return updated;
-  },
-
-  async markAllRead(userId, role) {
-    await delay(MOCK_LATENCY_MS);
-    const now = new Date().toISOString();
-    const changed: string[] = [];
-    const list = store.get(userId) ?? [];
-    for (let i = 0; i < list.length; i++) {
-      const n = list[i];
-      if (n.archivedAt || n.readAt) continue;
-      if (role === "membro" && n.financial) continue; // never touch hidden items
-      list[i] = { ...n, readAt: now };
-      changed.push(n.id);
+    try {
+      // INTEGRATION-GAP: userId — single-item response omits the recipient id;
+      // safe to default because notifications are own-scoped.
+      const raw = await http.post<RawNotification>(`/notifications/${id}/read`);
+      return toNotification(raw, "");
+    } catch (err) {
+      if (err instanceof HttpError) {
+        throw new NotificationError(err.status === 404 ? "not_found" : "network");
+      }
+      throw err;
     }
-    store.set(userId, list);
-    return changed;
   },
 
+  // WIRED — POST /notifications/read-all. The bulk endpoint returns only a
+  // count, so the unread ids (for the undo affordance) are gathered first.
+  async markAllRead(userId, role) {
+    const page = await http.get<{ items: RawNotification[] }>("/notifications", {
+      query: { unread_only: true, page_size: 100 },
+    });
+    let rows = page.items.map((r) => toNotification(r, userId));
+    if (role === "membro") rows = rows.filter((n) => !n.financial);
+    await http.post("/notifications/read-all");
+    return rows.map((n) => n.id);
+  },
+
+  // INTEGRATION-GAP: no backend endpoint — left on mock (bulk unread has no
+  // route; the undo it powers cannot round-trip to the backend).
   async markUnread(ids) {
     await delay(MOCK_LATENCY_MS / 2);
     const set = new Set(ids);
@@ -433,6 +489,7 @@ export const notificationsApi: NotificationsApi = {
     }
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no archive route).
   async archive(id) {
     await delay(MOCK_LATENCY_MS / 2);
     const found = locate(id);
@@ -446,6 +503,7 @@ export const notificationsApi: NotificationsApi = {
     return updated;
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no archive route).
   async unarchive(id) {
     await delay(MOCK_LATENCY_MS / 2);
     const found = locate(id);

@@ -18,6 +18,7 @@
 
 import { opportunitiesApi } from "@/lib/api/opportunities";
 import { PIPELINE_STAGE_IDS } from "@/lib/api/opportunities-types";
+import { http, HttpError } from "@/lib/api/http";
 import type { Role } from "@/lib/session";
 import {
   SettingsError,
@@ -234,11 +235,13 @@ export interface SettingsApi {
 }
 
 export const settingsApi: SettingsApi = {
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no org-profile route).
   async getAureaProfile() {
     await delay(MOCK_LATENCY_MS);
     return { ...aurea };
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no org-profile route).
   async updateAureaProfile(role, input) {
     assertAdmin(role);
     await delay(MOCK_LATENCY_MS);
@@ -247,6 +250,7 @@ export const settingsApi: SettingsApi = {
     return { ...aurea };
   },
 
+  // INTEGRATION-GAP: no backend endpoint — tags CRUD is entirely on mock.
   async listTags() {
     seedTags();
     await delay(MOCK_LATENCY_MS);
@@ -301,6 +305,8 @@ export const settingsApi: SettingsApi = {
     return { ...tag };
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no
+  // `GET /users` directory list; the members table has no real data source.
   async getMembers(role) {
     assertAdmin(role);
     seedMembers();
@@ -313,29 +319,44 @@ export const settingsApi: SettingsApi = {
     return { members, activeAdminCount: activeAdminCount() };
   },
 
+  // WIRED — POST /invitations. The grant gate is kept as defence-in-depth; the
+  // backend re-checks the invite capability from the JWT.
+  // INTEGRATION-GAP: name — invitations carry no name; derived from the email
+  // (the real name is set by the invitee on acceptance).
   async inviteMember(role, invitesGrant, input) {
     // BR-003 / §3: inviting is permitted for admin OR a gestor with the grant.
     if (!canInviteMembers(role, invitesGrant)) throw new SettingsError("forbidden");
-    seedMembers();
-    await delay(MOCK_LATENCY_MS);
     const email = input.email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       throw new SettingsError("validation", "emailInvalid");
-    const dup = [...memberStore.values()].some((m) => m.email.toLowerCase() === email);
-    if (dup) throw new SettingsError("validation", "emailDuplicate");
-    const name = email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    const member: MemberRecord = {
-      id: uid("u"),
-      name,
-      email,
-      role: input.role,
-      status: "invited",
-      lastActiveAt: null,
-    };
-    memberStore.set(member.id, member);
-    return { ...member };
+    try {
+      const invite = await http.post<{ id: string; email: string; role: Role }>(
+        "/invitations",
+        { email, role: input.role }
+      );
+      const name = email
+        .split("@")[0]
+        .replace(/[._-]+/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      return {
+        id: invite.id,
+        name,
+        email: invite.email,
+        role: invite.role,
+        status: "invited",
+        lastActiveAt: null,
+      };
+    } catch (err) {
+      if (err instanceof HttpError) {
+        if (err.status === 409) throw new SettingsError("validation", "emailDuplicate");
+        if (err.status === 403) throw new SettingsError("forbidden");
+        if (err.status === 422) throw new SettingsError("validation", "emailInvalid");
+      }
+      throw err;
+    }
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no role-change route).
   async updateMemberRole(role, input) {
     assertAdmin(role);
     seedMembers();
@@ -355,6 +376,10 @@ export const settingsApi: SettingsApi = {
     return this.getMembers(role);
   },
 
+  // INTEGRATION-GAP: left on mock. POST /users/{id}/activate|deactivate DO
+  // exist, but the member directory (getMembers) has no backend list, so the
+  // ids surfaced here are mock ids (not real UUIDs) — wiring the mutation alone
+  // would 404/422. Blocked pending a `GET /users` directory endpoint.
   async setMemberStatus(role, id, active) {
     assertAdmin(role);
     seedMembers();
@@ -369,11 +394,13 @@ export const settingsApi: SettingsApi = {
     return this.getMembers(role);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — org notification prefs left on mock.
   async getNotificationPreferences() {
     await delay(MOCK_LATENCY_MS);
     return structuredClone(notifications);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — org notification prefs left on mock.
   async updateNotificationPreferences(prefs) {
     await delay(MOCK_LATENCY_MS);
     // Defensive: only accept the known categories.
@@ -385,11 +412,13 @@ export const settingsApi: SettingsApi = {
     return structuredClone(notifications);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — priority colours left on mock.
   async getPriorities() {
     await delay(MOCK_LATENCY_MS);
     return PRIORITY_IDS.map((id) => ({ id, color: priorityColors[id] }));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — priority colours left on mock.
   async updatePriority(role, input) {
     assertAdmin(role);
     await delay(MOCK_LATENCY_MS);
@@ -397,12 +426,19 @@ export const settingsApi: SettingsApi = {
     return { id: input.id, color: input.color };
   },
 
+  // Reads through opportunitiesApi.getPipelineStages() (wired separately to
+  // GET /pipeline-stages). The presentation colour is a client-side default
+  // (backend stores a hex string, not an Aurea colour token).
   async getPipelineStageConfigs() {
     const configs = await ensureStageConfigs();
     await delay(MOCK_LATENCY_MS);
     return configs.slice().sort((a, b) => a.order - b.order).map((s) => ({ ...s }));
   },
 
+  // INTEGRATION-GAP: left on mock. PATCH /pipeline-stages/{id} exists, but the
+  // frontend keys stages by code (e.g. "new_contact") while the endpoint needs
+  // the stage UUID, and colour is an Aurea token vs the backend's hex string.
+  // Persisting cleanly needs a code→uuid + token→hex bridge; kept in-session.
   async updatePipelineStages(role, input) {
     assertAdmin(role);
     await ensureStageConfigs();
@@ -424,6 +460,7 @@ export const settingsApi: SettingsApi = {
     return stageConfigs.map((s) => ({ ...s }));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — unified archive list left on mock.
   async listArchived() {
     await delay(MOCK_LATENCY_MS);
     return archived
@@ -432,6 +469,7 @@ export const settingsApi: SettingsApi = {
       .map((a) => ({ ...a }));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — unified archive restore left on mock.
   async restoreArchived(role, id) {
     assertAdmin(role);
     await delay(MOCK_LATENCY_MS);
@@ -440,6 +478,7 @@ export const settingsApi: SettingsApi = {
     archived.splice(idx, 1);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — export dataset catalog left on mock.
   async listExportDatasets() {
     await delay(MOCK_LATENCY_MS / 2);
     return EXPORT_DATASETS.map((d) => ({ ...d, columns: [...d.columns] }));

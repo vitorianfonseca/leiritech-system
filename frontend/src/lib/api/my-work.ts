@@ -346,6 +346,12 @@ function mutate(taskId: string, patch: Partial<MyTask>): MyTask {
 }
 
 export const myWorkApi: MyWorkApi = {
+  // INTEGRATION-GAP: no backend endpoint — left on mock. The daily hub is an
+  // aggregate: assigned tasks (bucketed today/overdue/week) plus meetings,
+  // @mentions, a review queue, project cards, comment counts and recent time
+  // entries. Meetings, mentions and comment counts come from the calendar and
+  // collaboration surfaces, which have NO backend, so wiring only the task list
+  // would produce a broken half-hub. Left on mock until those exist.
   async getMyWork(_userId, role) {
     seed();
     await delay(MOCK_LATENCY_MS);
@@ -363,6 +369,9 @@ export const myWorkApi: MyWorkApi = {
     };
   },
 
+  // INTEGRATION-GAP: left on mock. PATCH /tasks/{id} exists, but it returns a
+  // bare task while MyTask needs enrichment (projectName, commentCount) and the
+  // status/priority vocabularies differ; kept on mock with the hub aggregate.
   async setTaskStatus(taskId, status) {
     await delay(MOCK_LATENCY_MS);
     return mutate(taskId, { status });

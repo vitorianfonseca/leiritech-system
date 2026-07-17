@@ -23,12 +23,14 @@
 
 import { addDays, format, startOfWeek } from "date-fns";
 import type { Role } from "@/lib/session";
+import { http } from "./http";
 import {
   TeamError,
   canConfigureCapacity,
   canSeeFullTeam,
   deriveAvailability,
   netCapacityHours,
+  type AvailabilityState,
   type FunctionCapacityConfig,
   type HeatmapDay,
   type TeamFunction,
@@ -312,6 +314,62 @@ function present(seed: MemberSeed, weekStart: Date): TeamMemberWorkload {
 }
 
 /* ------------------------------------------------------------------ *
+ * Backend mapping (real endpoint — GET /workload)
+ * ------------------------------------------------------------------ */
+
+/** Backend `WorkloadEntry` (camelCased by the HTTP client). */
+interface RawWorkloadEntry {
+  userId: string;
+  name: string;
+  role: Role;
+  weeklyCapacityHours: number;
+  roleUtilizationTarget: number;
+  netCapacityHours: number;
+  allocatedHours: number;
+  availableHours: number;
+  allocationPct: number;
+  billableHoursWeek: number;
+  utilizationPct: number;
+  availabilityState: AvailabilityState;
+  overAllocated: boolean;
+  availabilityOverride: string | null;
+}
+
+/**
+ * Map a backend workload entry to the client `TeamMemberWorkload`. Several
+ * enrichment fields have no source in `/workload` and are defaulted (never
+ * fabricated) — see the INTEGRATION-GAP notes.
+ */
+function toMemberWorkload(e: RawWorkloadEntry): TeamMemberWorkload {
+  return {
+    userId: e.userId,
+    name: e.name,
+    // INTEGRATION-GAP: avatarUrl — not provided by /workload.
+    avatarUrl: null,
+    // INTEGRATION-GAP: function — professional function (engineering/design/…)
+    // is not provided by /workload; placeholder pending a members endpoint.
+    function: "engineering",
+    accessRole: e.role,
+    availability: e.availabilityState,
+    awayNote: e.availabilityOverride,
+    // INTEGRATION-GAP: activeProjects/openTasks/overdueTasks — not in /workload.
+    activeProjects: 0,
+    openTasks: 0,
+    overdueTasks: 0,
+    allocatedHours: e.allocatedHours,
+    // INTEGRATION-GAP: loggedHours — total logged not provided (only billable).
+    loggedHours: 0,
+    billableHours: e.billableHoursWeek,
+    weeklyCapacityHours: e.weeklyCapacityHours,
+    netCapacityHours: round1(e.netCapacityHours),
+    utilizationRatio: e.allocationPct / 100,
+    billableUtilization: e.utilizationPct / 100,
+    // INTEGRATION-GAP: days — daily heatmap breakdown not provided by /workload.
+    days: [],
+  };
+}
+
+/* ------------------------------------------------------------------ *
  * Public API
  * ------------------------------------------------------------------ */
 
@@ -337,23 +395,28 @@ export interface TeamApi {
 }
 
 export const teamApi: TeamApi = {
+  // WIRED — GET /workload. The backend own-scopes a Membro to their single row.
+  // INTEGRATION-GAP: weekOffset — /workload has no week parameter; it always
+  // returns the CURRENT ISO week. weekStart is computed for display only, so
+  // week navigation shows current-week figures regardless of the offset.
   async getTeamWorkload(role, userId, weekOffset) {
+    void userId;
     seedConfigs();
-    await delay(MOCK_LATENCY_MS);
     const weekStart = weekStartFor(weekOffset);
     const full = canSeeFullTeam(role);
     const canConfigure = canConfigureCapacity(role);
 
-    const rows = MEMBER_SEED
-      // Membro is row-scoped to their own load (BR-002 — no existence leak).
-      .filter((m) => (full ? true : m.userId === userId))
-      .map((m) => present(m, weekStart))
+    const data = await http.get<{ items: RawWorkloadEntry[] }>("/workload");
+    const members = data.items
+      .map(toMemberWorkload)
       .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
 
     return {
       weekStart: isoDay(weekStart),
       weekOffset,
-      members: rows,
+      members,
+      // INTEGRATION-GAP: configs — per-function capacity config has no backend
+      // endpoint; served from the mock defaults for an Admin caller.
       configs: canConfigure
         ? (Object.keys(DEFAULT_CONFIGS) as TeamFunction[]).map((fn) => ({
             ...configFor(fn),
@@ -364,6 +427,8 @@ export const teamApi: TeamApi = {
     };
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock. Per-function capacity
+  // config (targets, capacity, internal cost rates) has no route yet.
   async getFunctionConfigs(role) {
     seedConfigs();
     if (!canConfigureCapacity(role)) throw new TeamError("forbidden");
@@ -373,6 +438,7 @@ export const teamApi: TeamApi = {
     }));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no capacity-config write).
   async updateFunctionConfig(role, fn, input) {
     seedConfigs();
     if (!canConfigureCapacity(role)) throw new TeamError("forbidden");

@@ -20,6 +20,7 @@
  */
 
 import { addDays, subDays } from "date-fns";
+import { http, HttpError } from "@/lib/api/http";
 import type { Role } from "@/lib/session";
 import {
   canAccessFinance,
@@ -45,6 +46,8 @@ import {
   isLiveState,
   type ConvertToProjectInput,
   type CreateProjectInput,
+  type DeliveryMilestone,
+  type DeliveryMilestoneStatus,
   type PhaseInput,
   type PhaseState,
   type PhaseTransitionInput,
@@ -681,6 +684,237 @@ function applyPhaseTransition(
 }
 
 /* ------------------------------------------------------------------ *
+ * Backend integration (F8/F10 real HTTP wiring)
+ *
+ * The shared `http` client deep-converts snake_case↔camelCase, so the shapes
+ * below are the camelCase mirror of the FastAPI Pydantic responses.
+ * ------------------------------------------------------------------ */
+
+interface ApiPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+interface ApiProject {
+  id: string;
+  name: string;
+  companyId: string | null;
+  opportunityId: string | null;
+  acceptedProposalId: string | null;
+  managerId: string | null;
+  description: string | null;
+  startDate: string | null;
+  deadline: string | null;
+  contractedValue: number | null;
+  hoursBudget: number | null;
+  internalCostRate: number | null;
+  status: string;
+  suggestedHealth: string | null;
+  publishedHealth: string | null;
+  healthReason: string | null;
+  healthPublishedAt: string | null;
+  healthPublishedBy: string | null;
+  statusReason: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiPhase {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string | null;
+  ownerId: string | null;
+  startDate: string | null;
+  deadline: string | null;
+  orderIndex: number;
+  progress: number;
+  finalMilestoneId: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiMember {
+  id: string;
+  projectId: string;
+  userId: string;
+  roleInProject: string | null;
+}
+
+interface ApiMilestone {
+  id: string;
+  projectId: string;
+  phaseId: string | null;
+  name: string;
+  description: string | null;
+  dueDate: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Translate the shared HttpError envelope into the file's typed ProjectError. */
+function mapProjectError(err: unknown): ProjectError {
+  if (err instanceof ProjectError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new ProjectError("not_found");
+    if (err.status === 403) return new ProjectError("forbidden");
+    if (err.status === 409) return new ProjectError("invalid_transition");
+    if (err.status === 400 || err.status === 422)
+      return new ProjectError("guard_failed");
+    if (err.status === 0 || err.code === "NETWORK")
+      return new ProjectError("network");
+  }
+  return new ProjectError("network");
+}
+
+function asHealth(v: string | null | undefined): ProjectHealth {
+  return v === "attention" || v === "at_risk" ? v : "healthy";
+}
+
+/** Map a backend phase to the frontend ProjectPhase shape. */
+function mapPhase(ph: ApiPhase): ProjectPhase {
+  return {
+    id: ph.id,
+    projectId: ph.projectId,
+    name: ph.name,
+    order: ph.orderIndex + 1,
+    state: ph.status as PhaseState,
+    // INTEGRATION-GAP: tasksTotal/tasksDone — backend exposes a phase progress
+    // percentage (mapped into project.progress) but no per-task counts (#34).
+    tasksTotal: 0,
+    tasksDone: 0,
+    dueDate: ph.deadline,
+    // INTEGRATION-GAP: blockerReason — not returned by the phase endpoint.
+    blockerReason: null,
+  };
+}
+
+const DELIVERY_STATUS_BY_MILESTONE: Record<string, DeliveryMilestoneStatus> = {
+  pending: "upcoming",
+  achieved: "met",
+  missed: "overdue",
+  cancelled: "upcoming",
+};
+
+/** Map a backend milestone to the frontend DeliveryMilestone shape. */
+function mapDeliveryMilestone(m: ApiMilestone): DeliveryMilestone {
+  return {
+    id: m.id,
+    projectId: m.projectId,
+    name: m.name,
+    dueDate: m.dueDate ?? "",
+    status: DELIVERY_STATUS_BY_MILESTONE[m.status] ?? "upcoming",
+  };
+}
+
+function mapMember(m: ApiMember): ProjectMember {
+  return {
+    userId: m.userId,
+    // INTEGRATION-GAP: name/avatarUrl — members endpoint returns only user_id.
+    name: m.userId,
+    roleLabel: m.roleInProject ?? "",
+    avatarUrl: null,
+  };
+}
+
+/** Base list projection — the shared fields available from a bare project row. */
+function mapListItem(p: ApiProject, teamCount: number, progress: number): ProjectListItem {
+  return {
+    id: p.id,
+    // INTEGRATION-GAP: clientId/clientName — backend returns company_id only; the
+    // company display name is not joined into the project payload.
+    clientId: p.companyId ?? "",
+    clientName: "",
+    name: p.name,
+    managerId: p.managerId ?? "",
+    // INTEGRATION-GAP: managerName — backend returns manager_id only (no join).
+    managerName: "",
+    teamCount,
+    state: p.status as ProjectState,
+    suggestedHealth: asHealth(p.suggestedHealth),
+    publishedHealth: p.publishedHealth ? asHealth(p.publishedHealth) : null,
+    progress,
+    startDate: p.startDate ?? "",
+    dueDate: p.deadline ?? "",
+    // Backend may already null contracted_value for a non-finance caller (BR-008).
+    contractedValueCents: p.contractedValue,
+    hoursBudget: p.hoursBudget ?? 0,
+    // INTEGRATION-GAP: hoursUsed — time tracking (#34) not aggregated by backend.
+    hoursUsed: 0,
+    nextDeliveryAt: null,
+  };
+}
+
+/** Average of real per-phase progress (BR-050 rollup the backend doesn't compute). */
+function progressFromPhases(phases: ApiPhase[]): number {
+  if (phases.length === 0) return 0;
+  const sum = phases.reduce((s, ph) => s + (ph.progress ?? 0), 0);
+  return Math.round(sum / phases.length);
+}
+
+/** Earliest still-open delivery milestone date, or null. */
+function nextDelivery(milestones: DeliveryMilestone[]): string | null {
+  const open = milestones
+    .filter((m) => m.status !== "met" && m.dueDate)
+    .map((m) => m.dueDate)
+    .sort((a, b) => a.localeCompare(b));
+  return open[0] ?? null;
+}
+
+function mapProject(
+  p: ApiProject,
+  members: ApiMember[],
+  phases: ApiPhase[],
+  milestones: ApiMilestone[]
+): Project {
+  const deliveryMilestones = milestones.map(mapDeliveryMilestone);
+  const base = mapListItem(p, members.length, progressFromPhases(phases));
+  base.nextDeliveryAt = nextDelivery(deliveryMilestones);
+  return {
+    ...base,
+    description: p.description ?? "",
+    team: members.map(mapMember),
+    phases: phases
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map(mapPhase),
+    deliveryMilestones,
+    // INTEGRATION-GAP: attentionTasks — real tasks (#34) not exposed here.
+    attentionTasks: [],
+    // INTEGRATION-GAP: risks — no risk/decision log backend endpoint.
+    risks: [],
+    healthReason: p.healthReason,
+    healthUpdatedAt: p.healthPublishedAt,
+    healthUpdatedBy: p.healthPublishedBy,
+    pauseReason: p.status === "on_hold" ? p.statusReason : null,
+    cancelReason: p.status === "cancelled" ? p.statusReason : null,
+    // INTEGRATION-GAP: paymentMilestonesConfirmed — not tracked on the project row.
+    paymentMilestonesConfirmed: false,
+    opportunityId: p.opportunityId,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
+
+/** Fetch a project plus its members / phases / milestones and project it. */
+async function fetchFullProject(id: string): Promise<Project> {
+  const [p, members, phases, milestones] = await Promise.all([
+    http.get<ApiProject>(`/projects/${id}`),
+    http.get<ApiMember[]>(`/projects/${id}/members`).catch(() => [] as ApiMember[]),
+    http.get<ApiPhase[]>(`/phases`, { query: { project_id: id } }).catch(() => [] as ApiPhase[]),
+    http
+      .get<ApiMilestone[]>(`/milestones`, { query: { project_id: id } })
+      .catch(() => [] as ApiMilestone[]),
+  ]);
+  return mapProject(p, members, phases, milestones);
+}
+
+/* ------------------------------------------------------------------ *
  * Public API
  * ------------------------------------------------------------------ */
 
@@ -720,145 +954,123 @@ function requireProject(id: string): Project {
 
 export const projectsApi: ProjectsApi = {
   async listProjects(role, userId, paymentsGrant) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const canFinance = canAccessFinance(role, paymentsGrant);
-    return [...projects.values()]
-      .filter((p) => visibleTo(p, role, userId))
-      .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"))
-      .map((p) => presentList(p, canFinance));
+    // Backend scopes rows (BR-002) and nulls finance fields (BR-008) via the JWT.
+    void role;
+    void userId;
+    void paymentsGrant;
+    try {
+      const page = await http.get<ApiPage<ApiProject>>("/projects", {
+        query: { page_size: 100, include_archived: true },
+      });
+      // INTEGRATION-GAP: teamCount/progress — the list endpoint returns bare
+      // project rows; members + phase rollups would cost one call per project,
+      // so both default to 0 here (enriched on the detail fetch).
+      return page.items.map((p) => mapListItem(p, 0, 0));
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async getProject(id, role, userId, paymentsGrant) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    // Membro not on the project is 404'd, never 403 (BR-002 — no existence leak).
-    if (!visibleTo(rec, role, userId)) throw new ProjectError("not_found");
-    return present(rec, canAccessFinance(role, paymentsGrant));
+    // Membro not on the project is 404'd server-side (BR-002 — no existence leak).
+    void role;
+    void userId;
+    void paymentsGrant;
+    try {
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async createProject(input, actorId, canFinance) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
+    void actorId;
     if (!input.name.trim()) throw new ProjectError("guard_failed", "nameRequired");
-    const id = uid("p");
-    const rec: Project = {
-      id,
-      name: input.name.trim(),
-      clientId: input.clientId,
-      clientName: input.clientName || input.clientId,
-      managerId: input.managerId,
-      managerName: userName(input.managerId),
-      teamCount: 1,
-      state: "planning",
-      suggestedHealth: "healthy",
-      publishedHealth: null,
-      healthReason: null,
-      healthUpdatedAt: null,
-      healthUpdatedBy: null,
-      progress: 0,
-      startDate: input.startDate,
-      dueDate: input.dueDate,
-      contractedValueCents: canFinance ? input.contractedValueCents : null,
-      hoursBudget: input.hoursBudget,
-      hoursUsed: 0,
-      nextDeliveryAt: null,
-      description: input.description.trim(),
-      team: [member(input.managerId, "Gestor de projeto")],
-      phases: [],
-      deliveryMilestones: [],
-      attentionTasks: [],
-      risks: [],
-      pauseReason: null,
-      cancelReason: null,
-      paymentMilestonesConfirmed: false,
-      opportunityId: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    projects.set(id, rec);
-    pushActivity(id, actorId, "created");
-    return present(rec, canFinance);
+    try {
+      const created = await http.post<ApiProject>("/projects", {
+        name: input.name.trim(),
+        companyId: input.clientId || null,
+        managerId: input.managerId || null,
+        description: input.description.trim() || null,
+        startDate: input.startDate || null,
+        deadline: input.dueDate || null,
+        // Finance gate (BR-008): a non-finance creator never sends a value.
+        contractedValue: canFinance ? input.contractedValueCents : null,
+        hoursBudget: input.hoursBudget,
+      });
+      return await fetchFullProject(created.id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async convertOpportunity(input, actorId, canFinance) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
+    void actorId;
     if (!input.name.trim()) throw new ProjectError("guard_failed", "nameRequired");
-    const id = uid("p");
-
-    // Team: gestor first (never duplicated), then the distinct extra members.
-    const team: ProjectMember[] = [member(input.managerId, "Gestor de projeto")];
-    for (const uidMember of input.teamMemberIds) {
-      if (uidMember && uidMember !== input.managerId && !team.some((m) => m.userId === uidMember)) {
-        team.push(member(uidMember, "Membro da equipa"));
+    try {
+      const created = await http.post<ApiProject>("/projects/from-opportunity", {
+        opportunityId: input.opportunityId,
+        name: input.name.trim(),
+        managerId: input.managerId || null,
+        startDate: input.startDate || null,
+        deadline: input.dueDate || null,
+        contractedValue: canFinance ? input.contractedValueCents : null,
+      });
+      // Extra members beyond the manager the service auto-adds (best effort).
+      for (const memberId of input.teamMemberIds) {
+        if (memberId && memberId !== input.managerId) {
+          await http
+            .post(`/projects/${created.id}/members`, {
+              userId: memberId,
+              roleInProject: "contributor",
+            })
+            .catch(() => undefined);
+        }
       }
+      // Template-instantiated phases: /from-opportunity does not accept an inline
+      // phase list, so create each explicitly (order preserved).
+      let order = 0;
+      for (const ph of input.phases) {
+        await http
+          .post(`/phases`, {
+            projectId: created.id,
+            name: ph.name.trim(),
+            deadline: ph.dueDate,
+            orderIndex: order,
+          })
+          .catch(() => undefined);
+        order += 1;
+      }
+      // INTEGRATION-GAP: proposalId / paymentMilestonesConfirmed (BR-037) — the
+      // from-opportunity endpoint does not accept or persist these.
+      return await fetchFullProject(created.id);
+    } catch (err) {
+      throw mapProjectError(err);
     }
-
-    // Phases instantiated from the chosen template (order is 1-based).
-    const phases: ProjectPhase[] = input.phases.map((p, i) => ({
-      id: uid(`${id}-ph`),
-      projectId: id,
-      name: p.name.trim(),
-      order: i + 1,
-      state: "not_started",
-      tasksTotal: Math.max(0, Math.round(p.tasksTotal)),
-      tasksDone: 0,
-      dueDate: p.dueDate,
-      blockerReason: null,
-    }));
-
-    const rec: Project = {
-      id,
-      name: input.name.trim(),
-      clientId: input.clientId,
-      clientName: input.clientName || input.clientId,
-      managerId: input.managerId,
-      managerName: userName(input.managerId),
-      teamCount: team.length,
-      state: "planning",
-      suggestedHealth: "healthy",
-      publishedHealth: null,
-      healthReason: null,
-      healthUpdatedAt: null,
-      healthUpdatedBy: null,
-      progress: 0,
-      startDate: input.startDate,
-      dueDate: input.dueDate,
-      contractedValueCents: canFinance ? input.contractedValueCents : null,
-      hoursBudget: input.hoursBudget,
-      hoursUsed: 0,
-      nextDeliveryAt: null,
-      description: input.description.trim(),
-      team,
-      phases,
-      deliveryMilestones: [],
-      attentionTasks: [],
-      risks: [],
-      pauseReason: null,
-      cancelReason: null,
-      // BR-037: only Admin/finance-grant can confirm; a non-finance converter
-      // leaves this false and the milestones step is skipped upstream.
-      paymentMilestonesConfirmed: canFinance ? input.paymentMilestonesConfirmed : false,
-      opportunityId: input.opportunityId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    projects.set(id, rec);
-    pushActivity(id, actorId, "created", { field: "conversion", after: input.opportunityId });
-    return present(rec, canFinance);
   },
 
   async transition(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    applyLifecycle(rec, input, actorId);
-    return present(rec, true);
+    void actorId;
+    // Preserve the mock's typed reason guard (§1.3) for a crisp UI message.
+    if (
+      (input.action === "pause" || input.action === "cancel") &&
+      !input.reason?.trim()
+    )
+      throw new ProjectError("reason_required");
+    try {
+      await http.post<ApiProject>(
+        `/projects/${id}/${input.action}`,
+        input.reason ? { reason: input.reason.trim() } : {}
+      );
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async restoreState(id, state, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — arbitrary guard-bypassing state
+    // revert (undo) is not exposed; left on the in-memory mock.
     seed();
     await delay(MOCK_LATENCY_MS);
     const rec = requireProject(id);
@@ -871,64 +1083,59 @@ export const projectsApi: ProjectsApi = {
   },
 
   async publishHealth(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    if (!isLiveState(rec.state))
-      throw new ProjectError("invalid_transition", "healthNotLive");
-    const differs = input.health !== rec.suggestedHealth;
-    if (differs && !input.reason?.trim()) throw new ProjectError("reason_required");
-    const before = effectiveHealth(rec);
-    rec.publishedHealth = input.health;
-    rec.healthReason = differs ? input.reason!.trim() : null;
-    rec.healthUpdatedAt = new Date().toISOString();
-    rec.healthUpdatedBy = actorId;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", {
-      field: "health",
-      before,
-      after: input.health,
-    });
-    return present(rec, true);
+    void actorId;
+    try {
+      await http.post<ApiProject>(`/projects/${id}/health`, {
+        health: input.health,
+        reason: input.reason?.trim() || null,
+      });
+      return await fetchFullProject(id);
+    } catch (err) {
+      // The dominant 422 on this route is a missing override reason (BR-031).
+      if (err instanceof HttpError && err.status === 422)
+        throw new ProjectError("reason_required");
+      throw mapProjectError(err);
+    }
   },
 
   async addPhase(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    if (!input.name.trim()) throw new ProjectError("guard_failed", "phaseNameRequired");
-    const order = rec.phases.length + 1;
-    rec.phases.push({
-      id: uid(`${id}-ph`),
-      projectId: id,
-      name: input.name.trim(),
-      order,
-      state: "not_started",
-      tasksTotal: 0,
-      tasksDone: 0,
-      dueDate: input.dueDate,
-      blockerReason: null,
-    });
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "updated", { field: "phase", after: input.name.trim() });
-    return present(rec, true);
+    void actorId;
+    if (!input.name.trim())
+      throw new ProjectError("guard_failed", "phaseNameRequired");
+    try {
+      const existing = await http
+        .get<ApiPhase[]>(`/phases`, { query: { project_id: id } })
+        .catch(() => [] as ApiPhase[]);
+      await http.post<ApiPhase>(`/phases`, {
+        projectId: id,
+        name: input.name.trim(),
+        deadline: input.dueDate,
+        orderIndex: existing.length,
+      });
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async updatePhase(id, phaseId, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    const ph = rec.phases.find((p) => p.id === phaseId);
-    if (!ph) throw new ProjectError("not_found");
-    if (!input.name.trim()) throw new ProjectError("guard_failed", "phaseNameRequired");
-    ph.name = input.name.trim();
-    ph.dueDate = input.dueDate;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "updated", { field: "phase", after: ph.name });
-    return present(rec, true);
+    void actorId;
+    if (!input.name.trim())
+      throw new ProjectError("guard_failed", "phaseNameRequired");
+    try {
+      await http.patch<ApiPhase>(`/phases/${phaseId}`, {
+        name: input.name.trim(),
+        deadline: input.dueDate,
+      });
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async removePhase(id, phaseId, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — DELETE /phases/{id} does not exist;
+    // phase removal is left on the in-memory mock.
     seed();
     await delay(MOCK_LATENCY_MS);
     const rec = requireProject(id);
@@ -941,39 +1148,47 @@ export const projectsApi: ProjectsApi = {
   },
 
   async reorderPhases(id, orderedPhaseIds, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    const byId = new Map(rec.phases.map((p) => [p.id, p]));
-    const next: ProjectPhase[] = [];
-    orderedPhaseIds.forEach((pid, i) => {
-      const ph = byId.get(pid);
-      if (ph) next.push({ ...ph, order: i + 1 });
-    });
-    // Preserve any phase not in the ordered list (defensive).
-    for (const ph of rec.phases) if (!orderedPhaseIds.includes(ph.id)) next.push(ph);
-    rec.phases = next;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "updated", { field: "phaseOrder" });
-    return present(rec, true);
+    void actorId;
+    try {
+      // No bulk reorder endpoint — persist each new order_index via PATCH.
+      await Promise.all(
+        orderedPhaseIds.map((pid, i) =>
+          http
+            .patch<ApiPhase>(`/phases/${pid}`, { orderIndex: i })
+            .catch(() => undefined)
+        )
+      );
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async transitionPhase(id, phaseId, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = requireProject(id);
-    const ph = rec.phases.find((p) => p.id === phaseId);
-    if (!ph) throw new ProjectError("not_found");
-    applyPhaseTransition(ph, rec, input);
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", {
-      field: "phaseState",
-      after: ph.state,
-    });
-    return present(rec, true);
+    void actorId;
+    if (input.transition === "block" && !input.reason?.trim())
+      throw new ProjectError("reason_required");
+    try {
+      if (input.transition === "complete") {
+        // Completion enforces the "all tasks done" guard server-side (BR-051).
+        await http.post<ApiPhase>(`/phases/${phaseId}/complete`, {});
+      } else {
+        // start / unblock / reopen all target in_progress; block → blocked.
+        // INTEGRATION-GAP: blockerReason — the transition endpoint accepts only a
+        // target status, so the block reason is not persisted.
+        const status = input.transition === "block" ? "blocked" : "in_progress";
+        await http.post<ApiPhase>(`/phases/${phaseId}/transition`, { status });
+      }
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
   },
 
   async getProjectFinance(id, role, paymentsGrant) {
+    // INTEGRATION-GAP: no backend endpoint — there is no per-project finance
+    // rollup route; the Financeiro tab reuses the (separate) finance client and
+    // the live-margin computation below (BR-065), left on the mock source.
     seed();
     if (!canAccessFinance(role, paymentsGrant)) throw new ProjectError("forbidden");
     const rec = requireProject(id);

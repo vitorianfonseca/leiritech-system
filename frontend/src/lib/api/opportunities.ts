@@ -18,6 +18,7 @@
 import { subDays } from "date-fns";
 import type { Role } from "@/lib/session";
 import { canAccessFinance } from "@/lib/api/finance-types";
+import { http, HttpError } from "@/lib/api/http";
 import {
   collaborationApi,
   type CollaborationApi,
@@ -36,6 +37,7 @@ import {
   type CreateOpportunityInput,
   type LoseOpportunityInput,
   type MoveOpportunityInput,
+  type LostReason,
   type Opportunity,
   type PipelineStage,
   type PipelineStageId,
@@ -370,6 +372,127 @@ function assertAccess(role: Role): void {
 }
 
 /* ------------------------------------------------------------------ *
+ * Backend wiring (integration issue #57)
+ *
+ * The backend is the single source of truth. A deal's stage is a
+ * pipeline_stages FK (uuid); the frontend `Opportunity.stageId` is the stage
+ * CODE (PipelineStageId). We load /pipeline-stages once and resolve uuid→code on
+ * read and code→uuid on write, so the board (which renders /pipeline-stages
+ * dynamically) and every opportunity read/write agree on the same taxonomy.
+ * ------------------------------------------------------------------ */
+
+interface BackendPipelineStage {
+  id: string;
+  name: string;
+  code: string;
+  color: string | null;
+  orderIndex: number;
+  winProbability: number | null;
+}
+
+interface BackendOpportunity {
+  id: string;
+  title: string;
+  companyId: string | null;
+  primaryContactId: string | null;
+  ownerId: string | null;
+  stageId: string | null;
+  estimatedValue: number | null;
+  probability: number | null;
+  expectedCloseDate: string | null;
+  source: string | null;
+  description: string | null;
+  nextAction: string | null;
+  nextActionDue: string | null;
+  outcome: "open" | "won" | "lost";
+  lostReason: string | null;
+  lostAt: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface StageMaps {
+  byId: Map<string, PipelineStageId>;
+  byCode: Map<PipelineStageId, string>;
+}
+
+let stageMapsCache: StageMaps | null = null;
+
+function buildStageMaps(rows: BackendPipelineStage[]): StageMaps {
+  const byId = new Map<string, PipelineStageId>();
+  const byCode = new Map<PipelineStageId, string>();
+  for (const r of rows) {
+    byId.set(r.id, r.code as PipelineStageId);
+    byCode.set(r.code as PipelineStageId, r.id);
+  }
+  return { byId, byCode };
+}
+
+/** Load + cache the #57 stage uuid↔code maps for the module lifetime. */
+async function loadStageMaps(): Promise<StageMaps> {
+  if (stageMapsCache) return stageMapsCache;
+  const rows = await http.get<BackendPipelineStage[]>("/pipeline-stages");
+  stageMapsCache = buildStageMaps(rows);
+  return stageMapsCache;
+}
+
+const PROPOSAL_SENT_INDEX = PIPELINE_STAGE_IDS.indexOf("proposal_sent");
+
+function mapOpportunity(
+  be: BackendOpportunity,
+  byId: Map<string, PipelineStageId>,
+  canFinance: boolean
+): Opportunity {
+  const stageCode: PipelineStageId =
+    (be.stageId ? byId.get(be.stageId) : undefined) ?? "new_contact";
+  return {
+    id: be.id,
+    title: be.title,
+    companyId: be.companyId ?? "",
+    // INTEGRATION-GAP: companyName — not returned by the opportunities endpoint
+    companyName: "",
+    ownerId: be.ownerId ?? "",
+    // INTEGRATION-GAP: ownerName — not returned by the opportunities endpoint
+    ownerName: "",
+    valueCents: canFinance ? be.estimatedValue ?? null : null,
+    probability: be.probability ?? 0,
+    // #57: resolve dynamic stage uuid → frontend PipelineStageId code.
+    stageId: stageCode,
+    // Backend outcome "open" → frontend null; won/lost pass through.
+    outcome: be.outcome === "open" ? null : be.outcome,
+    nextAction: be.nextAction ?? null,
+    nextActionAt: be.nextActionDue ?? null,
+    // INTEGRATION-GAP: proposalSentReached — not persisted by backend; derived
+    // from the current stage's order relative to `proposal_sent`.
+    proposalSentReached:
+      PIPELINE_STAGE_IDS.indexOf(stageCode) >= PROPOSAL_SENT_INDEX,
+    lostReason: (be.lostReason as LostReason | null) ?? null,
+    // INTEGRATION-GAP: lostReasonNote — backend stores a single lost_reason field
+    lostReasonNote: null,
+    lostAt: be.lostAt ? be.lostAt.slice(0, 10) : null,
+    // INTEGRATION-GAP: wonAt — backend has no won_at column
+    wonAt: null,
+    // INTEGRATION-GAP: converted/projectId — not exposed by the opportunities
+    // endpoint; the link is created server-side by POST /projects/from-opportunity
+    converted: false,
+    projectId: null,
+    createdAt: be.createdAt,
+    updatedAt: be.updatedAt,
+  };
+}
+
+function translateOpportunityError(err: unknown): OpportunityError {
+  if (err instanceof OpportunityError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new OpportunityError("not_found");
+    if (err.status === 403) return new OpportunityError("forbidden");
+    return new OpportunityError("invalid_transition", err.message);
+  }
+  return new OpportunityError("invalid_transition");
+}
+
+/* ------------------------------------------------------------------ *
  * Public API
  * ------------------------------------------------------------------ */
 
@@ -422,113 +545,131 @@ export interface OpportunitiesApi {
 }
 
 export const opportunitiesApi: OpportunitiesApi = {
+  // WIRED → GET /pipeline-stages. The board renders these dynamically; we also
+  // warm the #57 stage uuid↔code cache from the same payload.
   async getPipelineStages() {
-    await delay(MOCK_LATENCY_MS);
-    return STAGES.map((s) => ({ ...s }));
+    const rows = await http.get<BackendPipelineStage[]>("/pipeline-stages");
+    stageMapsCache = buildStageMaps(rows);
+    return [...rows]
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((r) => ({
+        id: r.code as PipelineStageId,
+        order: r.orderIndex,
+        winProbability: r.winProbability ?? 0,
+      }));
   },
 
+  // WIRED → GET /opportunities. Access is scoped server-side; the client-side
+  // pipeline gate (BR-002) is preserved so a Membro never issues the call.
   async listOpportunities(role, _userId, paymentsGrant) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
     assertAccess(role);
-    const canFinance = canAccessFinance(role, paymentsGrant);
-    return [...opportunities.values()].map((r) => present(r, canFinance));
+    try {
+      const [maps, page] = await Promise.all([
+        loadStageMaps(),
+        http.get<{ items: BackendOpportunity[] }>("/opportunities", {
+          query: { page_size: 100 },
+        }),
+      ]);
+      const canFinance = canAccessFinance(role, paymentsGrant);
+      return page.items.map((o) => mapOpportunity(o, maps.byId, canFinance));
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // WIRED → GET /opportunities/{id}
   async getOpportunity(id, role, _userId, paymentsGrant) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
     assertAccess(role);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    return present(rec, canAccessFinance(role, paymentsGrant));
+    try {
+      const [maps, be] = await Promise.all([
+        loadStageMaps(),
+        http.get<BackendOpportunity>(`/opportunities/${id}`),
+      ]);
+      return mapOpportunity(be, maps.byId, canAccessFinance(role, paymentsGrant));
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // WIRED → POST /opportunities/{id}/move. próxima-ação (BR-010) guarded client
+  // side to preserve the typed error code; stage code → uuid for the payload.
   async moveOpportunity(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    if (rec.outcome !== null) throw new OpportunityError("invalid_transition");
+    void actorId;
     if (!input.nextAction.trim()) throw new OpportunityError("next_action_required");
-
-    const fromStage = rec.stageId;
-    if (fromStage !== input.toStageId) {
-      pushActivity(id, actorId, "status_changed", {
-        field: "stage",
-        before: fromStage,
-        after: input.toStageId,
+    try {
+      const maps = await loadStageMaps();
+      const stageUuid = maps.byCode.get(input.toStageId);
+      if (!stageUuid) throw new OpportunityError("invalid_transition");
+      const be = await http.post<BackendOpportunity>(`/opportunities/${id}/move`, {
+        stageId: stageUuid,
+        nextAction: input.nextAction.trim(),
+        nextActionDue: input.nextActionAt,
       });
+      // BR-008: write responses are finance-stripped; a gated refetch restores value.
+      return mapOpportunity(be, maps.byId, false);
+    } catch (err) {
+      throw translateOpportunityError(err);
     }
-    rec.stageId = input.toStageId;
-    rec.nextAction = input.nextAction.trim();
-    rec.nextActionAt = input.nextActionAt;
-    if (stageOrder(input.toStageId) >= stageOrder("proposal_sent")) {
-      rec.proposalSentReached = true;
-    }
-    rec.updatedAt = new Date().toISOString();
-    return presentAfterWrite(rec);
   },
 
+  // WIRED → POST /opportunities/{id}/win
   async winOpportunity(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    if (rec.outcome === "won") throw new OpportunityError("invalid_transition");
-    if (rec.outcome === "lost") throw new OpportunityError("invalid_transition");
-
-    rec.outcome = "won";
-    rec.wonAt = new Date().toISOString().slice(0, 10);
-    rec.nextAction = null;
-    rec.nextActionAt = null;
-    rec.probability = 100;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "outcome", after: "won" });
-
-    // "Cliente ativo" is a DERIVED flag (BR-038) — a won deal makes the company
-    // active by definition. The CRM read recomputes it; nothing is persisted here.
-    return {
-      opportunity: presentAfterWrite(rec),
-      companyActivated: true,
-      companyId: rec.companyId,
-      companyName: rec.companyName,
-    };
+    void actorId;
+    try {
+      const maps = await loadStageMaps();
+      const be = await http.post<BackendOpportunity>(`/opportunities/${id}/win`, {});
+      const opportunity = mapOpportunity(be, maps.byId, false);
+      return {
+        opportunity,
+        // INTEGRATION-GAP: companyActivated — backend does not report it; a win
+        // activates the company by definition (BR-038).
+        companyActivated: true,
+        companyId: opportunity.companyId,
+        // INTEGRATION-GAP: companyName — not returned by the opportunities endpoint
+        companyName: opportunity.companyName,
+      };
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // INTEGRATION-GAP: no dedicated backend endpoint to persist the opportunity→
+  // project link — the real link is created server-side by POST
+  // /projects/from-opportunity. We validate against the live opportunity and
+  // reflect the link locally so the conversion wizard guard behaves.
   async markConverted(id, projectId, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    if (rec.outcome !== "won") throw new OpportunityError("invalid_transition");
-    if (rec.converted) throw new OpportunityError("invalid_transition");
-    rec.converted = true;
-    rec.projectId = projectId;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "converted", after: projectId });
-    return presentAfterWrite(rec);
+    void actorId;
+    try {
+      const maps = await loadStageMaps();
+      const be = await http.get<BackendOpportunity>(`/opportunities/${id}`);
+      const opp = mapOpportunity(be, maps.byId, false);
+      if (opp.outcome !== "won") throw new OpportunityError("invalid_transition");
+      return { ...opp, converted: true, projectId };
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // WIRED → POST /opportunities/{id}/lose. lost-reason (BR-011) guarded client
+  // side to preserve the typed error code.
   async loseOpportunity(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    if (rec.outcome === "won") throw new OpportunityError("invalid_transition");
+    void actorId;
     if (!input.reason) throw new OpportunityError("lost_reason_required");
-
-    rec.outcome = "lost";
-    rec.lostReason = input.reason;
-    rec.lostReasonNote = input.note?.trim() ? input.note.trim() : null;
-    rec.lostAt = new Date().toISOString().slice(0, 10);
-    rec.nextAction = null;
-    rec.nextActionAt = null;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "outcome", after: "lost" });
-    return presentAfterWrite(rec);
+    try {
+      const maps = await loadStageMaps();
+      // INTEGRATION-GAP: input.note is dropped — backend accepts a single
+      // lost_reason string with no separate note field.
+      const be = await http.post<BackendOpportunity>(`/opportunities/${id}/lose`, {
+        lostReason: input.reason,
+      });
+      return mapOpportunity(be, maps.byId, false);
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // LEFT-ON-MOCK: no backend endpoint — win/lose are terminal (BR-013) and no
+  // reopen route exists. Body unchanged.
   async reopenOpportunity(id, input, actorId) {
     seed();
     await delay(MOCK_LATENCY_MS);
@@ -547,58 +688,42 @@ export const opportunitiesApi: OpportunitiesApi = {
     return presentAfterWrite(rec);
   },
 
+  // WIRED → POST /opportunities. Stage code → uuid; probability defaults server
+  // side from the stage. próxima-ação (BR-010) guarded client side.
   async createOpportunity(input, actorId, canFinance) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
+    void actorId;
     if (!input.nextAction.trim()) throw new OpportunityError("next_action_required");
-
-    const id = uid("o");
-    const rec: OpportunityRecord = {
-      id,
-      title: input.title.trim(),
-      companyId: input.companyId,
-      companyName: input.companyName || input.companyId,
-      ownerId: input.ownerId,
-      ownerName: ownerName(input.ownerId),
-      valueCents: input.valueCents,
-      probability: STAGE_PROBABILITY[input.stageId],
-      stageId: input.stageId,
-      outcome: null,
-      nextAction: input.nextAction.trim(),
-      nextActionAt: input.nextActionAt,
-      proposalSentReached:
-        stageOrder(input.stageId) >= stageOrder("proposal_sent"),
-      lostReason: null,
-      lostReasonNote: null,
-      lostAt: null,
-      wonAt: null,
-      converted: false,
-      projectId: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    opportunities.set(id, rec);
-    pushActivity(id, actorId, "created");
-    return present(rec, canFinance);
+    try {
+      const maps = await loadStageMaps();
+      const stageUuid = maps.byCode.get(input.stageId);
+      const be = await http.post<BackendOpportunity>("/opportunities", {
+        title: input.title.trim(),
+        companyId: input.companyId,
+        ownerId: input.ownerId,
+        stageId: stageUuid,
+        estimatedValue: input.valueCents,
+        nextAction: input.nextAction.trim(),
+        nextActionDue: input.nextActionAt,
+      });
+      return mapOpportunity(be, maps.byId, canFinance);
+    } catch (err) {
+      throw translateOpportunityError(err);
+    }
   },
 
+  // WIRED → PATCH /opportunities/{id}. Probability is admin-tunable (BR-020).
   async updateProbability(id, probability, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = opportunities.get(id);
-    if (!rec) throw new OpportunityError("not_found");
-    const clamped = Math.max(0, Math.min(100, Math.round(probability)));
-    const before = rec.probability;
-    rec.probability = clamped;
-    rec.updatedAt = new Date().toISOString();
-    if (before !== clamped) {
-      pushActivity(id, actorId, "updated", {
-        field: "probability",
-        before: String(before),
-        after: String(clamped),
+    void actorId;
+    try {
+      const maps = await loadStageMaps();
+      const clamped = Math.max(0, Math.min(100, Math.round(probability)));
+      const be = await http.patch<BackendOpportunity>(`/opportunities/${id}`, {
+        probability: clamped,
       });
+      return mapOpportunity(be, maps.byId, false);
+    } catch (err) {
+      throw translateOpportunityError(err);
     }
-    return presentAfterWrite(rec);
   },
 };
 

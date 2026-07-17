@@ -16,6 +16,7 @@
 
 import { format } from "date-fns";
 import type { Role } from "@/lib/session";
+import { http } from "./http";
 import {
   canManageTemplates,
   summarize,
@@ -318,6 +319,41 @@ export interface TemplatesApi {
   reorderTasks(phaseId: string, orderedIds: string[], role: Role): Promise<void>;
 }
 
+/* ------------------------------------------------------------------ *
+ * Backend mapping (GET/POST /projects/templates)
+ * ------------------------------------------------------------------ */
+
+/** Backend `ProjectTemplateResponse` (camelCased by the HTTP client). */
+interface RawTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  expectedDuration: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Map a backend template row to the summary shape. Several fields are not
+ * modelled by the backend and are defaulted (never fabricated).
+ * INTEGRATION-GAP: type (no archetype field → "website"); active (not modelled
+ * → true); phaseCount/taskCount/totalEstimateHours (list omits nested phases → 0).
+ */
+function toSummaryFromBackend(raw: RawTemplate): ProjectTemplate {
+  return {
+    id: raw.id,
+    name: raw.name,
+    type: "website",
+    description: raw.description ?? "",
+    active: true,
+    expectedDurationDays: raw.expectedDuration ?? 0,
+    phaseCount: 0,
+    taskCount: 0,
+    totalEstimateHours: 0,
+    updatedAt: raw.updatedAt,
+  };
+}
+
 function findTask(taskId: string): { record: TemplateRecord; phase: TemplatePhase; task: TemplateTask } {
   for (const record of records) {
     for (const phase of record.phases) {
@@ -329,12 +365,17 @@ function findTask(taskId: string): { record: TemplateRecord; phase: TemplatePhas
 }
 
 export const templatesApi: TemplatesApi = {
+  // WIRED — GET /projects/templates (bare array). See toSummaryFromBackend gaps.
   async list() {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    return records.map(toSummary).sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
+    const rows = await http.get<RawTemplate[]>("/projects/templates");
+    return rows
+      .map(toSummaryFromBackend)
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no template
+  // DETAIL route (GET /projects/templates/{id}) returning nested phases/tasks,
+  // which #31's conversion wizard needs.
   async get(id) {
     seed();
     await delay(MOCK_LATENCY_MS);
@@ -342,24 +383,32 @@ export const templatesApi: TemplatesApi = {
     return r ? toDetail(r) : null;
   },
 
+  // WIRED — POST /projects/templates. `type`/`active` echo the input (the
+  // backend does not persist them); phases are added separately (see addPhase).
   async createTemplate(input, role) {
     assertManage(role);
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const created: TemplateRecord = {
-      id: rid("tpl"),
+    const raw = await http.post<RawTemplate>("/projects/templates", {
       name: input.name,
-      type: input.type,
       description: input.description,
+      expectedDuration: input.expectedDurationDays,
+      phases: [],
+    });
+    return {
+      id: raw.id,
+      name: raw.name,
+      type: input.type,
+      description: raw.description ?? input.description,
       active: input.active,
-      expectedDurationDays: input.expectedDurationDays,
-      updatedAt: nowIso(),
+      expectedDurationDays: raw.expectedDuration ?? input.expectedDurationDays,
+      phaseCount: 0,
+      taskCount: 0,
+      totalEstimateHours: 0,
+      updatedAt: raw.updatedAt,
       phases: [],
     };
-    records = [...records, created];
-    return toDetail(created);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no template PATCH).
   async updateTemplate(id, input, role) {
     assertManage(role);
     await delay(MOCK_LATENCY_MS);
@@ -373,12 +422,14 @@ export const templatesApi: TemplatesApi = {
     return toDetail(r);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no template DELETE).
   async deleteTemplate(id, role) {
     assertManage(role);
     await delay(MOCK_LATENCY_MS);
     records = records.filter((x) => x.id !== id);
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (undo helper).
   async restoreTemplate(detail, role) {
     assertManage(role);
     seed();
@@ -397,6 +448,9 @@ export const templatesApi: TemplatesApi = {
     records = [...records, record];
   },
 
+  // INTEGRATION-GAP: no backend endpoint — all phase/task editor mutations
+  // (add/update/remove/restore/reorder) are left on mock; the backend has no
+  // sub-resource routes for template phases or tasks.
   async addPhase(templateId, input, role) {
     assertManage(role);
     await delay(MOCK_LATENCY_MS);

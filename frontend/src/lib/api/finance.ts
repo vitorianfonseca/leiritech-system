@@ -1,22 +1,21 @@
 /**
- * Finance API client — MOCK implementation (F14, GATED).
+ * Finance API client — REAL implementation (F14, GATED).
  *
- * Backend is not wired yet. This module exports a typed `financeApi` whose
- * methods return promises exactly as the real HTTP client will. The integration
- * agent replaces the bodies with real `fetch` calls to FastAPI WITHOUT changing
- * the signatures. UI code (via TanStack Query) depends only on the `FinanceApi`
- * interface below.
+ * Wires `financeApi` to the FastAPI finance surface under `/finance/*`. The
+ * shared `http` client (see `./http`) attaches the JWT, refreshes on 401 and
+ * deep-maps snake_case↔camelCase, so everything below is camelCase.
  *
- * ⚠️ The client itself enforces the access boundary (BR-008/066): every method
- * that returns or mutates financial data refuses `membro`, and refuses a
- * `gestor` without the payments grant — mirroring the backend contract so the
- * UI never accidentally surfaces financials. See `canAccessFinance`.
+ * ⚠️ Access boundary (BR-008/066): the backend is authoritative (every route is
+ * gated by `RequireFinance`). We ALSO keep the client-side `assertAccess` guard
+ * so the UI never even attempts a call it may not make — mirroring the mock's
+ * documented semantics. The `role`/`paymentsGrant` params are preserved on every
+ * signature; the backend re-checks server-side.
  *
- * Margin is LIVE (BR-065): the summary is recomputed from the current
- * milestones + costs on every read and after every mutation.
+ * Margin is LIVE (BR-065): the summary is recomputed by the backend per project;
+ * `getOverview` aggregates the per-project summaries into the global rollup.
  */
 
-import { addDays, format, parseISO, startOfDay } from "date-fns";
+import { http, HttpError } from "./http";
 import type { Role } from "@/lib/session";
 import {
   canAccessFinance,
@@ -27,196 +26,152 @@ import {
   type PaymentMilestone,
   type PaymentMilestoneStatus,
   type ProjectCost,
+  type ProjectCostCategory,
   type ProjectCostInput,
   type RecordPaymentInput,
 } from "./finance-types";
 
-const MOCK_LATENCY_MS = 400;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function isoDate(offsetDays: number): string {
-  return format(addDays(startOfDay(new Date()), offsetDays), "yyyy-MM-dd");
-}
-
-/** Blended internal cost of logged time, in cents. Mock stand-in for F14 time cost. */
-const TIME_COST_CENTS = 1_842_00; // €1 842,00
-
 /* ------------------------------------------------------------------ *
- * Seed data (dates relative to today so overdue/due-soon are meaningful)
+ * Backend wire shapes (camelCased by the http client)
  * ------------------------------------------------------------------ */
 
-let milestones: PaymentMilestone[] = [];
-let costs: ProjectCost[] = [];
-let seeded = false;
-
-function seed(): void {
-  if (seeded) return;
-  seeded = true;
-
-  milestones = [
-    {
-      id: "pm-1",
-      projectId: "p-1",
-      projectName: "Website — Solar do Douro",
-      clientName: "Solar do Douro",
-      description: "Adjudicação — arranque do projeto",
-      amountCents: 4_500_00,
-      expectedDate: isoDate(-40),
-      invoicedDate: isoDate(-40),
-      paidDate: isoDate(-33),
-      receivedAmountCents: 4_500_00,
-      completionCriteria: "Contrato assinado e reunião de arranque realizada.",
-      externalInvoiceRef: "REF-2026-014",
-      status: "paid",
-    },
-    {
-      id: "pm-2",
-      projectId: "p-1",
-      projectName: "Website — Solar do Douro",
-      clientName: "Solar do Douro",
-      description: "Entrega do design aprovado",
-      amountCents: 3_500_00,
-      expectedDate: isoDate(-3),
-      invoicedDate: isoDate(-6),
-      paidDate: null,
-      receivedAmountCents: 1_500_00,
-      completionCriteria: "Maquetes finais aprovadas por escrito pelo cliente.",
-      externalInvoiceRef: "REF-2026-021",
-      status: "partially_paid",
-    },
-    {
-      id: "pm-3",
-      projectId: "p-2",
-      projectName: "Rebranding — Adega Vale",
-      clientName: "Adega Vale",
-      description: "Manual de marca entregue",
-      amountCents: 6_200_00,
-      expectedDate: isoDate(-5),
-      invoicedDate: isoDate(-8),
-      paidDate: null,
-      receivedAmountCents: 0,
-      completionCriteria: "Manual de marca em PDF entregue e validado.",
-      externalInvoiceRef: "REF-2026-018",
-      status: "overdue",
-    },
-    {
-      id: "pm-4",
-      projectId: "p-2",
-      projectName: "Rebranding — Adega Vale",
-      clientName: "Adega Vale",
-      description: "Aplicações de marca — segunda fase",
-      amountCents: 4_800_00,
-      expectedDate: isoDate(4),
-      invoicedDate: null,
-      paidDate: null,
-      receivedAmountCents: 0,
-      completionCriteria: "Estacionário e sinalética entregues em produção.",
-      externalInvoiceRef: null,
-      status: "planned",
-    },
-    {
-      id: "pm-5",
-      projectId: "p-3",
-      projectName: "App Fidelização — Lumina",
-      clientName: "Lumina",
-      description: "Entrega da versão beta",
-      amountCents: 9_000_00,
-      expectedDate: isoDate(18),
-      invoicedDate: null,
-      paidDate: null,
-      receivedAmountCents: 0,
-      completionCriteria: "Build beta publicada em TestFlight e Play Console.",
-      externalInvoiceRef: null,
-      status: "planned",
-    },
-    {
-      id: "pm-6",
-      projectId: "p-3",
-      projectName: "App Fidelização — Lumina",
-      clientName: "Lumina",
-      description: "Fase de descoberta (cancelada)",
-      amountCents: 2_000_00,
-      expectedDate: isoDate(-20),
-      invoicedDate: null,
-      paidDate: null,
-      receivedAmountCents: 0,
-      completionCriteria: "Workshop de descoberta e documento de âmbito.",
-      externalInvoiceRef: null,
-      status: "cancelled",
-    },
-  ];
-
-  costs = [
-    {
-      id: "pc-1",
-      projectId: "p-2",
-      projectName: "Rebranding — Adega Vale",
-      description: "Fotografia de produto (subcontratado)",
-      category: "subcontracting",
-      amountCents: 1_200_00,
-      incurredDate: isoDate(-15),
-    },
-    {
-      id: "pc-2",
-      projectId: "p-3",
-      projectName: "App Fidelização — Lumina",
-      description: "Licenças de API de mapas (12 meses)",
-      category: "software",
-      amountCents: 540_00,
-      incurredDate: isoDate(-10),
-    },
-    {
-      id: "pc-3",
-      projectId: "p-1",
-      projectName: "Website — Solar do Douro",
-      description: "Deslocação à vindima para sessão fotográfica",
-      category: "travel",
-      amountCents: 180_00,
-      incurredDate: isoDate(-8),
-    },
-  ];
+interface Page<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
+interface MilestoneWire {
+  id: string;
+  projectId: string;
+  companyId: string | null;
+  description: string | null;
+  amount: number;
+  expectedDate: string | null;
+  invoicedDate: string | null;
+  paidDate: string | null;
+  receivedAmount: number;
+  completionCriteria: string | null;
+  confirmerId: string | null;
+  externalInvoiceRef: string | null;
+  reference: string | null;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CostWire {
+  id: string;
+  projectId: string;
+  description: string;
+  amount: number;
+  date: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface SummaryWire {
+  projectId: string;
+  contracted: number;
+  received: number;
+  pending: number;
+  internalCostRate: number;
+  loggedHours: number;
+  laborCost: number;
+  costsTotal: number;
+  margin: number;
+  milestoneCount: number;
+}
+
+interface ProjectWire {
+  id: string;
+  name: string;
+  companyId: string | null;
+}
+
+interface CompanyWire {
+  id: string;
+  name: string;
+}
+
+type NameMaps = {
+  projects: Map<string, string>;
+  companies: Map<string, string>;
+};
+
 /* ------------------------------------------------------------------ *
- * Derivations
+ * Error mapping (BR: preserve the mock's typed error semantics)
  * ------------------------------------------------------------------ */
 
-/** Recompute the milestone status from its amounts + expected date (live). */
-function deriveStatus(m: PaymentMilestone): PaymentMilestoneStatus {
-  if (m.status === "cancelled") return "cancelled";
-  if (m.receivedAmountCents >= m.amountCents && m.amountCents > 0) return "paid";
-  if (m.receivedAmountCents > 0) {
-    // Partially paid, but still overdue if past the expected date.
-    return isPastDue(m) ? "overdue" : "partially_paid";
+function toFinanceError(err: unknown): FinanceError {
+  if (err instanceof FinanceError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 401 || err.status === 403) {
+      return new FinanceError("forbidden", err.message);
+    }
+    return new FinanceError("network", err.message);
   }
-  if (isPastDue(m)) return "overdue";
-  return m.invoicedDate ? "invoiced" : "planned";
+  return new FinanceError("network", (err as Error)?.message);
 }
 
-function isPastDue(m: PaymentMilestone): boolean {
-  const today = startOfDay(new Date());
-  return parseISO(m.expectedDate).getTime() < today.getTime();
+/* ------------------------------------------------------------------ *
+ * Mapping wire → domain
+ * ------------------------------------------------------------------ */
+
+function mapMilestone(m: MilestoneWire, names?: NameMaps): PaymentMilestone {
+  return {
+    id: m.id,
+    projectId: m.projectId,
+    // INTEGRATION-GAP: projectName — not on the milestone payload; enriched from
+    // the /projects list in getOverview, "" elsewhere.
+    projectName: names?.projects.get(m.projectId) ?? "",
+    // INTEGRATION-GAP: clientName — resolved from companyId via /companies in
+    // getOverview, "" elsewhere.
+    clientName: (m.companyId ? names?.companies.get(m.companyId) : "") ?? "",
+    description: m.description ?? "",
+    amountCents: m.amount,
+    // INTEGRATION-GAP: expectedDate — backend allows null; UI expects a date.
+    expectedDate: m.expectedDate ?? "",
+    invoicedDate: m.invoicedDate,
+    paidDate: m.paidDate,
+    receivedAmountCents: m.receivedAmount,
+    completionCriteria: m.completionCriteria ?? "",
+    // Prefer the neutral fiscal note; fall back to the generic reference code.
+    externalInvoiceRef: m.externalInvoiceRef ?? m.reference ?? null,
+    status: m.status as PaymentMilestoneStatus,
+  };
 }
 
-function withDerivedStatus(m: PaymentMilestone): PaymentMilestone {
-  return { ...m, status: deriveStatus(m) };
+function mapCost(c: CostWire, names?: NameMaps): ProjectCost {
+  return {
+    id: c.id,
+    projectId: c.projectId,
+    // INTEGRATION-GAP: projectName — enriched from /projects in getOverview.
+    projectName: names?.projects.get(c.projectId) ?? "",
+    description: c.description,
+    // INTEGRATION-GAP: category — backend project_costs has no category column;
+    // defaulted to "other".
+    category: "other" as ProjectCostCategory,
+    amountCents: c.amount,
+    // INTEGRATION-GAP: incurredDate — backend allows null date.
+    incurredDate: c.date ?? "",
+  };
 }
 
-/** Build the live summary (BR-065) from the current milestones + costs. */
-function computeSummary(): FinancialSummary {
-  const active = milestones.filter((m) => m.status !== "cancelled");
-  const contractedCents = active.reduce((sum, m) => sum + m.amountCents, 0);
-  const receivedCents = active.reduce((sum, m) => sum + m.receivedAmountCents, 0);
-  const costsCents = costs.reduce((sum, c) => sum + c.amountCents, 0);
-  const timeCostCents = TIME_COST_CENTS;
-  const marginCents = contractedCents - costsCents - timeCostCents;
+function aggregateSummary(summaries: SummaryWire[]): FinancialSummary {
+  const contractedCents = summaries.reduce((s, x) => s + x.contracted, 0);
+  const receivedCents = summaries.reduce((s, x) => s + x.received, 0);
+  const pendingCents = summaries.reduce((s, x) => s + x.pending, 0);
+  const costsCents = summaries.reduce((s, x) => s + x.costsTotal, 0);
+  const timeCostCents = summaries.reduce((s, x) => s + x.laborCost, 0);
+  const marginCents = summaries.reduce((s, x) => s + x.margin, 0);
   return {
     contractedCents,
     receivedCents,
-    pendingCents: Math.max(0, contractedCents - receivedCents),
+    pendingCents,
     costsCents,
     timeCostCents,
     marginCents,
@@ -224,20 +179,20 @@ function computeSummary(): FinancialSummary {
   };
 }
 
-function snapshot(): FinanceOverview {
-  const withStatus = milestones.map(withDerivedStatus);
-  milestones = withStatus; // persist derived status for the session
+/** One bounded /projects + /companies read to resolve display names. */
+async function loadNameMaps(): Promise<NameMaps> {
+  const [projects, companies] = await Promise.all([
+    http.get<Page<ProjectWire>>("/projects", { query: { page_size: 100 } }),
+    http.get<Page<CompanyWire>>("/companies", { query: { page_size: 100 } }),
+  ]);
   return {
-    summary: computeSummary(),
-    milestones: [...withStatus].sort((a, b) =>
-      a.expectedDate.localeCompare(b.expectedDate)
-    ),
-    costs: [...costs].sort((a, b) => b.incurredDate.localeCompare(a.incurredDate)),
+    projects: new Map(projects.items.map((p) => [p.id, p.name])),
+    companies: new Map(companies.items.map((c) => [c.id, c.name])),
   };
 }
 
 /* ------------------------------------------------------------------ *
- * Access guard
+ * Access guard (client-side UX only; backend is authoritative)
  * ------------------------------------------------------------------ */
 
 function assertAccess(role: Role, paymentsGrant: boolean): void {
@@ -246,14 +201,8 @@ function assertAccess(role: Role, paymentsGrant: boolean): void {
   }
 }
 
-function findMilestone(id: string): PaymentMilestone {
-  const m = milestones.find((x) => x.id === id);
-  if (!m) throw new FinanceError("network", `Unknown milestone: ${id}`);
-  return m;
-}
-
 /* ------------------------------------------------------------------ *
- * Public interface
+ * Public interface (signatures preserved verbatim)
  * ------------------------------------------------------------------ */
 
 export interface FinanceApi {
@@ -297,134 +246,198 @@ export interface FinanceApi {
   restoreCost(cost: ProjectCost, role: Role, paymentsGrant: boolean): Promise<void>;
 }
 
-const PROJECT_NAMES: Record<string, { projectName: string; clientName: string }> = {
-  "p-1": { projectName: "Website — Solar do Douro", clientName: "Solar do Douro" },
-  "p-2": { projectName: "Rebranding — Adega Vale", clientName: "Adega Vale" },
-  "p-3": { projectName: "App Fidelização — Lumina", clientName: "Lumina" },
-};
-
-function resolveProject(projectId: string) {
-  return (
-    PROJECT_NAMES[projectId] ?? { projectName: projectId, clientName: "—" }
-  );
-}
+const MILESTONES_PATH = "/finance/payment-milestones";
+const COSTS_PATH = "/finance/project-costs";
 
 export const financeApi: FinanceApi = {
   async getOverview(role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    return snapshot();
+    try {
+      // 1. All milestones (single paged read).
+      const page = await http.get<Page<MilestoneWire>>(MILESTONES_PATH, {
+        query: { page_size: 100 },
+      });
+      const rawMilestones = page.items;
+
+      // 2. Display-name maps (2 bounded list reads).
+      const names = await loadNameMaps();
+      const milestones = rawMilestones.map((m) => mapMilestone(m, names));
+
+      // 3. Per-project costs + live summary. The backend exposes NO global costs
+      //    or global summary endpoint, so this fans out per distinct project.
+      //    MULTI-CALL: N distinct projects → 2N reads. Bounded by active projects.
+      const projectIds = [...new Set(rawMilestones.map((m) => m.projectId))];
+      const perProject = await Promise.all(
+        projectIds.map(async (pid) => {
+          const [costsPage, summary] = await Promise.all([
+            http.get<Page<CostWire>>(COSTS_PATH, {
+              query: { project_id: pid, page_size: 100 },
+            }),
+            http.get<SummaryWire>(`/finance/projects/${pid}/summary`),
+          ]);
+          return { costs: costsPage.items, summary };
+        })
+      );
+
+      const costs = perProject
+        .flatMap((p) => p.costs)
+        .map((c) => mapCost(c, names));
+      const summary = aggregateSummary(perProject.map((p) => p.summary));
+
+      return {
+        summary,
+        milestones: [...milestones].sort((a, b) =>
+          a.expectedDate.localeCompare(b.expectedDate)
+        ),
+        costs: [...costs].sort((a, b) =>
+          b.incurredDate.localeCompare(a.incurredDate)
+        ),
+      };
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async createMilestone(input, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const project = resolveProject(input.projectId);
-    const created: PaymentMilestone = {
-      id: `pm-${Math.random().toString(36).slice(2, 8)}`,
-      projectId: input.projectId,
-      projectName: project.projectName,
-      clientName: project.clientName,
-      description: input.description,
-      amountCents: input.amountCents,
-      expectedDate: input.expectedDate,
-      invoicedDate: null,
-      paidDate: null,
-      receivedAmountCents: 0,
-      completionCriteria: input.completionCriteria,
-      externalInvoiceRef: input.externalInvoiceRef,
-      status: "planned",
-    };
-    milestones = [...milestones, withDerivedStatus(created)];
-    return withDerivedStatus(created);
+    try {
+      const created = await http.post<MilestoneWire>(MILESTONES_PATH, {
+        projectId: input.projectId,
+        description: input.description,
+        amount: input.amountCents,
+        expectedDate: input.expectedDate,
+        completionCriteria: input.completionCriteria,
+        // Create has no external_invoice_ref field; the plain ref maps to `reference`.
+        reference: input.externalInvoiceRef,
+      });
+      return mapMilestone(created);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async updateMilestone(id, input, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS);
-    const existing = findMilestone(id);
-    const project = resolveProject(input.projectId);
-    const updated: PaymentMilestone = {
-      ...existing,
-      projectId: input.projectId,
-      projectName: project.projectName,
-      clientName: project.clientName,
-      description: input.description,
-      amountCents: input.amountCents,
-      expectedDate: input.expectedDate,
-      completionCriteria: input.completionCriteria,
-      externalInvoiceRef: input.externalInvoiceRef,
-    };
-    const derived = withDerivedStatus(updated);
-    milestones = milestones.map((m) => (m.id === id ? derived : m));
-    return derived;
+    try {
+      // Backend PATCH has no project_id — projectId in the input is not moved.
+      const updated = await http.patch<MilestoneWire>(`${MILESTONES_PATH}/${id}`, {
+        description: input.description,
+        amount: input.amountCents,
+        expectedDate: input.expectedDate,
+        completionCriteria: input.completionCriteria,
+        reference: input.externalInvoiceRef,
+      });
+      return mapMilestone(updated);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async recordPayment(id, input, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS);
-    const existing = findMilestone(id);
-    const received = existing.receivedAmountCents + input.amountCents;
-    const updated: PaymentMilestone = {
-      ...existing,
-      receivedAmountCents: received,
-      paidDate: input.paidDate,
-      invoicedDate: existing.invoicedDate ?? input.paidDate,
-      externalInvoiceRef: input.externalInvoiceRef ?? existing.externalInvoiceRef,
-    };
-    const derived = withDerivedStatus(updated);
-    milestones = milestones.map((m) => (m.id === id ? derived : m));
-    return derived;
+    try {
+      // The status endpoint wants the CUMULATIVE received total; the input carries
+      // only the increment, so read the current milestone first.
+      const current = await http.get<MilestoneWire>(`${MILESTONES_PATH}/${id}`);
+      const cumulative = current.receivedAmount + input.amountCents;
+      const fullyPaid = cumulative >= current.amount;
+      const updated = await http.post<MilestoneWire>(
+        `${MILESTONES_PATH}/${id}/status`,
+        {
+          status: fullyPaid ? "paid" : "partially_paid",
+          receivedAmount: cumulative,
+          paidDate: input.paidDate,
+          externalInvoiceRef: input.externalInvoiceRef ?? undefined,
+        }
+      );
+      return mapMilestone(updated);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async restoreMilestone(prev, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS / 2);
-    const derived = withDerivedStatus(prev);
-    milestones = milestones.some((m) => m.id === prev.id)
-      ? milestones.map((m) => (m.id === prev.id ? derived : m))
-      : [...milestones, derived];
-    return derived;
+    try {
+      // INTEGRATION-GAP: no snapshot-restore endpoint. Best-effort restores only
+      // the editable metadata via PATCH; status/receivedAmount changes and
+      // re-creating a deleted milestone are NOT reversible server-side (a PATCH on
+      // a paid/cancelled milestone is rejected by the backend and surfaces as an
+      // error, which is the honest outcome for those undos).
+      const updated = await http.patch<MilestoneWire>(
+        `${MILESTONES_PATH}/${prev.id}`,
+        {
+          description: prev.description,
+          amount: prev.amountCents,
+          expectedDate: prev.expectedDate,
+          completionCriteria: prev.completionCriteria,
+          reference: prev.externalInvoiceRef,
+        }
+      );
+      return mapMilestone(updated);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async cancelMilestone(id, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS);
-    const existing = findMilestone(id);
-    const cancelled: PaymentMilestone = { ...existing, status: "cancelled" };
-    milestones = milestones.map((m) => (m.id === id ? cancelled : m));
-    return cancelled;
+    try {
+      const updated = await http.post<MilestoneWire>(
+        `${MILESTONES_PATH}/${id}/status`,
+        {
+          status: "cancelled",
+          // Backend requires a cancellation reason (CANCEL_REASON_REQUIRED); the
+          // mock signature carries none, so a neutral placeholder is sent.
+          // INTEGRATION-GAP: cancel reason not captured by the UI contract.
+          reason: "Cancelado pela aplicação.",
+        }
+      );
+      return mapMilestone(updated);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async createCost(input, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const project = resolveProject(input.projectId);
-    const created: ProjectCost = {
-      id: `pc-${Math.random().toString(36).slice(2, 8)}`,
-      projectId: input.projectId,
-      projectName: project.projectName,
-      description: input.description,
-      category: input.category,
-      amountCents: input.amountCents,
-      incurredDate: input.incurredDate,
-    };
-    costs = [...costs, created];
-    return created;
+    try {
+      // INTEGRATION-GAP: category — dropped on create; backend has no category
+      // column. It round-trips back as "other" via mapCost.
+      const created = await http.post<CostWire>(COSTS_PATH, {
+        projectId: input.projectId,
+        description: input.description,
+        amount: input.amountCents,
+        date: input.incurredDate,
+      });
+      return mapCost(created);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async deleteCost(id, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS);
-    costs = costs.filter((c) => c.id !== id);
+    try {
+      await http.delete<void>(`${COSTS_PATH}/${id}`);
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 
   async restoreCost(cost, role, paymentsGrant) {
     assertAccess(role, paymentsGrant);
-    await delay(MOCK_LATENCY_MS / 2);
-    if (!costs.some((c) => c.id === cost.id)) costs = [...costs, cost];
+    try {
+      // INTEGRATION-GAP: no restore-by-id endpoint — re-creates the line as a new
+      // row (new id, category not persisted). Adequate for undo of a delete.
+      await http.post<CostWire>(COSTS_PATH, {
+        projectId: cost.projectId,
+        description: cost.description,
+        amount: cost.amountCents,
+        date: cost.incurredDate,
+      });
+    } catch (err) {
+      throw toFinanceError(err);
+    }
   },
 };

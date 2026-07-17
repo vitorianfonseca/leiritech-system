@@ -272,6 +272,10 @@ export interface CalendarApi {
 }
 
 export const calendarApi: CalendarApi = {
+  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no /calendar
+  // route; a real feed must aggregate task due-dates, project milestones,
+  // deliveries, proposal expiries, next-actions and payment milestones across
+  // several domains (with BR-002/BR-008 scoping) — not a single cheap call.
   async getCalendarEvents(range, ctx) {
     await delay(MOCK_LATENCY_MS);
     const all = seedEvents();

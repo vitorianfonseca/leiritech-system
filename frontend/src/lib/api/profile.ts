@@ -13,7 +13,8 @@
  * edits persist for the session, keyed by user id.
  */
 
-import type { SessionUser } from "@/lib/session";
+import type { Role, SessionUser } from "@/lib/session";
+import { http, HttpError } from "@/lib/api/http";
 import {
   NOTIFICATION_CATEGORIES,
   type NotificationPreferences,
@@ -84,6 +85,30 @@ function seedPrefs(user: SessionUser): UserPreferences {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 8;
 
+/** Backend `UserResponse` (camelCased by the HTTP client). */
+interface RawUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  avatarUrl: string | null;
+}
+
+/**
+ * Map the backend user to the editable `PersonalProfile`.
+ * INTEGRATION-GAP: phone — not stored/returned by the backend; defaults to "".
+ */
+function toProfile(raw: RawUser): PersonalProfile {
+  return {
+    id: raw.id,
+    name: raw.name,
+    email: raw.email,
+    phone: "",
+    role: raw.role,
+    avatarDataUrl: raw.avatarUrl,
+  };
+}
+
 export interface ProfileApi {
   getProfile(user: SessionUser): Promise<PersonalProfile>;
   updateProfile(user: SessionUser, input: UpdateProfileInput): Promise<PersonalProfile>;
@@ -93,34 +118,47 @@ export interface ProfileApi {
 }
 
 export const profileApi: ProfileApi = {
+  // WIRED — GET /auth/me. `user` kept for signature; the token identifies the caller.
   async getProfile(user) {
-    await delay(MOCK_LATENCY_MS);
-    return structuredClone(seedProfile(user));
+    void user;
+    const raw = await http.get<RawUser>("/auth/me");
+    return toProfile(raw);
   },
 
+  // WIRED — PATCH /auth/me. The backend accepts only { name, avatar_url }.
+  // INTEGRATION-GAP: email/phone — the self-service endpoint does not persist
+  // them, so those edits are dropped (email is validated client-side but the
+  // returned value comes back unchanged from the server; phone is not stored).
   async updateProfile(user, input) {
-    await delay(MOCK_LATENCY_MS);
-    const current = seedProfile(user);
+    void user;
     const name = input.name.trim();
     const email = input.email.trim();
     if (name.length < 2) throw new ProfileError("validation", "nameRequired");
     if (!EMAIL_RE.test(email)) throw new ProfileError("validation", "emailInvalid");
-    const next: PersonalProfile = {
-      ...current,
-      name,
-      email,
-      phone: input.phone.trim(),
-      avatarDataUrl: input.avatarDataUrl,
-    };
-    profileStore.set(user.id, next);
-    return structuredClone(next);
+    try {
+      const raw = await http.patch<RawUser>("/auth/me", {
+        name,
+        avatarUrl: input.avatarDataUrl,
+      });
+      // Preserve the locally-entered phone in the returned object (not persisted).
+      return { ...toProfile(raw), phone: input.phone.trim() };
+    } catch (err) {
+      if (err instanceof HttpError && err.status === 422) {
+        throw new ProfileError("validation", "nameRequired");
+      }
+      throw err;
+    }
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no
+  // user_preferences endpoint (theme/locale/notification channels are not
+  // persisted server-side yet); resolved from the session for now.
   async getPreferences(user) {
     await delay(MOCK_LATENCY_MS);
     return structuredClone(seedPrefs(user));
   },
 
+  // INTEGRATION-GAP: no backend endpoint — left on mock (no user_preferences write).
   async updatePreferences(user, input) {
     await delay(MOCK_LATENCY_MS);
     const current = seedPrefs(user);
@@ -139,8 +177,9 @@ export const profileApi: ProfileApi = {
     return structuredClone(next);
   },
 
+  // WIRED — POST /auth/me/password. Client-side guards preserve the mock's error
+  // semantics; the backend verifies the current password against the hash.
   async changePassword(user, input) {
-    await delay(MOCK_LATENCY_MS);
     void user;
     if (input.currentPassword.trim().length < 1) {
       throw new ProfileError("validation", "currentPasswordRequired");
@@ -151,8 +190,21 @@ export const profileApi: ProfileApi = {
     if (input.newPassword === input.currentPassword) {
       throw new ProfileError("same_as_current", "passwordSameAsCurrent");
     }
-    // Mock: no stored credential to verify against, so a well-formed change
-    // succeeds. The integration agent verifies `currentPassword` against the
-    // hash and may throw ProfileError("invalid_current_password").
+    try {
+      await http.post("/auth/me/password", {
+        currentPassword: input.currentPassword,
+        newPassword: input.newPassword,
+      });
+    } catch (err) {
+      if (err instanceof HttpError) {
+        if (err.code === "INVALID_CURRENT_PASSWORD" || err.status === 401) {
+          throw new ProfileError("invalid_current_password", "currentPasswordInvalid");
+        }
+        if (err.status === 422) {
+          throw new ProfileError("validation", "passwordTooShort");
+        }
+      }
+      throw err;
+    }
   },
 };

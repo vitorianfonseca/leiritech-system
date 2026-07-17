@@ -16,7 +16,17 @@
 
 import { addDays, format, startOfDay, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
+import { http, HttpError } from "@/lib/api/http";
 import { canAccessFinance } from "@/lib/api/finance-types";
+import {
+  companyStatusFromBackend,
+  companyStatusToBackend,
+  contactStatusFromBackend,
+  crmOpportunityStage,
+  interactionTypeFromBackend,
+  interactionTypeToBackend,
+  isOpenOutcome,
+} from "@/lib/api/taxonomy";
 import {
   collaborationApi,
   type CollaborationApi,
@@ -29,34 +39,28 @@ import type {
   UpdateCommentInput,
 } from "@/lib/api/collaboration-types";
 import {
+  COMPANY_SOURCES,
   CrmError,
-  isScopedCrm,
   type ArchiveBlocker,
   type CompanyDetail,
   type CompanyInput,
+  type CompanySource,
+  type CompanyStatus,
   type CompanySummary,
   type Contact,
+  type ContactStatus,
   type FileRef,
   type Interaction,
   type InteractionInput,
   type MeetingRef,
   type OpportunityRef,
   type PaymentRef,
+  type ProjectHealth,
   type ProjectRef,
+  type ProjectRefStatus,
   type ProposalRef,
+  type ProposalStatus,
 } from "./crm-types";
-
-const MOCK_LATENCY_MS = 380;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-let counter = 0;
-function uid(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${Date.now().toString(36)}-${counter}`;
-}
 
 function isoDate(offsetDays: number): string {
   return format(addDays(startOfDay(new Date()), offsetDays), "yyyy-MM-dd");
@@ -717,58 +721,337 @@ function deriveClienteAtivo(r: CompanyRecord): boolean {
   return wonOpp || liveOrDoneProject || acceptedProposal;
 }
 
-function toSummary(r: CompanyRecord, canFinance: boolean): CompanySummary {
+/* ------------------------------------------------------------------ *
+ * Real backend wiring (issue #14 CRM API).
+ *
+ * The shared `http` client prepends `/api/v1`, attaches+refreshes the JWT and
+ * deep case-maps snake_case⇄camelCase, so everything below is camelCase. Backend
+ * permission scoping (BR-002) + financial gating happen server-side via the JWT;
+ * the `role`/`userId`/`paymentsGrant` params are kept in the signatures but the
+ * backend is authoritative. We still compute `canAccessFinance` locally to drive
+ * the UI's `canSeeFinancials` flag and to null out financial fields defensively.
+ * ------------------------------------------------------------------ */
+
+interface BackendPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+interface BackendCompany {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  sector: string | null;
+  website: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  description: string | null;
+  source: string | null;
+  ownerId: string | null;
+  status: string;
+  isActiveClient: boolean;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface BackendContact {
+  id: string;
+  name: string;
+  companyId: string | null;
+  photoUrl: string | null;
+  roleTitle: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  ownerId: string | null;
+  status: string;
+  archivedAt: string | null;
+}
+
+interface BackendOpportunity {
+  id: string;
+  title: string;
+  companyId: string | null;
+  ownerId: string | null;
+  stageId: string | null;
+  estimatedValue: number | null;
+  nextAction: string | null;
+  outcome: string;
+  archivedAt: string | null;
+}
+
+interface BackendProposal {
+  id: string;
+  reference: string;
+  companyId: string | null;
+  value: number | null;
+  validUntil: string | null;
+  status: string;
+}
+
+interface BackendProject {
+  id: string;
+  name: string;
+  companyId: string | null;
+  status: string;
+  publishedHealth: string | null;
+  contractedValue: number | null;
+}
+
+interface BackendMilestone {
+  id: string;
+  projectId: string;
+  companyId: string | null;
+  description: string | null;
+  amount: number;
+  receivedAmount: number;
+  expectedDate: string | null;
+  status: string;
+}
+
+interface BackendInteraction {
+  id: string;
+  type: string;
+  companyId: string | null;
+  contactId: string | null;
+  opportunityId: string | null;
+  projectId: string | null;
+  body: string | null;
+  occurredAt: string;
+  userId: string | null;
+}
+
+interface BackendStage {
+  id: string;
+  code: string;
+}
+
+/** Map an `HttpError` to the CRM domain error, preserving the mock's codes. */
+function toCrmError(err: unknown): CrmError {
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new CrmError("not_found");
+    if (err.status === 403) return new CrmError("forbidden");
+    if (err.status === 0 || err.code === "NETWORK") return new CrmError("network");
+    if (err.status === 409 && err.code === "COMPANY_ARCHIVE_BLOCKED") {
+      return new CrmError("archive_blocked", archiveBlockersFromDetails(err.details));
+    }
+  }
+  return new CrmError("network");
+}
+
+/**
+ * Translate the backend 409 archive-block payload
+ * `{ blockers: { active_projects, open_opportunities, won_unconverted_opportunities: id[] } }`
+ * into typed {@link ArchiveBlocker}s. NB: the error envelope is NOT case-mapped
+ * so keys stay snake_case. INTEGRATION-GAP: backend returns entity ids only —
+ * no human labels — so the id is used as the label.
+ */
+function archiveBlockersFromDetails(details: unknown): ArchiveBlocker[] {
+  const out: ArchiveBlocker[] = [];
+  const blockers =
+    details && typeof details === "object" && "blockers" in details
+      ? (details as { blockers?: Record<string, unknown> }).blockers
+      : undefined;
+  if (!blockers || typeof blockers !== "object") return out;
+  const b = blockers as Record<string, unknown>;
+  const collect = (key: string, kind: ArchiveBlocker["kind"]) => {
+    const ids = b[key];
+    if (Array.isArray(ids)) for (const id of ids) out.push({ kind, label: String(id) });
+  };
+  collect("active_projects", "liveProject");
+  collect("open_opportunities", "openOpportunity");
+  collect("won_unconverted_opportunities", "wonUnconvertedOpportunity");
+  return out;
+}
+
+function mapSource(source: string | null): CompanySource {
+  return (COMPANY_SOURCES as string[]).includes(source ?? "")
+    ? (source as CompanySource)
+    : "other";
+}
+
+const LIVE_PROJECT_STATUSES = new Set(["planning", "active", "on_hold"]);
+
+function mapProposalStatus(status: string): ProposalStatus {
+  // Backend adds "viewed" (not in the frontend union) — treat it as "sent".
+  if (status === "viewed") return "sent";
+  const known: ProposalStatus[] = ["draft", "sent", "accepted", "rejected", "expired"];
+  return known.includes(status as ProposalStatus) ? (status as ProposalStatus) : "draft";
+}
+
+/**
+ * Map a backend company to the frontend summary. Many summary fields are NOT
+ * carried on `CompanyResponse`; they are defaulted here (see INTEGRATION-GAPs).
+ * For a single-company detail read some of these are enriched afterwards from
+ * the relationship sub-queries.
+ */
+function mapCompanySummary(c: BackendCompany, canFinance: boolean): CompanySummary {
   return {
-    id: r.id,
-    name: r.name,
-    logoUrl: r.logoUrl,
-    status: r.status,
-    sector: r.sector,
-    website: r.website,
-    email: r.email,
-    phone: r.phone,
-    address: r.address,
-    ownerId: r.ownerId,
-    ownerName: ownerName(r.ownerId),
-    source: r.source,
-    lastInteractionAt: r.lastInteractionAt,
-    nextAction: r.nextAction,
-    nextActionAt: r.nextActionAt,
-    clienteAtivo: deriveClienteAtivo(r),
-    openOpportunities: r.opportunities.filter((o) => o.open).length,
-    activeProjects: r.projects.filter((p) => p.live).length,
-    totalContractedCents: canFinance ? r.totalContractedCents : null,
-    notesCount: r.files.length ? r.files.length : 0,
-    attachmentsCount: r.files.length,
-    archivedAt: r.archivedAt,
+    id: c.id,
+    name: c.name,
+    logoUrl: c.logoUrl,
+    status: companyStatusFromBackend(c.status, c.archivedAt),
+    sector: c.sector ?? "",
+    website: c.website,
+    email: c.email,
+    phone: c.phone,
+    address: c.address,
+    ownerId: c.ownerId ?? "",
+    // INTEGRATION-GAP: ownerName — backend returns owner_id only, no display name
+    ownerName: "",
+    source: mapSource(c.source),
+    // INTEGRATION-GAP: lastInteractionAt — not on CompanyResponse
+    lastInteractionAt: null,
+    // INTEGRATION-GAP: nextAction/nextActionAt — company has no next-action field
+    nextAction: null,
+    nextActionAt: null,
+    clienteAtivo: c.isActiveClient,
+    // INTEGRATION-GAP: counts — not on CompanyResponse (enriched per-detail only)
+    openOpportunities: 0,
+    activeProjects: 0,
+    // INTEGRATION-GAP: totalContractedCents — not on CompanyResponse
+    totalContractedCents: null,
+    // INTEGRATION-GAP: notesCount/attachmentsCount — no backend counters
+    notesCount: 0,
+    attachmentsCount: 0,
+    archivedAt: c.archivedAt,
   };
 }
 
-function stripFinancialRefs<T extends { valueCents: number | null }>(
-  refs: T[],
+function mapContact(c: BackendContact, companyName: string | null): Contact {
+  return {
+    id: c.id,
+    name: c.name,
+    photoUrl: c.photoUrl,
+    role: c.roleTitle,
+    email: c.email,
+    phone: c.phone,
+    // INTEGRATION-GAP: website — contact has no website field on the backend
+    website: null,
+    companyId: c.companyId ?? "",
+    // INTEGRATION-GAP: companyName — not embedded on ContactResponse (resolved
+    // from the parent company on a detail read, otherwise empty)
+    companyName: companyName ?? "",
+    ownerId: c.ownerId ?? "",
+    // INTEGRATION-GAP: ownerName — backend returns owner_id only
+    ownerName: "",
+    notes: c.notes,
+    // INTEGRATION-GAP: lastInteractionAt/nextAction/nextActionAt — not on ContactResponse
+    lastInteractionAt: null,
+    nextAction: null,
+    nextActionAt: null,
+    status: contactStatusFromBackend(c.status) as ContactStatus,
+    archivedAt: c.archivedAt,
+  };
+}
+
+function mapOpportunityRef(
+  o: BackendOpportunity,
+  stageCodes: Map<string, string>,
   canFinance: boolean
-): T[] {
-  return canFinance ? refs : refs.map((r) => ({ ...r, valueCents: null }));
+): OpportunityRef {
+  return {
+    id: o.id,
+    title: o.title,
+    stage: crmOpportunityStage(o.outcome, o.stageId ? stageCodes.get(o.stageId) ?? null : null),
+    open: isOpenOutcome(o.outcome),
+    // INTEGRATION-GAP: wonUnconverted — OpportunityResponse carries no
+    // "converted to project" flag (the backend computes it only for archive
+    // blocking). Defaulted false.
+    wonUnconverted: false,
+    valueCents: canFinance ? o.estimatedValue : null,
+    nextAction: o.nextAction,
+  };
 }
 
-/** Whether `record` is visible to `role`/`userId` (BR-002). */
-function canView(record: CompanyRecord, role: Role, userId: string): boolean {
-  if (!isScopedCrm(role)) return true;
-  return record.memberIds.includes(userId);
+function mapProposalRef(p: BackendProposal, canFinance: boolean): ProposalRef {
+  return {
+    id: p.id,
+    // Backend proposal has no title; `reference` is the human-facing label.
+    title: p.reference,
+    status: mapProposalStatus(p.status),
+    valueCents: canFinance ? p.value : null,
+    validUntil: p.validUntil,
+  };
 }
 
-/** Archive blockers for a company (BR-062/H6). */
-function archiveBlockers(r: CompanyRecord): ArchiveBlocker[] {
-  const blockers: ArchiveBlocker[] = [];
-  for (const p of r.projects) {
-    if (p.live) blockers.push({ kind: "liveProject", label: p.name });
-  }
-  for (const o of r.opportunities) {
-    if (o.open) blockers.push({ kind: "openOpportunity", label: o.title });
-    else if (o.wonUnconverted)
-      blockers.push({ kind: "wonUnconvertedOpportunity", label: o.title });
-  }
-  return blockers;
+function mapProjectRef(p: BackendProject): ProjectRef {
+  return {
+    id: p.id,
+    name: p.name,
+    status: p.status as ProjectRefStatus,
+    health: (p.publishedHealth as ProjectHealth | null) ?? "healthy",
+    // INTEGRATION-GAP: progress — ProjectResponse exposes no completion percentage
+    progress: 0,
+    live: LIVE_PROJECT_STATUSES.has(p.status),
+  };
+}
+
+function mapPaymentRef(m: BackendMilestone): PaymentRef {
+  return {
+    id: m.id,
+    description: m.description ?? "",
+    // INTEGRATION-GAP: projectName — milestone response carries project_id only
+    projectName: "",
+    amountCents: m.amount,
+    receivedAmountCents: m.receivedAmount,
+    status: m.status as PaymentRef["status"],
+    expectedDate: m.expectedDate ?? "",
+  };
+}
+
+function mapInteraction(i: BackendInteraction): Interaction {
+  return {
+    id: i.id,
+    companyId: i.companyId ?? "",
+    contactId: i.contactId,
+    // INTEGRATION-GAP: contactName/opportunityTitle/projectName — backend returns
+    // ids only, no embedded display names
+    contactName: null,
+    opportunityId: i.opportunityId,
+    opportunityTitle: null,
+    projectId: i.projectId,
+    projectName: null,
+    type: interactionTypeFromBackend(i.type),
+    // INTEGRATION-GAP: subject — InteractionResponse has no subject field (body only)
+    subject: "",
+    body: i.body,
+    occurredAt: i.occurredAt,
+    authorId: i.userId ?? "",
+    // INTEGRATION-GAP: authorName — backend returns user_id only
+    authorName: "",
+  };
+}
+
+/** Cached pipeline-stage id→code map (drives opportunity stage bucketing). */
+let stageCodeCache: Map<string, string> | null = null;
+async function stageCodeMap(): Promise<Map<string, string>> {
+  if (stageCodeCache) return stageCodeCache;
+  const stages = await http.get<BackendStage[]>("/pipeline-stages");
+  stageCodeCache = new Map(stages.map((s) => [s.id, s.code]));
+  return stageCodeCache;
+}
+
+/** Build the backend company create/update body from the frontend input. */
+function toCompanyBody(input: CompanyInput): Record<string, unknown> {
+  // INTEGRATION-GAP: nextAction/nextActionAt — no company field on the backend;
+  // dropped on write.
+  return {
+    name: input.name,
+    status: companyStatusToBackend(input.status as CompanyStatus),
+    sector: input.sector,
+    website: input.website,
+    email: input.email,
+    phone: input.phone,
+    address: input.address,
+    ownerId: input.ownerId,
+    source: input.source,
+    description: input.description,
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -810,190 +1093,200 @@ export interface CrmApi {
   createInteraction(input: InteractionInput): Promise<Interaction>;
 }
 
+const PAGE_SIZE = 100;
+
 export const crmApi: CrmApi = {
-  async listCompanies({ role, userId, paymentsGrant, includeArchived = false }) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
+  // GET /companies. Backend scopes by JWT (role/userId ignored here).
+  async listCompanies({ role, paymentsGrant, includeArchived = false }) {
     const canFinance = canAccessFinance(role, paymentsGrant);
-    return [...companies.values()]
-      .filter((r) => canView(r, role, userId))
-      .filter((r) => (includeArchived ? true : r.archivedAt === null))
-      .map((r) => toSummary(r, canFinance))
-      .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
-  },
-
-  async getCompany(id, role, userId, paymentsGrant) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const r = companies.get(id);
-    if (!r || !canView(r, role, userId)) throw new CrmError("not_found");
-    const canFinance = canAccessFinance(role, paymentsGrant);
-    return {
-      ...toSummary(r, canFinance),
-      description: r.description,
-      contacts: r.contacts.filter((c) => c.archivedAt === null),
-      opportunities: stripFinancialRefs(r.opportunities, canFinance),
-      proposals: stripFinancialRefs(r.proposals, canFinance),
-      projects: [...r.projects],
-      meetings: [...r.meetings],
-      files: [...r.files],
-      payments: canFinance ? [...r.payments] : [],
-      canSeeFinancials: canFinance,
-    };
-  },
-
-  async createCompany(input) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const id = uid("c");
-    const record: CompanyRecord = {
-      id,
-      name: input.name,
-      logoUrl: null,
-      status: input.status,
-      sector: input.sector,
-      website: input.website,
-      email: input.email,
-      phone: input.phone,
-      address: input.address,
-      ownerId: input.ownerId,
-      source: input.source,
-      description: input.description,
-      lastInteractionAt: null,
-      nextAction: input.nextAction,
-      nextActionAt: input.nextActionAt,
-      totalContractedCents: 0,
-      archivedAt: null,
-      memberIds: [input.ownerId],
-      contacts: [],
-      opportunities: [],
-      proposals: [],
-      projects: [],
-      meetings: [],
-      files: [],
-      payments: [],
-    };
-    companies.set(id, record);
-    // Strip financial fields from the write response (BR-008); callers refetch
-    // through the gated reads which restore them for authorised users.
-    return toSummary(record, false);
-  },
-
-  async updateCompany(id, input) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const r = companies.get(id);
-    if (!r) throw new CrmError("not_found");
-    if (r.archivedAt) throw new CrmError("forbidden"); // BR-061 read-only
-    Object.assign(r, {
-      name: input.name,
-      status: input.status,
-      sector: input.sector,
-      website: input.website,
-      email: input.email,
-      phone: input.phone,
-      address: input.address,
-      ownerId: input.ownerId,
-      source: input.source,
-      description: input.description,
-      nextAction: input.nextAction,
-      nextActionAt: input.nextActionAt,
-    });
-    // Strip financial fields from the write response (BR-008); callers refetch
-    // through the gated reads which restore them for authorised users.
-    return toSummary(r, false);
-  },
-
-  async archiveCompany(id) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const r = companies.get(id);
-    if (!r) throw new CrmError("not_found");
-    const blockers = archiveBlockers(r);
-    if (blockers.length > 0) throw new CrmError("archive_blocked", blockers);
-    r.archivedAt = isoDate(0);
-    r.status = "arquivada";
-  },
-
-  async restoreCompany(id) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const r = companies.get(id);
-    if (!r) throw new CrmError("not_found");
-    r.archivedAt = null;
-    if (r.status === "arquivada") r.status = deriveClienteAtivo(r) ? "ativo" : "potencial";
-  },
-
-  async listContacts({ role, userId }) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const out: Contact[] = [];
-    for (const r of companies.values()) {
-      if (!canView(r, role, userId)) continue;
-      if (r.archivedAt) continue;
-      for (const c of r.contacts) if (c.archivedAt === null) out.push(c);
+    try {
+      const page = await http.get<BackendPage<BackendCompany>>("/companies", {
+        query: { include_archived: includeArchived, page_size: PAGE_SIZE },
+      });
+      return page.items
+        .map((c) => mapCompanySummary(c, canFinance))
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
+    } catch (err) {
+      throw toCrmError(err);
     }
-    return out.sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
   },
 
-  async getContact(id, role, userId) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    for (const r of companies.values()) {
-      const c = r.contacts.find((x) => x.id === id);
-      if (c) {
-        if (!canView(r, role, userId)) throw new CrmError("not_found");
-        return {
-          contact: c,
-          interactions: interactions
-            .filter((i) => i.contactId === id)
-            .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)),
-        };
+  // GET /companies/{id} + relationship sub-queries for the detail tabs.
+  async getCompany(id, role, _userId, paymentsGrant) {
+    const canFinance = canAccessFinance(role, paymentsGrant);
+    try {
+      const [company, stageCodes, contactsPage, oppsPage, propsPage, projsPage] =
+        await Promise.all([
+          http.get<BackendCompany>(`/companies/${id}`),
+          stageCodeMap(),
+          http.get<BackendPage<BackendContact>>("/contacts", {
+            query: { company_id: id, page_size: PAGE_SIZE },
+          }),
+          http.get<BackendPage<BackendOpportunity>>("/opportunities", {
+            query: { company_id: id, page_size: PAGE_SIZE },
+          }),
+          http.get<BackendPage<BackendProposal>>("/proposals", {
+            query: { company_id: id, page_size: PAGE_SIZE },
+          }),
+          http.get<BackendPage<BackendProject>>("/projects", {
+            query: { company_id: id, page_size: PAGE_SIZE },
+          }),
+        ]);
+
+      const opportunities = oppsPage.items.map((o) =>
+        mapOpportunityRef(o, stageCodes, canFinance)
+      );
+      const projects = projsPage.items.map(mapProjectRef);
+      const contacts = contactsPage.items
+        .filter((c) => c.archivedAt === null)
+        .map((c) => mapContact(c, company.name));
+
+      // Financial gating (BR-008): milestones only for finance-capable callers.
+      let payments: PaymentRef[] = [];
+      if (canFinance) {
+        const milestonesPage = await http.get<BackendPage<BackendMilestone>>(
+          "/finance/payment-milestones",
+          { query: { company_id: id, page_size: PAGE_SIZE } }
+        );
+        payments = milestonesPage.items.map(mapPaymentRef);
       }
+
+      const summary = mapCompanySummary(company, canFinance);
+      return {
+        ...summary,
+        // Enriched from the relationship sub-queries (cheap: already fetched).
+        openOpportunities: opportunities.filter((o) => o.open).length,
+        activeProjects: projects.filter((p) => p.live).length,
+        totalContractedCents: canFinance
+          ? projsPage.items.reduce((sum, p) => sum + (p.contractedValue ?? 0), 0)
+          : null,
+        description: company.description,
+        contacts,
+        opportunities,
+        proposals: propsPage.items.map((p) => mapProposalRef(p, canFinance)),
+        projects,
+        // INTEGRATION-GAP: meetings — no meetings/calendar backend endpoint
+        meetings: [] as MeetingRef[],
+        // INTEGRATION-GAP: files — no attachments backend endpoint
+        files: [] as FileRef[],
+        payments,
+        canSeeFinancials: canFinance,
+      };
+    } catch (err) {
+      throw toCrmError(err);
     }
-    throw new CrmError("not_found");
   },
 
+  // POST /companies. Financial fields are stripped from the write response
+  // (BR-008); callers refetch via the gated reads.
+  async createCompany(input) {
+    try {
+      const created = await http.post<BackendCompany>("/companies", toCompanyBody(input));
+      return mapCompanySummary(created, false);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // PATCH /companies/{id}.
+  async updateCompany(id, input) {
+    try {
+      const updated = await http.patch<BackendCompany>(
+        `/companies/${id}`,
+        toCompanyBody(input)
+      );
+      return mapCompanySummary(updated, false);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // POST /companies/{id}/archive — 409 COMPANY_ARCHIVE_BLOCKED → archive_blocked.
+  async archiveCompany(id) {
+    try {
+      await http.post<BackendCompany>(`/companies/${id}/archive`);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // POST /companies/{id}/restore.
+  async restoreCompany(id) {
+    try {
+      await http.post<BackendCompany>(`/companies/${id}/restore`);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // GET /contacts. Backend scopes by JWT.
+  async listContacts() {
+    try {
+      const page = await http.get<BackendPage<BackendContact>>("/contacts", {
+        query: { page_size: PAGE_SIZE },
+      });
+      return page.items
+        .filter((c) => c.archivedAt === null)
+        // INTEGRATION-GAP: companyName — not embedded on ContactResponse
+        .map((c) => mapContact(c, null))
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // GET /contacts/{id} + its interactions.
+  async getContact(id) {
+    try {
+      const [contact, interactionsPage] = await Promise.all([
+        http.get<BackendContact>(`/contacts/${id}`),
+        http.get<BackendPage<BackendInteraction>>("/interactions", {
+          query: { contact_id: id, page_size: PAGE_SIZE },
+        }),
+      ]);
+      return {
+        // INTEGRATION-GAP: companyName — not embedded on ContactResponse
+        contact: mapContact(contact, null),
+        interactions: interactionsPage.items
+          .map(mapInteraction)
+          .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)),
+      };
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // GET /interactions?company_id=.
   async listInteractions(companyId) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    return interactions
-      .filter((i) => i.companyId === companyId)
-      .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+    try {
+      const page = await http.get<BackendPage<BackendInteraction>>("/interactions", {
+        query: { company_id: companyId, page_size: PAGE_SIZE },
+      });
+      return page.items
+        .map(mapInteraction)
+        .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+    } catch (err) {
+      throw toCrmError(err);
+    }
   },
 
+  // POST /interactions. INTEGRATION-GAP: `subject` is dropped (no backend field);
+  // `authorId` comes from the JWT server-side.
   async createInteraction(input) {
-    seedCompanies();
-    await delay(MOCK_LATENCY_MS);
-    const r = companies.get(input.companyId);
-    const c = input.contactId
-      ? r?.contacts.find((x) => x.id === input.contactId) ?? null
-      : null;
-    const opp = input.opportunityId
-      ? r?.opportunities.find((x) => x.id === input.opportunityId) ?? null
-      : null;
-    const proj = input.projectId
-      ? r?.projects.find((x) => x.id === input.projectId) ?? null
-      : null;
-    const created: Interaction = {
-      id: uid("in"),
-      companyId: input.companyId,
-      contactId: input.contactId,
-      contactName: c?.name ?? null,
-      opportunityId: input.opportunityId,
-      opportunityTitle: opp?.title ?? null,
-      projectId: input.projectId,
-      projectName: proj?.name ?? null,
-      type: input.type,
-      subject: input.subject,
-      body: input.body,
-      occurredAt: input.occurredAt,
-      authorId: input.authorId,
-      authorName: ownerName(input.authorId),
-    };
-    interactions.push(created);
-    if (r) r.lastInteractionAt = created.occurredAt.slice(0, 10);
-    return created;
+    try {
+      const created = await http.post<BackendInteraction>("/interactions", {
+        type: interactionTypeToBackend(input.type),
+        companyId: input.companyId,
+        contactId: input.contactId,
+        opportunityId: input.opportunityId,
+        projectId: input.projectId,
+        body: input.body,
+        occurredAt: input.occurredAt,
+      });
+      return mapInteraction(created);
+    } catch (err) {
+      throw toCrmError(err);
+    }
   },
 };
 
@@ -1077,6 +1370,11 @@ function seededCompanyActivity(companyId: string): ActivityLog[] {
   return base;
 }
 
+// INTEGRATION-GAP: no backend endpoint for CRM comments/@mentions/attachments or
+// a company activity feed — this wrapper is left on the mock collaboration
+// client. The seeded activity keys off the mock company ids, so against real
+// backend companies `seededCompanyActivity` returns [] and only live
+// collaboration entries surface (graceful degradation).
 export const crmCollaborationApi: CollaborationApi = {
   listDirectory: () => collaborationApi.listDirectory(),
   listComments: (t, id) => collaborationApi.listComments(t, id),

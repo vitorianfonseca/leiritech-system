@@ -23,6 +23,7 @@
 
 import { addDays, format, startOfDay } from "date-fns";
 import type { Role } from "@/lib/session";
+import { http, HttpError } from "@/lib/api/http";
 import {
   collaborationApi,
   type CollaborationApi,
@@ -597,96 +598,179 @@ function touch(rec: StoredTask): void {
   rec.updatedAt = new Date().toISOString();
 }
 
+/* ------------------------------------------------------------------ *
+ * Backend wiring (F10 routes). Response DTO is camelCased by `http`.
+ * ------------------------------------------------------------------ */
+
+interface TaskDto {
+  id: string;
+  projectId: string;
+  phaseId: string | null;
+  title: string;
+  description: string | null;
+  primaryAssigneeId: string | null;
+  priority: TaskPriority;
+  startDate: string | null;
+  dueDate: string | null;
+  estimateHours: number | null;
+  status: TaskState;
+  blockReason: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Map a backend TaskResponse to the UI `Task`. Enriched fields the backend does
+ * not return are defaulted and flagged. */
+function fromBackend(dto: TaskDto): Task {
+  return {
+    id: dto.id,
+    title: dto.title,
+    description: dto.description ?? "",
+    projectId: dto.projectId,
+    // INTEGRATION-GAP: projectName — not provided by backend
+    projectName: "",
+    phaseId: dto.phaseId,
+    // INTEGRATION-GAP: phaseName — not provided by backend
+    phaseName: null,
+    state: dto.status,
+    priority: dto.priority,
+    // INTEGRATION-GAP: assignee name/avatar — backend returns only primaryAssigneeId
+    assignees: dto.primaryAssigneeId
+      ? [{ userId: dto.primaryAssigneeId, name: "", avatarUrl: null }]
+      : [],
+    dueDate: dto.dueDate,
+    // INTEGRATION-GAP: labels — no backend endpoint
+    labels: [],
+    // INTEGRATION-GAP: checklist — no backend endpoint
+    checklist: [],
+    // INTEGRATION-GAP: dependency detail (title/state) — /dependencies returns ids only
+    dependencies: [],
+    // INTEGRATION-GAP: hasUnresolvedDependencies — not provided by backend
+    hasUnresolvedDependencies: false,
+    blockedReason: dto.blockReason,
+    // INTEGRATION-GAP: blocker association (id/title) — not provided by backend
+    blockerTaskId: null,
+    blockerTaskTitle: null,
+    // INTEGRATION-GAP: commentCount — not provided by backend
+    commentCount: 0,
+    archived: dto.archivedAt !== null,
+    // INTEGRATION-GAP: board order — not persisted by backend
+    order: 0,
+    // INTEGRATION-GAP: project lifecycle — default active; backend is authoritative on transitions
+    projectActive: true,
+    projectClosed: false,
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt,
+  };
+}
+
+/** Translate an `HttpError` into the domain `TaskError`, preserving mock codes. */
+function mapTaskError(
+  err: unknown,
+  kind: "transition" | "dependency" | "guard" = "guard"
+): TaskError {
+  if (err instanceof TaskError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new TaskError("not_found");
+    if (err.status === 403) return new TaskError("forbidden");
+    if (err.status === 0) return new TaskError("network");
+    if (err.status === 409 || err.status === 422 || err.status === 400) {
+      if (kind === "dependency")
+        return new TaskError("dependency_cycle", "dependencyCycle");
+      if (kind === "transition")
+        return new TaskError("invalid_transition", "invalid");
+      return new TaskError("guard_failed", err.code);
+    }
+  }
+  return new TaskError("network");
+}
+
 export const tasksApi: TasksApi = {
+  // WIRED: GET /tasks — server scopes rows from the JWT (role/userId ignored).
   async listTasks(role, userId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    return [...store.values()]
-      .filter((rec) => !rec.archived && visibleTo(rec, role, userId))
-      .sort((a, b) => {
-        const p = priorityRank(b.priority) - priorityRank(a.priority);
-        if (p !== 0) return p;
-        return a.order - b.order;
-      })
-      .map(present);
+    void role;
+    void userId;
+    try {
+      const page = await http.get<{ items: TaskDto[] }>("/tasks", {
+        query: { page_size: 100, include_archived: false },
+      });
+      return page.items.map(fromBackend);
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
+  // WIRED: GET /tasks/{id} — server enforces Membro scoping (role/userId ignored).
   async getTask(id, role, userId) {
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    if (!visibleTo(rec, role, userId)) throw new TaskError("not_found");
-    return present(rec);
+    void role;
+    void userId;
+    try {
+      return fromBackend(await http.get<TaskDto>(`/tasks/${id}`));
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
+  // WIRED: POST /tasks. Backend takes a single primary assignee (assigneeIds[0]).
   async createTask(input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
+    void actorId;
     if (!input.title.trim()) throw new TaskError("guard_failed", "titleRequired");
-    if (!PROJECTS[input.projectId]) throw new TaskError("guard_failed", "projectRequired");
-    const id = uid("tk");
-    const now = new Date().toISOString();
-    store.set(id, {
-      id,
-      title: input.title.trim(),
-      description: input.description.trim(),
-      projectId: input.projectId,
-      phaseId: input.phaseId,
-      state: "todo",
-      priority: input.priority,
-      assigneeIds: input.assigneeIds,
-      dueDate: input.dueDate,
-      labels: [],
-      checklist: [],
-      dependencyIds: [],
-      blockedReason: null,
-      blockerTaskId: null,
-      commentCount: 0,
-      archived: false,
-      order: (orderCounter += 1),
-      createdAt: now,
-      updatedAt: now,
-    });
-    pushActivity(id, actorId, "created");
-    return present(require_(id));
+    try {
+      const dto = await http.post<TaskDto>("/tasks", {
+        projectId: input.projectId,
+        phaseId: input.phaseId,
+        title: input.title.trim(),
+        description: input.description.trim() || null,
+        // INTEGRATION-GAP: backend supports one primary assignee, not a list
+        primaryAssigneeId: input.assigneeIds[0] ?? null,
+        priority: input.priority,
+        dueDate: input.dueDate,
+      });
+      return fromBackend(dto);
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
+  // WIRED: PATCH /tasks/{id} (metadata only; status goes through transition/block).
   async updateTask(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    if (input.title !== undefined) {
-      if (!input.title.trim()) throw new TaskError("guard_failed", "titleRequired");
-      rec.title = input.title.trim();
+    void actorId;
+    if (input.title !== undefined && !input.title.trim())
+      throw new TaskError("guard_failed", "titleRequired");
+    const body: Record<string, unknown> = {};
+    if (input.title !== undefined) body.title = input.title.trim();
+    if (input.description !== undefined) body.description = input.description;
+    if (input.priority !== undefined) body.priority = input.priority;
+    if (input.dueDate !== undefined) body.dueDate = input.dueDate;
+    if (input.phaseId !== undefined) body.phaseId = input.phaseId;
+    // INTEGRATION-GAP: backend supports one primary assignee, not a list
+    if (input.assigneeIds !== undefined)
+      body.primaryAssigneeId = input.assigneeIds[0] ?? null;
+    try {
+      return fromBackend(await http.patch<TaskDto>(`/tasks/${id}`, body));
+    } catch (err) {
+      throw mapTaskError(err);
     }
-    if (input.description !== undefined) rec.description = input.description;
-    if (input.priority !== undefined) rec.priority = input.priority;
-    if (input.dueDate !== undefined) rec.dueDate = input.dueDate;
-    if (input.phaseId !== undefined) rec.phaseId = input.phaseId;
-    if (input.assigneeIds !== undefined) rec.assigneeIds = input.assigneeIds;
-    touch(rec);
-    pushActivity(id, actorId, "updated");
-    return present(rec);
   },
 
+  // WIRED: POST /tasks/{id}/transition — state machine enforced server-side.
   async transition(id, to, role, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = require_(id);
-    const check = checkTaskTransition(present(rec), to, role);
-    if (!check.ok) throw new TaskError("invalid_transition", check.messageKey ?? "invalid");
-    const before = rec.state;
-    rec.state = to;
-    if (to !== "blocked") {
-      rec.blockedReason = null;
-      rec.blockerTaskId = null;
+    void role;
+    void actorId;
+    try {
+      const dto = await http.post<TaskDto>(`/tasks/${id}/transition`, {
+        status: to,
+      });
+      return fromBackend(dto);
+    } catch (err) {
+      throw mapTaskError(err, "transition");
     }
-    touch(rec);
-    pushActivity(id, actorId, "status_changed", { field: "state", before, after: to });
-    return present(rec);
   },
 
+  // LEFT-ON-MOCK: no backend endpoint to force a state without guards (undo).
   async restoreState(id, state, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 2);
     const rec = require_(id);
@@ -697,62 +781,62 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // WIRED: POST /tasks/{id}/block. Backend captures only the reason.
   async block(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = require_(id);
+    void actorId;
     if (!input.reason.trim()) throw new TaskError("reason_required");
-    if (rec.state === "done") throw new TaskError("invalid_transition", "cannotBlockDone");
     if (input.blockerTaskId && input.blockerTaskId === id)
       throw new TaskError("guard_failed", "blockerSelf");
-    rec.state = "blocked";
-    rec.blockedReason = input.reason.trim();
-    rec.blockerTaskId = input.blockerTaskId ?? null;
-    touch(rec);
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "blocked" });
-    return present(rec);
+    try {
+      // INTEGRATION-GAP: blockerTaskId association — not accepted by backend
+      const dto = await http.post<TaskDto>(`/tasks/${id}/block`, {
+        reason: input.reason.trim(),
+      });
+      return fromBackend(dto);
+    } catch (err) {
+      throw mapTaskError(err, "transition");
+    }
   },
 
+  // WIRED: POST /tasks/{id}/unblock (defaults to `todo` server-side).
   async unblock(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = require_(id);
-    if (rec.state !== "blocked") throw new TaskError("invalid_transition", "notBlocked");
-    rec.state = "todo";
-    rec.blockedReason = null;
-    rec.blockerTaskId = null;
-    touch(rec);
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "todo" });
-    return present(rec);
+    void actorId;
+    try {
+      return fromBackend(await http.post<TaskDto>(`/tasks/${id}/unblock`));
+    } catch (err) {
+      throw mapTaskError(err, "transition");
+    }
   },
 
+  // WIRED: POST /tasks/{id}/dependencies (cycle rejection server-side), then re-read.
   async addDependency(id, dependsOnId, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    require_(dependsOnId);
-    if (dependsOnId === id) throw new TaskError("dependency_cycle", "dependencyCycle");
-    if (rec.dependencyIds.includes(dependsOnId)) return present(rec);
-    // Adding rec → dependsOnId; a cycle exists if dependsOnId already depends on rec.
-    if (dependsOnTransitively(dependsOnId, id))
+    void actorId;
+    if (dependsOnId === id)
       throw new TaskError("dependency_cycle", "dependencyCycle");
-    rec.dependencyIds.push(dependsOnId);
-    touch(rec);
-    pushActivity(id, actorId, "updated", { field: "dependency" });
-    return present(rec);
+    try {
+      await http.post(`/tasks/${id}/dependencies`, {
+        dependsOnTaskId: dependsOnId,
+      });
+      return fromBackend(await http.get<TaskDto>(`/tasks/${id}`));
+    } catch (err) {
+      throw mapTaskError(err, "dependency");
+    }
   },
 
+  // WIRED: DELETE /tasks/{id}/dependencies/{dependsOnId}, then re-read the task.
   async removeDependency(id, dependsOnId, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    rec.dependencyIds = rec.dependencyIds.filter((d) => d !== dependsOnId);
-    touch(rec);
-    pushActivity(id, actorId, "updated", { field: "dependency" });
-    return present(rec);
+    void actorId;
+    try {
+      await http.delete(`/tasks/${id}/dependencies/${dependsOnId}`);
+      return fromBackend(await http.get<TaskDto>(`/tasks/${id}`));
+    } catch (err) {
+      throw mapTaskError(err, "dependency");
+    }
   },
 
+  // LEFT-ON-MOCK: no backend endpoint for task checklists.
   async addChecklistItem(id, text, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 2);
     const rec = require_(id);
@@ -763,7 +847,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: no backend endpoint for task checklists.
   async toggleChecklistItem(id, itemId, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
@@ -775,7 +861,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: no backend endpoint for task checklists.
   async removeChecklistItem(id, itemId, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
@@ -785,7 +873,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: board ordering is not persisted by the backend.
   async reorder(id, toState, toIndex, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 3);
     const rec = require_(id);
@@ -803,7 +893,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: no backend endpoint to duplicate a task.
   async duplicate(id, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS);
     const src = require_(id);
@@ -829,7 +921,9 @@ export const tasksApi: TasksApi = {
     return present(require_(newId));
   },
 
+  // LEFT-ON-MOCK: backend has no archive endpoint (archived_at is not settable).
   async archive(id, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 2);
     const rec = require_(id);
@@ -839,7 +933,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: backend has no restore endpoint.
   async restore(id, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 2);
     const rec = require_(id);
@@ -849,7 +945,9 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
+  // LEFT-ON-MOCK: backend has no task delete endpoint.
   async remove(id, actorId) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     seed();
     await delay(MOCK_LATENCY_MS / 2);
     const rec = require_(id);

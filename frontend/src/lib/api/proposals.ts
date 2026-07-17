@@ -18,6 +18,7 @@
 import { addDays, format, startOfDay, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
 import { canAccessFinance } from "@/lib/api/finance-types";
+import { http, HttpError } from "@/lib/api/http";
 import {
   collaborationApi,
   type CollaborationApi,
@@ -351,6 +352,77 @@ function get(id: string): ProposalRecord {
 }
 
 /* ------------------------------------------------------------------ *
+ * Backend wiring (F6). The state machine (send/view/accept/reject/expire/
+ * resend/archive) lives server-side; the frontend `state` == backend `status`
+ * (same enum keys). Financial gating (BR-008) is applied client-side on read to
+ * mirror the mock. PDF storage has NO backend yet (issue #46), so upload/remove
+ * stay stubbed and the resolved `file` is always null on read.
+ * ------------------------------------------------------------------ */
+
+interface BackendProposal {
+  id: string;
+  reference: string;
+  opportunityId: string | null;
+  companyId: string | null;
+  contactId: string | null;
+  value: number | null;
+  createdDate: string | null;
+  sentDate: string | null;
+  validUntil: string | null;
+  pdfAttachmentId: string | null;
+  notes: string | null;
+  status: ProposalState;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapProposal(be: BackendProposal, canFinance: boolean): Proposal {
+  return {
+    id: be.id,
+    reference: be.reference,
+    opportunityId: be.opportunityId ?? "",
+    // INTEGRATION-GAP: opportunityTitle — not returned by the proposals endpoint
+    opportunityTitle: "",
+    // INTEGRATION-GAP: opportunityLost — not returned by the proposals endpoint
+    opportunityLost: false,
+    companyId: be.companyId ?? "",
+    // INTEGRATION-GAP: companyName — not returned by the proposals endpoint
+    companyName: "",
+    contactId: be.contactId ?? null,
+    // INTEGRATION-GAP: contactName — not returned by the proposals endpoint
+    contactName: null,
+    valueCents: canFinance ? be.value ?? null : null,
+    state: be.status,
+    // INTEGRATION-GAP: file — no storage backend (#46); pdf_attachment_id is not
+    // resolvable to a downloadable file yet.
+    file: null,
+    createdAt: be.createdDate ?? be.createdAt,
+    sentAt: be.sentDate ?? null,
+    validUntil: be.validUntil ?? null,
+    // INTEGRATION-GAP: viewedAt — backend has no viewed_at column
+    viewedAt: null,
+    // INTEGRATION-GAP: decidedAt — backend has no decided_at column
+    decidedAt: null,
+    notes: be.notes ?? null,
+    // INTEGRATION-GAP: rejectionNote — not returned by the proposals endpoint
+    rejectionNote: null,
+    archivedAt: be.archivedAt ?? null,
+    updatedAt: be.updatedAt,
+  };
+}
+
+function translateProposalError(err: unknown): ProposalError {
+  if (err instanceof ProposalError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new ProposalError("not_found");
+    if (err.status === 403) return new ProposalError("forbidden");
+    return new ProposalError("invalid_transition", err.message);
+  }
+  return new ProposalError("invalid_transition");
+}
+
+/* ------------------------------------------------------------------ *
  * Public API
  * ------------------------------------------------------------------ */
 
@@ -405,220 +477,186 @@ export interface ProposalsApi {
 }
 
 export const proposalsApi: ProposalsApi = {
+  // WIRED → GET /proposals. Access scoped server-side; the proposals gate
+  // (BR-002) is kept client-side so a Membro never issues the call.
   async listProposals({ role, userId, paymentsGrant, includeArchived = false }) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
     assertAccess(role);
     void userId;
-    const canFinance = canAccessFinance(role, paymentsGrant);
-    return [...proposals.values()]
-      .map((rec) => {
-        applyAutoExpire(rec);
-        return rec;
-      })
-      .filter((rec) => (includeArchived ? true : rec.archivedAt === null))
-      .map((rec) => present(rec, canFinance))
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    try {
+      const canFinance = canAccessFinance(role, paymentsGrant);
+      const page = await http.get<{ items: BackendProposal[] }>("/proposals", {
+        query: { include_archived: includeArchived, page_size: 100 },
+      });
+      return page.items
+        .map((p) => mapProposal(p, canFinance))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // WIRED → GET /proposals/{id}
   async getProposal(id, role, userId, paymentsGrant) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
     assertAccess(role);
     void userId;
-    const rec = get(id);
-    applyAutoExpire(rec);
-    return present(rec, canAccessFinance(role, paymentsGrant));
+    try {
+      const be = await http.get<BackendProposal>(`/proposals/${id}`);
+      return mapProposal(be, canAccessFinance(role, paymentsGrant));
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // WIRED → POST /proposals. Backend requires a `reference`; the frontend create
+  // form does not collect one, so we generate it client-side.
   async createProposal(input, actorId, canFinance) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-
-    // Resolve the linked opportunity's display + company from the seeded set so
-    // the proposal carries denormalized labels (the real backend joins these).
-    const linked = [...proposals.values()].find(
-      (p) => p.opportunityId === input.opportunityId
-    );
-    const id = uid("p");
-    const year = new Date().getFullYear();
-    const seq = String(proposals.size + 1).padStart(3, "0");
-    const rec: ProposalRecord = {
-      id,
-      reference: `PROP-${year}-${seq}`,
-      opportunityId: input.opportunityId,
-      opportunityTitle: linked?.opportunityTitle ?? input.opportunityId,
-      opportunityLost: linked?.opportunityLost ?? false,
-      companyId: linked?.companyId ?? "",
-      companyName: linked?.companyName ?? "",
-      contactId: input.contactId,
-      contactName: null,
-      valueCents: input.valueCents,
-      state: "draft",
-      file: null,
-      createdAt: new Date().toISOString(),
-      sentAt: null,
-      validUntil: input.validUntil,
-      viewedAt: null,
-      decidedAt: null,
-      notes: input.notes,
-      rejectionNote: null,
-      archivedAt: null,
-      updatedAt: new Date().toISOString(),
-    };
-    proposals.set(id, rec);
-    activityByProposal.set(id, []);
-    pushActivity(id, actorId, "created");
-    return present(rec, canFinance);
+    void actorId;
+    try {
+      const year = new Date().getFullYear();
+      const be = await http.post<BackendProposal>("/proposals", {
+        // NOTE: client-generated reference — backend field is required and the
+        // create form omits it. Ideally the backend would auto-number these.
+        reference: `PROP-${year}-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+        opportunityId: input.opportunityId,
+        contactId: input.contactId,
+        value: input.valueCents,
+        validUntil: input.validUntil,
+        notes: input.notes,
+      });
+      return mapProposal(be, canFinance);
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // LEFT-ON-STUB: no storage backend (#46). We fetch the real proposal so the id
+  // resolves, then synthesize (non-persisted) file metadata for the optimistic
+  // UI; a subsequent read returns `file: null` until R2 wiring lands.
   async uploadPdf(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state !== "draft") throw new ProposalError("invalid_transition");
-    rec.file = {
-      name: input.name,
-      sizeBytes: input.sizeBytes,
-      uploadedAt: new Date().toISOString(),
-      url: mockSignedUrl(id, input.name),
-    };
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "attached", { field: "file", after: input.name });
-    return presentAfterWrite(rec);
+    void actorId;
+    try {
+      const be = await http.get<BackendProposal>(`/proposals/${id}`);
+      if (be.status !== "draft") throw new ProposalError("invalid_transition");
+      const p = mapProposal(be, false);
+      return {
+        ...p,
+        file: {
+          name: input.name,
+          sizeBytes: input.sizeBytes,
+          uploadedAt: new Date().toISOString(),
+          url: mockSignedUrl(id, input.name),
+        },
+      };
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // LEFT-ON-STUB: no storage backend (#46). Returns the live proposal (file is
+  // already null on read).
   async removePdf(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state !== "draft") throw new ProposalError("invalid_transition");
-    const previous = rec.file?.name ?? null;
-    rec.file = null;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "updated", { field: "file", before: previous });
-    return presentAfterWrite(rec);
+    void actorId;
+    try {
+      const be = await http.get<BackendProposal>(`/proposals/${id}`);
+      if (be.status !== "draft") throw new ProposalError("invalid_transition");
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // WIRED → POST /proposals/{id}/send (BR-025 enforced server-side)
   async sendProposal(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state === "accepted") throw new ProposalError("accepted_locked");
-    if (rec.state !== "draft" && rec.state !== "expired") {
-      throw new ProposalError("invalid_transition");
+    void actorId;
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/send`, {});
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
     }
-    // Reissuing an expired proposal uses `resendProposal` (needs a new validity);
-    // a plain send is only valid from draft.
-    if (rec.state === "expired") throw new ProposalError("not_expired");
-    if (!meetsSendRequirements(rec)) {
-      throw new ProposalError("send_requirements_missing");
-    }
-    rec.state = "sent";
-    rec.sentAt = today();
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "sent" });
-    return presentAfterWrite(rec);
   },
 
+  // WIRED → POST /proposals/{id}/view
   async markViewed(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state === "draft") throw new ProposalError("draft_not_decidable");
-    if (rec.state !== "sent") throw new ProposalError("invalid_transition");
-    rec.state = "viewed";
-    rec.viewedAt = today();
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "viewed" });
-    return presentAfterWrite(rec);
+    void actorId;
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/view`, {});
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // WIRED → POST /proposals/{id}/accept (BR-026 terminal, enforced server-side)
   async acceptProposal(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state === "draft") throw new ProposalError("draft_not_decidable");
-    if (rec.state === "accepted") throw new ProposalError("accepted_locked");
-    if (rec.state === "rejected") throw new ProposalError("rejected_not_acceptable");
-    if (rec.state !== "sent" && rec.state !== "viewed") {
-      throw new ProposalError("invalid_transition");
+    void actorId;
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/accept`, {});
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
     }
-    if (rec.opportunityLost) throw new ProposalError("opportunity_lost");
-    rec.state = "accepted";
-    rec.decidedAt = today();
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "accepted" });
-    return presentAfterWrite(rec);
   },
 
+  // WIRED → POST /proposals/{id}/reject. Note required (guarded client side to
+  // preserve the typed error code).
   async rejectProposal(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state === "draft") throw new ProposalError("draft_not_decidable");
-    if (rec.state === "accepted") throw new ProposalError("accepted_locked");
-    if (rec.state !== "sent" && rec.state !== "viewed") {
-      throw new ProposalError("invalid_transition");
-    }
+    void actorId;
     if (!input.note.trim()) throw new ProposalError("reject_note_required");
-    rec.state = "rejected";
-    rec.rejectionNote = input.note.trim();
-    rec.decidedAt = today();
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "rejected" });
-    return presentAfterWrite(rec);
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/reject`, {
+        note: input.note.trim(),
+      });
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 
+  // WIRED → POST /proposals/{id}/expire
   async expireProposal(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state !== "sent" && rec.state !== "viewed") {
-      throw new ProposalError("invalid_transition");
+    void actorId;
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/expire`, {});
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
     }
-    rec.state = "expired";
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "expired" });
-    return presentAfterWrite(rec);
   },
 
+  // WIRED → POST /proposals/{id}/resend. New validity required (guarded client
+  // side to preserve the typed error code).
   async resendProposal(id, input, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state !== "expired") throw new ProposalError("not_expired");
+    void actorId;
     if (!input.validUntil) throw new ProposalError("resend_validity_required");
-    rec.state = "sent";
-    rec.validUntil = input.validUntil;
-    rec.sentAt = today();
-    rec.viewedAt = null;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "status_changed", { field: "state", after: "sent" });
-    return presentAfterWrite(rec);
-  },
-
-  async archiveProposal(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    if (rec.state === "accepted") throw new ProposalError("accepted_not_archivable");
-    if (rec.state === "sent" || rec.state === "viewed") {
-      // Live documents stay in the funnel — only draft/rejected/expired archive (BR-028).
-      throw new ProposalError("invalid_transition");
+    try {
+      const be = await http.post<BackendProposal>(`/proposals/${id}/resend`, {
+        validUntil: input.validUntil,
+      });
+      return mapProposal(be, false);
+    } catch (err) {
+      throw translateProposalError(err);
     }
-    rec.archivedAt = today();
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "archived");
   },
 
+  // WIRED → POST /proposals/{id}/archive (BR-028 enforced server-side)
+  async archiveProposal(id, actorId) {
+    void actorId;
+    try {
+      await http.post<BackendProposal>(`/proposals/${id}/archive`, {});
+    } catch (err) {
+      throw translateProposalError(err);
+    }
+  },
+
+  // WIRED → POST /proposals/{id}/restore
   async restoreProposal(id, actorId) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const rec = get(id);
-    rec.archivedAt = null;
-    rec.updatedAt = new Date().toISOString();
-    pushActivity(id, actorId, "restored");
+    void actorId;
+    try {
+      await http.post<BackendProposal>(`/proposals/${id}/restore`, {});
+    } catch (err) {
+      throw translateProposalError(err);
+    }
   },
 };
 

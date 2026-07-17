@@ -210,6 +210,9 @@ function locateComment(id: string): { key: string; index: number } | null {
 }
 
 export const collaborationApi: CollaborationApi = {
+  // INTEGRATION-GAP: no backend endpoint — the entire collaboration surface
+  // (comments, @mentions, attachments, activity log, directory) is left on
+  // mock. No comments/attachments API exists yet.
   async listDirectory() {
     await delay(MOCK_LATENCY_MS / 2);
     return [...DIRECTORY];

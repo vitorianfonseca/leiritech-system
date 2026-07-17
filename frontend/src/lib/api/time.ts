@@ -23,6 +23,7 @@
 
 import { addMinutes, formatISO, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
+import { http, HttpError } from "@/lib/api/http";
 import {
   TimeError,
   computeRollups,
@@ -384,87 +385,170 @@ function buildEntry(
   };
 }
 
-export const timeApi: TimeApi = {
-  async listEntries(role, userId, scope) {
-    await delay(MOCK_LATENCY_MS);
-    const entries = visibleEntries(role, userId, scope).sort((a, b) =>
-      b.startedAt.localeCompare(a.startedAt)
-    );
-    return { entries, totals: sumTotals(entries) };
-  },
+/* ------------------------------------------------------------------ *
+ * Backend wiring (F11 routes). Response DTO is camelCased by `http`.
+ * ------------------------------------------------------------------ */
 
-  async createEntry(input, userId) {
-    await delay(MOCK_LATENCY_MS);
-    const entry = buildEntry(
-      input.taskId,
-      userId,
-      input.startedAt,
-      input.endedAt,
-      input.description,
-      input.billable,
-      "manual"
-    );
-    store.set(entry.id, entry);
-    return entry;
-  },
+interface TimeEntryDto {
+  id: string;
+  userId: string;
+  taskId: string;
+  startedAt: string;
+  endedAt: string | null;
+  description: string | null;
+  billable: boolean;
+  createdAt: string;
+  updatedAt: string;
+  isRunning: boolean;
+  durationMinutes: number | null;
+}
 
-  async updateEntry(id, input, userId) {
-    await delay(MOCK_LATENCY_MS);
-    const existing = store.get(id);
-    if (!existing) throw new TimeError("not_found");
-    if (existing.userId !== userId) throw new TimeError("forbidden");
+/** Map a backend TimeEntryResponse to the UI `TimeEntry`. The backend stores only
+ * the raw entry; all denormalized labels/budgets are enrichment gaps. */
+function fromBackend(dto: TimeEntryDto): TimeEntry {
+  return {
+    id: dto.id,
+    taskId: dto.taskId,
+    // INTEGRATION-GAP: taskTitle — not provided by backend
+    taskTitle: "",
+    // INTEGRATION-GAP: projectId — not provided by backend (rollup grouping degraded)
+    projectId: "",
+    // INTEGRATION-GAP: projectName — not provided by backend
+    projectName: "",
+    // INTEGRATION-GAP: phaseId — not provided by backend
+    phaseId: null,
+    // INTEGRATION-GAP: phaseName — not provided by backend
+    phaseName: null,
+    userId: dto.userId,
+    // INTEGRATION-GAP: userName — not provided by backend
+    userName: "",
+    startedAt: dto.startedAt,
+    // INTEGRATION-GAP: a running entry has a null endedAt; fall back to startedAt
+    endedAt: dto.endedAt ?? dto.startedAt,
+    durationMinutes: dto.durationMinutes ?? 0,
+    description: dto.description ?? "",
+    billable: dto.billable,
+    // INTEGRATION-GAP: source (timer|manual) — not distinguished by backend
+    source: "manual",
+    createdAt: dto.createdAt,
+  };
+}
 
-    const startedAt = input.startedAt ?? existing.startedAt;
-    const endedAt = input.endedAt ?? existing.endedAt;
-    const check = validateTimeEntry({ taskId: existing.taskId, startedAt, endedAt });
-    if (!check.ok || check.durationMinutes == null) {
-      const key = check.errors.start ?? check.errors.end ?? "validation";
-      throw new TimeError("validation", key);
+/** Translate an `HttpError` into the domain `TimeError`, preserving mock codes. */
+function mapTimeError(err: unknown): TimeError {
+  if (err instanceof TimeError) return err;
+  if (err instanceof HttpError) {
+    if (err.status === 404) return new TimeError("not_found");
+    if (err.status === 403) return new TimeError("forbidden");
+    if (err.status === 0) return new TimeError("network");
+    if (err.status === 409 || err.status === 422 || err.status === 400) {
+      const code = (err.code ?? "").toUpperCase();
+      if (code.includes("INACTIVE") || code.includes("PROJECT"))
+        return new TimeError("project_inactive");
+      return new TimeError("validation");
     }
-    const next: TimeEntry = {
-      ...existing,
-      startedAt,
-      endedAt,
-      durationMinutes: check.durationMinutes,
-      description: input.description?.trim() ?? existing.description,
-      billable: input.billable ?? existing.billable,
-    };
-    store.set(id, next);
-    return next;
+  }
+  return new TimeError("network");
+}
+
+export const timeApi: TimeApi = {
+  // WIRED: GET /time — server scopes rows (own + team for Gestor/Admin) from the JWT.
+  // INTEGRATION-GAP: scope (own vs team) not filterable here — no real user UUID to pass.
+  async listEntries(role, userId, scope) {
+    void role;
+    void userId;
+    void scope;
+    try {
+      const page = await http.get<{ items: TimeEntryDto[] }>("/time", {
+        query: { page_size: 100 },
+      });
+      const entries = page.items
+        .map(fromBackend)
+        .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+      return { entries, totals: sumTotals(entries) };
+    } catch (err) {
+      throw mapTimeError(err);
+    }
   },
 
+  // WIRED: POST /time (manual entry). Server owns the entry from the JWT.
+  async createEntry(input, userId) {
+    void userId;
+    try {
+      const dto = await http.post<TimeEntryDto>("/time", {
+        taskId: input.taskId,
+        startedAt: input.startedAt,
+        endedAt: input.endedAt,
+        description: input.description,
+        billable: input.billable,
+      });
+      return fromBackend(dto);
+    } catch (err) {
+      throw mapTimeError(err);
+    }
+  },
+
+  // WIRED: PATCH /time/{id} — owner-only check enforced server-side.
+  async updateEntry(id, input, userId) {
+    void userId;
+    const body: Record<string, unknown> = {};
+    if (input.startedAt !== undefined) body.startedAt = input.startedAt;
+    if (input.endedAt !== undefined) body.endedAt = input.endedAt;
+    if (input.description !== undefined) body.description = input.description;
+    if (input.billable !== undefined) body.billable = input.billable;
+    try {
+      return fromBackend(await http.patch<TimeEntryDto>(`/time/${id}`, body));
+    } catch (err) {
+      throw mapTimeError(err);
+    }
+  },
+
+  // WIRED: DELETE /time/{id} — owner-only check enforced server-side.
   async deleteEntry(id, userId) {
-    await delay(MOCK_LATENCY_MS);
-    const existing = store.get(id);
-    if (!existing) throw new TimeError("not_found");
-    if (existing.userId !== userId) throw new TimeError("forbidden");
-    store.delete(id);
+    void userId;
+    try {
+      await http.delete(`/time/${id}`);
+    } catch (err) {
+      throw mapTimeError(err);
+    }
   },
 
+  // LEFT-ON-MOCK: no backend endpoint to restore a deleted entry (undo).
   async restoreEntry(entry) {
+    // INTEGRATION-GAP: no backend endpoint — left on mock
     await delay(MOCK_LATENCY_MS / 2);
     store.set(entry.id, entry);
     return entry;
   },
 
+  // WIRED: POST /time/stop — stops the server-side running timer.
+  // INTEGRATION-GAP: backend ignores the client-provided task/start/end/description;
+  // it stops whatever timer /time/start opened and sets endedAt server-side.
   async timerStop(input, userId) {
-    await delay(MOCK_LATENCY_MS);
-    const entry = buildEntry(
-      input.taskId,
-      userId,
-      iso(new Date(input.startedAt)),
-      iso(new Date(input.endedAt)),
-      input.description ?? "",
-      input.billable,
-      "timer"
-    );
-    store.set(entry.id, entry);
-    return entry;
+    void input;
+    void userId;
+    try {
+      return fromBackend(await http.post<TimeEntryDto>("/time/stop"));
+    } catch (err) {
+      throw mapTimeError(err);
+    }
   },
 
+  // WIRED (aggregated): GET /time then compute rollups client-side.
+  // INTEGRATION-GAP: projectId/phaseId/labels absent from backend rows, so
+  // project/phase/task grouping and budget lookups are degraded.
   async getRollups(role, userId, scope, dimension) {
-    await delay(MOCK_LATENCY_MS);
-    const entries = visibleEntries(role, userId, scope);
-    return computeRollups(entries, dimension, budgetLookup);
+    void role;
+    void userId;
+    void scope;
+    try {
+      const page = await http.get<{ items: TimeEntryDto[] }>("/time", {
+        query: { page_size: 100 },
+      });
+      const entries = page.items.map(fromBackend);
+      return computeRollups(entries, dimension, budgetLookup);
+    } catch (err) {
+      throw mapTimeError(err);
+    }
   },
 };
