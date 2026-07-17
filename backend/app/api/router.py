@@ -12,6 +12,7 @@ from app.api.routes import (
     auth,
     companies,
     contacts,
+    dashboard,
     finance,
     interactions,
     invitations,
@@ -21,6 +22,7 @@ from app.api.routes import (
     pipeline_stages,
     projects,
     proposals,
+    reports,
     search,
     tasks,
     time,
@@ -62,3 +64,7 @@ api_router.include_router(
     notifications.router, prefix="/notifications", tags=["notifications"]
 )
 api_router.include_router(search.router, prefix="/search", tags=["search"])
+api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
+api_router.include_router(
+    dashboard.router, prefix="/dashboard", tags=["dashboard"]
+)
