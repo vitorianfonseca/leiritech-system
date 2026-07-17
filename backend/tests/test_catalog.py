@@ -67,3 +67,35 @@ def test_catalog_enums_exist():
         "unit", "hour", "day", "month", "m2", "license", "fixed"
     )
     assert enums.BILLING_TYPES == ("one_time", "monthly", "annual")
+
+
+# --------------------------------------------------------------------------- #
+# Task 2 — model persistence (direct SessionLocal, mirrors _add_attachment)
+# --------------------------------------------------------------------------- #
+def test_catalog_item_persists():
+    from decimal import Decimal
+
+    from app.models.catalog import CatalogItem
+
+    db = SessionLocal()
+    created: uuid.UUID | None = None
+    try:
+        item = CatalogItem(
+            name="Licença anual",
+            unit="license",
+            unit_price=120000,  # €1200.00
+            tax_rate=Decimal("23.00"),
+            billing_type="annual",
+        )
+        db.add(item)
+        db.commit()
+        db.refresh(item)
+        created = item.id
+        assert item.id is not None
+        assert item.archived_at is None
+        assert item.unit_price == 120000
+    finally:
+        if created is not None:
+            db.execute(delete(CatalogItem).where(CatalogItem.id == created))
+            db.commit()
+        db.close()

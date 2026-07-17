@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.database.base import Base
+from app.models.catalog import CatalogItem
 from app.models.collaboration import (
     ActivityLog,
     Attachment,
@@ -37,6 +38,7 @@ from app.models.user import Invitation, User, UserPreference, UserSession
 
 __all__ = [
     "Base",
+    "CatalogItem",
     "ActivityLog",
     "Attachment",
     "Comment",
