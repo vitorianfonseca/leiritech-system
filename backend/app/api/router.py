@@ -27,6 +27,7 @@ from app.api.routes import (
     phases,
     pipeline_stages,
     projects,
+    proposal_templates,
     proposals,
     reports,
     search,
@@ -57,6 +58,9 @@ api_router.include_router(
 )
 api_router.include_router(
     proposals.router, prefix="/proposals", tags=["proposals"]
+)
+api_router.include_router(
+    proposal_templates.router, prefix="/proposal-templates", tags=["proposals"]
 )
 api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
 api_router.include_router(phases.router, prefix="/phases", tags=["projects"])
