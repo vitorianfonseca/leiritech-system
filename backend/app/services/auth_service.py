@@ -6,11 +6,12 @@ errors are deliberately generic to prevent user enumeration (§9).
 
 from __future__ import annotations
 
+import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.core import errors, security
@@ -21,6 +22,12 @@ logger = structlog.get_logger("aurea.auth")
 
 _GENERIC_LOGIN_ERROR = "Email ou palavra-passe incorretos."
 _DEACTIVATED_ERROR = "Conta desativada. Contacte um Administrador."
+
+# Precomputed ONCE at import so the unknown-user login path performs exactly one
+# Argon2 verify — identical work to the known-user path. Computing a fresh hash
+# per request (as before) made unknown-user logins measurably slower and leaked
+# account existence via a timing oracle.
+_DUMMY_PASSWORD_HASH = security.hash_password(secrets.token_urlsafe(16))
 
 
 def _now() -> datetime:
@@ -38,9 +45,9 @@ def authenticate(db: Session, email: str, password: str) -> User:
     ).scalar_one_or_none()
 
     if user is None:
-        # Constant-work path: verify against a throwaway hash to avoid a timing
-        # oracle, then fail generically.
-        security.verify_password(password, security.hash_password("timing-guard"))
+        # Constant-work path: one verify against a PRECOMPUTED dummy hash so the
+        # timing matches the known-user path (no per-request hashing).
+        security.verify_password(password, _DUMMY_PASSWORD_HASH)
         raise errors.unauthorized(_GENERIC_LOGIN_ERROR, code="INVALID_CREDENTIALS")
 
     if not security.verify_password(password, user.password_hash):
@@ -113,17 +120,31 @@ def rotate_refresh(
             "Sessão inválida ou expirada.", code="INVALID_REFRESH_TOKEN"
         ) from exc
 
-    session = _active_session_for(db, raw_refresh)
-    if session is None or str(session.user_id) != payload.get("sub"):
+    now = _now()
+    # ATOMIC single-use consumption: revoke the still-active session in one
+    # UPDATE ... WHERE revoked_at IS NULL RETURNING. Under concurrent replay of
+    # the same refresh token only ONE request matches an unrevoked row, so a
+    # stolen/duplicated token cannot be redeemed twice (no read-then-write race).
+    consumed = db.execute(
+        update(UserSession)
+        .where(
+            UserSession.refresh_token_hash == security.hash_token(raw_refresh),
+            UserSession.revoked_at.is_(None),
+            UserSession.expires_at > now,
+        )
+        .values(revoked_at=now)
+        .returning(UserSession.user_id)
+    ).first()
+
+    if consumed is None or str(consumed.user_id) != payload.get("sub"):
         raise errors.unauthorized(
             "Sessão inválida ou expirada.", code="INVALID_REFRESH_TOKEN"
         )
 
-    user = db.get(User, session.user_id)
+    user = db.get(User, consumed.user_id)
     if user is None or user.status != "active":
         raise errors.unauthorized(_DEACTIVATED_ERROR, code="ACCOUNT_DEACTIVATED")
 
-    session.revoked_at = _now()  # rotation: old token is single-use
     access, refresh = issue_tokens(
         db, user, user_agent=user_agent, ip_address=ip_address
     )

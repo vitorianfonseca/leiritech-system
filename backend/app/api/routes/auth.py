@@ -28,8 +28,16 @@ from app.services import auth_service
 
 router = APIRouter()
 
-# Process-local login limiter (see rate_limit.py for the multi-instance caveat).
+# Two process-local login limiters (see rate_limit.py for the multi-instance
+# caveat). Per-(ip,email) blunts targeted brute force of one account; per-ip
+# blunts credential stuffing / password spraying where an attacker VARIES the
+# email each attempt (which would bypass a per-account-only limiter). The IP
+# budget is a multiple of the account budget to tolerate a few users behind a
+# shared NAT while still bounding total attempts from one source.
 login_rate_limiter = SlidingWindowRateLimiter(settings.LOGIN_RATE_LIMIT_PER_MINUTE)
+login_ip_rate_limiter = SlidingWindowRateLimiter(
+    max(settings.LOGIN_RATE_LIMIT_PER_MINUTE * 4, 20)
+)
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -40,9 +48,11 @@ def _client_ip(request: Request) -> str:
 
 @router.post("/login", response_model=TokenResponse)
 def login(request: Request, payload: LoginRequest, db: DbSession) -> TokenResponse:
-    # Rate limit per IP + email to blunt credential stuffing (§9).
-    rl_key = f"{_client_ip(request)}:{payload.email.lower()}"
-    if not login_rate_limiter.check(rl_key):
+    # Per-IP budget first (credential stuffing / spraying), then per-account.
+    ip = _client_ip(request)
+    if not login_ip_rate_limiter.check(ip):
+        raise errors.too_many_requests()
+    if not login_rate_limiter.check(f"{ip}:{payload.email.lower()}"):
         raise errors.too_many_requests()
 
     user = auth_service.authenticate(db, payload.email, payload.password)

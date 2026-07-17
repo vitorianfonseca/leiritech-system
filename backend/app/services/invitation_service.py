@@ -30,6 +30,16 @@ def create_invitation(
 ) -> tuple[Invitation, str]:
     """Create a pending invitation and dispatch the email. Returns (invite, raw_token)."""
     email = payload.email.lower()
+    role = str(payload.role)
+
+    # Only an Administrador may grant elevated roles (BR-004: only Admin manages
+    # roles). A Gestor with the invite grant can create MEMBRO accounts only —
+    # otherwise a non-admin could self-escalate by inviting a new admin/gestor.
+    if invited_by.role != "admin" and role != "membro":
+        raise errors.forbidden(
+            "Apenas um Administrador pode convidar com este perfil.",
+            code="INVITE_ROLE_NOT_PERMITTED",
+        )
 
     existing_user = db.execute(
         select(User).where(User.email == email)

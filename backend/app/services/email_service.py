@@ -16,17 +16,22 @@ logger = structlog.get_logger("aurea.email")
 
 class EmailService:
     def _send(self, *, to: str, subject: str, body: str, link: str | None = None) -> None:
+        # Action links carry single-use invite/reset tokens. Logging the full
+        # link exposes those tokens to anyone with log access (log = credential
+        # store), so the raw link is emitted ONLY in a local development
+        # environment. Elsewhere logs record just recipient + subject.
+        is_dev = settings.ENVIRONMENT.lower() == "development"
         if settings.RESEND_API_KEY:
             # TODO(issue: email-delivery): POST to Resend API. Until then, even in
             # a configured environment we only log to avoid a hard dependency.
-            logger.info("email_send_pending_provider", to=to, subject=subject, link=link)
+            logger.info("email_send_pending_provider", to=to, subject=subject)
             return
         logger.info(
             "email_send_dev_stub",
             to=to,
             subject=subject,
-            body=body,
-            link=link,
+            body=body if is_dev else None,
+            link=link if is_dev else None,
         )
 
     def send_invitation(self, *, to: str, accept_link: str, role: str) -> None:
