@@ -122,3 +122,45 @@ def test_catalog_create_defaults_tax_23():
         name="x", unit="unit", unit_price=1000, billing_type="one_time"
     )
     assert str(payload.tax_rate) == "23.00"
+
+
+# --------------------------------------------------------------------------- #
+# Task 4 — repository (direct SessionLocal)
+# --------------------------------------------------------------------------- #
+def test_list_items_filters_and_search():
+    from app.models.catalog import CatalogItem
+    from app.repositories import catalog as catalog_repo
+
+    db = SessionLocal()
+    created: list[uuid.UUID] = []
+    try:
+        marker = uuid.uuid4().hex[:8]
+        a = CatalogItem(
+            name=f"Website institucional {marker}", unit="fixed",
+            unit_price=500000, billing_type="one_time", category=f"web-{marker}",
+        )
+        b = CatalogItem(
+            name=f"Manutenção mensal {marker}", unit="month",
+            unit_price=20000, billing_type="monthly", category=f"ops-{marker}",
+        )
+        db.add_all([a, b])
+        db.commit()
+        created = [a.id, b.id]
+
+        rows, total = catalog_repo.list_items(
+            db, q=f"website institucional {marker}", category=None,
+            billing_type=None, include_archived=False, sort="name",
+            page=1, page_size=20,
+        )
+        assert total == 1 and rows[0].name.startswith("Website")
+
+        rows, total = catalog_repo.list_items(
+            db, q=None, category=f"ops-{marker}", billing_type="monthly",
+            include_archived=False, sort="name", page=1, page_size=20,
+        )
+        assert total == 1 and rows[0].billing_type == "monthly"
+    finally:
+        if created:
+            db.execute(delete(CatalogItem).where(CatalogItem.id.in_(created)))
+            db.commit()
+        db.close()
