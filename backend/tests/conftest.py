@@ -13,7 +13,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete
 
-from app.api.routes.auth import login_rate_limiter
+from app.api.routes.auth import login_ip_rate_limiter, login_rate_limiter
 from app.core import security
 from app.database.session import SessionLocal
 from app.main import app
@@ -28,7 +28,12 @@ def client() -> Iterator[TestClient]:
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limiter() -> None:
+    # Reset BOTH login limiters between tests. The per-IP limiter is keyed on the
+    # constant TestClient IP, so without this its budget accumulates across the
+    # whole suite and later tests spuriously get 429. This resets test state only
+    # and does not change the production limits (config is untouched).
     login_rate_limiter.reset()
+    login_ip_rate_limiter.reset()
 
 
 @pytest.fixture

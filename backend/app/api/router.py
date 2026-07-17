@@ -14,6 +14,8 @@ from app.api.routes import (
     contacts,
     interactions,
     invitations,
+    opportunities,
+    pipeline_stages,
     users,
 )
 
@@ -28,4 +30,10 @@ api_router.include_router(companies.router, prefix="/companies", tags=["crm"])
 api_router.include_router(contacts.router, prefix="/contacts", tags=["crm"])
 api_router.include_router(
     interactions.router, prefix="/interactions", tags=["crm"]
+)
+api_router.include_router(
+    pipeline_stages.router, prefix="/pipeline-stages", tags=["pipeline"]
+)
+api_router.include_router(
+    opportunities.router, prefix="/opportunities", tags=["pipeline"]
 )
