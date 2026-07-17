@@ -42,10 +42,11 @@ import random
 import sys
 from datetime import UTC, date, datetime, time, timedelta
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.core import security
+from app.core.config import settings
 from app.database.seed import seed_admin, seed_stages
 from app.database.session import SessionLocal
 from app.models.collaboration import ActivityLog, Comment, Mention, Notification
@@ -65,6 +66,19 @@ from app.models.time_entry import TimeEntry
 from app.models.user import User, UserPreference
 
 SEED = 42
+
+# Role-dependent utilization targets — MUST mirror ``workload_service`` so the
+# generated open-task load maps to the same allocation_pct the app displays.
+_ROLE_TARGET = {
+    "membro": settings.WORKLOAD_TARGET_MEMBRO,
+    "gestor": settings.WORKLOAD_TARGET_GESTOR,
+    "admin": settings.WORKLOAD_TARGET_ADMIN,
+}
+
+
+def _role_target(role: str) -> float:
+    return _ROLE_TARGET.get(role, settings.WORKLOAD_TARGET_MEMBRO)
+
 
 LOGIN_ADMIN_EMAIL = "intglogin@aurea.pt"
 LOGIN_ADMIN_NAME = "Aurea Interno"
@@ -1129,38 +1143,48 @@ def gen_login_admin_extras(
     db.flush()
 
     # Guaranteed open tasks for the admin, spread across the daily-hub buckets.
-    due_offsets = [-7, -2, 0, 0, 1, 2, 3, 6, 12, None]
-    statuses = ["todo", "in_progress", "in_progress", "in_review", "blocked",
-                "todo", "in_progress", "todo", "in_review", "todo"]
-    for p in admin_projects:
+    # Kept small: net capacity for an Admin is only capacity×0.40, so a handful
+    # of open tasks already realistically fills "O meu trabalho". The workload
+    # rebalance pass later trims the tail; these seed the buckets (overdue /
+    # today / upcoming / someday) so the personal hub never renders empty.
+    hub_tasks = [
+        (-3, "in_progress"), (0, "todo"), (0, "in_review"),
+        (2, "in_progress"), (5, "todo"), (10, "todo"),
+        (12, "in_progress"), (None, "todo"),
+    ]
+    hub_projects = admin_projects[:3] or admin_projects
+    for i, (off, st) in enumerate(hub_tasks):
+        p = hub_projects[i % len(hub_projects)] if hub_projects else None
+        if p is None:
+            break
         phases = db.execute(
             select(ProjectPhase).where(ProjectPhase.project_id == p.id)
         ).scalars().all()
         phase = random.choice(phases) if phases else None
-        for off, st in zip(due_offsets, statuses, strict=True):
-            due = TODAY + timedelta(days=off) if off is not None else None
-            created = NOW - timedelta(days=random.randint(2, 30))
-            task = Task(
-                project_id=p.id,
-                phase_id=phase.id if phase else None,
-                title=random.choice(_TASK_TITLES),
-                description="Tarefa atribuída ao utilizador interno.",
-                primary_assignee_id=admin.id,
-                priority=random.choice(["normal", "high", "urgent", "low"]),
-                start_date=(created - timedelta(days=2)).date(),
-                due_date=due,
-                estimate_hours=random.choice([2, 4, 6, 8]),
-                status=st,
-                block_reason="Bloqueado à espera de feedback." if st == "blocked" else None,
-                created_by=admin.id,
-                created_at=created,
-                updated_at=created,
-            )
-            db.add(task)
-            db.flush()
-            db.add(TaskAssignee(task_id=task.id, user_id=admin.id, created_by=admin.id,
-                                created_at=created, updated_at=created))
-            p._tasks.append(task)  # type: ignore[attr-defined]
+        due = TODAY + timedelta(days=off) if off is not None else None
+        created = NOW - timedelta(days=random.randint(2, 30))
+        task = Task(
+            project_id=p.id,
+            phase_id=phase.id if phase else None,
+            title=random.choice(_TASK_TITLES),
+            description="Tarefa atribuída ao utilizador interno.",
+            primary_assignee_id=admin.id,
+            priority=random.choice(["normal", "high", "urgent", "low"]),
+            start_date=(created - timedelta(days=2)).date(),
+            due_date=due,
+            # Small estimates so several fit inside the Admin's modest net
+            # capacity — the daily hub stays populated without over-allocating.
+            estimate_hours=random.choice([2, 3, 4]),
+            status=st,
+            created_by=admin.id,
+            created_at=created,
+            updated_at=created,
+        )
+        db.add(task)
+        db.flush()
+        db.add(TaskAssignee(task_id=task.id, user_id=admin.id, created_by=admin.id,
+                            created_at=created, updated_at=created))
+        p._tasks.append(task)  # type: ignore[attr-defined]
     db.flush()
 
     # Done tasks in the past for history + time entries.
@@ -1343,6 +1367,156 @@ def gen_activity_logs(
 
 
 # --------------------------------------------------------------------------- #
+# Workload rebalance (keeps CURRENT load believable while history stays rich)
+# --------------------------------------------------------------------------- #
+def _mark_done_historical(task: Task) -> None:
+    """Flip an OPEN task to a completed one with a plausible PAST timeline.
+
+    Anchored to the task's own ``created_at`` so completion dates spread across
+    the whole ~12-month window (created_at already spans the year), keeping the
+    done-task history — and the time entries built from it — realistic.
+    """
+    anchor = task.created_at
+    if anchor.tzinfo is None:
+        anchor = anchor.replace(tzinfo=UTC)
+    latest = min(NOW - timedelta(days=1), anchor + timedelta(days=60))
+    if latest <= anchor:
+        latest = anchor + timedelta(days=1)
+    done_at = _rand_dt(anchor, latest)
+    task.status = "done"
+    task.block_reason = None
+    task.updated_at = done_at
+    task.due_date = (done_at + timedelta(days=random.randint(-3, 2))).date()
+
+
+def rebalance_workload(db: Session, admin: User) -> None:
+    """Cap each active member's OPEN-task load to a believable slice of their
+    net capacity, flipping the excess to historical ``done``; then globally tune
+    overdue and blocked counts.
+
+    Net capacity mirrors ``workload_service``: ``weekly_capacity × role_target``.
+    Most members land ~55–105% of that; one or two run "hot" (~115–130%) so the
+    over-allocated (red) state still demos. Members with too few open tasks stay
+    naturally under target — a realistic spread, never the ~579% blow-up.
+    """
+    active = list(
+        db.execute(select(User).where(User.status == "active")).scalars()
+    )
+    # Pick the two "hot" (over-allocated) members from those with the LARGEST
+    # open-task pools, so they can actually reach ~115–130% and the red zone
+    # demos — a random pick can land on a thin pool that undershoots.
+    pool_hours = {
+        u.id: db.scalar(
+            select(func.coalesce(func.sum(Task.estimate_hours), 0)).where(
+                Task.primary_assignee_id == u.id,
+                Task.archived_at.is_(None),
+                Task.status != "done",
+                Task.estimate_hours.is_not(None),
+            )
+        )
+        or 0
+        for u in active
+    }
+    # The login/demo admin stays comfortably in-band — never the red member.
+    ranked = sorted(
+        (u for u in active if u.id != admin.id),
+        key=lambda u: float(pool_hours[u.id]),
+        reverse=True,
+    )
+    hot_ids = {u.id for u in ranked[:2]}
+
+    for user in active:
+        capacity = float(user.weekly_capacity_hours or 0.0)
+        net_capacity = capacity * _role_target(user.role)
+        factor = (
+            random.uniform(1.14, 1.24) if user.id in hot_ids
+            else random.uniform(0.55, 1.00)
+        )
+        desired_hours = net_capacity * factor
+        # Cap overshoot to ~6% of net capacity so a single big task can never
+        # blow a member past the target band (keeps hot members ≤ ~130%).
+        slack = 0.06 * net_capacity
+        open_tasks = list(
+            db.execute(
+                select(Task)
+                .where(
+                    Task.primary_assignee_id == user.id,
+                    Task.archived_at.is_(None),
+                    Task.status != "done",
+                    Task.estimate_hours.is_not(None),
+                )
+                .order_by(Task.created_at.asc())
+            ).scalars()
+        )
+        # Keep a believable slice of open tasks up to the desired load; the rest
+        # become completed history. Randomise which stay open for variety — but
+        # for the login admin, keep the smallest tasks first so its modest net
+        # capacity holds several items (a well-populated daily hub).
+        if user.id == admin.id:
+            open_tasks.sort(key=lambda t: float(t.estimate_hours or 0.0))
+        else:
+            random.shuffle(open_tasks)
+        acc = 0.0
+        for task in open_tasks:
+            est = float(task.estimate_hours or 0.0)
+            if acc + est <= desired_hours + slack:
+                acc += est
+            else:
+                _mark_done_historical(task)
+    db.flush()
+
+    # ---- Global tuning across every remaining OPEN task -------------------- #
+    remaining = list(
+        db.execute(
+            select(Task).where(
+                Task.archived_at.is_(None), Task.status != "done"
+            )
+        ).scalars()
+    )
+
+    # Due dates: default everything with a due date to now/soon...
+    for task in remaining:
+        if task.due_date is not None:
+            task.due_date = TODAY + timedelta(days=random.randint(0, 21))
+
+    # ...then make only a believable handful genuinely overdue. Guarantee the
+    # login admin owns at least one so the personal daily-hub "overdue" bucket
+    # renders, and spread the remainder across the whole operation.
+    dated = [t for t in remaining if t.due_date is not None]
+    random.shuffle(dated)
+    admin_dated = [t for t in dated if t.primary_assignee_id == admin.id]
+    overdue: list[Task] = []
+    if admin_dated:
+        overdue.append(admin_dated[0])
+    target_overdue = random.randint(9, 13)
+    for task in dated:
+        if len(overdue) >= target_overdue:
+            break
+        if task not in overdue:
+            overdue.append(task)
+    for task in overdue:
+        task.due_date = TODAY - timedelta(days=random.randint(1, 14))
+
+    # Blocked: keep a small realistic number (3–6).
+    blocked = [t for t in remaining if t.status == "blocked"]
+    random.shuffle(blocked)
+    keep_blocked = random.randint(3, 5)
+    for task in blocked[keep_blocked:]:
+        task.status = random.choice(["in_progress", "todo", "in_review"])
+        task.block_reason = None
+    if len(blocked) < 3:
+        pool = [
+            t for t in remaining
+            if t.status in ("in_progress", "todo") and t not in blocked
+        ]
+        random.shuffle(pool)
+        for task in pool[: 3 - len(blocked)]:
+            task.status = "blocked"
+            task.block_reason = "A aguardar aprovação de conteúdos do cliente."
+    db.flush()
+
+
+# --------------------------------------------------------------------------- #
 # Orchestration
 # --------------------------------------------------------------------------- #
 def run_rich_seed(db: Session) -> dict:
@@ -1356,12 +1530,16 @@ def run_rich_seed(db: Session) -> dict:
     opps = gen_opportunities(db, companies, contacts_by_company, stages, users, admin)
     proposals = gen_proposals(db, opps, admin)
     projects = gen_projects(db, opps, users, admin)
+    # Admin personal tasks first, THEN cap current open load to a believable
+    # band (flipping the excess to historical done), THEN build time entries so
+    # the ~12-month logged-work history reflects the final task statuses.
+    gen_login_admin_extras(db, admin, projects, users)
+    rebalance_workload(db, admin)
     n_time = gen_time_entries(db, projects, admin)
     gen_running_timers(db, projects, users)
     n_interactions = gen_interactions(db, companies, opps, users, admin)
     n_meetings = gen_meetings(db, projects, companies, admin, users)
     n_comments, n_mentions = gen_comments_mentions(db, projects, admin, users)
-    gen_login_admin_extras(db, admin, projects, users)
     n_notifications = gen_notifications(db, admin, users, projects)
     n_activity = gen_activity_logs(db, admin, users, projects, opps, companies)
 
