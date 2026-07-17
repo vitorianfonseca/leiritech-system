@@ -106,7 +106,7 @@ export function AttentionPanel({
         </div>
       </CardHeader>
 
-      <CardContent className="max-h-[32rem] overflow-y-auto">
+      <CardContent className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (
           <SkeletonList rows={5} />
         ) : totalItems === 0 ? (
