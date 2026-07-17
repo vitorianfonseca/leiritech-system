@@ -26,6 +26,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { CHART_FILL_OPACITY } from "@/lib/chart-style";
 import { formatEUR } from "@/components/finance/finance-format";
 import type {
   ContractedReceivedPoint,
@@ -220,6 +221,7 @@ export function ProjectsByStateChart({
                   paddingAngle={2}
                   stroke="var(--card)"
                   strokeWidth={2}
+                  fillOpacity={CHART_FILL_OPACITY}
                   isAnimationActive={animate}
                 >
                   {data.map((entry) => (
@@ -335,8 +337,8 @@ export function TaskFlowChart({
                     );
                   }}
                 />
-                <Bar dataKey="done" fill="var(--chart-3)" radius={[4, 4, 0, 0]} isAnimationActive={animate} />
-                <Bar dataKey="overdue" fill="var(--status-overdue)" radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+                <Bar dataKey="done" fill="var(--chart-3)" fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+                <Bar dataKey="overdue" fill="var(--status-overdue)" fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -421,8 +423,8 @@ export function ContractedReceivedChart({
                     );
                   }}
                 />
-                <Bar dataKey="contractedCents" fill="var(--chart-1)" radius={[4, 4, 0, 0]} isAnimationActive={animate} />
-                <Bar dataKey="receivedCents" fill="var(--chart-3)" radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+                <Bar dataKey="contractedCents" fill="var(--chart-1)" fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
+                <Bar dataKey="receivedCents" fill="var(--chart-3)" fillOpacity={CHART_FILL_OPACITY} radius={[4, 4, 0, 0]} isAnimationActive={animate} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -499,7 +501,7 @@ export function TeamLoadChart({
                   );
                 }}
               />
-              <Bar dataKey="allocationPct" radius={[0, 6, 6, 0]} barSize={16} isAnimationActive={animate}>
+              <Bar dataKey="allocationPct" radius={[0, 6, 6, 0]} barSize={16} fillOpacity={CHART_FILL_OPACITY} isAnimationActive={animate}>
                 {data.map((entry) => (
                   <Cell key={entry.memberId} fill={loadColor(entry.allocationPct)} />
                 ))}

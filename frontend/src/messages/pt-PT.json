@@ -3622,5 +3622,25 @@
     "title": "Página não encontrada",
     "description": "A página que procura não existe ou foi movida. Verifique o endereço ou regresse ao início.",
     "backHome": "Voltar ao início"
+  },
+  "preferences": {
+    "textSize": {
+      "title": "Tamanho do texto",
+      "description": "Ajuste a dimensão do texto e da interface em toda a aplicação.",
+      "options": {
+        "compact": {
+          "title": "Compacto",
+          "description": "Mais conteúdo no ecrã."
+        },
+        "normal": {
+          "title": "Normal",
+          "description": "Equilíbrio recomendado."
+        },
+        "large": {
+          "title": "Grande",
+          "description": "Texto maior, mais legível."
+        }
+      }
+    }
   }
 }

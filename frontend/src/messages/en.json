@@ -3622,5 +3622,25 @@
     "title": "Page not found",
     "description": "The page you’re looking for doesn’t exist or has moved. Check the address or head back home.",
     "backHome": "Back to home"
+  },
+  "preferences": {
+    "textSize": {
+      "title": "Text size",
+      "description": "Adjust the text and interface scale across the whole app.",
+      "options": {
+        "compact": {
+          "title": "Compact",
+          "description": "More content on screen."
+        },
+        "normal": {
+          "title": "Normal",
+          "description": "Recommended balance."
+        },
+        "large": {
+          "title": "Large",
+          "description": "Larger and easier to read."
+        }
+      }
+    }
   }
 }
