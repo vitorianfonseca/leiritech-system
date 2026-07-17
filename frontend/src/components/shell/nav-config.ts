@@ -6,6 +6,8 @@ import {
   Users,
   GitBranch,
   FileText,
+  Package,
+  FileStack,
   FolderKanban,
   ListChecks,
   CalendarDays,
@@ -57,6 +59,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { key: "crmContacts", href: "/crm/contacts", icon: Users, roles: ALL },
       { key: "crmPipeline", href: "/crm/pipeline", icon: GitBranch, roles: MANAGERS },
       { key: "crmProposals", href: "/crm/proposals", icon: FileText, roles: MANAGERS },
+      { key: "crmCatalog", href: "/crm/catalog", icon: Package, roles: MANAGERS },
+      { key: "crmProposalTemplates", href: "/crm/proposal-templates", icon: FileStack, roles: MANAGERS },
     ],
   },
   {
