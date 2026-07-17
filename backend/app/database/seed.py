@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import secrets
 import sys
 from datetime import UTC, date, datetime, timedelta
 
@@ -51,10 +52,22 @@ from app.models.task import Task
 from app.models.user import User, UserPreference
 
 # Default admin identity (override via CLI args or env). The password has NO
-# default — it must be supplied so a weak credential is never silently seeded.
+# default and NO hardcoded fallback — outside development it must be supplied,
+# and in development an absent password is randomly generated and shown once, so
+# a known/weak credential is never baked into the repo or silently seeded.
 _DEFAULT_ADMIN_EMAIL = "admin@aurea.studio"
 _DEFAULT_ADMIN_NAME = "Aurea Admin"
-_DEV_FALLBACK_PASSWORD = "aurea-dev-admin-2026"  # only used when ENVIRONMENT=development
+
+
+def _is_development() -> bool:
+    """True only when ENVIRONMENT is *explicitly* 'development'.
+
+    Fail-closed: an unset/blank/unknown ENVIRONMENT is treated as NON-dev, so a
+    misconfigured production never falls into the convenience paths (auto-generated
+    password, demo accounts). Demo accounts and password auto-generation are
+    dev-only affordances, never a production default.
+    """
+    return os.getenv("ENVIRONMENT", "").strip().lower() == "development"
 
 
 def _euros(amount: float) -> int:
@@ -526,9 +539,28 @@ def seed_interactions(
 # --------------------------------------------------------------------------- #
 # Orchestration
 # --------------------------------------------------------------------------- #
-def run_seed(db: Session, *, admin_name: str, admin_email: str, admin_password: str) -> dict:
+def run_seed(
+    db: Session,
+    *,
+    admin_name: str,
+    admin_email: str,
+    admin_password: str,
+    include_demo: bool,
+    demo_password: str | None = None,
+) -> dict:
+    # The first admin is the only production-relevant record. Demo accounts (which
+    # carry a shared, printed demo password) are seeded ONLY when include_demo is
+    # set — never in production — so no known-credential accounts can leak there.
     admin = seed_admin(db, name=admin_name, email=admin_email, password=admin_password)
-    members_map = seed_members(db, default_password=admin_password)
+    summary: dict = {"admin": admin.email, "demo": include_demo}
+    if not include_demo:
+        return summary
+
+    if not demo_password:
+        raise ValueError("demo_password is required when include_demo is set")
+    # Demo members get their OWN password, distinct from the admin's — never reuse
+    # the admin credential across accounts (one of them is a Gestor with grants).
+    members_map = seed_members(db, default_password=demo_password)
     members = list(members_map.values())
     manager = members_map["beatriz@aurea.studio"]  # the Gestor
     owners = [admin, *members]
@@ -540,36 +572,65 @@ def run_seed(db: Session, *, admin_name: str, admin_email: str, admin_password: 
     projects = seed_projects(db, companies, opportunities, members, manager, admin.id)
     seed_interactions(db, companies, contacts, opportunities, owners, admin.id)
 
-    return {
-        "admin": admin.email,
-        "members": len(members),
-        "pipeline_stages": len(stages),
-        "companies": len(companies),
-        "contacts": len(contacts),
-        "opportunities": len(opportunities),
-        "proposals": len(proposals),
-        "projects": len(projects),
-    }
+    summary.update(
+        {
+            "members": len(members),
+            "pipeline_stages": len(stages),
+            "companies": len(companies),
+            "contacts": len(contacts),
+            "opportunities": len(opportunities),
+            "proposals": len(proposals),
+            "projects": len(projects),
+        }
+    )
+    return summary
 
 
-def _resolve_admin_credentials(args: argparse.Namespace) -> tuple[str, str, str]:
+def _resolve_admin_credentials(
+    args: argparse.Namespace,
+) -> tuple[str, str, str, bool]:
+    """Return (name, email, password, generated).
+
+    Password precedence: --password → SEED_ADMIN_PASSWORD → (development only)
+    a freshly generated random secret. Outside development an absent password is
+    a hard error (fail-closed) — never a default. ``generated`` flags the random
+    case so main() can print it once for the operator.
+    """
     name = args.name or os.getenv("SEED_ADMIN_NAME") or _DEFAULT_ADMIN_NAME
     email = args.email or os.getenv("SEED_ADMIN_EMAIL") or _DEFAULT_ADMIN_EMAIL
     password = args.password or os.getenv("SEED_ADMIN_PASSWORD")
+    generated = False
     if not password:
-        if os.getenv("ENVIRONMENT", "development") == "development":
-            password = _DEV_FALLBACK_PASSWORD
+        if _is_development():
+            password = secrets.token_urlsafe(16)
+            generated = True
         else:
             print(
-                "error: admin password required — pass --password or set "
-                "SEED_ADMIN_PASSWORD (no default outside development).",
+                "error: admin password required outside development — pass "
+                "--password or set SEED_ADMIN_PASSWORD (no default, no fallback).",
                 file=sys.stderr,
             )
             raise SystemExit(2)
     if len(password) < 10:
         print("error: admin password must be at least 10 characters", file=sys.stderr)
         raise SystemExit(2)
-    return name, email, password
+    return name, email, password, generated
+
+
+def _resolve_demo(args: argparse.Namespace) -> tuple[bool, str | None, bool]:
+    """Return (include_demo, demo_password, demo_generated).
+
+    Demo data is seeded only in development or with an explicit --demo flag. Its
+    password comes from SEED_DEMO_PASSWORD or is generated (distinct from the
+    admin's) — demo accounts never share the admin credential.
+    """
+    include_demo = _is_development() or args.demo
+    if not include_demo:
+        return False, None, False
+    demo_password = os.getenv("SEED_DEMO_PASSWORD")
+    if demo_password:
+        return True, demo_password, False
+    return True, secrets.token_urlsafe(16), True
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -584,12 +645,25 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="admin password (>=10 chars); falls back to SEED_ADMIN_PASSWORD env",
     )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="also seed Aurea demo data (default in development; opt-in elsewhere)",
+    )
     args = parser.parse_args(argv)
-    name, email, password = _resolve_admin_credentials(args)
+    name, email, password, generated = _resolve_admin_credentials(args)
+    include_demo, demo_password, demo_generated = _resolve_demo(args)
 
     db = SessionLocal()
     try:
-        summary = run_seed(db, admin_name=name, admin_email=email, admin_password=password)
+        summary = run_seed(
+            db,
+            admin_name=name,
+            admin_email=email,
+            admin_password=password,
+            include_demo=include_demo,
+            demo_password=demo_password,
+        )
         db.commit()
     except Exception as exc:  # noqa: BLE001 — surface any failure to the operator
         db.rollback()
@@ -601,6 +675,13 @@ def main(argv: list[str] | None = None) -> int:
     print("seed complete (idempotent):")
     for key, value in summary.items():
         print(f"  {key}: {value}")
+    # Secrets are shown ONCE here (never logged/persisted) so the operator can
+    # sign in. A newly created admin keeps this password; on a re-run the existing
+    # admin is unchanged (idempotent) and this generated value simply won't apply.
+    if generated:
+        print(f"  generated admin password (shown once): {password}")
+    if demo_generated:
+        print(f"  generated demo-member password (shown once): {demo_password}")
     return 0
 
 
