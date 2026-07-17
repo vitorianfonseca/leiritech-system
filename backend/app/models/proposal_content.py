@@ -113,3 +113,70 @@ class ProposalTemplateItem(AuditBase):
     )
 
     template: Mapped[ProposalTemplate] = relationship(back_populates="items")
+
+
+class ProposalSection(AuditBase):
+    """Snapshot of a proposal's text sections (deep-copied from a template)."""
+
+    __tablename__ = "proposal_sections"
+
+    proposal_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("proposals.id", ondelete="CASCADE"),
+        index=True,
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    heading: Mapped[str] = mapped_column(String(200), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+    proposal = relationship("Proposal", back_populates="sections")
+
+
+class ProposalItem(AuditBase):
+    """Snapshot of a proposal's priced line items. ``catalog_item_id`` is kept
+    for traceability only (SET NULL if the catalog item is later deleted); the
+    price/tax are frozen copies so the proposal is immutable to catalog edits."""
+
+    __tablename__ = "proposal_items"
+
+    proposal_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("proposals.id", ondelete="CASCADE"),
+        index=True,
+    )
+    catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("catalog_items.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    unit: Mapped[str] = mapped_column(
+        Enum(
+            *enums.CATALOG_UNITS,
+            name="catalog_unit",
+            native_enum=False,
+            create_constraint=False,
+        ),
+        nullable=False,
+        default="unit",
+    )
+    unit_price: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    tax_rate: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("23.00")
+    )
+    billing_type: Mapped[str] = mapped_column(
+        Enum(
+            *enums.BILLING_TYPES,
+            name="billing_type",
+            native_enum=False,
+            create_constraint=False,
+        ),
+        nullable=False,
+        default="one_time",
+    )
+    quantity: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("1")
+    )
+
+    proposal = relationship("Proposal", back_populates="items")

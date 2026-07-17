@@ -22,7 +22,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import ArchiveMixin, AuditBase
 from app.models import enums
@@ -174,6 +174,29 @@ class Proposal(AuditBase, ArchiveMixin):
         Enum(*enums.PROPOSAL_STATUSES, name="proposal_status", native_enum=False),
         nullable=False,
         default="draft",
+    )
+    # Structured content (F-templates): snapshot of the template used, a
+    # proposal-level discount, and the copied terms. Sections/items live in
+    # dedicated tables and are deep-copied at instantiation.
+    template_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("proposal_templates.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    discount_bps: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    terms: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    sections = relationship(
+        "ProposalSection",
+        back_populates="proposal",
+        cascade="all, delete-orphan",
+        order_by="ProposalSection.position",
+    )
+    items = relationship(
+        "ProposalItem",
+        back_populates="proposal",
+        cascade="all, delete-orphan",
+        order_by="ProposalItem.position",
     )
 
 
