@@ -129,7 +129,7 @@ Full dark values live in `globals.css` under `.dark`.
 
 ## Typography
 
-- **Body / UI**: **Manrope** (`--font-sans`). Geometric, clean, numeric-friendly.
+- **Body / UI**: **Satoshi** (`--font-sans`, self-hosted via `next/font/local`). Geometric, clean, numeric-friendly.
 - **Headings / editorial moments**: **Marcellus** (`--font-heading`), an elegant classical
   serif. Used for page titles, greeting headers, big metric labels — the "editorial"
   voice of Aurea. Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
