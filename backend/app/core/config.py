@@ -65,6 +65,20 @@ class Settings(BaseSettings):
     # --- Rate limiting ---
     LOGIN_RATE_LIMIT_PER_MINUTE: int = 5
 
+    # --- Workload / capacity (F13, BR-080..084) ---
+    # Role-dependent utilization targets (BR-081, Admin-configurable per role).
+    # Net delivery capacity = weekly_capacity_hours × target (BR-080). Delivery
+    # roles carry the highest billable target; management/lead the lowest, since
+    # more of their week is spent coordinating rather than on project work.
+    WORKLOAD_TARGET_MEMBRO: float = 0.80
+    WORKLOAD_TARGET_GESTOR: float = 0.50
+    WORKLOAD_TARGET_ADMIN: float = 0.40
+    # Availability band thresholds as a % of net capacity (BR-082): below
+    # BALANCED_MIN → disponível; up to OVERALLOCATED → equilibrado; above it →
+    # sobrecarregado. Over-allocation warning (BR-084) fires at OVERALLOCATED.
+    WORKLOAD_BALANCED_MIN_PCT: float = 70.0
+    WORKLOAD_OVERALLOCATED_PCT: float = 100.0
+
     @field_validator("DATABASE_URL")
     @classmethod
     def normalize_driver(cls, value: str) -> str:

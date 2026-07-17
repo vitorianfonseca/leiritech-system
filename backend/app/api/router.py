@@ -23,6 +23,7 @@ from app.api.routes import (
     tasks,
     time,
     users,
+    workload,
 )
 
 api_router = APIRouter()
@@ -54,3 +55,4 @@ api_router.include_router(
 api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(time.router, prefix="/time", tags=["time"])
 api_router.include_router(finance.router, prefix="/finance", tags=["finance"])
+api_router.include_router(workload.router, prefix="/workload", tags=["workload"])
