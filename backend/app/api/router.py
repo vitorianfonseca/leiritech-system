@@ -20,6 +20,7 @@ from app.api.routes import (
     projects,
     proposals,
     tasks,
+    time,
     users,
 )
 
@@ -50,3 +51,4 @@ api_router.include_router(
     phases.milestones_router, prefix="/milestones", tags=["projects"]
 )
 api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
+api_router.include_router(time.router, prefix="/time", tags=["time"])
