@@ -79,6 +79,24 @@ def _make_project(
         db.close()
 
 
+def _make_phase(project_id: uuid.UUID, *, progress: int) -> None:
+    from app.models.project import ProjectPhase
+
+    db = SessionLocal()
+    try:
+        db.add(
+            ProjectPhase(
+                project_id=project_id,
+                name="Phase",
+                order_index=0,
+                progress=progress,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def _make_overdue_task(project_id: uuid.UUID, assignee_id: uuid.UUID) -> uuid.UUID:
     db = SessionLocal()
     try:
@@ -233,6 +251,52 @@ def test_projects_by_state_includes_project_breakdown(
     ids = {ref["id"] for ref in at_risk_point["projects"]}
     assert str(project.id) in ids
     assert at_risk_point["count"] == len(at_risk_point["projects"])
+
+
+def test_project_at_risk_attention_carries_progress_param(
+    client, make_user, track
+) -> None:
+    """Regression: the projectAtRisk attention item must carry a `progress`
+    metaParam (derived from avg phase progress) so the frontend i18n template
+    `{progress}% progress` renders instead of a raw key."""
+    admin = make_user(role="admin")
+    project = _make_project(
+        track, name=f"Risky {uuid.uuid4().hex[:6]}", health="at_risk"
+    )
+    _make_phase(project.id, progress=40)
+
+    data = _dashboard(client, admin.email)
+    group = next(g for g in data["attention"] if g["key"] == "projectsAtRisk")
+    item = next(i for i in group["items"] if i["entityId"] == str(project.id))
+    assert item["metaParams"] is not None
+    assert item["metaParams"]["progress"] == 40
+
+
+def test_low_progress_near_delivery_attention_carries_progress_param(
+    client, make_user, track
+) -> None:
+    """Regression: lowProgressNearDelivery items must carry both `days` and
+    `progress` metaParams (the i18n template needs both)."""
+    admin = make_user(role="admin")
+    project = _make_project(track, name=f"NearDue {uuid.uuid4().hex[:6]}")
+    # Give it a near deadline so it lands in the low-progress-near-delivery group.
+    db = SessionLocal()
+    try:
+        p = db.get(Project, project.id)
+        p.deadline = date.today() + timedelta(days=3)
+        db.commit()
+    finally:
+        db.close()
+    _make_phase(project.id, progress=15)
+
+    data = _dashboard(client, admin.email)
+    group = next(
+        g for g in data["attention"] if g["key"] == "lowProgressNearDelivery"
+    )
+    item = next(i for i in group["items"] if i["entityId"] == str(project.id))
+    assert item["metaParams"] is not None
+    assert set(item["metaParams"].keys()) >= {"days", "progress"}
+    assert item["metaParams"]["progress"] == 15
 
 
 def test_dashboard_requires_auth(client) -> None:
