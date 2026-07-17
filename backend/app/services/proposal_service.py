@@ -19,7 +19,8 @@ logic — only guard that the linked opportunity is not already lost.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
+from decimal import Decimal
 from typing import Any
 
 import structlog
@@ -29,15 +30,23 @@ from app.core import errors
 from app.core.permissions import Role, role_at_least
 from app.models.collaboration import Attachment, Notification
 from app.models.crm import Company, Opportunity, Proposal
+from app.models.proposal_content import ProposalItem, ProposalSection
 from app.models.user import User
 from app.repositories import proposals as proposal_repo
 from app.schemas.proposals import (
+    ProposalContentInput,
     ProposalCreate,
     ProposalReject,
     ProposalResend,
     ProposalUpdate,
 )
-from app.services import activity_service, notification_service
+from app.services import (
+    activity_service,
+    notification_service,
+    proposal_placeholders,
+    proposal_template_service,
+    proposal_totals,
+)
 
 logger = structlog.get_logger("aurea.proposal")
 
@@ -529,3 +538,136 @@ def expire_overdue_proposals(
         )
     logger.info("proposal_expiry_run", expired_count=len(overdue), run_date=str(today))
     return overdue
+
+
+# --------------------------------------------------------------------------- #
+# Structured content (templates instantiation, editing, totals)
+# --------------------------------------------------------------------------- #
+def _proposal_lines(proposal: Proposal) -> list[proposal_totals.LineInput]:
+    return [
+        proposal_totals.LineInput(
+            quantity=Decimal(it.quantity),
+            unit_price=it.unit_price,
+            tax_rate=Decimal(it.tax_rate),
+            billing_type=it.billing_type,
+        )
+        for it in proposal.items
+    ]
+
+
+def _recompute_value(proposal: Proposal) -> None:
+    """proposals.value = one-time net total (excl. IVA), keeping the lifecycle
+    (BR-025..028) and dashboard consistent with the structured content."""
+    totals = proposal_totals.compute_totals(
+        _proposal_lines(proposal), discount_bps=proposal.discount_bps
+    )
+    proposal.value = totals.value
+
+
+def _require_draft(proposal: Proposal) -> None:
+    if proposal.status != "draft":
+        raise errors.conflict(
+            "O conteúdo só pode ser editado enquanto a proposta está em rascunho.",
+            code="PROPOSAL_NOT_DRAFT",
+        )
+
+
+def _placeholder_context(db: Session, proposal: Proposal) -> dict[str, str | None]:
+    company = db.get(Company, proposal.company_id) if proposal.company_id else None
+    today = date.today()
+    return {
+        "cliente": company.name if company else None,
+        "empresa": company.name if company else None,
+        "data": today.strftime("%d/%m/%Y"),
+        "validade": proposal.valid_until.strftime("%d/%m/%Y")
+        if proposal.valid_until
+        else None,
+        "referencia": proposal.reference,
+    }
+
+
+def apply_template(
+    db: Session, user: User, proposal_id: uuid.UUID, template_id: uuid.UUID
+) -> Proposal:
+    """Deep-copy a template into a DRAFT proposal, snapshotting catalog prices
+    and resolving placeholders. Editing the template afterwards never mutates
+    this proposal (BR — snapshot integrity)."""
+    proposal = get_proposal_or_404(db, user, proposal_id)
+    _require_draft(proposal)
+    tpl = proposal_template_service.get_or_404(db, template_id)
+
+    proposal.template_id = tpl.id
+    proposal.discount_bps = tpl.default_discount_bps
+    if tpl.default_validity_days is not None:
+        proposal.valid_until = date.today() + timedelta(days=tpl.default_validity_days)
+
+    ctx = _placeholder_context(db, proposal)
+    proposal.terms = (
+        proposal_placeholders.resolve(tpl.terms, ctx) if tpl.terms else None
+    )
+    proposal.sections = [
+        ProposalSection(
+            position=s.position,
+            heading=s.heading,
+            body=proposal_placeholders.resolve(s.body, ctx),
+        )
+        for s in tpl.sections
+    ]
+    proposal.items = [
+        ProposalItem(
+            position=it.position,
+            catalog_item_id=it.catalog_item_id,
+            name=it.name,
+            unit=it.unit,
+            unit_price=it.unit_price,
+            tax_rate=it.tax_rate,
+            billing_type=it.billing_type,
+            quantity=it.quantity,
+        )
+        for it in tpl.items
+    ]
+    _recompute_value(proposal)
+    db.flush()
+    return get_proposal_or_404(db, user, proposal_id)
+
+
+def set_content(
+    db: Session, user: User, proposal_id: uuid.UUID, payload: ProposalContentInput
+) -> Proposal:
+    proposal = get_proposal_or_404(db, user, proposal_id)
+    _require_draft(proposal)
+    proposal.discount_bps = payload.discount_bps
+    proposal.terms = payload.terms
+    proposal.sections = [
+        ProposalSection(position=i, heading=s.heading, body=s.body)
+        for i, s in enumerate(payload.sections)
+    ]
+    proposal.items = [
+        ProposalItem(
+            position=i,
+            catalog_item_id=it.catalog_item_id,
+            name=it.name,
+            unit=it.unit,
+            unit_price=it.unit_price,
+            tax_rate=it.tax_rate,
+            billing_type=it.billing_type,
+            quantity=it.quantity,
+        )
+        for i, it in enumerate(payload.items)
+    ]
+    _recompute_value(proposal)
+    db.flush()
+    return get_proposal_or_404(db, user, proposal_id)
+
+
+def get_content(db: Session, user: User, proposal_id: uuid.UUID):
+    from app.schemas.proposals import ProposalContentResponse
+
+    proposal = get_proposal_or_404(db, user, proposal_id)
+    totals = proposal_totals.compute_totals(
+        _proposal_lines(proposal), discount_bps=proposal.discount_bps
+    )
+    response = ProposalContentResponse.model_validate(proposal)
+    return response.model_copy(
+        update={"totals": proposal_template_service.totals_to_schema(totals)}
+    )

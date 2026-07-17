@@ -16,6 +16,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.proposal_templates import (
+    ItemInput as ContentItemInput,
+    ItemResponse as ContentItemResponse,
+    SectionInput as ContentSectionInput,
+    SectionResponse as ContentSectionResponse,
+    TotalsResponse as ContentTotalsResponse,
+)
+
 ProposalStatus = Literal[
     "draft", "sent", "viewed", "accepted", "rejected", "expired"
 ]
@@ -63,6 +71,31 @@ class ProposalResend(BaseModel):
 
     valid_until: date
     pdf_attachment_id: uuid.UUID | None = None
+
+
+class ApplyTemplateInput(BaseModel):
+    """Instantiate a template into a draft proposal (deep-copy snapshot)."""
+
+    template_id: uuid.UUID
+
+
+class ProposalContentInput(BaseModel):
+    """Replace a draft proposal's structured content (sections/items/terms)."""
+
+    discount_bps: int = Field(default=0, ge=0, le=10000)
+    terms: str | None = None
+    sections: list[ContentSectionInput] = Field(default_factory=list)
+    items: list[ContentItemInput] = Field(default_factory=list)
+
+
+class ProposalContentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    discount_bps: int
+    terms: str | None
+    sections: list[ContentSectionResponse]
+    items: list[ContentItemResponse]
+    totals: ContentTotalsResponse | None = None
 
 
 class ProposalResponse(BaseModel):
