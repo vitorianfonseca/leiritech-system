@@ -13,6 +13,7 @@ from app.api.routes import (
     attachments,
     auth,
     calendar,
+    catalog,
     comments,
     companies,
     contacts,
@@ -44,6 +45,7 @@ api_router.include_router(
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(companies.router, prefix="/companies", tags=["crm"])
 api_router.include_router(contacts.router, prefix="/contacts", tags=["crm"])
+api_router.include_router(catalog.router, prefix="/catalog-items", tags=["catalog"])
 api_router.include_router(
     interactions.router, prefix="/interactions", tags=["crm"]
 )

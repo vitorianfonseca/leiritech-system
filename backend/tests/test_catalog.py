@@ -164,3 +164,61 @@ def test_list_items_filters_and_search():
             db.execute(delete(CatalogItem).where(CatalogItem.id.in_(created)))
             db.commit()
         db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Task 5 — service not-found (direct call, catches ApiError)
+# --------------------------------------------------------------------------- #
+def test_service_get_missing_raises():
+    from app.core.errors import ApiError
+    from app.services import catalog_service
+
+    db = SessionLocal()
+    try:
+        with pytest.raises(ApiError) as exc:
+            catalog_service.get_or_404(db, uuid.uuid4())
+        assert exc.value.status_code == 404
+    finally:
+        db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Task 6 — API (HTTP integration)
+# --------------------------------------------------------------------------- #
+def test_create_and_list_via_api(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    marker = uuid.uuid4().hex[:8]
+    _create_item(client, token, track, name=f"Website {marker}", unit="fixed",
+                 unit_price=500000, billing_type="one_time")
+    resp = client.get(f"{API}/catalog-items?q=Website {marker}", headers=_auth(token))
+    assert resp.status_code == 200
+    assert resp.json()["total"] >= 1
+
+
+def test_membro_cannot_create(client, make_user):
+    membro = make_user(role="membro")
+    token = _token(client, membro.email)
+    resp = client.post(
+        f"{API}/catalog-items",
+        json={"name": "x", "unit": "unit", "unit_price": 1, "billing_type": "one_time"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 403
+
+
+def test_archive_restore_via_api(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    item = _create_item(client, token, track)
+    iid = item["id"]
+
+    resp = client.post(f"{API}/catalog-items/{iid}/archive", headers=_auth(token))
+    assert resp.status_code == 200 and resp.json()["archived_at"] is not None
+
+    resp = client.get(f"{API}/catalog-items?include_archived=false", headers=_auth(token))
+    ids = [i["id"] for i in resp.json()["items"]]
+    assert iid not in ids  # archived is hidden by default
+
+    resp = client.post(f"{API}/catalog-items/{iid}/restore", headers=_auth(token))
+    assert resp.status_code == 200 and resp.json()["archived_at"] is None
