@@ -27,6 +27,94 @@
     "time": "Time tracking",
     "invite": "Invite"
   },
+  "catalog": {
+    "list": {
+      "title": "Catalog",
+      "subtitle": "Reusable products and services for your proposals.",
+      "new": "New item",
+      "searchPlaceholder": "Search by name or category…",
+      "columns": {
+        "name": "Name",
+        "unit": "Unit",
+        "billing": "Billing",
+        "unitPrice": "Unit price",
+        "taxRate": "VAT"
+      },
+      "actions": { "edit": "Edit", "archive": "Archive", "restore": "Restore" },
+      "empty": {
+        "title": "No catalog items yet",
+        "description": "Create your first product or service to reuse it in proposals."
+      },
+      "createdToast": "\"{name}\" created.",
+      "updatedToast": "\"{name}\" updated.",
+      "archivedToast": "\"{name}\" archived.",
+      "errorGeneric": "Something went wrong. Try again.",
+      "errorTitle": "Couldn't load the catalog",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again"
+    },
+    "form": {
+      "createTitle": "New catalog item",
+      "editTitle": "Edit item",
+      "subtitle": "Set the price, unit and billing cadence.",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "e.g. Corporate website",
+        "description": "Description",
+        "descriptionPlaceholder": "Details shown on the proposal",
+        "category": "Category",
+        "categoryPlaceholder": "e.g. Development",
+        "unit": "Unit",
+        "price": "Unit price (€)",
+        "priceHint": "Excl. VAT",
+        "taxRate": "VAT (%)",
+        "billingType": "Billing"
+      },
+      "cancel": "Cancel",
+      "create": "Create",
+      "save": "Save",
+      "saving": "Saving…"
+    },
+    "detail": {
+      "back": "Back to catalog",
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore",
+      "archived": "Archived",
+      "archivedToast": "Item archived.",
+      "updatedToast": "Item updated.",
+      "notFoundTitle": "Item not found",
+      "notFoundDescription": "This catalog item does not exist or was removed.",
+      "fields": {
+        "unitPrice": "Unit price",
+        "taxRate": "VAT",
+        "unit": "Unit",
+        "billingType": "Billing",
+        "category": "Category",
+        "description": "Description"
+      }
+    },
+    "units": {
+      "unit": "Unit",
+      "hour": "Hour",
+      "day": "Day",
+      "month": "Month",
+      "m2": "m²",
+      "license": "License",
+      "fixed": "Fixed"
+    },
+    "billing": {
+      "one_time": "One-time",
+      "monthly": "Monthly",
+      "annual": "Annual"
+    },
+    "validation": {
+      "nameRequired": "Name is required.",
+      "priceRequired": "Price is required.",
+      "priceInvalid": "Invalid price.",
+      "taxInvalid": "Invalid VAT."
+    }
+  },
   "shell": {
     "search": {
       "placeholder": "Search…",

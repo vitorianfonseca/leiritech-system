@@ -27,6 +27,94 @@
     "time": "Cronómetro",
     "invite": "Convidar"
   },
+  "catalog": {
+    "list": {
+      "title": "Catálogo",
+      "subtitle": "Produtos e serviços reutilizáveis para as tuas propostas.",
+      "new": "Novo item",
+      "searchPlaceholder": "Procurar por nome ou categoria…",
+      "columns": {
+        "name": "Nome",
+        "unit": "Unidade",
+        "billing": "Faturação",
+        "unitPrice": "Preço unitário",
+        "taxRate": "IVA"
+      },
+      "actions": { "edit": "Editar", "archive": "Arquivar", "restore": "Restaurar" },
+      "empty": {
+        "title": "Ainda não há itens no catálogo",
+        "description": "Cria o teu primeiro produto ou serviço para o reutilizar em propostas."
+      },
+      "createdToast": "\"{name}\" criado.",
+      "updatedToast": "\"{name}\" atualizado.",
+      "archivedToast": "\"{name}\" arquivado.",
+      "errorGeneric": "Ocorreu um erro. Tenta novamente.",
+      "errorTitle": "Não foi possível carregar o catálogo",
+      "errorDescription": "Verifica a ligação e tenta novamente.",
+      "retry": "Tentar novamente"
+    },
+    "form": {
+      "createTitle": "Novo item de catálogo",
+      "editTitle": "Editar item",
+      "subtitle": "Define o preço, a unidade e a periodicidade de faturação.",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Ex.: Website institucional",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Detalhes que aparecem na proposta",
+        "category": "Categoria",
+        "categoryPlaceholder": "Ex.: Desenvolvimento",
+        "unit": "Unidade",
+        "price": "Preço unitário (€)",
+        "priceHint": "Sem IVA",
+        "taxRate": "IVA (%)",
+        "billingType": "Faturação"
+      },
+      "cancel": "Cancelar",
+      "create": "Criar",
+      "save": "Guardar",
+      "saving": "A guardar…"
+    },
+    "detail": {
+      "back": "Voltar ao catálogo",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "restore": "Restaurar",
+      "archived": "Arquivado",
+      "archivedToast": "Item arquivado.",
+      "updatedToast": "Item atualizado.",
+      "notFoundTitle": "Item não encontrado",
+      "notFoundDescription": "Este item de catálogo não existe ou foi removido.",
+      "fields": {
+        "unitPrice": "Preço unitário",
+        "taxRate": "IVA",
+        "unit": "Unidade",
+        "billingType": "Faturação",
+        "category": "Categoria",
+        "description": "Descrição"
+      }
+    },
+    "units": {
+      "unit": "Unidade",
+      "hour": "Hora",
+      "day": "Dia",
+      "month": "Mês",
+      "m2": "m²",
+      "license": "Licença",
+      "fixed": "Fixo"
+    },
+    "billing": {
+      "one_time": "Único",
+      "monthly": "Mensal",
+      "annual": "Anual"
+    },
+    "validation": {
+      "nameRequired": "O nome é obrigatório.",
+      "priceRequired": "O preço é obrigatório.",
+      "priceInvalid": "Preço inválido.",
+      "taxInvalid": "IVA inválido."
+    }
+  },
   "shell": {
     "search": {
       "placeholder": "Procurar…",
