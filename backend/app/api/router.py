@@ -11,6 +11,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     attachments,
     auth,
+    calendar,
     comments,
     companies,
     contacts,
@@ -18,6 +19,7 @@ from app.api.routes import (
     finance,
     interactions,
     invitations,
+    my_work,
     notifications,
     opportunities,
     phases,
@@ -76,3 +78,5 @@ api_router.include_router(
 api_router.include_router(
     comments.router, prefix="/comments", tags=["collaboration"]
 )
+api_router.include_router(calendar.router, prefix="/calendar", tags=["calendar"])
+api_router.include_router(my_work.router, prefix="/my-work", tags=["my-work"])
