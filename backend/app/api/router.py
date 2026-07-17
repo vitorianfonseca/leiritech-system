@@ -15,9 +15,11 @@ from app.api.routes import (
     interactions,
     invitations,
     opportunities,
+    phases,
     pipeline_stages,
     projects,
     proposals,
+    tasks,
     users,
 )
 
@@ -43,3 +45,8 @@ api_router.include_router(
     proposals.router, prefix="/proposals", tags=["proposals"]
 )
 api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
+api_router.include_router(phases.router, prefix="/phases", tags=["projects"])
+api_router.include_router(
+    phases.milestones_router, prefix="/milestones", tags=["projects"]
+)
+api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
