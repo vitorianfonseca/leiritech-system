@@ -13,7 +13,6 @@ import { StatTiles } from "./stat-tiles";
 import { AttentionPanel } from "./attention-panel";
 import {
   PipelineEvolutionChart,
-  ProjectsByStateChart,
   TaskFlowChart,
   ContractedReceivedChart,
   TeamLoadChart,
@@ -88,7 +87,6 @@ export function DashboardView({ user }: DashboardViewProps) {
   const managementView = user.role !== "membro";
   const charts = data?.charts;
   const showPipeline = !!charts && charts.pipeline.length > 0;
-  const showProjectsByState = !!charts && charts.projectsByState.length > 0;
   const showTaskFlow = !!charts && charts.taskFlow.length > 0;
   const showContractedReceived = !!charts && !!charts.contractedReceived;
   const showTeamLoad = !!charts && charts.teamLoad.length > 0;
@@ -99,17 +97,8 @@ export function DashboardView({ user }: DashboardViewProps) {
 
       <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
 
-      {/* Attention + project health */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <AttentionPanel
-          groups={data?.attention ?? []}
-          loading={isLoading}
-          className={showProjectsByState ? "lg:col-span-2" : "lg:col-span-3"}
-        />
-        {managementView && ((isLoading) || showProjectsByState) ? (
-          <ProjectsByStateChart data={charts?.projectsByState ?? []} loading={isLoading} />
-        ) : null}
-      </div>
+      {/* Attention — full width (project-health card removed per request) */}
+      <AttentionPanel groups={data?.attention ?? []} loading={isLoading} />
 
       {/* Pipeline evolution */}
       {(isLoading && managementView) || showPipeline ? (

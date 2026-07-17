@@ -71,7 +71,7 @@ export function StatTiles({
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {Array.from({ length: 9 }).map((_, i) => (
+        {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} className="gap-3 p-5">
             <div className="flex items-center justify-between">
               <div className="h-3.5 w-20 animate-pulse rounded bg-muted" />

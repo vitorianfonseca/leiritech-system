@@ -95,10 +95,9 @@ def _full_metrics(db: Session, today: date) -> list[DashboardMetric]:
     health = repo.project_health_counts(db, None)
     overdue_tasks = repo.overdue_task_count(db, today, None)
     deliveries = repo.deliveries_within(db, today, today + timedelta(days=7), None)
-    pending = repo.pending_total(db)
-    overdue_pay = repo.overdue_total(db)
-    team = _team_stats(db)
 
+    # 6 decision-driving KPIs (2×3). Payments live on /finance, team load on
+    # /team — deliberately kept off the overview to stay calm, not SaaS-busy.
     m = DashboardMetric
     return [
         m(key="openOpportunities", value=outcomes["open"], format="count",
@@ -113,12 +112,6 @@ def _full_metrics(db: Session, today: date) -> list[DashboardMetric]:
           tone="destructive", financial=False, href="/tasks"),
         m(key="deliveriesNext7Days", value=deliveries, format="count",
           tone="warning", financial=False, href="/calendar"),
-        m(key="pendingPayments", value=pending, format="currencyCents",
-          tone="warning", financial=True, href="/finance"),
-        m(key="overduePayments", value=overdue_pay, format="currencyCents",
-          tone="destructive", financial=True, href="/finance"),
-        m(key="teamLoad", value=team["avg_pct"], format="percent", tone="info",
-          financial=False, href="/team", detail=team["over"]),
     ]
 
 
@@ -138,15 +131,6 @@ def _scoped_metrics(db: Session, user: User, today: date) -> list[DashboardMetri
         m(key="deliveriesNext7Days", value=deliveries, format="count",
           tone="warning", financial=False, href="/calendar"),
     ]
-
-
-def _team_stats(db: Session) -> dict[str, int]:
-    # Only runs for the full (management) payload → the rollup is the whole team.
-    entries = _all_team_entries(db)
-    n = len(entries)
-    avg = round(sum(e.allocation_pct for e in entries) / n) if n else 0
-    over = sum(1 for e in entries if e.over_allocated)
-    return {"avg_pct": int(avg), "over": over, "count": n}
 
 
 # --------------------------------------------------------------------------- #

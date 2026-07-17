@@ -160,8 +160,14 @@ def test_admin_gets_full_payload(client, make_user) -> None:
     assert data["scoped"] is False
     assert data["canSeeFinancials"] is True
     keys = {m["key"] for m in data["metrics"]}
-    assert "openOpportunities" in keys
-    assert _FINANCIAL_METRIC_KEYS <= keys
+    # Overview KPIs are the 6 non-financial decision drivers. Payments and team
+    # load were moved off the dashboard (they live on /finance and /team); the
+    # financial gate now shows through the charts + attention groups, not tiles.
+    assert keys == {
+        "openOpportunities", "pipelineValue", "activeProjects",
+        "projectsAtRisk", "overdueTasks", "deliveriesNext7Days",
+    }
+    assert not (keys & _FINANCIAL_METRIC_KEYS)
     assert data["charts"]["contractedReceived"] is not None
 
 
@@ -229,7 +235,8 @@ def test_gestor_with_grant_sees_financials(client, make_user) -> None:
 
     assert data["canSeeFinancials"] is True
     keys = {m["key"] for m in data["metrics"]}
-    assert _FINANCIAL_METRIC_KEYS <= keys
+    # Payments are not on the overview tiles; the finance gate shows via charts.
+    assert not (keys & _FINANCIAL_METRIC_KEYS)
     assert data["charts"]["contractedReceived"] is not None
 
 
