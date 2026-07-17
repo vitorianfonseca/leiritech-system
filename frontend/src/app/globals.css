@@ -10,7 +10,7 @@
 
   --font-sans: var(--font-satoshi);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-marcellus);
+  --font-heading: var(--font-satoshi);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -271,7 +271,7 @@
     }
   }
   .font-heading {
-    font-family: var(--font-marcellus), ui-serif, Georgia, serif;
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.02em;
     font-optical-sizing: auto;
   }

@@ -130,9 +130,9 @@ Full dark values live in `globals.css` under `.dark`.
 ## Typography
 
 - **Body / UI**: **Satoshi** (`--font-sans`, self-hosted via `next/font/local`). Geometric, clean, numeric-friendly.
-- **Headings / editorial moments**: **Marcellus** (`--font-heading`), an elegant classical
-  serif. Used for page titles, greeting headers, big metric labels — the "editorial"
-  voice of Aurea. Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
+- **Headings / editorial moments**: **Satoshi** (`--font-heading` = `--font-sans`). A single
+  typeface across the whole UI; headings lean on the heavier weights (700/900) for hierarchy.
+  Utility: `.font-heading` (also `--font-heading` registered in `@theme`).
 - **Mono**: Geist Mono (`--font-mono`) for references, IDs, code, keyboard hints.
 
 Scale (max 3 sizes per view — HIG): title `text-2xl/3xl` heading serif, body `text-sm/base`,
