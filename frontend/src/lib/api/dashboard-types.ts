@@ -125,6 +125,12 @@ export interface PipelinePoint {
 export interface ProjectStatePoint {
   state: "healthy" | "attention" | "atRisk";
   count: number;
+  /**
+   * The individual projects in this state (id + display name), same source as
+   * `count` so the donut and the breakdown list can never disagree. Names are
+   * data (not translatable). May be empty for scoped/aggregate-only payloads.
+   */
+  projects: { id: string; name: string }[];
 }
 
 export interface TaskFlowPoint {

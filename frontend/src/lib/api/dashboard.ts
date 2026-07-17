@@ -327,9 +327,39 @@ function buildCharts(canFinance: boolean, scoped: boolean): DashboardCharts {
   return {
     pipeline,
     projectsByState: [
-      { state: "healthy", count: 9 },
-      { state: "attention", count: 4 },
-      { state: "atRisk", count: 2 },
+      {
+        state: "healthy",
+        count: 9,
+        projects: [
+          { id: "p-h1", name: "Manual de marca — Adega Vale" },
+          { id: "p-h2", name: "Portal Interno — Lumina" },
+          { id: "p-h3", name: "Campanha Verão — Solar do Douro" },
+          { id: "p-h4", name: "Identidade Visual — Cais 21" },
+          { id: "p-h5", name: "App Reservas — Termas Vale" },
+          { id: "p-h6", name: "Catálogo Digital — Olaria Norte" },
+          { id: "p-h7", name: "Newsletter — Adega Vale" },
+          { id: "p-h8", name: "Dashboard BI — Metalúrgica Norte" },
+          { id: "p-h9", name: "Site Institucional — Fundação Luz" },
+        ],
+      },
+      {
+        state: "attention",
+        count: 4,
+        projects: [
+          { id: "p-a1", name: "Portal B2B — Metalúrgica Norte" },
+          { id: "p-a2", name: "Website — Solar do Douro" },
+          { id: "p-a3", name: "Rebranding — Adega Vale" },
+          { id: "p-a4", name: "Loja Online — Herdade do Sobral" },
+        ],
+      },
+      {
+        state: "atRisk",
+        count: 2,
+        projects: [
+          { id: "p-r1", name: "App Fidelização — Lumina" },
+          { id: "p-r2", name: "Migração ERP — Metalúrgica Norte" },
+        ],
+      },
     ],
     taskFlow,
     contractedReceived: canFinance

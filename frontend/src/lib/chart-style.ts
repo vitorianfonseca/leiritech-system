@@ -9,4 +9,4 @@
  * opacity so meaning is never carried by a washed-out fill alone (WCAG: colour
  * is always paired with an icon/label elsewhere).
  */
-export const CHART_FILL_OPACITY = 0.78;
+export const CHART_FILL_OPACITY = 0.6;

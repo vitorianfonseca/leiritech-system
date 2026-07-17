@@ -16,6 +16,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
   type TooltipContentProps,
 } from "recharts";
 import {
@@ -52,11 +53,13 @@ function ChartCard({
   description,
   children,
   className,
+  contentClassName,
 }: {
   title: string;
   description?: string;
   children: React.ReactNode;
   className?: string;
+  contentClassName?: string;
 }) {
   return (
     <Card className={cn("gap-4", className)}>
@@ -64,7 +67,7 @@ function ChartCard({
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className={contentClassName}>{children}</CardContent>
     </Card>
   );
 }
@@ -202,12 +205,17 @@ export function ProjectsByStateChart({
   const total = data.reduce((s, d) => s + d.count, 0);
 
   return (
-    <ChartCard title={t("charts.projectsByState.title")} description={t("charts.projectsByState.subtitle")}>
+    <ChartCard
+      title={t("charts.projectsByState.title")}
+      description={t("charts.projectsByState.subtitle")}
+      contentClassName="flex flex-1 flex-col gap-5 min-h-0"
+    >
       {loading ? (
         <ChartSkeleton />
       ) : (
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <div className="relative h-40 w-40 shrink-0">
+        <>
+          {/* Donut + centred total */}
+          <div className="relative mx-auto h-40 w-40 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -253,22 +261,35 @@ export function ProjectsByStateChart({
               </span>
             </div>
           </div>
-          <ul className="flex-1 space-y-2 self-stretch">
+
+          {/* Per-state breakdown — fills the card so it never dead-spaces */}
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
             {data.map((entry) => (
-              <li key={entry.state} className="flex items-center justify-between gap-3 text-sm">
-                <span className="flex items-center gap-2">
-                  <span
-                    className="size-2.5 rounded-full"
-                    style={{ background: STATE_COLOR[entry.state] }}
-                    aria-hidden
-                  />
-                  {ts(STATE_STATUS_KEY[entry.state])}
-                </span>
-                <span className="font-heading font-semibold tabular-nums">{entry.count}</span>
-              </li>
+              <div key={entry.state} className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    <span
+                      className="size-2.5 rounded-full"
+                      style={{ background: STATE_COLOR[entry.state] }}
+                      aria-hidden
+                    />
+                    {ts(STATE_STATUS_KEY[entry.state])}
+                  </span>
+                  <span className="font-heading text-sm font-semibold tabular-nums text-muted-foreground">
+                    {entry.count}
+                  </span>
+                </div>
+                <ul className="space-y-1 pl-[18px]">
+                  {entry.projects.map((p) => (
+                    <li key={p.id} className="truncate text-sm text-muted-foreground">
+                      {p.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
-        </div>
+          </div>
+        </>
       )}
     </ChartCard>
   );
@@ -302,7 +323,7 @@ export function TaskFlowChart({
         <>
           <div className="h-52 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barGap={4}>
+              <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="week"
@@ -311,7 +332,7 @@ export function TaskFlowChart({
                   axisLine={false}
                   tick={AXIS_TICK}
                 />
-                <YAxis tickLine={false} axisLine={false} tick={AXIS_TICK} width={32} allowDecimals={false} />
+                <YAxis tickLine={false} axisLine={false} tick={AXIS_TICK} width={40} allowDecimals={false} />
                 <Tooltip
                   cursor={{ fill: "var(--accent)" }}
                   content={(props: TooltipContentProps) => {
@@ -474,6 +495,7 @@ export function TeamLoadChart({
               <XAxis
                 type="number"
                 domain={[0, 130]}
+                ticks={[0, 25, 50, 75, 100, 125]}
                 tickFormatter={(v: number) => `${v}%`}
                 tickLine={false}
                 axisLine={false}
@@ -486,6 +508,19 @@ export function TeamLoadChart({
                 tickLine={false}
                 axisLine={false}
                 tick={AXIS_TICK}
+              />
+              {/* Capacity threshold — the reference every bar is read against */}
+              <ReferenceLine
+                x={100}
+                stroke="var(--gold)"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
+                label={{
+                  value: "100%",
+                  position: "top",
+                  fill: "var(--muted-foreground)",
+                  fontSize: 11,
+                }}
               />
               <Tooltip
                 cursor={{ fill: "var(--accent)" }}
