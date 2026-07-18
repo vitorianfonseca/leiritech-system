@@ -1693,6 +1693,24 @@
       "addManual": "Manual line",
       "noCatalog": "No catalog items"
     },
+    "content": {
+      "title": "Proposal content",
+      "preview": "View preview",
+      "sectionsTitle": "Sections",
+      "itemsTitle": "Items",
+      "termsTitle": "Terms & conditions",
+      "termsPlaceholder": "Payment terms, warranties, clauses…",
+      "discount": "Discount (%)",
+      "save": "Save content",
+      "saving": "Saving…",
+      "savedToast": "Content saved.",
+      "errorToast": "Couldn't save. Try again.",
+      "applyTemplateLabel": "Apply template:",
+      "applyTemplatePlaceholder": "Choose template…",
+      "appliedToast": "Template applied.",
+      "noTemplates": "No templates",
+      "emptyReadOnly": "This proposal has no structured content."
+    },
     "states": {
       "draft": "Draft",
       "sent": "Sent",

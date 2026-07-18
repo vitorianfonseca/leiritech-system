@@ -1693,6 +1693,24 @@
       "addManual": "Linha manual",
       "noCatalog": "Sem itens no catálogo"
     },
+    "content": {
+      "title": "Conteúdo da proposta",
+      "preview": "Ver pré-visualização",
+      "sectionsTitle": "Secções",
+      "itemsTitle": "Itens",
+      "termsTitle": "Termos e condições",
+      "termsPlaceholder": "Condições de pagamento, garantias, cláusulas…",
+      "discount": "Desconto (%)",
+      "save": "Guardar conteúdo",
+      "saving": "A guardar…",
+      "savedToast": "Conteúdo guardado.",
+      "errorToast": "Não foi possível guardar. Tenta novamente.",
+      "applyTemplateLabel": "Aplicar template:",
+      "applyTemplatePlaceholder": "Escolher template…",
+      "appliedToast": "Template aplicado.",
+      "noTemplates": "Sem templates",
+      "emptyReadOnly": "Esta proposta não tem conteúdo estruturado."
+    },
     "states": {
       "draft": "Rascunho",
       "sent": "Enviada",

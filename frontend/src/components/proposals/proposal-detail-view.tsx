@@ -45,6 +45,7 @@ import {
 } from "@/lib/api/proposals-types";
 import type { Role } from "@/lib/session";
 import { PdfUpload } from "./pdf-upload";
+import { ProposalContentEditor } from "./proposal-content-editor";
 import { ProposalStateBadge } from "./status-badge";
 import { SendProposalDialog } from "./send-proposal-dialog";
 import { RejectProposalDialog } from "./reject-proposal-dialog";
@@ -351,6 +352,8 @@ export function ProposalDetailView({ proposalId, user }: ProposalDetailViewProps
           {t("banners.needsPdf")}
         </Banner>
       ) : null}
+
+      <ProposalContentEditor proposalId={p.id} isDraft={isDraft} canManage={canManage} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left: document + facts */}
