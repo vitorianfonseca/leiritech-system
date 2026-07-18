@@ -1693,6 +1693,27 @@
       "addManual": "Linha manual",
       "noCatalog": "Sem itens no catálogo"
     },
+    "preview": {
+      "back": "Voltar à proposta",
+      "print": "Imprimir / Guardar PDF",
+      "documentLabel": "Proposta comercial",
+      "dateLabel": "Data",
+      "validUntilLabel": "Válida até",
+      "preparedFor": "Preparada para",
+      "investment": "Investimento",
+      "description": "Descrição",
+      "quantity": "Qtd.",
+      "unitPrice": "Preço unit.",
+      "lineTotal": "Total",
+      "oneTimeNet": "Subtotal",
+      "oneTimeVat": "IVA",
+      "oneTimeTotal": "Total inicial",
+      "monthlyTotal": "Total mensal",
+      "annualTotal": "Total anual",
+      "terms": "Termos e condições",
+      "notFoundTitle": "Proposta não encontrada",
+      "notFoundDescription": "Esta proposta não existe ou não tens acesso."
+    },
     "content": {
       "title": "Conteúdo da proposta",
       "preview": "Ver pré-visualização",

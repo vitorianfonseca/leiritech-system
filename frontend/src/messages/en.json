@@ -1693,6 +1693,27 @@
       "addManual": "Manual line",
       "noCatalog": "No catalog items"
     },
+    "preview": {
+      "back": "Back to proposal",
+      "print": "Print / Save PDF",
+      "documentLabel": "Commercial proposal",
+      "dateLabel": "Date",
+      "validUntilLabel": "Valid until",
+      "preparedFor": "Prepared for",
+      "investment": "Investment",
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "lineTotal": "Total",
+      "oneTimeNet": "Subtotal",
+      "oneTimeVat": "VAT",
+      "oneTimeTotal": "Upfront total",
+      "monthlyTotal": "Monthly total",
+      "annualTotal": "Annual total",
+      "terms": "Terms & conditions",
+      "notFoundTitle": "Proposal not found",
+      "notFoundDescription": "This proposal does not exist or you don't have access."
+    },
     "content": {
       "title": "Proposal content",
       "preview": "View preview",
