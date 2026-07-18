@@ -115,6 +115,64 @@
       "taxInvalid": "IVA inválido."
     }
   },
+  "proposalTemplates": {
+    "list": {
+      "title": "Templates de proposta",
+      "subtitle": "Modelos reutilizáveis com secções, itens e termos pré-configurados.",
+      "new": "Novo template",
+      "searchPlaceholder": "Procurar templates…",
+      "columns": {
+        "name": "Nome",
+        "sections": "Secções",
+        "items": "Itens",
+        "oneTimeTotal": "Total inicial"
+      },
+      "actions": { "archive": "Arquivar", "restore": "Restaurar" },
+      "empty": {
+        "title": "Ainda não há templates",
+        "description": "Cria um template para montar propostas em segundos."
+      },
+      "archivedToast": "\"{name}\" arquivado.",
+      "errorGeneric": "Ocorreu um erro. Tenta novamente.",
+      "errorTitle": "Não foi possível carregar os templates",
+      "errorDescription": "Verifica a ligação e tenta novamente.",
+      "retry": "Tentar novamente"
+    },
+    "editor": {
+      "back": "Voltar aos templates",
+      "createTitle": "Novo template",
+      "editTitle": "Editar template",
+      "name": "Nome do template",
+      "namePlaceholder": "Ex.: Website + Manutenção",
+      "description": "Descrição interna",
+      "descriptionPlaceholder": "Para que serve este template",
+      "sectionsTitle": "Secções de texto",
+      "itemsTitle": "Itens",
+      "termsTitle": "Termos e condições",
+      "termsPlaceholder": "Condições de pagamento, garantias, cláusulas… (aceita {{cliente}})",
+      "validityDays": "Validade (dias)",
+      "validityHint": "Define a data-limite ao criar a proposta",
+      "discount": "Desconto (%)",
+      "discountHint": "Aplicado ao subtotal antes de IVA",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "savedToast": "Template guardado.",
+      "errorToast": "Não foi possível guardar. Tenta novamente.",
+      "notFoundTitle": "Template não encontrado",
+      "notFoundDescription": "Este template não existe ou foi removido."
+    },
+    "sections": {
+      "heading": "Título da secção",
+      "headingPlaceholder": "Ex.: Introdução",
+      "body": "Conteúdo",
+      "bodyPlaceholder": "Texto da secção…",
+      "add": "Adicionar secção",
+      "remove": "Remover secção",
+      "moveUp": "Subir",
+      "moveDown": "Descer",
+      "placeholderHint": "Placeholders disponíveis: {{cliente}}, {{empresa}}, {{data}}, {{validade}}, {{referencia}}"
+    }
+  },
   "shell": {
     "search": {
       "placeholder": "Procurar…",

@@ -115,6 +115,64 @@
       "taxInvalid": "Invalid VAT."
     }
   },
+  "proposalTemplates": {
+    "list": {
+      "title": "Proposal templates",
+      "subtitle": "Reusable blueprints with preconfigured sections, items and terms.",
+      "new": "New template",
+      "searchPlaceholder": "Search templates…",
+      "columns": {
+        "name": "Name",
+        "sections": "Sections",
+        "items": "Items",
+        "oneTimeTotal": "Upfront total"
+      },
+      "actions": { "archive": "Archive", "restore": "Restore" },
+      "empty": {
+        "title": "No templates yet",
+        "description": "Create a template to assemble proposals in seconds."
+      },
+      "archivedToast": "\"{name}\" archived.",
+      "errorGeneric": "Something went wrong. Try again.",
+      "errorTitle": "Couldn't load templates",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again"
+    },
+    "editor": {
+      "back": "Back to templates",
+      "createTitle": "New template",
+      "editTitle": "Edit template",
+      "name": "Template name",
+      "namePlaceholder": "e.g. Website + Maintenance",
+      "description": "Internal description",
+      "descriptionPlaceholder": "What this template is for",
+      "sectionsTitle": "Text sections",
+      "itemsTitle": "Items",
+      "termsTitle": "Terms & conditions",
+      "termsPlaceholder": "Payment terms, warranties, clauses… (accepts {{cliente}})",
+      "validityDays": "Validity (days)",
+      "validityHint": "Sets the expiry date when creating the proposal",
+      "discount": "Discount (%)",
+      "discountHint": "Applied to the subtotal before VAT",
+      "save": "Save",
+      "saving": "Saving…",
+      "savedToast": "Template saved.",
+      "errorToast": "Couldn't save. Try again.",
+      "notFoundTitle": "Template not found",
+      "notFoundDescription": "This template does not exist or was removed."
+    },
+    "sections": {
+      "heading": "Section heading",
+      "headingPlaceholder": "e.g. Introduction",
+      "body": "Content",
+      "bodyPlaceholder": "Section text…",
+      "add": "Add section",
+      "remove": "Remove section",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "placeholderHint": "Available placeholders: {{cliente}}, {{empresa}}, {{data}}, {{validade}}, {{referencia}}"
+    }
+  },
   "shell": {
     "search": {
       "placeholder": "Search…",
