@@ -255,8 +255,11 @@ export function ProposalsView({ user }: ProposalsViewProps) {
         onOpenChange={setCreateOpen}
         user={user}
         canFinance={canFinance}
-        onConfirm={async (input) => {
+        onConfirm={async (input, templateId) => {
           const created = await proposalsApi.createProposal(input, user.userId, canFinance);
+          if (templateId) {
+            await proposalsApi.applyTemplate(created.id, templateId);
+          }
           refresh();
           toast({ tone: "success", title: t("createdToast", { reference: created.reference }) });
           router.push(proposalRoutes.detail(created.id));

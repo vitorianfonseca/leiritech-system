@@ -1739,6 +1739,10 @@
       "saving": "Saving…",
       "confirm": "Create proposal",
       "fields": {
+        "template": "Start from a template",
+        "templateHint": "Optional — auto-fills sections, items and terms.",
+        "templatePlaceholder": "No template (blank)",
+        "noTemplates": "No templates available",
         "opportunity": "Opportunity",
         "opportunityPlaceholder": "Select the opportunity",
         "noOpportunities": "No open opportunities",

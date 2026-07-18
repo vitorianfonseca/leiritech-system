@@ -79,3 +79,52 @@ export const EMPTY_TOTALS: Totals = {
   annual: EMPTY,
   value: 0,
 };
+
+/** A proposal's persisted structured content (as returned by the backend). */
+export interface ContentSection {
+  id: string;
+  position: number;
+  heading: string;
+  body: string;
+}
+
+export interface ContentItem {
+  id: string;
+  position: number;
+  catalogItemId: string | null;
+  name: string;
+  unit: LineItem["unit"];
+  unitPrice: number;
+  taxRate: string;
+  billingType: BillingType;
+  quantity: string;
+}
+
+export interface ProposalContent {
+  discountBps: number;
+  terms: string | null;
+  sections: ContentSection[];
+  items: ContentItem[];
+  totals: Totals;
+}
+
+/** Payload to replace a draft proposal's content. */
+export interface ProposalContentInput {
+  discountBps: number;
+  terms: string | null;
+  sections: SectionData[];
+  items: LineItem[];
+}
+
+/** Map persisted content items to the editor's numeric-quantity LineItem. */
+export function contentItemsToLines(items: ContentItem[]): LineItem[] {
+  return items.map((it) => ({
+    catalogItemId: it.catalogItemId,
+    name: it.name,
+    unit: it.unit,
+    unitPrice: it.unitPrice,
+    taxRate: it.taxRate,
+    billingType: it.billingType,
+    quantity: Number(String(it.quantity).replace(",", ".")) || 0,
+  }));
+}

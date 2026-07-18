@@ -19,6 +19,10 @@ import { addDays, format, startOfDay, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
 import { canAccessFinance } from "@/lib/api/finance-types";
 import { http, HttpError } from "@/lib/api/http";
+import type {
+  ProposalContent,
+  ProposalContentInput,
+} from "@/lib/api/proposal-content-types";
 import {
   collaborationApi,
   type CollaborationApi,
@@ -404,6 +408,12 @@ export interface ProposalsApi {
   /** Archive a non-accepted proposal (BR-028). */
   archiveProposal(id: string, actorId: string): Promise<void>;
   restoreProposal(id: string, actorId: string): Promise<void>;
+  /** Structured content (sections + priced items + computed totals). */
+  getContent(id: string): Promise<ProposalContent>;
+  /** Replace a draft proposal's content; recomputes `value` server-side. */
+  setContent(id: string, input: ProposalContentInput): Promise<ProposalContent>;
+  /** Deep-copy a template into a draft proposal (snapshot). */
+  applyTemplate(id: string, templateId: string): Promise<void>;
 }
 
 export const proposalsApi: ProposalsApi = {
@@ -584,6 +594,48 @@ export const proposalsApi: ProposalsApi = {
     void actorId;
     try {
       await http.post<BackendProposal>(`/proposals/${id}/restore`, {});
+    } catch (err) {
+      throw translateProposalError(err);
+    }
+  },
+
+  // WIRED → GET /proposals/{id}/content
+  async getContent(id) {
+    try {
+      return await http.get<ProposalContent>(`/proposals/${id}/content`);
+    } catch (err) {
+      throw translateProposalError(err);
+    }
+  },
+
+  // WIRED → PUT /proposals/{id}/content (draft only; recomputes value)
+  async setContent(id, input) {
+    try {
+      return await http.put<ProposalContent>(`/proposals/${id}/content`, {
+        discountBps: input.discountBps,
+        terms: input.terms,
+        sections: input.sections,
+        items: input.items.map((it) => ({
+          catalogItemId: it.catalogItemId,
+          name: it.name,
+          unit: it.unit,
+          unitPrice: it.unitPrice,
+          taxRate: it.taxRate,
+          billingType: it.billingType,
+          quantity: it.quantity,
+        })),
+      });
+    } catch (err) {
+      throw translateProposalError(err);
+    }
+  },
+
+  // WIRED → POST /proposals/{id}/apply-template (draft only; snapshot)
+  async applyTemplate(id, templateId) {
+    try {
+      await http.post<BackendProposal>(`/proposals/${id}/apply-template`, {
+        templateId,
+      });
     } catch (err) {
       throw translateProposalError(err);
     }

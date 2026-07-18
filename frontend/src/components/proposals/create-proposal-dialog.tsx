@@ -21,6 +21,7 @@ import {
 } from "@/lib/validation/proposal-schemas";
 import { crmApi } from "@/lib/api/crm";
 import { opportunitiesApi } from "@/lib/api/opportunities";
+import { proposalTemplatesApi } from "@/lib/api/proposal-templates";
 import type { CreateProposalInput } from "@/lib/api/proposals-types";
 import type { Role } from "@/lib/session";
 import { parseEuroToCents } from "./proposal-format";
@@ -30,7 +31,7 @@ export interface CreateProposalDialogProps {
   onOpenChange: (open: boolean) => void;
   user: { role: Role; userId: string; paymentsGrant: boolean };
   canFinance: boolean;
-  onConfirm: (input: CreateProposalInput) => Promise<void>;
+  onConfirm: (input: CreateProposalInput, templateId: string | null) => Promise<void>;
 }
 
 const DEFAULTS: CreateProposalFormValues = {
@@ -74,6 +75,12 @@ export function CreateProposalDialog({
       }),
     enabled: open,
   });
+  const templatesQuery = useQuery({
+    queryKey: ["proposal-templates", "options"],
+    queryFn: () => proposalTemplatesApi.list(),
+    enabled: open,
+  });
+  const [templateId, setTemplateId] = React.useState<string | null>(null);
 
   const {
     control,
@@ -96,6 +103,11 @@ export function CreateProposalDialog({
     if (open) reset(DEFAULTS);
   }, [open, reset]);
 
+  const templateOptions: ComboboxItem[] = (templatesQuery.data?.items ?? []).map((tpl) => ({
+    value: tpl.id,
+    label: tpl.name,
+  }));
+
   const opportunityId = useWatch({ control, name: "opportunityId" });
   const contactId = useWatch({ control, name: "contactId" });
 
@@ -113,13 +125,16 @@ export function CreateProposalDialog({
     .map((c) => ({ value: c.id, label: c.name }));
 
   async function submit(values: CreateProposalFormValues) {
-    await onConfirm({
-      opportunityId: values.opportunityId,
-      contactId: values.contactId ? values.contactId : null,
-      valueCents: values.value ? parseEuroToCents(values.value) : null,
-      validUntil: values.validUntil ? values.validUntil : null,
-      notes: values.notes?.trim() ? values.notes.trim() : null,
-    });
+    await onConfirm(
+      {
+        opportunityId: values.opportunityId,
+        contactId: values.contactId ? values.contactId : null,
+        valueCents: values.value ? parseEuroToCents(values.value) : null,
+        validUntil: values.validUntil ? values.validUntil : null,
+        notes: values.notes?.trim() ? values.notes.trim() : null,
+      },
+      templateId
+    );
     onOpenChange(false);
   }
 
@@ -128,6 +143,7 @@ export function CreateProposalDialog({
       open={open}
       onOpenChange={(next) => {
         if (isSubmitting) return;
+        if (!next) setTemplateId(null);
         onOpenChange(next);
       }}
     >
@@ -138,6 +154,22 @@ export function CreateProposalDialog({
         </div>
 
         <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
+          <CrmField label={t("fields.template")} hint={t("fields.templateHint")}>
+            {({ controlProps }) => (
+              <SearchableCombobox
+                id={controlProps.id}
+                aria-label={t("fields.template")}
+                items={templateOptions}
+                loading={templatesQuery.isPending}
+                value={templateId}
+                clearable
+                placeholder={t("fields.templatePlaceholder")}
+                emptyMessage={t("fields.noTemplates")}
+                onValueChange={(v) => setTemplateId(v)}
+              />
+            )}
+          </CrmField>
+
           <CrmField label={t("fields.opportunity")} required error={errors.opportunityId?.message}>
             {({ controlProps }) => (
               <SearchableCombobox

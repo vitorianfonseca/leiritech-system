@@ -1739,6 +1739,10 @@
       "saving": "A guardar…",
       "confirm": "Criar proposta",
       "fields": {
+        "template": "Começar a partir de um template",
+        "templateHint": "Opcional — preenche secções, itens e termos automaticamente.",
+        "templatePlaceholder": "Sem template (em branco)",
+        "noTemplates": "Sem templates disponíveis",
         "opportunity": "Oportunidade",
         "opportunityPlaceholder": "Selecione a oportunidade",
         "noOpportunities": "Sem oportunidades em aberto",
