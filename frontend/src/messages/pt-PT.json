@@ -1613,6 +1613,28 @@
     }
   },
   "proposals": {
+    "totals": {
+      "oneTime": "Investimento inicial",
+      "monthly": "Recorrente mensal",
+      "annual": "Recorrente anual",
+      "net": "Subtotal",
+      "vat": "IVA",
+      "total": "Total",
+      "totalPerMonth": "Total / mês",
+      "totalPerYear": "Total / ano"
+    },
+    "lineItems": {
+      "name": "Descrição",
+      "namePlaceholder": "Produto ou serviço",
+      "quantity": "Qtd.",
+      "unitPrice": "Preço unit.",
+      "taxRate": "IVA %",
+      "billing": "Faturação",
+      "remove": "Remover linha",
+      "addFromCatalog": "Adicionar do catálogo…",
+      "addManual": "Linha manual",
+      "noCatalog": "Sem itens no catálogo"
+    },
     "states": {
       "draft": "Rascunho",
       "sent": "Enviada",

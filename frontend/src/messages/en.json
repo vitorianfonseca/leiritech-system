@@ -1613,6 +1613,28 @@
     }
   },
   "proposals": {
+    "totals": {
+      "oneTime": "Upfront investment",
+      "monthly": "Monthly recurring",
+      "annual": "Annual recurring",
+      "net": "Subtotal",
+      "vat": "VAT",
+      "total": "Total",
+      "totalPerMonth": "Total / month",
+      "totalPerYear": "Total / year"
+    },
+    "lineItems": {
+      "name": "Description",
+      "namePlaceholder": "Product or service",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "taxRate": "VAT %",
+      "billing": "Billing",
+      "remove": "Remove line",
+      "addFromCatalog": "Add from catalog…",
+      "addManual": "Manual line",
+      "noCatalog": "No catalog items"
+    },
     "states": {
       "draft": "Draft",
       "sent": "Sent",
