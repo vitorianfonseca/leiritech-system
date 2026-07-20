@@ -149,7 +149,7 @@
       "sectionsTitle": "Secções de texto",
       "itemsTitle": "Itens",
       "termsTitle": "Termos e condições",
-      "termsPlaceholder": "Condições de pagamento, garantias, cláusulas… (aceita {{cliente}})",
+      "termsPlaceholder": "Condições de pagamento, garantias, cláusulas… (aceita '{{cliente}}')",
       "validityDays": "Validade (dias)",
       "validityHint": "Define a data-limite ao criar a proposta",
       "discount": "Desconto (%)",
@@ -170,7 +170,7 @@
       "remove": "Remover secção",
       "moveUp": "Subir",
       "moveDown": "Descer",
-      "placeholderHint": "Placeholders disponíveis: {{cliente}}, {{empresa}}, {{data}}, {{validade}}, {{referencia}}"
+      "placeholderHint": "Placeholders disponíveis: '{{cliente}}', '{{empresa}}', '{{data}}', '{{validade}}', '{{referencia}}'"
     }
   },
   "shell": {

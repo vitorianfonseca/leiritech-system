@@ -149,7 +149,7 @@
       "sectionsTitle": "Text sections",
       "itemsTitle": "Items",
       "termsTitle": "Terms & conditions",
-      "termsPlaceholder": "Payment terms, warranties, clauses… (accepts {{cliente}})",
+      "termsPlaceholder": "Payment terms, warranties, clauses… (accepts '{{cliente}}')",
       "validityDays": "Validity (days)",
       "validityHint": "Sets the expiry date when creating the proposal",
       "discount": "Discount (%)",
@@ -170,7 +170,7 @@
       "remove": "Remove section",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "placeholderHint": "Available placeholders: {{cliente}}, {{empresa}}, {{data}}, {{validade}}, {{referencia}}"
+      "placeholderHint": "Available placeholders: '{{cliente}}', '{{empresa}}', '{{data}}', '{{validade}}', '{{referencia}}'"
     }
   },
   "shell": {

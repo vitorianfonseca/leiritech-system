@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SkeletonCard, EmptyState } from "@/components/shared";
 import { formatEUR, formatDate } from "@/components/finance/finance-format";
 import { proposalsApi } from "@/lib/api/proposals";
+import { crmApi } from "@/lib/api/crm";
 import type { BillingType } from "@/lib/api/catalog-types";
 import type { ContentItem } from "@/lib/api/proposal-content-types";
 import type { Role } from "@/lib/session";
@@ -46,6 +47,14 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
     queryKey: ["proposal-content", proposalId],
     queryFn: () => proposalsApi.getContent(proposalId),
   });
+  // The proposals endpoint doesn't return the client's name (integration gap),
+  // so resolve it from the linked company for the "prepared for" header.
+  const companyId = proposalQuery.data?.companyId || null;
+  const companyQuery = useQuery({
+    queryKey: ["crm", "company", companyId],
+    queryFn: () => crmApi.getCompany(companyId as string, user.role, user.userId, user.paymentsGrant),
+    enabled: Boolean(companyId),
+  });
 
   if (proposalQuery.isLoading || contentQuery.isLoading) return <SkeletonCard />;
   if (proposalQuery.isError || !proposalQuery.data || !contentQuery.data) {
@@ -54,6 +63,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
 
   const p = proposalQuery.data;
   const content = contentQuery.data;
+  const clientName = companyQuery.data?.name || p.companyName;
   const f = (cents: number) => formatEUR(cents, locale);
 
   const groups: { key: BillingType; items: ContentItem[] }[] = (
@@ -108,7 +118,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {t("preparedFor")}
           </p>
-          <p className="text-lg font-medium">{p.companyName}</p>
+          <p className="text-lg font-medium">{clientName}</p>
           {p.contactName ? <p className="text-sm text-muted-foreground">{p.contactName}</p> : null}
         </section>
 
