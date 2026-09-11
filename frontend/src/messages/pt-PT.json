@@ -425,6 +425,8 @@
       "empty": "Ainda não há issues associadas.",
       "refresh": "Atualizar estado",
       "openOnGithub": "Abrir no GitHub",
+      "closeIssue": "Fechar issue",
+      "reopenIssue": "Reabrir issue",
       "state": {
         "open": "Aberta",
         "closed": "Fechada"
@@ -433,14 +435,36 @@
       "createFailedToast": "Não foi possível criar a issue.",
       "createFailedGeneric": "Ocorreu um erro inesperado.",
       "refreshFailedToast": "Não foi possível atualizar o estado.",
+      "closedToast": "Issue #{number} fechada.",
+      "reopenedToast": "Issue #{number} reaberta.",
+      "stateChangeFailedToast": "Não foi possível alterar o estado da issue.",
+      "filters": {
+        "state": "Estado",
+        "stateOpen": "Abertas",
+        "stateClosed": "Fechadas",
+        "stateAll": "Todas",
+        "label": "Label",
+        "labelPlaceholder": "Filtrar por label..."
+      },
+      "comments": {
+        "toggle": "Mostrar comentários",
+        "empty": "Ainda não há comentários.",
+        "addPlaceholder": "Escreva um comentário...",
+        "send": "Enviar comentário",
+        "addFailedToast": "Não foi possível adicionar o comentário."
+      },
       "dialog": {
         "title": "Reportar problema no GitHub",
         "description": "Cria uma issue real no repositório do GitHub, associada a este registo.",
         "fields": {
           "title": "Título",
           "body": "Descrição",
-          "bodyPlaceholder": "O que aconteceu? Passos para reproduzir..."
+          "bodyPlaceholder": "O que aconteceu? Passos para reproduzir...",
+          "labels": "Labels",
+          "assignee": "Responsável",
+          "unassigned": "Sem responsável"
         },
+        "noLabels": "Sem labels disponíveis.",
         "cancel": "Cancelar",
         "save": "Criar issue",
         "saving": "A criar..."

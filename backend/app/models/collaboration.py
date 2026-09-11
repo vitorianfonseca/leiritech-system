@@ -155,6 +155,13 @@ class GithubIssueLink(AuditBase):
     issue_number: Mapped[int] = mapped_column(Integer, nullable=False)
     issue_url: Mapped[str] = mapped_column(String(1024), nullable=False)
     title: Mapped[str] = mapped_column(String(512), nullable=False)
-    # Cached snapshot from creation time ("open"); refreshed on demand via
-    # GET /github/issues/{id}/refresh, never polled in the background.
+    # Cached snapshot from creation time; refreshed on demand via
+    # POST /github/issues/{id}/refresh (state) or right after a label/
+    # assignee/close/reopen mutation — never polled in the background.
     state: Mapped[str] = mapped_column(String(16), nullable=False, default="open")
+    # [{"name": "bug", "color": "d73a4a"}, ...] — GitHub's own label objects,
+    # cached so the list view can render coloured chips without an extra
+    # round trip per issue.
+    labels: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    # [{"login": "octocat", "avatar_url": "..."}, ...]
+    assignees: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)

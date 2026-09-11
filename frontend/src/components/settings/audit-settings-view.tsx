@@ -76,7 +76,7 @@ export function AuditSettingsView() {
                   entityId={selected.code}
                   canCreate
                   titlePrefix={`[${selected.code}] `}
-                  labels={["audit", selected.severity]}
+                  defaultLabels={["audit", selected.severity]}
                 />
               </div>
             </>

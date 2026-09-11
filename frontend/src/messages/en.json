@@ -418,32 +418,56 @@
       "defaultTitle": "Nothing here yet."
     },
     "githubIssues": {
-      "title": "Issues do GitHub",
-      "subtitle": "Problemas reportados e ligados a este registo.",
-      "createButton": "Reportar problema",
-      "loading": "A carregar...",
-      "empty": "Ainda não há issues associadas.",
-      "refresh": "Atualizar estado",
-      "openOnGithub": "Abrir no GitHub",
+      "title": "GitHub Issues",
+      "subtitle": "Problems reported and linked to this record.",
+      "createButton": "Report a problem",
+      "loading": "Loading...",
+      "empty": "No issues linked yet.",
+      "refresh": "Refresh status",
+      "openOnGithub": "Open on GitHub",
+      "closeIssue": "Close issue",
+      "reopenIssue": "Reopen issue",
       "state": {
-        "open": "Aberta",
-        "closed": "Fechada"
+        "open": "Open",
+        "closed": "Closed"
       },
-      "createdToast": "Issue #{number} criada no GitHub.",
-      "createFailedToast": "Não foi possível criar a issue.",
-      "createFailedGeneric": "Ocorreu um erro inesperado.",
-      "refreshFailedToast": "Não foi possível atualizar o estado.",
+      "createdToast": "Issue #{number} created on GitHub.",
+      "createFailedToast": "Could not create the issue.",
+      "createFailedGeneric": "An unexpected error occurred.",
+      "refreshFailedToast": "Could not refresh the status.",
+      "closedToast": "Issue #{number} closed.",
+      "reopenedToast": "Issue #{number} reopened.",
+      "stateChangeFailedToast": "Could not change the issue's status.",
+      "filters": {
+        "state": "Status",
+        "stateOpen": "Open",
+        "stateClosed": "Closed",
+        "stateAll": "All",
+        "label": "Label",
+        "labelPlaceholder": "Filter by label..."
+      },
+      "comments": {
+        "toggle": "Show comments",
+        "empty": "No comments yet.",
+        "addPlaceholder": "Write a comment...",
+        "send": "Send comment",
+        "addFailedToast": "Could not add the comment."
+      },
       "dialog": {
-        "title": "Reportar problema no GitHub",
-        "description": "Cria uma issue real no repositório do GitHub, associada a este registo.",
+        "title": "Report a problem on GitHub",
+        "description": "Creates a real issue in the GitHub repository, linked to this record.",
         "fields": {
-          "title": "Título",
-          "body": "Descrição",
-          "bodyPlaceholder": "O que aconteceu? Passos para reproduzir..."
+          "title": "Title",
+          "body": "Description",
+          "bodyPlaceholder": "What happened? Steps to reproduce...",
+          "labels": "Labels",
+          "assignee": "Assignee",
+          "unassigned": "Unassigned"
         },
-        "cancel": "Cancelar",
-        "save": "Criar issue",
-        "saving": "A criar..."
+        "noLabels": "No labels available.",
+        "cancel": "Cancel",
+        "save": "Create issue",
+        "saving": "Creating..."
       }
     }
   },
