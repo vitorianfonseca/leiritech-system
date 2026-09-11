@@ -17,6 +17,7 @@ export { FunctionConfigView } from "./function-config-view";
 export { NotificationsSettingsView } from "./notifications-settings-view";
 export { ThemeSettingsView } from "./theme-settings-view";
 export { ArchiveSettingsView } from "./archive-settings-view";
+export { AuditSettingsView } from "./audit-settings-view";
 export { ExportSettingsView } from "./export-settings-view";
 export {
   visibleSettingsGroups,

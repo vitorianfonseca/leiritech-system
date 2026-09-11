@@ -16,6 +16,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -133,3 +134,27 @@ class EntityTag(AuditBase):
     )
     entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
     entity_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
+
+
+class GithubIssueLink(AuditBase):
+    """A GitHub issue filed from within the app and linked back to whatever it
+    was filed about — a Project (client delivery work) or an internal
+    ``audit_finding`` (a forge-audit finding code like "C1", which has no DB
+    row of its own, hence ``entity_id`` being a free string rather than a
+    UUID FK here, unlike every other entity_type/entity_id pair in this file).
+    """
+
+    __tablename__ = "github_issue_links"
+    __table_args__ = (
+        Index("ix_github_issue_links_entity", "entity_type", "entity_id"),
+    )
+
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    entity_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    repo: Mapped[str] = mapped_column(String(255), nullable=False)
+    issue_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    issue_url: Mapped[str] = mapped_column(String(1024), nullable=False)
+    title: Mapped[str] = mapped_column(String(512), nullable=False)
+    # Cached snapshot from creation time ("open"); refreshed on demand via
+    # GET /github/issues/{id}/refresh, never polled in the background.
+    state: Mapped[str] = mapped_column(String(16), nullable=False, default="open")

@@ -13,6 +13,7 @@ import {
   Palette,
   Archive,
   Download,
+  Bug,
 } from "lucide-react";
 import type { Role } from "@/lib/session";
 
@@ -68,6 +69,12 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     items: [
       { key: "archive", href: "/settings/archive", icon: Archive, adminOnly: true },
       { key: "export", href: "/settings/export", icon: Download, adminOnly: true },
+    ],
+  },
+  {
+    labelKey: "development",
+    items: [
+      { key: "audit", href: "/settings/audit", icon: Bug, adminOnly: true },
     ],
   },
 ];

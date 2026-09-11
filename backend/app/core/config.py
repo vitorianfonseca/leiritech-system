@@ -62,6 +62,13 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = ""
     EMAIL_FROM: str = "no-reply@aurea.example"
 
+    # --- GitHub issue integration ---
+    # A PAT with `repo` scope. Empty = feature disabled (503, never silent).
+    GITHUB_TOKEN: str = ""
+    # Default "owner/repo" issues are filed against when a request doesn't
+    # name one explicitly (e.g. the internal audit-findings panel).
+    GITHUB_DEFAULT_REPO: str = ""
+
     # --- Rate limiting ---
     LOGIN_RATE_LIMIT_PER_MINUTE: int = 5
     # audit H1: previously only /auth/login was throttled; /password/forgot,

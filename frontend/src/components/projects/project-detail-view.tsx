@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { EmptyState, ProgressBar, SkeletonCard, toast } from "@/components/shared";
+import { EmptyState, GithubIssuesPanel, ProgressBar, SkeletonCard, toast } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { crmRoutes } from "@/lib/api/crm";
 import { projectsApi } from "@/lib/api/projects";
@@ -282,7 +282,15 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
         <div className="pt-6">
           <Tabs.Panel value="overview">
-            <OverviewTab project={project} canFinance={canFinance} />
+            <div className="space-y-6">
+              <OverviewTab project={project} canFinance={canFinance} />
+              <GithubIssuesPanel
+                entityType="project"
+                entityId={project.id}
+                canCreate={canManage}
+                titlePrefix={`${project.name} — `}
+              />
+            </div>
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
             <TasksTab project={project} />

@@ -19,6 +19,7 @@ from app.api.routes import (
     contacts,
     dashboard,
     finance,
+    github,
     interactions,
     invitations,
     meetings,
@@ -73,6 +74,7 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(time.router, prefix="/time", tags=["time"])
 api_router.include_router(finance.router, prefix="/finance", tags=["finance"])
 api_router.include_router(workload.router, prefix="/workload", tags=["workload"])
+api_router.include_router(github.router, prefix="/github", tags=["github"])
 api_router.include_router(
     notifications.router, prefix="/notifications", tags=["notifications"]
 )

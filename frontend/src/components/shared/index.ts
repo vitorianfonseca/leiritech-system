@@ -21,6 +21,8 @@ export type { SearchableComboboxProps, ComboboxItem } from "./searchable-combobo
 // Overlays
 export { DetailSidePanel } from "./detail-side-panel";
 export type { DetailSidePanelProps } from "./detail-side-panel";
+export { GithubIssuesPanel } from "./github-issues-panel";
+export type { GithubIssuesPanelProps } from "./github-issues-panel";
 export { ConfirmDialog, useConfirmDialog } from "./confirm-dialog";
 export type { ConfirmDialogProps, ConfirmVariant } from "./confirm-dialog";
 

@@ -40,7 +40,11 @@
         "unitPrice": "Unit price",
         "taxRate": "VAT"
       },
-      "actions": { "edit": "Edit", "archive": "Archive", "restore": "Restore" },
+      "actions": {
+        "edit": "Edit",
+        "archive": "Archive",
+        "restore": "Restore"
+      },
       "empty": {
         "title": "No catalog items yet",
         "description": "Create your first product or service to reuse it in proposals."
@@ -131,7 +135,10 @@
         "items": "Items",
         "oneTimeTotal": "Upfront total"
       },
-      "actions": { "archive": "Archive", "restore": "Restore" },
+      "actions": {
+        "archive": "Archive",
+        "restore": "Restore"
+      },
       "empty": {
         "title": "No templates yet",
         "description": "Create a template to assemble proposals in seconds."
@@ -409,6 +416,35 @@
     },
     "emptyState": {
       "defaultTitle": "Nothing here yet."
+    },
+    "githubIssues": {
+      "title": "Issues do GitHub",
+      "subtitle": "Problemas reportados e ligados a este registo.",
+      "createButton": "Reportar problema",
+      "loading": "A carregar...",
+      "empty": "Ainda não há issues associadas.",
+      "refresh": "Atualizar estado",
+      "openOnGithub": "Abrir no GitHub",
+      "state": {
+        "open": "Aberta",
+        "closed": "Fechada"
+      },
+      "createdToast": "Issue #{number} criada no GitHub.",
+      "createFailedToast": "Não foi possível criar a issue.",
+      "createFailedGeneric": "Ocorreu um erro inesperado.",
+      "refreshFailedToast": "Não foi possível atualizar o estado.",
+      "dialog": {
+        "title": "Reportar problema no GitHub",
+        "description": "Cria uma issue real no repositório do GitHub, associada a este registo.",
+        "fields": {
+          "title": "Título",
+          "body": "Descrição",
+          "bodyPlaceholder": "O que aconteceu? Passos para reproduzir..."
+        },
+        "cancel": "Cancelar",
+        "save": "Criar issue",
+        "saving": "A criar..."
+      }
     }
   },
   "foundation": {
@@ -3296,7 +3332,8 @@
       "commercial": "Commercial",
       "resources": "Resources",
       "preferences": "Preferences",
-      "data": "Data"
+      "data": "Data",
+      "development": "Development"
     },
     "navLabelShort": "Settings",
     "areas": {
@@ -3351,6 +3388,10 @@
       "export": {
         "title": "Data export",
         "description": "Export your data as CSV files."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Forge-audit findings and GitHub issue tracking."
       }
     },
     "colors": {
@@ -3788,6 +3829,12 @@
         "loadDescription": "Something went wrong loading the export. Please try again.",
         "retry": "Try again"
       }
+    },
+    "audit": {
+      "title": "Audit",
+      "subtitle": "Findings from the forge-audit review, with real GitHub issue tracking per finding.",
+      "openTitle": "Open ({count})",
+      "fixedTitle": "Fixed this session ({count})"
     }
   },
   "profile": {

@@ -40,7 +40,11 @@
         "unitPrice": "Preço unitário",
         "taxRate": "IVA"
       },
-      "actions": { "edit": "Editar", "archive": "Arquivar", "restore": "Restaurar" },
+      "actions": {
+        "edit": "Editar",
+        "archive": "Arquivar",
+        "restore": "Restaurar"
+      },
       "empty": {
         "title": "Ainda não há itens no catálogo",
         "description": "Cria o teu primeiro produto ou serviço para o reutilizar em propostas."
@@ -131,7 +135,10 @@
         "items": "Itens",
         "oneTimeTotal": "Total inicial"
       },
-      "actions": { "archive": "Arquivar", "restore": "Restaurar" },
+      "actions": {
+        "archive": "Arquivar",
+        "restore": "Restaurar"
+      },
       "empty": {
         "title": "Ainda não há templates",
         "description": "Cria um template para montar propostas em segundos."
@@ -409,6 +416,35 @@
     },
     "emptyState": {
       "defaultTitle": "Ainda não existe nada aqui."
+    },
+    "githubIssues": {
+      "title": "Issues do GitHub",
+      "subtitle": "Problemas reportados e ligados a este registo.",
+      "createButton": "Reportar problema",
+      "loading": "A carregar...",
+      "empty": "Ainda não há issues associadas.",
+      "refresh": "Atualizar estado",
+      "openOnGithub": "Abrir no GitHub",
+      "state": {
+        "open": "Aberta",
+        "closed": "Fechada"
+      },
+      "createdToast": "Issue #{number} criada no GitHub.",
+      "createFailedToast": "Não foi possível criar a issue.",
+      "createFailedGeneric": "Ocorreu um erro inesperado.",
+      "refreshFailedToast": "Não foi possível atualizar o estado.",
+      "dialog": {
+        "title": "Reportar problema no GitHub",
+        "description": "Cria uma issue real no repositório do GitHub, associada a este registo.",
+        "fields": {
+          "title": "Título",
+          "body": "Descrição",
+          "bodyPlaceholder": "O que aconteceu? Passos para reproduzir..."
+        },
+        "cancel": "Cancelar",
+        "save": "Criar issue",
+        "saving": "A criar..."
+      }
     }
   },
   "foundation": {
@@ -3296,7 +3332,8 @@
       "commercial": "Comercial",
       "resources": "Recursos",
       "preferences": "Preferências",
-      "data": "Dados"
+      "data": "Dados",
+      "development": "Desenvolvimento"
     },
     "navLabelShort": "Definições",
     "areas": {
@@ -3351,6 +3388,10 @@
       "export": {
         "title": "Exportação de dados",
         "description": "Exporte os seus dados em ficheiros CSV."
+      },
+      "audit": {
+        "title": "Auditoria",
+        "description": "Achados da auditoria e acompanhamento de issues no GitHub."
       }
     },
     "colors": {
@@ -3788,6 +3829,12 @@
         "loadDescription": "Ocorreu um problema ao carregar a exportação. Tente novamente.",
         "retry": "Tentar novamente"
       }
+    },
+    "audit": {
+      "title": "Auditoria",
+      "subtitle": "Achados da revisão forge-audit, com acompanhamento real de issues no GitHub por achado.",
+      "openTitle": "Em aberto ({count})",
+      "fixedTitle": "Corrigidos nesta sessão ({count})"
     }
   },
   "profile": {
