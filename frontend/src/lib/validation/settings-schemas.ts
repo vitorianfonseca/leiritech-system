@@ -28,7 +28,7 @@ const optionalUrl = (t: T) =>
     .optional()
     .or(z.literal(""));
 
-export function aureaProfileSchema(t: T) {
+export function leiritechProfileSchema(t: T) {
   return z.object({
     name: z.string().trim().min(2, { message: t("nameRequired") }),
     tagline: z.string().trim().max(120, { message: t("taglineLong") }).optional().or(z.literal("")),
@@ -42,4 +42,4 @@ export function aureaProfileSchema(t: T) {
   });
 }
 
-export type AureaProfileFormValues = z.infer<ReturnType<typeof aureaProfileSchema>>;
+export type LeiritechProfileFormValues = z.infer<ReturnType<typeof leiritechProfileSchema>>;

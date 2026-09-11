@@ -11,7 +11,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
-export const OPEN_COMMAND_EVENT = "aurea:command-open";
+export const OPEN_COMMAND_EVENT = "leiritech:command-open";
 
 interface CommandAction {
   id: string;

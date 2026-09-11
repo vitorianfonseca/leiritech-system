@@ -24,7 +24,7 @@ import type {
  * while running, and stays in sync across browser tabs.
  */
 
-const STORAGE_KEY = "aurea.timer.active";
+const STORAGE_KEY = "leiritech.timer.active";
 
 interface Snapshot {
   active: ActiveTimer | null;

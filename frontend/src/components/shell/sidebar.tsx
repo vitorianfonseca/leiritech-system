@@ -8,7 +8,7 @@ import { PanelLeftClose, PanelLeft } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
 import { visibleSections, type NavItem } from "./nav-config";
 import { useSidebar } from "./sidebar-context";
-import { AureaWordmark } from "./logo";
+import { LeiritechWordmark } from "./logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -133,8 +133,8 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
           collapsed && "justify-center px-0"
         )}
       >
-        <Link href="/" aria-label="Aurea System">
-          <AureaWordmark collapsed={collapsed} />
+        <Link href="/" aria-label="LeiriTech">
+          <LeiritechWordmark collapsed={collapsed} />
         </Link>
       </div>
 

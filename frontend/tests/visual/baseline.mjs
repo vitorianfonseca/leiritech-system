@@ -1,4 +1,4 @@
-// Visual baseline for the Aurea System foundation shell.
+// Visual baseline for the LeiriTech foundation shell.
 // Playwright CLI (NOT MCP). Run against a running server:
 //   BASE_URL=http://localhost:3100 node tests/visual/baseline.mjs
 import { chromium } from "playwright";
@@ -41,8 +41,8 @@ for (const shot of shots) {
     } catch {}
   }, shot.theme);
   await context.addCookies([
-    { name: "aurea_role", value: "admin", url: BASE },
-    { name: "aurea_sidebar_collapsed", value: shot.collapsed ? "true" : "false", url: BASE },
+    { name: "leiritech_role", value: "admin", url: BASE },
+    { name: "leiritech_sidebar_collapsed", value: shot.collapsed ? "true" : "false", url: BASE },
   ]);
 
   const page = await context.newPage();

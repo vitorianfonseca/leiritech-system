@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
 import { useSidebar } from "./sidebar-context";
 import { NavList } from "./sidebar";
-import { AureaWordmark } from "./logo";
+import { LeiritechWordmark } from "./logo";
 import { Button } from "@/components/ui/button";
 
 export function MobileNav({ user }: { user: SessionUser }) {
@@ -24,7 +24,7 @@ export function MobileNav({ user }: { user: SessionUser }) {
           className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col bg-sidebar shadow-lg outline-none transition-transform duration-200 data-[starting-style]:-translate-x-full data-[ending-style]:-translate-x-full md:hidden"
         >
           <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-            <AureaWordmark />
+            <LeiritechWordmark />
             <DialogPrimitive.Close
               render={
                 <Button variant="ghost" size="icon" aria-label={t("close")} />

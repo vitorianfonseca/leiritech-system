@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Aurea System",
-    "tagline": "O sistema operativo interno da Aurea."
+    "name": "LeiriTech",
+    "tagline": "O sistema operativo interno da LeiriTech."
   },
   "nav": {
     "sectionMain": "Geral",
@@ -81,6 +81,10 @@
       "archive": "Arquivar",
       "restore": "Restaurar",
       "archived": "Arquivado",
+      "archiveConfirm": {
+        "title": "Arquivar este item?",
+        "description": "\"{name}\" deixará de aparecer no catálogo. Pode restaurá-lo mais tarde."
+      },
       "archivedToast": "Item arquivado.",
       "updatedToast": "Item atualizado.",
       "notFoundTitle": "Item não encontrado",
@@ -272,7 +276,7 @@
   "auth": {
     "login": {
       "title": "Entrar",
-      "subtitle": "Aceda à sua conta Aurea.",
+      "subtitle": "Aceda à sua conta LeiriTech.",
       "submit": "Entrar",
       "submitting": "A entrar…",
       "forgotLink": "Esqueceu-se da palavra-passe?"
@@ -318,7 +322,7 @@
       "name": "Nome completo"
     },
     "placeholders": {
-      "email": "nome@aurea.pt",
+      "email": "nome@leiritech.pt",
       "password": "A sua palavra-passe",
       "newPassword": "Pelo menos 8 caracteres",
       "confirmPassword": "Repita a palavra-passe",
@@ -1154,7 +1158,12 @@
       "apr": "Abr",
       "may": "Mai",
       "jun": "Jun",
-      "jul": "Jul"
+      "jul": "Jul",
+      "aug": "Ago",
+      "sep": "Set",
+      "oct": "Out",
+      "nov": "Nov",
+      "dec": "Dez"
     },
     "weeks": {
       "w1": "S1",
@@ -1321,17 +1330,59 @@
         "contact": "Contactar"
       },
       "actions": {
-        "view": "Ver contacto"
+        "new": "Novo contacto",
+        "view": "Ver contacto",
+        "edit": "Editar",
+        "archive": "Arquivar",
+        "restore": "Restaurar",
+        "showArchived": "Mostrar arquivados",
+        "hideArchived": "Ocultar arquivados"
       },
       "empty": {
         "title": "Sem contactos",
         "description": "Os contactos das empresas aparecerão aqui."
+      },
+      "toasts": {
+        "created": "Contacto \"{name}\" criado.",
+        "updated": "Contacto \"{name}\" atualizado.",
+        "archived": "Contacto \"{name}\" arquivado.",
+        "restored": "Contacto \"{name}\" restaurado."
+      },
+      "archiveConfirm": {
+        "title": "Arquivar este contacto?",
+        "description": "\"{name}\" deixa de aparecer nas listas ativas. Podes restaurá-lo a qualquer momento."
       },
       "errors": {
         "loadTitle": "Não foi possível carregar os contactos",
         "loadDescription": "Ocorreu um erro ao obter os dados. Tenta novamente.",
         "retry": "Tentar novamente"
       }
+    },
+    "contactForm": {
+      "createTitle": "Novo contacto",
+      "editTitle": "Editar contacto",
+      "subtitle": "Os campos assinalados como obrigatórios têm de ser preenchidos.",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Nome completo",
+        "company": "Empresa",
+        "companyPlaceholder": "Selecionar empresa",
+        "noCompanies": "Sem empresas",
+        "owner": "Responsável interno",
+        "ownerPlaceholder": "Selecionar responsável",
+        "role": "Cargo",
+        "rolePlaceholder": "ex. Diretora de Marketing",
+        "status": "Estado",
+        "email": "Email",
+        "emailPlaceholder": "ola@empresa.com",
+        "phone": "Telefone",
+        "notes": "Notas",
+        "notesPlaceholder": "Notas sobre este contacto"
+      },
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "saveEdit": "Guardar alterações",
+      "saveCreate": "Criar contacto"
     },
     "archive": {
       "confirmTitle": "Arquivar empresa?",
@@ -1481,7 +1532,18 @@
       "noInteractionsTitle": "Sem interações",
       "noInteractionsDescription": "As interações com este contacto aparecerão aqui.",
       "nextAction": "Próxima ação",
-      "noNextAction": "Sem próxima ação definida."
+      "noNextAction": "Sem próxima ação definida.",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "restore": "Restaurar",
+      "archivedBanner": "Contacto arquivado a {date}. Restaura-o para editar.",
+      "toastUpdated": "Contacto atualizado.",
+      "toastArchived": "Contacto arquivado.",
+      "toastRestored": "Contacto restaurado.",
+      "archiveConfirm": {
+        "title": "Arquivar este contacto?",
+        "description": "\"{name}\" deixa de aparecer nas listas ativas. Podes restaurá-lo a qualquer momento."
+      }
     },
     "newPage": {
       "back": "Voltar às empresas",
@@ -1697,13 +1759,13 @@
       "back": "Voltar à proposta",
       "print": "Imprimir / Guardar PDF",
       "documentLabel": "Proposta comercial",
-      "tagline": "O sistema operativo interno da Aurea.",
+      "tagline": "O sistema operativo interno da LeiriTech.",
       "dateLabel": "Data",
       "validUntilLabel": "Válida até",
       "preparedFor": "Preparada para",
       "attn": "Ao cuidado de",
       "vatIncluded": "Valor com IVA incluído",
-      "footer": "Documento gerado por Aurea System · {reference}",
+      "footer": "Documento gerado por LeiriTech · {reference}",
       "investment": "Investimento",
       "description": "Descrição",
       "quantity": "Qtd.",
@@ -2499,7 +2561,10 @@
       "stop": "Parar ({elapsed})",
       "started": "Cronómetro iniciado.",
       "stopped": "Cronómetro parado — {minutes, plural, one {# minuto} other {# minutos}} registados.",
-      "switched": "Cronómetro anterior parado em «{task}» — {minutes, plural, one {# minuto} other {# minutos}} registados."
+      "switched": "Cronómetro anterior parado em «{task}» — {minutes, plural, one {# minuto} other {# minutos}} registados.",
+      "switchConfirmTitle": "Já existe um cronómetro a correr",
+      "switchConfirmDescription": "«{running}» está a ser cronometrada. Parar e iniciar «{next}»?",
+      "switchConfirm": "Parar e iniciar"
     },
     "panel": {
       "loading": "A carregar…",
@@ -3224,7 +3289,7 @@
     "navLabel": "Navegação das definições",
     "index": {
       "title": "Definições",
-      "subtitle": "Configure a Aurea, a equipa e as regras que fazem o sistema funcionar."
+      "subtitle": "Configure a LeiriTech, a equipa e as regras que fazem o sistema funcionar."
     },
     "groups": {
       "organization": "Organização",
@@ -3235,8 +3300,8 @@
     },
     "navLabelShort": "Definições",
     "areas": {
-      "aurea": {
-        "title": "Dados da Aurea",
+      "leiritech": {
+        "title": "Dados da LeiriTech",
         "description": "Nome, contactos, morada e logótipo da organização."
       },
       "members": {
@@ -3257,7 +3322,7 @@
       },
       "tags": {
         "title": "Etiquetas",
-        "description": "Crie e organize as etiquetas usadas em toda a Aurea."
+        "description": "Crie e organize as etiquetas usadas em toda a LeiriTech."
       },
       "templates": {
         "title": "Modelos de projeto",
@@ -3290,7 +3355,7 @@
     },
     "colors": {
       "label": "Cor",
-      "gold": "Dourado",
+      "gold": "Azul",
       "teal": "Azul-petróleo",
       "green": "Verde",
       "indigo": "Índigo",
@@ -3303,12 +3368,12 @@
       "loadDescription": "Ocorreu um problema ao carregar esta secção. Tente novamente.",
       "retry": "Tentar novamente"
     },
-    "aurea": {
-      "title": "Dados da Aurea",
+    "leiritech": {
+      "title": "Dados da LeiriTech",
       "subtitle": "A identidade da organização usada em todo o sistema.",
       "save": "Guardar",
       "saving": "A guardar…",
-      "saved": "Dados da Aurea atualizados.",
+      "saved": "Dados da LeiriTech atualizados.",
       "logo": {
         "title": "Logótipo",
         "description": "PNG ou SVG até 512 KB. Usado no cabeçalho e nos documentos.",
@@ -3342,7 +3407,7 @@
       "errors": {
         "saveFailed": "Não foi possível guardar.",
         "loadTitle": "Não foi possível carregar os dados",
-        "loadDescription": "Ocorreu um problema ao carregar os dados da Aurea. Tente novamente.",
+        "loadDescription": "Ocorreu um problema ao carregar os dados da LeiriTech. Tente novamente.",
         "retry": "Tentar novamente",
         "logoType": "O ficheiro tem de ser uma imagem.",
         "logoSize": "A imagem excede 512 KB."
@@ -3350,7 +3415,7 @@
     },
     "members": {
       "title": "Membros",
-      "subtitle": "Quem tem acesso à Aurea e com que perfil.",
+      "subtitle": "Quem tem acesso à LeiriTech e com que perfil.",
       "inviteAction": "Convidar membro",
       "inviteShort": "Convidar",
       "searchPlaceholder": "Procurar por nome ou email…",
@@ -3378,7 +3443,7 @@
       },
       "deactivateConfirm": {
         "title": "Desativar membro?",
-        "description": "{name} deixa de ter acesso à Aurea. Pode reativar a qualquer momento."
+        "description": "{name} deixa de ter acesso à LeiriTech. Pode reativar a qualquer momento."
       },
       "invite": {
         "title": "Convidar membro",
@@ -3417,7 +3482,7 @@
     },
     "roles": {
       "title": "Perfis e permissões",
-      "subtitle": "O que cada perfil pode ver e fazer na Aurea.",
+      "subtitle": "O que cada perfil pode ver e fazer na LeiriTech.",
       "notice": "Estas permissões são aplicadas de forma consistente em todo o sistema.",
       "summary": {
         "admin": "Acesso total à configuração, à equipa e aos valores financeiros.",
@@ -3657,7 +3722,7 @@
       "options": {
         "light": {
           "title": "Claro",
-          "description": "O tema por omissão da Aurea."
+          "description": "O tema por omissão da LeiriTech."
         },
         "dark": {
           "title": "Escuro",
@@ -3701,13 +3766,13 @@
       }
     },
     "export": {
-      "title": "Exportação de dados",
-      "subtitle": "Exporte os seus dados em ficheiros CSV.",
-      "notice": "Os ficheiros são gerados no formato CSV, prontos para folha de cálculo.",
-      "exportAction": "Exportar CSV",
-      "exporting": "A exportar…",
-      "exported": "Exportação de {dataset} concluída.",
-      "rowCount": "{rows, number} registos",
+      "title": "Exportação de dados (pré-visualização)",
+      "subtitle": "Pré-visualize as colunas que cada conjunto de dados exportaria em CSV.",
+      "notice": "Apenas pré-visualização — cada transferência contém só os cabeçalhos das colunas e uma linha de exemplo, não os seus dados reais. A exportação completa ainda não está ligada.",
+      "exportAction": "Transferir pré-visualização",
+      "exporting": "A preparar pré-visualização…",
+      "exported": "Pré-visualização de {dataset} transferida (só cabeçalhos — sem dados reais).",
+      "rowCount": "{rows, number} registos quando ligado",
       "datasets": {
         "companies": "Empresas",
         "contacts": "Contactos",
@@ -3730,7 +3795,7 @@
     "subtitle": "Faça a gestão dos seus dados pessoais, preferências e segurança da conta.",
     "personal": {
       "title": "Perfil pessoal",
-      "subtitle": "Os seus dados de identificação na Aurea.",
+      "subtitle": "Os seus dados de identificação na LeiriTech.",
       "save": "Guardar alterações",
       "saving": "A guardar…",
       "saved": "Perfil atualizado.",

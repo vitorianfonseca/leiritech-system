@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 export type ToastTone = "default" | "success" | "warning" | "destructive" | "info";
 
 /** Custom payload carried on each toast. */
-export interface AureaToastData {
+export interface LeiritechToastData {
   tone?: ToastTone;
   onUndo?: () => void | Promise<void>;
 }
@@ -45,12 +45,12 @@ export interface UndoToastOptions extends Omit<ToastOptions, "tone"> {
  * `toastWithUndo()` can be called from anywhere (event handlers, mutation
  * callbacks, non-component modules) and still render in the single <Toaster/>.
  */
-export const aureaToastManager = Toast.createToastManager<AureaToastData>();
+export const leiritechToastManager = Toast.createToastManager<LeiritechToastData>();
 
 /** Fire a basic toast. Returns the toast id. */
 export function toast(options: ToastOptions): string {
   const { title, description, tone = "default", duration } = options;
-  return aureaToastManager.add({
+  return leiritechToastManager.add({
     title,
     description,
     timeout: duration,
@@ -65,7 +65,7 @@ export function toast(options: ToastOptions): string {
  */
 export function toastWithUndo(options: UndoToastOptions): string {
   const { title, description, onUndo, tone = "default", duration = 6000 } = options;
-  return aureaToastManager.add({
+  return leiritechToastManager.add({
     title,
     description,
     timeout: duration,
@@ -75,7 +75,7 @@ export function toastWithUndo(options: UndoToastOptions): string {
 
 /** Programmatically dismiss a toast (or the latest when no id is given). */
 export function dismissToast(id?: string): void {
-  aureaToastManager.close(id);
+  leiritechToastManager.close(id);
 }
 
 /**
@@ -118,7 +118,7 @@ const toneIconColor: Record<ToastTone, string> = {
 };
 
 function ToastList() {
-  const { toasts } = Toast.useToastManager<AureaToastData>();
+  const { toasts } = Toast.useToastManager<LeiritechToastData>();
   const t = useTranslations("shared.toast");
 
   return (
@@ -186,7 +186,7 @@ function ToastList() {
 export function Toaster() {
   const t = useTranslations("shared.toast");
   return (
-    <Toast.Provider toastManager={aureaToastManager}>
+    <Toast.Provider toastManager={leiritechToastManager}>
       <Toast.Portal>
         <Toast.Viewport
           aria-label={t("region")}

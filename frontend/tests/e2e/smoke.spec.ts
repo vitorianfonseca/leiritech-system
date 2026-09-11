@@ -49,7 +49,7 @@ test("BR-008: Membro is denied the finance page", async ({ browser }) => {
     storageState: {
       cookies: [
         {
-          name: "aurea_role",
+          name: "leiritech_role",
           value: "membro",
           domain: "localhost",
           path: "/",

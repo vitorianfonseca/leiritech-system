@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Smoke E2E config for Aurea System (partial coverage toward issue #54).
+ * Smoke E2E config for LeiriTech (partial coverage toward issue #54).
  * Boots the dev server on a dedicated port and drives representative routes.
  */
 const PORT = 3930;
@@ -15,11 +15,11 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "off",
-    // Dev session stub: role is read from the aurea_role cookie.
+    // Dev session stub: role is read from the leiritech_role cookie.
     storageState: {
       cookies: [
         {
-          name: "aurea_role",
+          name: "leiritech_role",
           value: "admin",
           domain: "localhost",
           path: "/",

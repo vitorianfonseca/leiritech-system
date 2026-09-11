@@ -1,5 +1,5 @@
 /**
- * Shared component library for Aurea System (issue #7).
+ * Shared component library for LeiriTech (issue #7).
  *
  * Feature builders import from `@/components/shared` — never reach into the
  * individual files. Everything here consumes the DESIGN.md tokens, is fully
@@ -52,13 +52,13 @@ export {
   toast,
   toastWithUndo,
   dismissToast,
-  aureaToastManager,
+  leiritechToastManager,
 } from "./toast";
 export type {
   ToastOptions,
   UndoToastOptions,
   ToastTone,
-  AureaToastData,
+  LeiritechToastData,
 } from "./toast";
 
 // Collaboration (issue #40) — reusable across companies/opportunities/projects/tasks
