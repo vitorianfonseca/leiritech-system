@@ -1,0 +1,62 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Mirrors backend/docker-compose.yml (postgres:16, user/pass/db = aurea),
+    # published on 5433 so the app's default DATABASE_URL works unchanged.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aurea
+          POSTGRES_PASSWORD: aurea
+          POSTGRES_DB: aurea
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U aurea -d aurea"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://aurea:aurea@localhost:5433/aurea
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+
+      - name: Run tests
+        run: uv run pytest

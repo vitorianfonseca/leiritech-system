@@ -44,10 +44,10 @@ const UNIT_KEYS: Record<string, string> = {
 };
 
 /**
- * The branded Aurea proposal document. Editorial layout on warm paper: a
+ * The branded LeiriTech proposal document. Editorial layout on cool paper: a
  * masthead with the wordmark, a "prepared for" block, numbered content
  * sections, an investment table grouped by billing cadence, and the upfront
- * total set as the one editorial figure with a gold underline. Print-optimised
+ * total set as the one editorial figure with a cobalt underline. Print-optimised
  * so "Imprimir" produces a clean PDF.
  */
 export function ProposalPreview({ proposalId, user, brandName }: ProposalPreviewProps) {

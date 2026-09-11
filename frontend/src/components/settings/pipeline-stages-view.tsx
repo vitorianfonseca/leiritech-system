@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState, toast, SkeletonList } from "@/components/shared";
 import { settingsApi } from "@/lib/api/settings";
-import type { AureaColorToken, PipelineStageConfig } from "@/lib/api/settings-types";
+import type { LeiritechColorToken, PipelineStageConfig } from "@/lib/api/settings-types";
 import type { PipelineStageId } from "@/lib/api/opportunities-types";
 import type { Role } from "@/lib/session";
 import { SortableStageRow } from "./sortable-stage-row";
@@ -86,7 +86,7 @@ export function PipelineStagesView({ role }: PipelineStagesViewProps) {
     setDraft((prev) => prev.map((s) => (s.id === id ? { ...s, winProbability: clamped } : s)));
   }
 
-  function setColor(id: PipelineStageId, color: AureaColorToken) {
+  function setColor(id: PipelineStageId, color: LeiritechColorToken) {
     setDraft((prev) => prev.map((s) => (s.id === id ? { ...s, color } : s)));
   }
 

@@ -112,10 +112,12 @@ export function filterDataset(data: ReportDataset, f: ReportFilters): ReportData
           if (!dateInRange(m.expectedDate, f.from, f.to)) return false;
           return true;
         }),
-        costs: data.finance.costs.filter((c) => {
-          if (f.projectId && c.projectId !== f.projectId) return false;
-          if (f.clientId && !clientProjectIds.has(c.projectId)) return false;
-          if (!dateInRange(c.incurredDate, f.from, f.to)) return false;
+        // Per-project rollups aren't dated (they're a live snapshot, not a
+        // line item), so only client/project narrow them — a `from`/`to`
+        // range filter has no meaningful per-project date to check against.
+        projectSummaries: data.finance.projectSummaries.filter((s) => {
+          if (f.projectId && s.projectId !== f.projectId) return false;
+          if (f.clientId && !clientProjectIds.has(s.projectId)) return false;
           return true;
         }),
       }
@@ -552,42 +554,35 @@ export interface ProjectMarginRow {
   marginCents: number;
   marginRatio: number;
 }
+/**
+ * Per-project margin (BR-065). Sourced directly from the backend's own live
+ * rollup (`FinancialProjectSummary`, from `financeApi.getOverview` →
+ * `/finance/projects/{id}/summary`) instead of being recomputed here —
+ * `marginCents` already nets out labour cost
+ * (`contracted − Σlogged-hours×rate − costs`) exactly like
+ * `finance_service.financial_summary()` on the backend.
+ *
+ * H6 (AUDIT_REPORT.md): an earlier version of this function recomputed
+ * margin client-side as `contracted − costs`, omitting labour cost entirely
+ * and inflating every project's margin by its full labour spend. Do not
+ * reintroduce a local recomputation here — if a new figure is needed, prefer
+ * extending `FinancialProjectSummary` so the backend stays the single source
+ * of truth for money math.
+ */
 export function marginByProject(
   finance: NonNullable<ReportDataset["finance"]>
 ): ProjectMarginRow[] {
-  const map = new Map<string, ProjectMarginRow>();
-  const get = (id: string, name: string): ProjectMarginRow => {
-    let r = map.get(id);
-    if (!r) {
-      r = {
-        projectId: id,
-        projectName: name,
-        contractedCents: 0,
-        receivedCents: 0,
-        costsCents: 0,
-        marginCents: 0,
-        marginRatio: 0,
-      };
-      map.set(id, r);
-    }
-    return r;
-  };
-  for (const m of finance.milestones) {
-    if (m.status === "cancelled") continue;
-    const r = get(m.projectId, m.projectName);
-    r.contractedCents += m.amountCents;
-    r.receivedCents += m.receivedAmountCents;
-  }
-  for (const c of finance.costs) {
-    const r = get(c.projectId, c.projectName);
-    r.costsCents += c.amountCents;
-  }
-  const rows = [...map.values()];
-  for (const r of rows) {
-    r.marginCents = r.contractedCents - r.costsCents;
-    r.marginRatio = r.contractedCents > 0 ? r.marginCents / r.contractedCents : 0;
-  }
-  return rows.sort((a, b) => b.contractedCents - a.contractedCents);
+  return finance.projectSummaries
+    .map((s) => ({
+      projectId: s.projectId,
+      projectName: s.projectName,
+      contractedCents: s.contractedCents,
+      receivedCents: s.receivedCents,
+      costsCents: s.costsCents,
+      marginCents: s.marginCents,
+      marginRatio: s.marginRatio,
+    }))
+    .sort((a, b) => b.contractedCents - a.contractedCents);
 }
 
 export interface MonthlyPointRow {

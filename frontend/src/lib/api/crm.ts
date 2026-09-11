@@ -48,6 +48,7 @@ import {
   type CompanyStatus,
   type CompanySummary,
   type Contact,
+  type ContactInput,
   type ContactStatus,
   type FileRef,
   type Interaction,
@@ -1057,6 +1058,20 @@ function toCompanyBody(input: CompanyInput): Record<string, unknown> {
   };
 }
 
+/** Build the backend contact create/update body from the frontend input. */
+function toContactBody(input: ContactInput): Record<string, unknown> {
+  return {
+    name: input.name,
+    companyId: input.companyId,
+    roleTitle: input.role,
+    email: input.email,
+    phone: input.phone,
+    notes: input.notes,
+    ownerId: input.ownerId,
+    status: input.status,
+  };
+}
+
 /* ------------------------------------------------------------------ *
  * Public interface
  * ------------------------------------------------------------------ */
@@ -1092,6 +1107,11 @@ export interface CrmApi {
     role: Role,
     userId: string
   ): Promise<{ contact: Contact; interactions: Interaction[] }>;
+  createContact(input: ContactInput, actorId: string): Promise<Contact>;
+  updateContact(id: string, input: ContactInput, actorId: string): Promise<Contact>;
+  /** Soft-archive (BR-060). Contacts have no archive-blocker rule. */
+  archiveContact(id: string, actorId: string): Promise<void>;
+  restoreContact(id: string, actorId: string): Promise<void>;
   listInteractions(companyId: string): Promise<Interaction[]>;
   createInteraction(input: InteractionInput): Promise<Interaction>;
 }
@@ -1223,13 +1243,13 @@ export const crmApi: CrmApi = {
   },
 
   // GET /contacts. Backend scopes by JWT.
-  async listContacts() {
+  async listContacts({ includeArchived = false }) {
     try {
       const page = await http.get<BackendPage<BackendContact>>("/contacts", {
-        query: { page_size: PAGE_SIZE },
+        query: { include_archived: includeArchived, page_size: PAGE_SIZE },
       });
       return page.items
-        .filter((c) => c.archivedAt === null)
+        .filter((c) => includeArchived || c.archivedAt === null)
         // INTEGRATION-GAP: companyName — not embedded on ContactResponse
         .map((c) => mapContact(c, null))
         .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
@@ -1254,6 +1274,47 @@ export const crmApi: CrmApi = {
           .map(mapInteraction)
           .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)),
       };
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // POST /contacts (H9 fix). Gestor+ only (RequireGestor on the route).
+  async createContact(input) {
+    try {
+      const created = await http.post<BackendContact>("/contacts", toContactBody(input));
+      return mapContact(created, null);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // PATCH /contacts/{id} (H9 fix).
+  async updateContact(id, input) {
+    try {
+      const updated = await http.patch<BackendContact>(
+        `/contacts/${id}`,
+        toContactBody(input)
+      );
+      return mapContact(updated, null);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // POST /contacts/{id}/archive (H9 fix). No archive-blocker rule for contacts.
+  async archiveContact(id) {
+    try {
+      await http.post<BackendContact>(`/contacts/${id}/archive`);
+    } catch (err) {
+      throw toCrmError(err);
+    }
+  },
+
+  // POST /contacts/{id}/restore (H9 fix).
+  async restoreContact(id) {
+    try {
+      await http.post<BackendContact>(`/contacts/${id}/restore`);
     } catch (err) {
       throw toCrmError(err);
     }
@@ -1305,9 +1366,9 @@ export const crmApi: CrmApi = {
  * ------------------------------------------------------------------ */
 
 const CRM_ACTORS: Record<string, DirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", avatarUrl: null },
-  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@aurea.pt", avatarUrl: null },
+  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
+  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@leiritech.pt", avatarUrl: null },
+  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@leiritech.pt", avatarUrl: null },
 };
 
 function seededCompanyActivity(companyId: string): ActivityLog[] {

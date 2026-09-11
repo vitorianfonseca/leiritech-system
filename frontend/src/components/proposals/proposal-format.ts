@@ -3,6 +3,7 @@ import type { Badge } from "@/components/ui/badge";
 import type { ProposalState } from "@/lib/api/proposals-types";
 
 export { formatEUR, formatDate } from "@/components/finance/finance-format";
+export { parseEuroToCents } from "@/lib/currency";
 
 type BadgeVariant = NonNullable<ComponentProps<typeof Badge>["variant"]>;
 
@@ -21,16 +22,6 @@ export const PROPOSAL_STATE_VARIANT: Record<ProposalState, BadgeVariant> = {
   rejected: "destructive",
   expired: "done",
 };
-
-/** Parse a `1.234,56` / `1234.56` value string (EUR) to cents, or null. */
-export function parseEuroToCents(raw: string): number | null {
-  const s = raw.trim();
-  if (!s) return null;
-  const normalized = s.replace(/\./g, "").replace(",", ".");
-  const n = Number(normalized);
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
-}
 
 /** Human-readable file size (1.2 MB / 842 KB) using the active locale. */
 export function formatFileSize(bytes: number, locale: string): string {

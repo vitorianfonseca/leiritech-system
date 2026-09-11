@@ -8,14 +8,14 @@
  *
  * Access (WORKFLOW_SPEC §3 / BR-004): settings configuration is Admin-only. A
  * Gestor may *use* project templates (#33) and manage personal preferences, but
- * organisation config (Aurea data, members, pipeline, tags, capacity, costs) is
+ * organisation config (LeiriTech data, members, pipeline, tags, capacity, costs) is
  * Admin-only. Cost rates specifically are Admin-only (BR-008/069). A Membro has
  * no settings access at all — the route renders not-found.
  *
  * NOTE: capacity + internal cost rates are the SINGLE SOURCE `teamApi`
  * (`./team`, issue #37). The `/settings/capacity` and `/settings/costs` sections
  * read/write through `teamApi.updateFunctionConfig`, NOT through this module —
- * this file owns only genuinely new config (Aurea data, tags, members,
+ * this file owns only genuinely new config (LeiriTech data, tags, members,
  * notifications, priorities, pipeline stage colours, archive, export).
  */
 
@@ -58,7 +58,7 @@ export function canAccessSettings(role: Role): boolean {
  * `globals.css`. Used for tags, priorities and pipeline stages so config never
  * introduces new hues.
  */
-export type AureaColorToken =
+export type LeiritechColorToken =
   | "gold"
   | "teal"
   | "green"
@@ -67,7 +67,7 @@ export type AureaColorToken =
   | "violet"
   | "info";
 
-export const AUREA_COLOR_TOKENS: AureaColorToken[] = [
+export const LEIRITECH_COLOR_TOKENS: LeiritechColorToken[] = [
   "gold",
   "teal",
   "green",
@@ -78,7 +78,7 @@ export const AUREA_COLOR_TOKENS: AureaColorToken[] = [
 ];
 
 /** Maps a colour token to the CSS variable defined in globals.css. */
-export const AUREA_COLOR_VAR: Record<AureaColorToken, string> = {
+export const LEIRITECH_COLOR_VAR: Record<LeiritechColorToken, string> = {
   gold: "var(--gold)",
   teal: "var(--chart-2)",
   green: "var(--success)",
@@ -89,10 +89,10 @@ export const AUREA_COLOR_VAR: Record<AureaColorToken, string> = {
 };
 
 /* ------------------------------------------------------------------ *
- * Aurea organisation profile
+ * LeiriTech organisation profile
  * ------------------------------------------------------------------ */
 
-export interface AureaProfile {
+export interface LeiritechProfile {
   name: string;
   tagline: string;
   email: string;
@@ -106,7 +106,7 @@ export interface AureaProfile {
   logoDataUrl: string | null;
 }
 
-export type UpdateAureaInput = AureaProfile;
+export type UpdateLeiritechInput = LeiritechProfile;
 
 /* ------------------------------------------------------------------ *
  * Tags (genuinely new config)
@@ -115,20 +115,20 @@ export type UpdateAureaInput = AureaProfile;
 export interface Tag {
   id: string;
   label: string;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
   /** How many records currently carry the tag (drives the delete warning). */
   usageCount: number;
 }
 
 export interface CreateTagInput {
   label: string;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 export interface UpdateTagInput {
   id: string;
   label: string;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 /* ------------------------------------------------------------------ *
@@ -236,12 +236,12 @@ export const PRIORITY_IDS: PriorityId[] = ["baixa", "media", "alta", "urgente"];
 
 export interface PriorityConfig {
   id: PriorityId;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 export interface UpdatePriorityInput {
   id: PriorityId;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 /* ------------------------------------------------------------------ *
@@ -260,7 +260,7 @@ export interface PipelineStageConfig {
   order: number;
   /** Default win probability 0–100 (BR-020). */
   winProbability: number;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 export interface UpdatePipelineStagesInput {
@@ -268,7 +268,7 @@ export interface UpdatePipelineStagesInput {
     id: PipelineStageId;
     order: number;
     winProbability: number;
-    color: AureaColorToken;
+    color: LeiritechColorToken;
   }>;
 }
 

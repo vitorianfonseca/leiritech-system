@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { User, Settings, LogOut, ChevronDown } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
+import { useLogout } from "@/lib/hooks/use-logout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +28,7 @@ function initials(name: string) {
 export function UserMenu({ user }: { user: SessionUser }) {
   const t = useTranslations("shell.userMenu");
   const tr = useTranslations("roles");
+  const { logout, pending } = useLogout();
 
   return (
     <DropdownMenu>
@@ -68,7 +70,8 @@ export function UserMenu({ user }: { user: SessionUser }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          render={<Link href="/login" />}
+          disabled={pending}
+          onClick={() => void logout()}
         >
           <LogOut />
           {t("signOut")}

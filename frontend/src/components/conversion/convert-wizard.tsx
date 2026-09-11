@@ -644,7 +644,9 @@ function StepMilestones({
                       {...controlProps}
                       inputMode="decimal"
                       defaultValue={(m.amountCents / 100).toFixed(2).replace(".", ",")}
-                      onChange={(e) => patchRow(m.key, { amountCents: parseEuroToCents(e.target.value) })}
+                      onChange={(e) =>
+                        patchRow(m.key, { amountCents: parseEuroToCents(e.target.value) ?? 0 })
+                      }
                       placeholder="0,00"
                     />
                   )}

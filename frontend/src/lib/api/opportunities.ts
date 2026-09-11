@@ -87,10 +87,10 @@ export const PIPELINE_OWNERS: { id: string; name: string }[] = Object.entries(
 ).map(([id, name]) => ({ id, name }));
 
 const ACTORS: Record<string, DirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", avatarUrl: null },
-  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@aurea.pt", avatarUrl: null },
-  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@aurea.pt", avatarUrl: null },
+  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
+  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@leiritech.pt", avatarUrl: null },
+  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@leiritech.pt", avatarUrl: null },
+  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@leiritech.pt", avatarUrl: null },
 };
 function actor(id: string): DirectoryUser {
   return ACTORS[id] ?? { id, name: ownerName(id), email: "", avatarUrl: null };
@@ -419,8 +419,10 @@ function buildStageMaps(rows: BackendPipelineStage[]): StageMaps {
   return { byId, byCode };
 }
 
-/** Load + cache the #57 stage uuid↔code maps for the module lifetime. */
-async function loadStageMaps(): Promise<StageMaps> {
+/** Load + cache the #57 stage uuid↔code maps for the module lifetime. Exported
+ * so other API clients (settings.ts's pipeline-stage config) can resolve a
+ * stage code to its backend UUID (audit H14). */
+export async function loadStageMaps(): Promise<StageMaps> {
   if (stageMapsCache) return stageMapsCache;
   const rows = await http.get<BackendPipelineStage[]>("/pipeline-stages");
   stageMapsCache = buildStageMaps(rows);

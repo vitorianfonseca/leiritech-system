@@ -16,7 +16,6 @@ import {
   PipelineEvolutionChart,
   TaskFlowChart,
   ContractedReceivedChart,
-  TeamLoadChart,
 } from "./dashboard-charts";
 
 export interface DashboardViewProps {
@@ -90,7 +89,6 @@ export function DashboardView({ user }: DashboardViewProps) {
   const showPipeline = !!charts && charts.pipeline.length > 0;
   const showTaskFlow = !!charts && charts.taskFlow.length > 0;
   const showContractedReceived = !!charts && !!charts.contractedReceived;
-  const showTeamLoad = !!charts && charts.teamLoad.length > 0;
 
   return (
     <div className="space-y-8">
@@ -99,28 +97,23 @@ export function DashboardView({ user }: DashboardViewProps) {
       <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
 
       {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <AttentionPanel
           groups={data?.attention ?? []}
           loading={isLoading}
-          className="lg:col-span-2"
+          className="lg:col-span-2 lg:h-[38rem]"
         />
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 lg:h-[38rem]">
           {isLoading || showTaskFlow ? (
             <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
           ) : null}
-          <AgendaCard user={{ id: user.id, role: user.role }} />
+          <AgendaCard user={{ id: user.id, role: user.role }} className="min-h-0 flex-1" />
         </div>
       </div>
 
       {/* Pipeline evolution */}
       {(isLoading && managementView) || showPipeline ? (
         <PipelineEvolutionChart data={charts?.pipeline ?? []} loading={isLoading} />
-      ) : null}
-
-      {/* Team load — full width */}
-      {(isLoading && managementView) || showTeamLoad ? (
-        <TeamLoadChart data={charts?.teamLoad ?? []} loading={isLoading} />
       ) : null}
 
       {/* Contracted vs received — GATED (BR-008) */}

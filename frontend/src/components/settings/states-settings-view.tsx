@@ -13,7 +13,7 @@ import { settingsApi } from "@/lib/api/settings";
 import {
   TASK_STATE_IDS,
   taskStateBadgeVariant,
-  type AureaColorToken,
+  type LeiritechColorToken,
   type PriorityConfig,
   type PriorityId,
 } from "@/lib/api/settings-types";
@@ -34,7 +34,7 @@ export function StatesSettingsView({ role }: StatesSettingsViewProps) {
 
   const query = useQuery({ queryKey: PRIORITIES_KEY, queryFn: () => settingsApi.getPriorities() });
 
-  async function setColor(id: PriorityId, color: AureaColorToken) {
+  async function setColor(id: PriorityId, color: LeiritechColorToken) {
     try {
       await settingsApi.updatePriority(role, { id, color });
       await qc.invalidateQueries({ queryKey: PRIORITIES_KEY });

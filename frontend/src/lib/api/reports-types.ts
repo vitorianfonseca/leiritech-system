@@ -23,7 +23,7 @@ import type { ProjectListItem } from "@/lib/api/projects-types";
 import type { Task } from "@/lib/api/tasks-types";
 import type { TimeEntry } from "@/lib/api/time-types";
 import type { TeamMemberWorkload } from "@/lib/api/team-types";
-import type { PaymentMilestone, ProjectCost } from "@/lib/api/finance-types";
+import type { FinancialProjectSummary, PaymentMilestone } from "@/lib/api/finance-types";
 
 /** The four report groups (tabs). */
 export type ReportGroupKey = "comercial" | "projetos" | "equipa" | "financeiro";
@@ -90,7 +90,13 @@ export interface ReportDataset {
   tasks: Task[];
   timeEntries: TimeEntry[];
   team: TeamMemberWorkload[];
-  finance: { milestones: PaymentMilestone[]; costs: ProjectCost[] } | null;
+  /**
+   * `projectSummaries` is the backend's live per-project margin rollup
+   * (BR-065, `finance_service.financial_summary()`) — it already nets out
+   * labour cost. Report aggregation MUST derive margin from it rather than
+   * recomputing `contracted − costs` from milestones/costs (see H6).
+   */
+  finance: { milestones: PaymentMilestone[]; projectSummaries: FinancialProjectSummary[] } | null;
 
   /** Options for the filter bar, derived from the scoped datasets. */
   filterOptions: {

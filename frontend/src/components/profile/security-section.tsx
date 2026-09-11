@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { KeyRound, LogOut, ShieldCheck } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
+import { useLogout } from "@/lib/hooks/use-logout";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, toast } from "@/components/shared";
 import { PasswordInput } from "@/components/auth/password-input";
@@ -23,6 +23,7 @@ export function SecuritySection({ user }: { user: SessionUser }) {
   const tv = useTranslations("profile.validation");
   const tErr = useTranslations("profile.errors");
 
+  const { logout, pending: loggingOut } = useLogout();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [pendingValues, setPendingValues] =
     React.useState<ChangePasswordFormValues | null>(null);
@@ -155,8 +156,8 @@ export function SecuritySection({ user }: { user: SessionUser }) {
           <Button
             variant="outline"
             size="lg"
-            nativeButton={false}
-            render={<Link href="/login" />}
+            disabled={loggingOut}
+            onClick={() => void logout()}
           >
             <LogOut aria-hidden />
             {t("session.logout")}

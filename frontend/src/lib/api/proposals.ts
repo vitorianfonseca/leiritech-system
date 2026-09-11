@@ -19,6 +19,7 @@ import { addDays, format, startOfDay, subDays } from "date-fns";
 import type { Role } from "@/lib/session";
 import { canAccessFinance } from "@/lib/api/finance-types";
 import { http, HttpError } from "@/lib/api/http";
+import { attachmentsApi } from "@/lib/api/attachments";
 import type {
   ProposalContent,
   ProposalContentInput,
@@ -69,10 +70,10 @@ export const proposalRoutes = {
  * ------------------------------------------------------------------ */
 
 const ACTORS: Record<string, DirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", avatarUrl: null },
-  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@aurea.pt", avatarUrl: null },
-  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@aurea.pt", avatarUrl: null },
+  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
+  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@leiritech.pt", avatarUrl: null },
+  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@leiritech.pt", avatarUrl: null },
+  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@leiritech.pt", avatarUrl: null },
 };
 function actor(id: string): DirectoryUser {
   return ACTORS[id] ?? { id, name: id, email: "", avatarUrl: null };
@@ -81,7 +82,7 @@ function actor(id: string): DirectoryUser {
 /** Mock signed download URL for an attachment (real R2 signing is integration). */
 function mockSignedUrl(proposalId: string, fileName: string): string {
   const sig = Math.random().toString(36).slice(2, 10);
-  return `https://mock.r2.aurea.pt/proposals/${proposalId}/${encodeURIComponent(
+  return `https://mock.r2.leiritech.pt/proposals/${proposalId}/${encodeURIComponent(
     fileName
   )}?sig=${sig}`;
 }
@@ -311,7 +312,38 @@ interface BackendProposal {
   updatedAt: string;
 }
 
-function mapProposal(be: BackendProposal, canFinance: boolean): Proposal {
+/**
+ * Resolve `pdf_attachment_id` to a real, downloadable file via the attachments
+ * endpoint (C8 fix): list the attachments scoped to this proposal to recover
+ * filename/size/upload date, then mint a short-lived signed download URL. Both
+ * calls are IDOR-guarded server-side by `authorize_entity_access`, so this only
+ * ever succeeds for a proposal the caller can already see.
+ */
+async function resolveProposalFile(
+  proposalId: string,
+  pdfAttachmentId: string | null
+): Promise<Proposal["file"]> {
+  if (!pdfAttachmentId) return null;
+  try {
+    const [metas, url] = await Promise.all([
+      attachmentsApi.list("proposal", proposalId),
+      attachmentsApi.getDownloadUrl(pdfAttachmentId),
+    ]);
+    const meta = metas.find((m) => m.id === pdfAttachmentId);
+    return {
+      name: meta?.filename ?? "documento.pdf",
+      sizeBytes: meta?.sizeBytes ?? 0,
+      uploadedAt: meta?.createdAt ?? new Date().toISOString(),
+      url,
+    };
+  } catch {
+    // Storage not configured, attachment deleted, or a transient failure —
+    // never fail the whole proposal read over a broken PDF link.
+    return null;
+  }
+}
+
+async function mapProposal(be: BackendProposal, canFinance: boolean): Promise<Proposal> {
   return {
     id: be.id,
     reference: be.reference,
@@ -328,9 +360,7 @@ function mapProposal(be: BackendProposal, canFinance: boolean): Proposal {
     contactName: null,
     valueCents: canFinance ? be.value ?? null : null,
     state: be.status,
-    // INTEGRATION-GAP: file — no storage backend (#46); pdf_attachment_id is not
-    // resolvable to a downloadable file yet.
-    file: null,
+    file: await resolveProposalFile(be.id, be.pdfAttachmentId),
     createdAt: be.createdDate ?? be.createdAt,
     sentAt: be.sentDate ?? null,
     validUntil: be.validUntil ?? null,
@@ -427,9 +457,10 @@ export const proposalsApi: ProposalsApi = {
       const page = await http.get<{ items: BackendProposal[] }>("/proposals", {
         query: { include_archived: includeArchived, page_size: 100 },
       });
-      return page.items
-        .map((p) => mapProposal(p, canFinance))
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      const mapped = await Promise.all(
+        page.items.map((p) => mapProposal(p, canFinance))
+      );
+      return mapped.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -441,7 +472,7 @@ export const proposalsApi: ProposalsApi = {
     void userId;
     try {
       const be = await http.get<BackendProposal>(`/proposals/${id}`);
-      return mapProposal(be, canAccessFinance(role, paymentsGrant));
+      return await mapProposal(be, canAccessFinance(role, paymentsGrant));
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -463,43 +494,40 @@ export const proposalsApi: ProposalsApi = {
         validUntil: input.validUntil,
         notes: input.notes,
       });
-      return mapProposal(be, canFinance);
+      return await mapProposal(be, canFinance);
     } catch (err) {
       throw translateProposalError(err);
     }
   },
 
-  // LEFT-ON-STUB: no storage backend (#46). We fetch the real proposal so the id
-  // resolves, then synthesize (non-persisted) file metadata for the optimistic
-  // UI; a subsequent read returns `file: null` until R2 wiring lands.
+  // WIRED (C8 fix) → uploads the real bytes via the attachments API (signed PUT
+  // to R2), then PATCHes the proposal's `pdf_attachment_id`. Draft-only is
+  // enforced server-side (`_assert_not_terminal` plus the caller only renders
+  // this control while `isDraft`); a non-draft attempt surfaces as
+  // `invalid_transition` via `translateProposalError`.
   async uploadPdf(id, input, actorId) {
     void actorId;
     try {
-      const be = await http.get<BackendProposal>(`/proposals/${id}`);
-      if (be.status !== "draft") throw new ProposalError("invalid_transition");
-      const p = mapProposal(be, false);
-      return {
-        ...p,
-        file: {
-          name: input.name,
-          sizeBytes: input.sizeBytes,
-          uploadedAt: new Date().toISOString(),
-          url: mockSignedUrl(id, input.name),
-        },
-      };
+      const meta = await attachmentsApi.upload("proposal", id, input.file);
+      const be = await http.patch<BackendProposal>(`/proposals/${id}`, {
+        pdfAttachmentId: meta.id,
+      });
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
   },
 
-  // LEFT-ON-STUB: no storage backend (#46). Returns the live proposal (file is
-  // already null on read).
+  // WIRED (C8 fix) → clears `pdf_attachment_id`. The R2 object itself is left in
+  // place (attachments are never hard-deleted from storage here); only the link
+  // from the proposal is removed.
   async removePdf(id, actorId) {
     void actorId;
     try {
-      const be = await http.get<BackendProposal>(`/proposals/${id}`);
-      if (be.status !== "draft") throw new ProposalError("invalid_transition");
-      return mapProposal(be, false);
+      const be = await http.patch<BackendProposal>(`/proposals/${id}`, {
+        pdfAttachmentId: null,
+      });
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -510,7 +538,7 @@ export const proposalsApi: ProposalsApi = {
     void actorId;
     try {
       const be = await http.post<BackendProposal>(`/proposals/${id}/send`, {});
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -521,7 +549,7 @@ export const proposalsApi: ProposalsApi = {
     void actorId;
     try {
       const be = await http.post<BackendProposal>(`/proposals/${id}/view`, {});
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -532,7 +560,7 @@ export const proposalsApi: ProposalsApi = {
     void actorId;
     try {
       const be = await http.post<BackendProposal>(`/proposals/${id}/accept`, {});
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -547,7 +575,7 @@ export const proposalsApi: ProposalsApi = {
       const be = await http.post<BackendProposal>(`/proposals/${id}/reject`, {
         note: input.note.trim(),
       });
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -558,7 +586,7 @@ export const proposalsApi: ProposalsApi = {
     void actorId;
     try {
       const be = await http.post<BackendProposal>(`/proposals/${id}/expire`, {});
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }
@@ -573,7 +601,7 @@ export const proposalsApi: ProposalsApi = {
       const be = await http.post<BackendProposal>(`/proposals/${id}/resend`, {
         validUntil: input.validUntil,
       });
-      return mapProposal(be, false);
+      return await mapProposal(be, false);
     } catch (err) {
       throw translateProposalError(err);
     }

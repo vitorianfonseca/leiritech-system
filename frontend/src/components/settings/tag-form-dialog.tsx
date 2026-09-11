@@ -11,12 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { AureaColorToken, Tag } from "@/lib/api/settings-types";
+import type { LeiritechColorToken, Tag } from "@/lib/api/settings-types";
 import { ColorPicker, ColorChip } from "./settings-colors";
 
 export interface TagFormValues {
   label: string;
-  color: AureaColorToken;
+  color: LeiritechColorToken;
 }
 
 export interface TagFormDialogProps {
@@ -43,7 +43,7 @@ export function TagFormDialog({
   const labelId = React.useId();
 
   const [label, setLabel] = React.useState(tag?.label ?? "");
-  const [color, setColor] = React.useState<AureaColorToken>(tag?.color ?? "gold");
+  const [color, setColor] = React.useState<LeiritechColorToken>(tag?.color ?? "gold");
   const [pending, setPending] = React.useState(false);
   const [showErrors, setShowErrors] = React.useState(false);
 

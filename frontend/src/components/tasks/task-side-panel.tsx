@@ -27,6 +27,7 @@ import {
   SearchableCombobox,
   CommentThread,
   ProgressBar,
+  ConfirmDialog,
   toast,
 } from "@/components/shared";
 import { cn } from "@/lib/utils";
@@ -161,15 +162,9 @@ function PanelBody({
 
   /* ---------------- timer (single active — BR-040) ---------------- */
   const running = timer.isRunning(task.id);
-  function handleTimer() {
-    if (running) {
-      const finished = timer.stop();
-      if (finished) {
-        const minutes = Math.max(1, Math.round(finished.durationMs / 60000));
-        toast({ tone: "success", title: t("timer.stopped", { minutes }) });
-      }
-      return;
-    }
+  const [switchConfirmOpen, setSwitchConfirmOpen] = React.useState(false);
+
+  function startTimerNow() {
     const finished = timer.start({
       taskId: task.id,
       taskTitle: task.title,
@@ -185,6 +180,24 @@ function PanelBody({
     } else {
       toast({ tone: "success", title: t("timer.started") });
     }
+  }
+
+  function handleTimer() {
+    if (running) {
+      const finished = timer.stop();
+      if (finished) {
+        const minutes = Math.max(1, Math.round(finished.durationMs / 60000));
+        toast({ tone: "success", title: t("timer.stopped", { minutes }) });
+      }
+      return;
+    }
+    // Single active timer (BR-040): confirm before displacing a running one —
+    // mirrors my-work-view.tsx / active-timer-card.tsx.
+    if (timer.active && timer.active.taskId !== task.id) {
+      setSwitchConfirmOpen(true);
+      return;
+    }
+    startTimerNow();
   }
 
   /* ---------------- checklist ---------------- */
@@ -663,6 +676,25 @@ function PanelBody({
           api={taskCollaborationApi}
         />
       )}
+
+      <ConfirmDialog
+        open={switchConfirmOpen}
+        onOpenChange={setSwitchConfirmOpen}
+        title={t("timer.switchConfirmTitle")}
+        description={
+          timer.active
+            ? t("timer.switchConfirmDescription", {
+                running: timer.active.taskTitle,
+                next: task.title,
+              })
+            : undefined
+        }
+        confirmLabel={t("timer.switchConfirm")}
+        onConfirm={() => {
+          startTimerNow();
+          setSwitchConfirmOpen(false);
+        }}
+      />
     </div>
   );
 }

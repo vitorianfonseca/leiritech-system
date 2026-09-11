@@ -7,4 +7,5 @@ export { CompaniesView } from "./companies-view";
 export { CompanyDetailView } from "./company-detail-view";
 export { ContactsView } from "./contacts-view";
 export { ContactDetailView } from "./contact-detail-view";
+export { ContactFormDialog } from "./contact-form-dialog";
 export { NewCompanyForm } from "./new-company-form";

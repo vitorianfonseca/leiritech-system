@@ -92,7 +92,7 @@ export function InviteMemberDialog({
               type="email"
               value={email}
               autoFocus
-              placeholder="nome@aurea.pt"
+              placeholder="nome@leiritech.pt"
               onChange={(e) => {
                 setEmail(e.target.value);
                 onClearServerError?.();

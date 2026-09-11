@@ -2,6 +2,7 @@ import type * as React from "react";
 import type { PipelineStageId } from "@/lib/api/opportunities-types";
 
 export { formatEUR, formatDate } from "@/components/finance/finance-format";
+export { parseEuroToCents } from "@/lib/currency";
 
 /**
  * Column accent (F5). On brand (DESIGN.md "paper + ink + one flash of gold"),
@@ -30,16 +31,6 @@ export function initials(name: string): string {
     .slice(0, 2)
     .map((p) => p.charAt(0).toUpperCase())
     .join("");
-}
-
-/** Parse a `1.234,56` / `1234.56` value string (EUR) to cents, or null. */
-export function parseEuroToCents(raw: string): number | null {
-  const s = raw.trim();
-  if (!s) return null;
-  const normalized = s.replace(/\./g, "").replace(",", ".");
-  const n = Number(normalized);
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
 }
 
 /** Stable stage order index for sorting. */

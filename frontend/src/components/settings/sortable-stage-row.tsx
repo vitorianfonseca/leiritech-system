@@ -10,14 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { AureaColorToken, PipelineStageConfig } from "@/lib/api/settings-types";
+import type { LeiritechColorToken, PipelineStageConfig } from "@/lib/api/settings-types";
 import { ColorDot, ColorPicker } from "./settings-colors";
 
 export interface SortableStageRowProps {
   stage: PipelineStageConfig;
   index: number;
   onProbabilityChange: (id: PipelineStageConfig["id"], value: number) => void;
-  onColorChange: (id: PipelineStageConfig["id"], color: AureaColorToken) => void;
+  onColorChange: (id: PipelineStageConfig["id"], color: LeiritechColorToken) => void;
 }
 
 export function SortableStageRow({

@@ -3,15 +3,15 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getSession } from "@/lib/session";
 import { canAdministerSettings } from "@/lib/api/settings-types";
-import { AureaSettingsView } from "@/components/settings";
+import { LeiritechSettingsView } from "@/components/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("settings.areas.aurea");
+  const t = await getTranslations("settings.areas.leiritech");
   return { title: t("title") };
 }
 
-export default async function AureaSettingsPage() {
+export default async function LeiritechSettingsPage() {
   const session = await getSession();
   if (!session || !canAdministerSettings(session.role)) notFound();
-  return <AureaSettingsView role={session.role} />;
+  return <LeiritechSettingsView role={session.role} />;
 }

@@ -1,11 +1,21 @@
 /**
- * Project templates API client — MOCK implementation (F9).
+ * Project templates API client (F9, audit C10).
  *
- * Backend is not wired yet. This module exports a typed `templatesApi` whose
- * methods return promises exactly as the real HTTP client will. The integration
- * agent replaces the bodies with real `fetch` calls to FastAPI WITHOUT changing
- * the signatures. UI code (via TanStack Query) depends only on the
- * `TemplatesApi` interface below.
+ * WIRED to the real backend (`/projects/templates`). The backend does a
+ * "replace-on-save" PATCH — sending `phases` replaces the whole phases/tasks
+ * tree in one call (mirrors `proposal_template_service`'s established
+ * pattern for exactly this "template with nested ordered children" shape).
+ * Every granular phase/task mutation below (addPhase, reorderTasks, etc.) is
+ * implemented as read-current-detail → mutate the array in memory → PATCH
+ * the whole tree — there is one real persistence path, not eight sub-resource
+ * endpoints, and every call is genuinely durable (survives reload, visible to
+ * every user) where it used to be an in-session mock.
+ *
+ * `type`/`active` (template) and `isMilestone`/`milestoneName` (phase) are
+ * NOT modelled by the backend — there was never a request to add them, and
+ * they are cosmetic organizing fields, not something a business rule reads.
+ * They are defaulted on every read (never fabricated as "saved") exactly as
+ * they were before this file was wired to the backend.
  *
  * This is the CANONICAL template source. #31 (conversion wizard) and #42
  * (settings nav) import from here — do not duplicate the fixtures elsewhere.
@@ -14,9 +24,8 @@
  * Reads are open to any caller (the route/UI gate to Admin+Gestor).
  */
 
-import { format } from "date-fns";
 import type { Role } from "@/lib/session";
-import { http } from "./http";
+import { http, HttpError } from "./http";
 import {
   canManageTemplates,
   summarize,
@@ -28,265 +37,160 @@ import {
   type TemplateInput,
   type TemplatePhase,
   type TemplateTask,
+  type TemplateTaskRole,
 } from "./template-types";
-
-const MOCK_LATENCY_MS = 350;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function nowIso(): string {
-  return format(new Date(), "yyyy-MM-dd");
-}
-
-function rid(prefix: string): string {
-  return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/* ------------------------------------------------------------------ *
- * Internal record shape (summary fields + nested phases)
- * ------------------------------------------------------------------ */
-
-interface TemplateRecord {
-  id: string;
-  name: string;
-  type: TemplateDetail["type"];
-  description: string;
-  active: boolean;
-  expectedDurationDays: number;
-  updatedAt: string;
-  phases: TemplatePhase[];
-}
-
-/* ------------------------------------------------------------------ *
- * Seed — the 4 demo templates (pt-PT content).
- * Content is DATA (canonical pt-PT), not UI chrome.
- * ------------------------------------------------------------------ */
-
-/** Compact phase/task authoring helper for the seed. */
-function seedPhase(
-  templateId: string,
-  index: number,
-  name: string,
-  expectedDurationDays: number,
-  milestone: string | null,
-  tasks: Array<[string, TemplateTask["roleResponsible"], number]>,
-): TemplatePhase {
-  const phaseId = `${templateId}-ph-${index + 1}`;
-  return {
-    id: phaseId,
-    templateId,
-    name,
-    order: index,
-    expectedDurationDays,
-    isMilestone: milestone !== null,
-    milestoneName: milestone,
-    tasks: tasks.map(([title, roleResponsible, estimateHours], i) => ({
-      id: `${phaseId}-t-${i + 1}`,
-      phaseId,
-      title,
-      roleResponsible,
-      estimateHours,
-      order: i,
-    })),
-  };
-}
-
-function buildSeed(): TemplateRecord[] {
-  const website: TemplateRecord = {
-    id: "tpl-website",
-    name: "Website institucional",
-    type: "website",
-    description:
-      "Website institucional com design à medida, CMS e publicação. Do arranque à entrega em produção.",
-    active: true,
-    expectedDurationDays: 45,
-    updatedAt: nowIso(),
-    phases: [
-      seedPhase("tpl-website", 0, "Descoberta e planeamento", 5, null, [
-        ["Reunião de arranque com o cliente", "gestor", 3],
-        ["Levantamento de requisitos e conteúdos", "consultant", 6],
-        ["Definição de mapa do site e âmbito", "gestor", 4],
-      ]),
-      seedPhase("tpl-website", 1, "Design", 12, "Design aprovado", [
-        ["Wireframes das páginas principais", "designer", 10],
-        ["Design visual (UI) das páginas-chave", "designer", 20],
-        ["Revisão e aprovação do cliente", "gestor", 4],
-      ]),
-      seedPhase("tpl-website", 2, "Desenvolvimento", 18, null, [
-        ["Montagem do tema e componentes", "developer", 32],
-        ["Integração de CMS e conteúdos", "developer", 16],
-        ["Formulários e integrações", "developer", 10],
-      ]),
-      seedPhase("tpl-website", 3, "Testes e publicação", 8, "Site em produção", [
-        ["Testes de responsividade e navegadores", "qa", 8],
-        ["Otimização SEO técnica e desempenho", "developer", 6],
-        ["Publicação e verificação em produção", "developer", 4],
-      ]),
-    ],
-  };
-
-  const app: TemplateRecord = {
-    id: "tpl-app",
-    name: "Aplicação móvel",
-    type: "app",
-    description:
-      "Aplicação móvel iOS e Android, do produto mínimo viável às lojas, com fase beta.",
-    active: true,
-    expectedDurationDays: 90,
-    updatedAt: nowIso(),
-    phases: [
-      seedPhase("tpl-app", 0, "Descoberta de produto", 10, "Âmbito validado", [
-        ["Workshop de descoberta", "consultant", 8],
-        ["Definição de funcionalidades do MVP", "gestor", 6],
-        ["Arquitetura técnica e stack", "developer", 8],
-      ]),
-      seedPhase("tpl-app", 1, "Design de produto", 15, "Protótipo aprovado", [
-        ["Fluxos e wireframes", "designer", 18],
-        ["Design de interface (UI kit)", "designer", 30],
-        ["Protótipo interativo e validação", "designer", 12],
-      ]),
-      seedPhase("tpl-app", 2, "Desenvolvimento", 40, null, [
-        ["Configuração de projeto e CI/CD", "developer", 16],
-        ["Ecrãs e navegação", "developer", 60],
-        ["Integração de API e autenticação", "developer", 40],
-        ["Notificações e estado offline", "developer", 24],
-      ]),
-      seedPhase("tpl-app", 3, "Beta e QA", 15, "Beta publicada", [
-        ["Plano de testes e casos", "qa", 12],
-        ["Testes funcionais e correções", "qa", 32],
-        ["Distribuição TestFlight / Play Console", "developer", 8],
-      ]),
-      seedPhase("tpl-app", 4, "Lançamento", 10, "App nas lojas", [
-        ["Fichas de loja e capturas", "marketing", 8],
-        ["Submissão e revisão nas lojas", "developer", 10],
-        ["Monitorização pós-lançamento", "developer", 8],
-      ]),
-    ],
-  };
-
-  const consulting: TemplateRecord = {
-    id: "tpl-consulting",
-    name: "Consultoria e auditoria",
-    type: "consulting",
-    description:
-      "Projeto de consultoria com diagnóstico, recomendações e apresentação final ao cliente.",
-    active: true,
-    expectedDurationDays: 30,
-    updatedAt: nowIso(),
-    phases: [
-      seedPhase("tpl-consulting", 0, "Enquadramento", 4, null, [
-        ["Reunião de arranque e objetivos", "gestor", 3],
-        ["Recolha de documentação e acessos", "consultant", 5],
-      ]),
-      seedPhase("tpl-consulting", 1, "Diagnóstico", 12, "Diagnóstico entregue", [
-        ["Entrevistas com stakeholders", "consultant", 12],
-        ["Análise de dados e processos", "consultant", 20],
-        ["Identificação de oportunidades", "consultant", 8],
-      ]),
-      seedPhase("tpl-consulting", 2, "Recomendações", 8, null, [
-        ["Elaboração do plano de ação", "consultant", 16],
-        ["Estimativa de impacto e prioridades", "gestor", 6],
-      ]),
-      seedPhase("tpl-consulting", 3, "Apresentação", 6, "Relatório final", [
-        ["Preparação do relatório final", "consultant", 10],
-        ["Apresentação executiva ao cliente", "gestor", 4],
-      ]),
-    ],
-  };
-
-  const maintenance: TemplateRecord = {
-    id: "tpl-maintenance",
-    name: "Manutenção mensal",
-    type: "maintenance",
-    description:
-      "Avença mensal de manutenção e suporte: monitorização, atualizações e um relatório de fecho.",
-    active: true,
-    expectedDurationDays: 30,
-    updatedAt: nowIso(),
-    phases: [
-      seedPhase("tpl-maintenance", 0, "Monitorização contínua", 30, null, [
-        ["Verificação de disponibilidade e alertas", "developer", 4],
-        ["Cópias de segurança e verificação", "developer", 3],
-      ]),
-      seedPhase("tpl-maintenance", 1, "Atualizações e correções", 30, null, [
-        ["Atualizações de segurança e dependências", "developer", 6],
-        ["Correção de incidências reportadas", "developer", 8],
-        ["Pequenas melhorias solicitadas", "developer", 6],
-      ]),
-      seedPhase("tpl-maintenance", 2, "Relatório mensal", 3, "Relatório mensal", [
-        ["Compilação de métricas do mês", "gestor", 3],
-        ["Reunião de balanço com o cliente", "gestor", 2],
-      ]),
-    ],
-  };
-
-  return [website, app, consulting, maintenance];
-}
-
-let records: TemplateRecord[] = [];
-let seeded = false;
-
-function seed(): void {
-  if (seeded) return;
-  seeded = true;
-  records = buildSeed();
-}
-
-/* ------------------------------------------------------------------ *
- * Projections
- * ------------------------------------------------------------------ */
-
-function toSummary(r: TemplateRecord): ProjectTemplate {
-  return summarize(
-    {
-      id: r.id,
-      name: r.name,
-      type: r.type,
-      description: r.description,
-      active: r.active,
-      expectedDurationDays: r.expectedDurationDays,
-      updatedAt: r.updatedAt,
-    },
-    r.phases,
-  );
-}
-
-function toDetail(r: TemplateRecord): TemplateDetail {
-  return {
-    ...toSummary(r),
-    phases: r.phases
-      .map((p, i) => ({
-        ...p,
-        order: i,
-        tasks: [...p.tasks].sort((a, b) => a.order - b.order).map((t, ti) => ({ ...t, order: ti })),
-      }))
-      .sort((a, b) => a.order - b.order),
-  };
-}
-
-function findRecord(id: string): TemplateRecord {
-  const r = records.find((x) => x.id === id);
-  if (!r) throw new TemplateError("not_found", `Unknown template: ${id}`);
-  return r;
-}
-
-function findPhase(phaseId: string): { record: TemplateRecord; phase: TemplatePhase } {
-  for (const record of records) {
-    const phase = record.phases.find((p) => p.id === phaseId);
-    if (phase) return { record, phase };
-  }
-  throw new TemplateError("not_found", `Unknown phase: ${phaseId}`);
-}
-
-function touch(r: TemplateRecord): void {
-  r.updatedAt = nowIso();
-}
 
 function assertManage(role: Role): void {
   if (!canManageTemplates(role)) {
     throw new TemplateError("forbidden", "Only an administrator can edit templates.");
+  }
+}
+
+function mapError(err: unknown): never {
+  if (err instanceof HttpError) {
+    if (err.status === 404) throw new TemplateError("not_found", "Template not found.");
+    if (err.status === 403) throw new TemplateError("forbidden", "Not allowed.");
+  }
+  throw err;
+}
+
+/* ------------------------------------------------------------------ *
+ * Backend mapping (GET/POST/PATCH/DELETE /projects/templates)
+ * ------------------------------------------------------------------ */
+
+interface RawTask {
+  id: string;
+  title: string;
+  orderIndex: number;
+  roleResponsible: string | null;
+  estimateHours: number | null;
+}
+
+interface RawPhase {
+  id: string;
+  name: string;
+  orderIndex: number;
+  expectedDuration: number | null;
+  tasks: RawTask[];
+}
+
+interface RawTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  expectedDuration: number | null;
+  phases: RawPhase[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const DEFAULT_ROLE: TemplateTaskRole = "developer";
+
+function taskFromBackend(raw: RawTask, phaseId: string): TemplateTask {
+  return {
+    id: raw.id,
+    phaseId,
+    title: raw.title,
+    roleResponsible: (raw.roleResponsible as TemplateTaskRole | null) ?? DEFAULT_ROLE,
+    estimateHours: raw.estimateHours ?? 0,
+    order: raw.orderIndex,
+  };
+}
+
+function phaseFromBackend(raw: RawPhase, templateId: string): TemplatePhase {
+  return {
+    id: raw.id,
+    templateId,
+    name: raw.name,
+    order: raw.orderIndex,
+    expectedDurationDays: raw.expectedDuration ?? 0,
+    // INTEGRATION-GAP: isMilestone/milestoneName — not modelled by the backend.
+    isMilestone: false,
+    milestoneName: null,
+    tasks: raw.tasks
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((t) => taskFromBackend(t, raw.id)),
+  };
+}
+
+/**
+ * `type`/`active` are frontend-only organizing fields with no backend column
+ * — defaulted on every read, optionally overridden right after a create/
+ * update call with the value the caller just submitted so the UI doesn't
+ * visibly "forget" what was just typed within the same request/response.
+ */
+function toDetailFromBackend(
+  raw: RawTemplate,
+  overrides?: { type?: TemplateDetail["type"]; active?: boolean }
+): TemplateDetail {
+  const phases = raw.phases
+    .slice()
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((p) => phaseFromBackend(p, raw.id));
+  const summary = summarize(
+    {
+      id: raw.id,
+      name: raw.name,
+      type: overrides?.type ?? "website",
+      description: raw.description ?? "",
+      active: overrides?.active ?? true,
+      expectedDurationDays: raw.expectedDuration ?? 0,
+      updatedAt: raw.updatedAt,
+    },
+    phases
+  );
+  return { ...summary, phases };
+}
+
+function toSummaryFromBackend(raw: RawTemplate): ProjectTemplate {
+  return toDetailFromBackend(raw);
+}
+
+/** Phase/task tree → the backend's nested create/update payload shape. */
+function phasesToBackend(phases: TemplatePhase[]) {
+  return phases
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .map((p, pi) => ({
+      name: p.name,
+      order_index: pi,
+      expected_duration: p.expectedDurationDays || null,
+      tasks: p.tasks
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((t, ti) => ({
+          title: t.title,
+          order_index: ti,
+          role_responsible: t.roleResponsible,
+          estimate_hours: t.estimateHours || null,
+        })),
+    }));
+}
+
+/** The one real mutation path every granular phase/task method below funnels
+ * through: replace the whole phases tree via PATCH. */
+async function replacePhases(
+  templateId: string,
+  phases: TemplatePhase[],
+  overrides?: { type?: TemplateDetail["type"]; active?: boolean }
+): Promise<TemplateDetail> {
+  try {
+    const raw = await http.patch<RawTemplate>(`/projects/templates/${templateId}`, {
+      phases: phasesToBackend(phases),
+    });
+    return toDetailFromBackend(raw, overrides);
+  } catch (err) {
+    mapError(err);
+  }
+}
+
+async function fetchDetail(id: string): Promise<TemplateDetail> {
+  try {
+    const raw = await http.get<RawTemplate>(`/projects/templates/${id}`);
+    return toDetailFromBackend(raw);
+  } catch (err) {
+    mapError(err);
   }
 }
 
@@ -319,271 +223,271 @@ export interface TemplatesApi {
   reorderTasks(phaseId: string, orderedIds: string[], role: Role): Promise<void>;
 }
 
-/* ------------------------------------------------------------------ *
- * Backend mapping (GET/POST /projects/templates)
- * ------------------------------------------------------------------ */
-
-/** Backend `ProjectTemplateResponse` (camelCased by the HTTP client). */
-interface RawTemplate {
-  id: string;
-  name: string;
-  description: string | null;
-  expectedDuration: number | null;
-  createdAt: string;
-  updatedAt: string;
+/** Locate a phase's parent template id by scanning a freshly fetched detail
+ * list — the granular methods only receive a phaseId/taskId, not the owning
+ * template id, so we resolve it via `list()` + `get()` once per call. */
+async function findTemplateIdForPhase(phaseId: string): Promise<string> {
+  const summaries = await templatesApi.list();
+  for (const s of summaries) {
+    const detail = await fetchDetail(s.id);
+    if (detail.phases.some((p) => p.id === phaseId)) return s.id;
+  }
+  throw new TemplateError("not_found", `Unknown phase: ${phaseId}`);
 }
 
-/**
- * Map a backend template row to the summary shape. Several fields are not
- * modelled by the backend and are defaulted (never fabricated).
- * INTEGRATION-GAP: type (no archetype field → "website"); active (not modelled
- * → true); phaseCount/taskCount/totalEstimateHours (list omits nested phases → 0).
- */
-function toSummaryFromBackend(raw: RawTemplate): ProjectTemplate {
-  return {
-    id: raw.id,
-    name: raw.name,
-    type: "website",
-    description: raw.description ?? "",
-    active: true,
-    expectedDurationDays: raw.expectedDuration ?? 0,
-    phaseCount: 0,
-    taskCount: 0,
-    totalEstimateHours: 0,
-    updatedAt: raw.updatedAt,
-  };
-}
-
-function findTask(taskId: string): { record: TemplateRecord; phase: TemplatePhase; task: TemplateTask } {
-  for (const record of records) {
-    for (const phase of record.phases) {
-      const task = phase.tasks.find((t) => t.id === taskId);
-      if (task) return { record, phase, task };
+async function findTemplateIdForTask(
+  taskId: string
+): Promise<{ templateId: string; phaseId: string }> {
+  const summaries = await templatesApi.list();
+  for (const s of summaries) {
+    const detail = await fetchDetail(s.id);
+    for (const phase of detail.phases) {
+      if (phase.tasks.some((t) => t.id === taskId)) {
+        return { templateId: s.id, phaseId: phase.id };
+      }
     }
   }
   throw new TemplateError("not_found", `Unknown task: ${taskId}`);
 }
 
 export const templatesApi: TemplatesApi = {
-  // WIRED — GET /projects/templates (bare array). See toSummaryFromBackend gaps.
+  // WIRED — GET /projects/templates.
   async list() {
-    const rows = await http.get<RawTemplate[]>("/projects/templates");
-    return rows
-      .map(toSummaryFromBackend)
-      .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
+    try {
+      const rows = await http.get<RawTemplate[]>("/projects/templates");
+      return rows
+        .map(toSummaryFromBackend)
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-PT"));
+    } catch (err) {
+      mapError(err);
+    }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock. There is no template
-  // DETAIL route (GET /projects/templates/{id}) returning nested phases/tasks,
-  // which #31's conversion wizard needs.
+  // WIRED — GET /projects/templates/{id}.
   async get(id) {
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const r = records.find((x) => x.id === id);
-    return r ? toDetail(r) : null;
+    try {
+      return await fetchDetail(id);
+    } catch (err) {
+      if (err instanceof TemplateError && err.kind === "not_found") return null;
+      throw err;
+    }
   },
 
-  // WIRED — POST /projects/templates. `type`/`active` echo the input (the
-  // backend does not persist them); phases are added separately (see addPhase).
+  // WIRED — POST /projects/templates (full nested payload in one call).
   async createTemplate(input, role) {
     assertManage(role);
-    const raw = await http.post<RawTemplate>("/projects/templates", {
-      name: input.name,
-      description: input.description,
-      expectedDuration: input.expectedDurationDays,
-      phases: [],
-    });
-    return {
-      id: raw.id,
-      name: raw.name,
-      type: input.type,
-      description: raw.description ?? input.description,
-      active: input.active,
-      expectedDurationDays: raw.expectedDuration ?? input.expectedDurationDays,
-      phaseCount: 0,
-      taskCount: 0,
-      totalEstimateHours: 0,
-      updatedAt: raw.updatedAt,
-      phases: [],
-    };
+    try {
+      const raw = await http.post<RawTemplate>("/projects/templates", {
+        name: input.name,
+        description: input.description,
+        expectedDuration: input.expectedDurationDays || null,
+        phases: [],
+      });
+      return toDetailFromBackend(raw, { type: input.type, active: input.active });
+    } catch (err) {
+      mapError(err);
+    }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock (no template PATCH).
+  // WIRED — PATCH /projects/templates/{id}.
   async updateTemplate(id, input, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const r = findRecord(id);
-    r.name = input.name;
-    r.type = input.type;
-    r.description = input.description;
-    r.active = input.active;
-    r.expectedDurationDays = input.expectedDurationDays;
-    touch(r);
-    return toDetail(r);
+    try {
+      const raw = await http.patch<RawTemplate>(`/projects/templates/${id}`, {
+        name: input.name,
+        description: input.description,
+        expected_duration: input.expectedDurationDays || null,
+      });
+      return toDetailFromBackend(raw, { type: input.type, active: input.active });
+    } catch (err) {
+      mapError(err);
+    }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock (no template DELETE).
+  // WIRED — DELETE /projects/templates/{id}. Real delete (templates are
+  // canonical config, not a BR-060 soft-delete entity).
   async deleteTemplate(id, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    records = records.filter((x) => x.id !== id);
+    try {
+      await http.delete(`/projects/templates/${id}`);
+    } catch (err) {
+      mapError(err);
+    }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock (undo helper).
+  // WIRED — undo re-creates the template with the same name/phases (a new id
+  // is assigned; the backend has no "restore a specific id" concept since
+  // delete is a real delete, not a soft-delete).
   async restoreTemplate(detail, role) {
     assertManage(role);
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    if (records.some((x) => x.id === detail.id)) return;
-    const record: TemplateRecord = {
-      id: detail.id,
-      name: detail.name,
-      type: detail.type,
-      description: detail.description,
-      active: detail.active,
-      expectedDurationDays: detail.expectedDurationDays,
-      updatedAt: nowIso(),
-      phases: detail.phases.map((p) => ({ ...p, tasks: [...p.tasks] })),
-    };
-    records = [...records, record];
+    try {
+      const raw = await http.post<RawTemplate>("/projects/templates", {
+        name: detail.name,
+        description: detail.description,
+        expectedDuration: detail.expectedDurationDays || null,
+        phases: phasesToBackend(detail.phases),
+      });
+      void raw;
+    } catch (err) {
+      mapError(err);
+    }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — all phase/task editor mutations
-  // (add/update/remove/restore/reorder) are left on mock; the backend has no
-  // sub-resource routes for template phases or tasks.
   async addPhase(templateId, input, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const r = findRecord(templateId);
+    const current = await fetchDetail(templateId);
     const phase: TemplatePhase = {
-      id: rid(`${templateId}-ph`),
+      id: `new-${current.phases.length}`,
       templateId,
       name: input.name,
-      order: r.phases.length,
+      order: current.phases.length,
       expectedDurationDays: input.expectedDurationDays,
       isMilestone: input.isMilestone,
       milestoneName: input.isMilestone ? input.milestoneName : null,
       tasks: [],
     };
-    r.phases = [...r.phases, phase];
-    touch(r);
-    return toDetail(r);
+    return replacePhases(templateId, [...current.phases, phase], {
+      type: current.type,
+      active: current.active,
+    });
   },
 
   async updatePhase(phaseId, input, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const { record, phase } = findPhase(phaseId);
-    phase.name = input.name;
-    phase.expectedDurationDays = input.expectedDurationDays;
-    phase.isMilestone = input.isMilestone;
-    phase.milestoneName = input.isMilestone ? input.milestoneName : null;
-    touch(record);
-    return toDetail(record);
+    const templateId = await findTemplateIdForPhase(phaseId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) =>
+      p.id === phaseId
+        ? {
+            ...p,
+            name: input.name,
+            expectedDurationDays: input.expectedDurationDays,
+            isMilestone: input.isMilestone,
+            milestoneName: input.isMilestone ? input.milestoneName : null,
+          }
+        : p
+    );
+    return replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 
   async removePhase(phaseId, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const { record } = findPhase(phaseId);
-    record.phases = record.phases
-      .filter((p) => p.id !== phaseId)
-      .map((p, i) => ({ ...p, order: i }));
-    touch(record);
+    const templateId = await findTemplateIdForPhase(phaseId);
+    const current = await fetchDetail(templateId);
+    await replacePhases(
+      templateId,
+      current.phases.filter((p) => p.id !== phaseId),
+      { type: current.type, active: current.active }
+    );
   },
 
   async restorePhase(templateId, phase, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS / 2);
-    const r = findRecord(templateId);
-    if (r.phases.some((p) => p.id === phase.id)) return;
-    const next = [...r.phases];
-    const at = Math.min(phase.order, next.length);
-    next.splice(at, 0, { ...phase, tasks: [...phase.tasks] });
-    r.phases = next.map((p, i) => ({ ...p, order: i }));
-    touch(r);
+    const current = await fetchDetail(templateId);
+    if (current.phases.some((p) => p.id === phase.id)) return;
+    const next = [...current.phases];
+    next.splice(Math.min(phase.order, next.length), 0, phase);
+    await replacePhases(templateId, next, { type: current.type, active: current.active });
   },
 
   async reorderPhases(templateId, orderedIds, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS / 2);
-    const r = findRecord(templateId);
-    const byId = new Map(r.phases.map((p) => [p.id, p]));
+    const current = await fetchDetail(templateId);
+    const byId = new Map(current.phases.map((p) => [p.id, p]));
     const reordered = orderedIds
       .map((id) => byId.get(id))
-      .filter((p): p is TemplatePhase => p != null)
-      .map((p, i) => ({ ...p, order: i }));
-    // Keep any phase not present in orderedIds appended (defensive).
-    for (const p of r.phases) {
-      if (!orderedIds.includes(p.id)) reordered.push({ ...p, order: reordered.length });
+      .filter((p): p is TemplatePhase => p != null);
+    for (const p of current.phases) {
+      if (!orderedIds.includes(p.id)) reordered.push(p);
     }
-    r.phases = reordered;
-    touch(r);
+    await replacePhases(templateId, reordered, { type: current.type, active: current.active });
   },
 
   async addTask(phaseId, input, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const { record, phase } = findPhase(phaseId);
-    const task: TemplateTask = {
-      id: rid(`${phaseId}-t`),
-      phaseId,
-      title: input.title,
-      roleResponsible: input.roleResponsible,
-      estimateHours: input.estimateHours,
-      order: phase.tasks.length,
-    };
-    phase.tasks = [...phase.tasks, task];
-    touch(record);
-    return toDetail(record);
+    const templateId = await findTemplateIdForPhase(phaseId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) =>
+      p.id === phaseId
+        ? {
+            ...p,
+            tasks: [
+              ...p.tasks,
+              {
+                id: `new-${p.tasks.length}`,
+                phaseId,
+                title: input.title,
+                roleResponsible: input.roleResponsible,
+                estimateHours: input.estimateHours,
+                order: p.tasks.length,
+              },
+            ],
+          }
+        : p
+    );
+    return replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 
   async updateTask(taskId, input, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const { record, task } = findTask(taskId);
-    task.title = input.title;
-    task.roleResponsible = input.roleResponsible;
-    task.estimateHours = input.estimateHours;
-    touch(record);
-    return toDetail(record);
+    const { templateId } = await findTemplateIdForTask(taskId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) => ({
+      ...p,
+      tasks: p.tasks.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              title: input.title,
+              roleResponsible: input.roleResponsible,
+              estimateHours: input.estimateHours,
+            }
+          : t
+      ),
+    }));
+    return replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 
   async removeTask(taskId, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS);
-    const { record, phase } = findTask(taskId);
-    phase.tasks = phase.tasks
-      .filter((t) => t.id !== taskId)
-      .map((t, i) => ({ ...t, order: i }));
-    touch(record);
+    const { templateId } = await findTemplateIdForTask(taskId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) => ({
+      ...p,
+      tasks: p.tasks.filter((t) => t.id !== taskId),
+    }));
+    await replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 
   async restoreTask(phaseId, task, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS / 2);
-    const { record, phase } = findPhase(phaseId);
-    if (phase.tasks.some((t) => t.id === task.id)) return;
-    const next = [...phase.tasks];
-    const at = Math.min(task.order, next.length);
-    next.splice(at, 0, { ...task });
-    phase.tasks = next.map((t, i) => ({ ...t, order: i }));
-    touch(record);
+    const templateId = await findTemplateIdForPhase(phaseId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) => {
+      if (p.id !== phaseId) return p;
+      if (p.tasks.some((t) => t.id === task.id)) return p;
+      const next = [...p.tasks];
+      next.splice(Math.min(task.order, next.length), 0, task);
+      return { ...p, tasks: next };
+    });
+    await replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 
   async reorderTasks(phaseId, orderedIds, role) {
     assertManage(role);
-    await delay(MOCK_LATENCY_MS / 2);
-    const { record, phase } = findPhase(phaseId);
-    const byId = new Map(phase.tasks.map((t) => [t.id, t]));
-    const reordered = orderedIds
-      .map((id) => byId.get(id))
-      .filter((t): t is TemplateTask => t != null)
-      .map((t, i) => ({ ...t, order: i }));
-    for (const t of phase.tasks) {
-      if (!orderedIds.includes(t.id)) reordered.push({ ...t, order: reordered.length });
-    }
-    phase.tasks = reordered;
-    touch(record);
+    const templateId = await findTemplateIdForPhase(phaseId);
+    const current = await fetchDetail(templateId);
+    const phases = current.phases.map((p) => {
+      if (p.id !== phaseId) return p;
+      const byId = new Map(p.tasks.map((t) => [t.id, t]));
+      const reordered = orderedIds
+        .map((id) => byId.get(id))
+        .filter((t): t is TemplateTask => t != null);
+      for (const t of p.tasks) {
+        if (!orderedIds.includes(t.id)) reordered.push(t);
+      }
+      return { ...p, tasks: reordered };
+    });
+    await replacePhases(templateId, phases, { type: current.type, active: current.active });
   },
 };

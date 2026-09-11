@@ -163,10 +163,9 @@ export interface CreateProposalInput {
   notes: string | null;
 }
 
-/** PDF attachment metadata (the bytes live in R2 later; the mock stores meta). */
+/** PDF attachment to upload — the real `File`, transferred to R2 via the attachments API. */
 export interface UploadPdfInput {
-  name: string;
-  sizeBytes: number;
+  file: File;
 }
 
 /** Mark rejected — a rejection note is mandatory (§1.2). */

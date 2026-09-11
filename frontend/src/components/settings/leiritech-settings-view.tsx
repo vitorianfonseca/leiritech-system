@@ -13,27 +13,27 @@ import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState, SkeletonCard, toast } from "@/components/shared";
 import { zodResolver } from "@/lib/form/zod-resolver";
 import {
-  aureaProfileSchema,
-  type AureaProfileFormValues,
+  leiritechProfileSchema,
+  type LeiritechProfileFormValues,
 } from "@/lib/validation/settings-schemas";
 import { settingsApi } from "@/lib/api/settings";
 import { SettingsError } from "@/lib/api/settings-types";
 import type { Role } from "@/lib/session";
 
-export interface AureaSettingsViewProps {
+export interface LeiritechSettingsViewProps {
   role: Role;
 }
 
 const MAX_LOGO_BYTES = 512 * 1024;
 
-export function AureaSettingsView({ role }: AureaSettingsViewProps) {
-  const t = useTranslations("settings.aurea");
-  const tv = useTranslations("settings.aurea.validation");
-  const tErr = useTranslations("settings.aurea.errors");
+export function LeiritechSettingsView({ role }: LeiritechSettingsViewProps) {
+  const t = useTranslations("settings.leiritech");
+  const tv = useTranslations("settings.leiritech.validation");
+  const tErr = useTranslations("settings.leiritech.errors");
 
   const query = useQuery({
-    queryKey: ["settings-aurea"],
-    queryFn: () => settingsApi.getAureaProfile(),
+    queryKey: ["settings-leiritech"],
+    queryFn: () => settingsApi.getLeiritechProfile(),
   });
 
   const [logo, setLogo] = React.useState<string | null>(null);
@@ -45,8 +45,8 @@ export function AureaSettingsView({ role }: AureaSettingsViewProps) {
     handleSubmit,
     reset,
     formState: { errors, isDirty },
-  } = useForm<AureaProfileFormValues>({
-    resolver: zodResolver(aureaProfileSchema((k) => tv(k))),
+  } = useForm<LeiritechProfileFormValues>({
+    resolver: zodResolver(leiritechProfileSchema((k) => tv(k))),
     defaultValues: {
       name: "",
       tagline: "",
@@ -85,10 +85,10 @@ export function AureaSettingsView({ role }: AureaSettingsViewProps) {
     reader.readAsDataURL(file);
   }
 
-  async function onSubmit(values: AureaProfileFormValues) {
+  async function onSubmit(values: LeiritechProfileFormValues) {
     try {
       setSaving(true);
-      await settingsApi.updateAureaProfile(role, {
+      await settingsApi.updateLeiritechProfile(role, {
         name: values.name,
         tagline: values.tagline ?? "",
         email: values.email ?? "",

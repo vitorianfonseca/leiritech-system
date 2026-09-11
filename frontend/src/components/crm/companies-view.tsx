@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,19 +71,8 @@ export function CompaniesView({ user }: CompaniesViewProps) {
     qc.invalidateQueries({ queryKey: ["crm"] });
   }, [qc]);
 
-  const [createOpen, setCreateOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<CompanySummary | null>(null);
   const [archiving, setArchiving] = React.useState<CompanySummary | null>(null);
-
-  const handleCreate = React.useCallback(
-    async (input: CompanyInput) => {
-      const created = await crmApi.createCompany(input, user.userId);
-      refresh();
-      toast({ tone: "success", title: t("toasts.created", { name: created.name }) });
-      router.push(`/crm/companies/${created.id}`);
-    },
-    [refresh, router, t, user.userId]
-  );
 
   const handleUpdate = React.useCallback(
     async (input: CompanyInput) => {
@@ -270,7 +260,7 @@ export function CompaniesView({ user }: CompaniesViewProps) {
         subtitle={t("subtitle")}
         actions={
           canManage ? (
-            <Button onClick={() => setCreateOpen(true)}>
+            <Button nativeButton={false} render={<Link href="/crm/companies/new" />}>
               <Plus aria-hidden />
               {t("actions.new")}
             </Button>
@@ -304,7 +294,6 @@ export function CompaniesView({ user }: CompaniesViewProps) {
 
       {canManage ? (
         <>
-          <CompanyFormDialog open={createOpen} onOpenChange={setCreateOpen} company={null} onSubmit={handleCreate} />
           <CompanyFormDialog
             open={editing !== null}
             onOpenChange={(open) => {

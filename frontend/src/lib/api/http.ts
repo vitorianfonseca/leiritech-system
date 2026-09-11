@@ -5,7 +5,7 @@
  * Responsibilities:
  *  - Resolve the backend base URL from `NEXT_PUBLIC_API_URL` and append the
  *    `/api/v1` prefix.
- *  - Attach the JWT access token (read from the browser-readable `aurea_access`
+ *  - Attach the JWT access token (read from the browser-readable `leiritech_access`
  *    cookie) as a cross-origin `Authorization: Bearer` header.
  *  - On a 401, transparently refresh ONCE via the `/api/auth/refresh` route
  *    handler (which holds the httpOnly refresh token) and retry the request.

@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SkeletonCard, EmptyState, toast } from "@/components/shared";
+import { SkeletonCard, EmptyState, ConfirmDialog, toast } from "@/components/shared";
 import { formatEUR } from "@/components/finance/finance-format";
 import { catalogApi } from "@/lib/api/catalog";
 import type { CatalogItem } from "@/lib/api/catalog-types";
@@ -29,6 +29,7 @@ export function CatalogDetailView({ id }: { id: string }) {
   const locale = useLocale();
   const qc = useQueryClient();
   const [editOpen, setEditOpen] = React.useState(false);
+  const [archiveOpen, setArchiveOpen] = React.useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["catalog", "item", id],
@@ -76,15 +77,7 @@ export function CatalogDetailView({ id }: { id: string }) {
               {t("restore")}
             </Button>
           ) : (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={async () => {
-                await catalogApi.archive(item.id);
-                refresh();
-                toast({ tone: "success", title: t("archivedToast") });
-              }}
-            >
+            <Button variant="outline" size="lg" onClick={() => setArchiveOpen(true)}>
               <Archive aria-hidden />
               {t("archive")}
             </Button>
@@ -110,6 +103,19 @@ export function CatalogDetailView({ id }: { id: string }) {
           refresh();
           qc.invalidateQueries({ queryKey: ["catalog", "item", id] });
           toast({ tone: "success", title: t("updatedToast") });
+        }}
+      />
+
+      <ConfirmDialog
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title={t("archiveConfirm.title")}
+        description={t("archiveConfirm.description", { name: item.name })}
+        confirmLabel={t("archive")}
+        onConfirm={async () => {
+          await catalogApi.archive(item.id);
+          refresh();
+          toast({ tone: "success", title: t("archivedToast") });
         }}
       />
     </div>

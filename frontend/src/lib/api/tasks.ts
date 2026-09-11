@@ -78,13 +78,13 @@ export const taskRoutes = {
  * ------------------------------------------------------------------ */
 
 const DIRECTORY: Record<string, DirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", avatarUrl: null },
-  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@aurea.pt", avatarUrl: null },
-  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@aurea.pt", avatarUrl: null },
-  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@aurea.pt", avatarUrl: null },
-  "u-tiago": { id: "u-tiago", name: "Tiago Lopes", email: "tiago@aurea.pt", avatarUrl: null },
-  "u-ines": { id: "u-ines", name: "Inês Duarte", email: "ines@aurea.pt", avatarUrl: null },
+  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
+  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@leiritech.pt", avatarUrl: null },
+  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@leiritech.pt", avatarUrl: null },
+  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@leiritech.pt", avatarUrl: null },
+  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@leiritech.pt", avatarUrl: null },
+  "u-tiago": { id: "u-tiago", name: "Tiago Lopes", email: "tiago@leiritech.pt", avatarUrl: null },
+  "u-ines": { id: "u-ines", name: "Inês Duarte", email: "ines@leiritech.pt", avatarUrl: null },
 };
 
 function assignee(userId: string): TaskAssignee {
@@ -592,6 +592,31 @@ interface TaskDto {
   updatedAt: string;
 }
 
+interface TaskChecklistItemDto {
+  id: string;
+  taskId: string;
+  text: string;
+  done: boolean;
+  orderIndex: number;
+}
+
+function checklistItemFromBackend(dto: TaskChecklistItemDto): TaskChecklistItem {
+  return { id: dto.id, text: dto.text, done: dto.done };
+}
+
+/** WIRED: GET /tasks/{id}/checklist (audit C12). Used to enrich a single task's
+ * detail view — NOT called per-row from listTasks to avoid an N+1 fetch there,
+ * so the board/list checklist progress badge only reflects reality once a task
+ * has been opened in the side panel at least once this session (the badge
+ * already hides itself at 0, so this degrades gracefully, not incorrectly). */
+async function fetchChecklist(id: string): Promise<TaskChecklistItem[]> {
+  const items = await http.get<TaskChecklistItemDto[]>(`/tasks/${id}/checklist`);
+  return items
+    .slice()
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map(checklistItemFromBackend);
+}
+
 /** Map a backend TaskResponse to the UI `Task`. Enriched fields the backend does
  * not return are defaulted and flagged. */
 function fromBackend(dto: TaskDto): Task {
@@ -674,11 +699,17 @@ export const tasksApi: TasksApi = {
   },
 
   // WIRED: GET /tasks/{id} — server enforces Membro scoping (role/userId ignored).
+  // Also resolves the real checklist (audit C12) so the detail view is never
+  // stale/mock for it.
   async getTask(id, role, userId) {
     void role;
     void userId;
     try {
-      return fromBackend(await http.get<TaskDto>(`/tasks/${id}`));
+      const [dto, checklist] = await Promise.all([
+        http.get<TaskDto>(`/tasks/${id}`),
+        fetchChecklist(id),
+      ]);
+      return { ...fromBackend(dto), checklist };
     } catch (err) {
       throw mapTaskError(err);
     }
@@ -806,43 +837,39 @@ export const tasksApi: TasksApi = {
     }
   },
 
-  // LEFT-ON-MOCK: no backend endpoint for task checklists.
+  // WIRED: POST /tasks/{id}/checklist (audit C12).
   async addChecklistItem(id, text, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
+    void actorId;
     if (!text.trim()) throw new TaskError("guard_failed", "checklistTextRequired");
-    rec.checklist.push({ id: uid("c"), text: text.trim(), done: false });
-    touch(rec);
-    pushActivity(id, actorId, "updated", { field: "checklist" });
-    return present(rec);
+    try {
+      await http.post(`/tasks/${id}/checklist`, { text: text.trim() });
+      return tasksApi.getTask(id, "admin", actorId);
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
-  // LEFT-ON-MOCK: no backend endpoint for task checklists.
+  // WIRED: PATCH /tasks/{id}/checklist/{itemId} (audit C12).
   async toggleChecklistItem(id, itemId, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 3);
-    const rec = require_(id);
-    const item = rec.checklist.find((c) => c.id === itemId);
-    if (!item) throw new TaskError("not_found");
-    item.done = !item.done;
-    touch(rec);
-    pushActivity(id, actorId, "updated", { field: "checklist" });
-    return present(rec);
+    try {
+      const current = await fetchChecklist(id);
+      const item = current.find((c) => c.id === itemId);
+      if (!item) throw new TaskError("not_found");
+      await http.patch(`/tasks/${id}/checklist/${itemId}`, { done: !item.done });
+      return tasksApi.getTask(id, "admin", actorId);
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
-  // LEFT-ON-MOCK: no backend endpoint for task checklists.
+  // WIRED: DELETE /tasks/{id}/checklist/{itemId} (audit C12).
   async removeChecklistItem(id, itemId, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 3);
-    const rec = require_(id);
-    rec.checklist = rec.checklist.filter((c) => c.id !== itemId);
-    touch(rec);
-    pushActivity(id, actorId, "updated", { field: "checklist" });
-    return present(rec);
+    try {
+      await http.delete(`/tasks/${id}/checklist/${itemId}`);
+      return tasksApi.getTask(id, "admin", actorId);
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 
   // LEFT-ON-MOCK: board ordering is not persisted by the backend.
@@ -865,72 +892,47 @@ export const tasksApi: TasksApi = {
     return present(rec);
   },
 
-  // LEFT-ON-MOCK: no backend endpoint to duplicate a task.
+  // WIRED: POST /tasks/{id}/duplicate (audit C13). Assignee/dependencies/
+  // checklist/comments deliberately NOT copied — see the backend docstring.
   async duplicate(id, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS);
-    const src = require_(id);
-    const newId = uid("tk");
-    const now = new Date().toISOString();
-    store.set(newId, {
-      ...src,
-      id: newId,
-      title: `${src.title} (cópia)`,
-      state: "todo",
-      blockedReason: null,
-      blockerTaskId: null,
-      dependencyIds: [...src.dependencyIds],
-      labels: src.labels.map((l) => ({ ...l })),
-      checklist: src.checklist.map((c) => ({ ...c, id: uid("c"), done: false })),
-      commentCount: 0,
-      archived: false,
-      order: (orderCounter += 1),
-      createdAt: now,
-      updatedAt: now,
-    });
-    pushActivity(newId, actorId, "created");
-    return present(require_(newId));
-  },
-
-  // LEFT-ON-MOCK: backend has no archive endpoint (archived_at is not settable).
-  async archive(id, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    rec.archived = true;
-    touch(rec);
-    pushActivity(id, actorId, "archived");
-    return present(rec);
-  },
-
-  // LEFT-ON-MOCK: backend has no restore endpoint.
-  async restore(id, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    rec.archived = false;
-    touch(rec);
-    pushActivity(id, actorId, "restored");
-    return present(rec);
-  },
-
-  // LEFT-ON-MOCK: backend has no task delete endpoint.
-  async remove(id, actorId) {
-    // INTEGRATION-GAP: no backend endpoint — left on mock
-    seed();
-    await delay(MOCK_LATENCY_MS / 2);
-    const rec = require_(id);
-    // Soft-remove: mark archived so undo can re-list it; drop dangling deps.
-    rec.archived = true;
-    for (const other of store.values()) {
-      other.dependencyIds = other.dependencyIds.filter((d) => d !== id);
+    void actorId;
+    try {
+      return fromBackend(await http.post<TaskDto>(`/tasks/${id}/duplicate`));
+    } catch (err) {
+      throw mapTaskError(err);
     }
-    touch(rec);
-    pushActivity(id, actorId, "archived");
-    return present(rec);
+  },
+
+  // WIRED: POST /tasks/{id}/archive (audit C13). Also stops any running timer
+  // on the task server-side (BR-042).
+  async archive(id, actorId) {
+    void actorId;
+    try {
+      return fromBackend(await http.post<TaskDto>(`/tasks/${id}/archive`));
+    } catch (err) {
+      throw mapTaskError(err);
+    }
+  },
+
+  // WIRED: POST /tasks/{id}/restore (audit C13).
+  async restore(id, actorId) {
+    void actorId;
+    try {
+      return fromBackend(await http.post<TaskDto>(`/tasks/${id}/restore`));
+    } catch (err) {
+      throw mapTaskError(err);
+    }
+  },
+
+  // WIRED: same soft-delete as archive (audit C13) — "remove" from the board is
+  // a BR-060 archive, never a hard delete.
+  async remove(id, actorId) {
+    void actorId;
+    try {
+      return fromBackend(await http.post<TaskDto>(`/tasks/${id}/archive`));
+    } catch (err) {
+      throw mapTaskError(err);
+    }
   },
 };
 

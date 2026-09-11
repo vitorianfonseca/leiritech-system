@@ -50,7 +50,7 @@ export function csvFilename(stem: string, generatedAt: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
   const day = generatedAt.slice(0, 10);
-  return `aurea-${slug}-${day}.csv`;
+  return `leiritech-${slug}-${day}.csv`;
 }
 
 /** Trigger a browser download of a CSV document. No-op outside the browser. */

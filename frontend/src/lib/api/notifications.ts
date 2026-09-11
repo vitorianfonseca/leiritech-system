@@ -8,7 +8,7 @@
  * the `NotificationsApi` interface below.
  *
  * State lives in a module-level map so mark-read / archive persist for the
- * session. Notifications are seeded per dev user so switching the `aurea_role`
+ * session. Notifications are seeded per dev user so switching the `leiritech_role`
  * cookie shows a role-appropriate feed.
  *
  * Role scoping (enforced here as defence-in-depth; the backend is authoritative):

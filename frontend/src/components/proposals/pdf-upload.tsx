@@ -66,7 +66,7 @@ export function PdfUpload({
       return;
     }
     setError(null);
-    onUpload({ name: selected.name, sizeBytes: selected.size });
+    onUpload({ file: selected });
   }
 
   return (

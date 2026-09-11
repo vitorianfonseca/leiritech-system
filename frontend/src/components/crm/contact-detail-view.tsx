@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Building2,
@@ -12,33 +12,56 @@ import {
   Users,
   CalendarClock,
   History,
+  Pencil,
+  Archive,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState, SkeletonCard } from "@/components/shared";
+import { EmptyState, SkeletonCard, ConfirmDialog, toast } from "@/components/shared";
 import { crmApi, crmRoutes } from "@/lib/api/crm";
-import { CrmError } from "@/lib/api/crm-types";
+import { CrmError, type ContactInput } from "@/lib/api/crm-types";
 import type { Role } from "@/lib/session";
 import { ContactStatusBadge } from "./status-badges";
+import { ContactFormDialog } from "./contact-form-dialog";
 import { QuickActions } from "./quick-actions";
 import { formatDate, formatDateTime, initials } from "./crm-format";
 
 export interface ContactDetailViewProps {
   contactId: string;
-  user: { role: Role; userId: string };
+  user: { role: Role; userId: string; paymentsGrant: boolean };
 }
 
 export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
   const t = useTranslations("crm.contactDetail");
   const tType = useTranslations("crm.interactionType");
   const locale = useLocale();
+  const qc = useQueryClient();
+  const canManage = user.role !== "membro";
 
+  const queryKey = ["crm", "contact", contactId, user.role, user.userId] as const;
   const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: ["crm", "contact", contactId, user.role, user.userId],
+    queryKey,
     queryFn: () => crmApi.getContact(contactId, user.role, user.userId),
     retry: (count, err) => !(err instanceof CrmError) && count < 1,
   });
+
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [archiveOpen, setArchiveOpen] = React.useState(false);
+
+  const refresh = React.useCallback(() => {
+    qc.invalidateQueries({ queryKey: ["crm"] });
+  }, [qc]);
+
+  const handleUpdate = React.useCallback(
+    async (input: ContactInput) => {
+      await crmApi.updateContact(contactId, input, user.userId);
+      refresh();
+      toast({ tone: "success", title: t("toastUpdated") });
+    },
+    [contactId, refresh, t, user.userId]
+  );
 
   const back = (
     <Link
@@ -86,6 +109,7 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
   }
 
   const { contact, interactions } = data;
+  const isArchived = contact.archivedAt !== null;
 
   const rows: Array<[string, React.ReactNode]> = [
     [
@@ -129,8 +153,46 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
             </div>
           </div>
         </div>
-        <QuickActions email={contact.email} phone={contact.phone} website={contact.website} size="sm" />
+        <div className="flex shrink-0 items-center gap-2">
+          <QuickActions email={contact.email} phone={contact.phone} website={contact.website} size="sm" />
+          {canManage && !isArchived ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+                <Pencil aria-hidden />
+                {t("edit")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setArchiveOpen(true)}>
+                <Archive aria-hidden />
+                {t("archive")}
+              </Button>
+            </>
+          ) : null}
+          {canManage && isArchived ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await crmApi.restoreContact(contact.id, user.userId);
+                refresh();
+                toast({ tone: "success", title: t("toastRestored") });
+              }}
+            >
+              <RotateCcw aria-hidden />
+              {t("restore")}
+            </Button>
+          ) : null}
+        </div>
       </div>
+
+      {isArchived ? (
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-border bg-status-done-bg px-4 py-3 text-sm text-status-done"
+        >
+          <Archive className="size-4 shrink-0" strokeWidth={1.8} aria-hidden />
+          {t("archivedBanner", { date: contact.archivedAt ? formatDate(contact.archivedAt) : "" })}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -212,6 +274,30 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
           </Card>
         </div>
       </div>
+
+      {canManage ? (
+        <>
+          <ContactFormDialog
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            contact={contact}
+            user={{ role: user.role, userId: user.userId, paymentsGrant: user.paymentsGrant }}
+            onSubmit={handleUpdate}
+          />
+          <ConfirmDialog
+            open={archiveOpen}
+            onOpenChange={setArchiveOpen}
+            title={t("archiveConfirm.title")}
+            description={t("archiveConfirm.description", { name: contact.name })}
+            confirmLabel={t("archive")}
+            onConfirm={async () => {
+              await crmApi.archiveContact(contact.id, user.userId);
+              refresh();
+              toast({ tone: "success", title: t("toastArchived") });
+            }}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

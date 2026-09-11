@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseEuroToCents } from "@/lib/currency";
 
 /**
  * Project form schemas (F8). Factories receive a `field` translator so all
@@ -14,7 +15,11 @@ const euroValue = (t: T) =>
     .trim()
     .optional()
     .or(z.literal(""))
-    .refine((v) => !v || /^\d{1,3}(\.?\d{3})*([.,]\d{1,2})?$/.test(v.replace(/\s/g, "")), {
+    .refine((v) => !v || parseEuroToCents(v) !== null, {
+      // Delegates to the SAME parser `submit()` calls (H7, AUDIT_REPORT.md) so
+      // "passes validation" and "parses to a real amount" can never drift —
+      // a value that fails here is rejected with a visible error instead of
+      // silently becoming €0.00.
       message: t("valueInvalid"),
     });
 

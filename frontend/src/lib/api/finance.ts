@@ -21,6 +21,7 @@ import {
   canAccessFinance,
   FinanceError,
   type FinanceOverview,
+  type FinancialProjectSummary,
   type FinancialSummary,
   type MilestoneInput,
   type PaymentMilestone,
@@ -284,6 +285,25 @@ export const financeApi: FinanceApi = {
         .map((c) => mapCost(c, names));
       const summary = aggregateSummary(perProject.map((p) => p.summary));
 
+      // Backend-authoritative per-project margin (BR-065): the /finance/projects/{id}/summary
+      // read above already nets out labour cost; preserve it here instead of letting
+      // a caller (e.g. /reports) recompute margin from raw milestones+costs and
+      // silently drop the labour term.
+      const projectSummaries: FinancialProjectSummary[] = perProject
+        .map((p) => p.summary)
+        .map((s) => ({
+          projectId: s.projectId,
+          projectName: names.projects.get(s.projectId) ?? "",
+          contractedCents: s.contracted,
+          receivedCents: s.received,
+          pendingCents: s.pending,
+          costsCents: s.costsTotal,
+          laborCostCents: s.laborCost,
+          marginCents: s.margin,
+          marginRatio: s.contracted > 0 ? s.margin / s.contracted : 0,
+        }))
+        .sort((a, b) => b.contractedCents - a.contractedCents);
+
       return {
         summary,
         milestones: [...milestones].sort((a, b) =>
@@ -292,6 +312,7 @@ export const financeApi: FinanceApi = {
         costs: [...costs].sort((a, b) =>
           b.incurredDate.localeCompare(a.incurredDate)
         ),
+        projectSummaries,
       };
     } catch (err) {
       throw toFinanceError(err);

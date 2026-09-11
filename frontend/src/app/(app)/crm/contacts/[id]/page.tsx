@@ -19,5 +19,14 @@ export default async function ContactDetailPage({
   const { id } = await params;
   const session = await getSession();
   if (!session) notFound();
-  return <ContactDetailView contactId={id} user={{ role: session.role, userId: session.id }} />;
+  return (
+    <ContactDetailView
+      contactId={id}
+      user={{
+        role: session.role,
+        userId: session.id,
+        paymentsGrant: session.paymentsGrant,
+      }}
+    />
+  );
 }

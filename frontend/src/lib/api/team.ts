@@ -263,8 +263,17 @@ export const teamApi: TeamApi = {
     };
   },
 
-  // INTEGRATION-GAP: no backend endpoint — left on mock. Per-function capacity
-  // config (targets, capacity, internal cost rates) has no route yet.
+  // INTEGRATION-GAP (audit H16, partially resolved): the REAL BR-081 axis —
+  // per-ROLE (admin/gestor/membro) utilization targets — now has a working,
+  // Admin-configurable backend at GET/PATCH /workload/capacity-config/{role}
+  // (see workload_service.list_role_capacity_configs /
+  // update_role_capacity_config) and it genuinely drives live workload
+  // computation. This "function" (engineering/design/qa/management/
+  // leadership) axis stays mock: no member is ever assignable to a function
+  // anywhere in the data model (toMemberWorkload hardcodes "engineering" for
+  // everyone, see its own INTEGRATION-GAP note) — that's a separate, deeper
+  // gap than H16 ("capacity edits never influence real computation") asks for,
+  // since there is no real per-function data to wire this UI to yet.
   async getFunctionConfigs(role) {
     seedConfigs();
     if (!canConfigureCapacity(role)) throw new TeamError("forbidden");

@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  AUREA_COLOR_TOKENS,
-  AUREA_COLOR_VAR,
-  type AureaColorToken,
+  LEIRITECH_COLOR_TOKENS,
+  LEIRITECH_COLOR_VAR,
+  type LeiritechColorToken,
 } from "@/lib/api/settings-types";
 
 /** A small filled dot rendered in a config colour (uses an existing CSS var). */
@@ -15,14 +15,14 @@ export function ColorDot({
   color,
   className,
 }: {
-  color: AureaColorToken;
+  color: LeiritechColorToken;
   className?: string;
 }) {
   return (
     <span
       aria-hidden
       className={cn("inline-block size-2.5 shrink-0 rounded-full", className)}
-      style={{ backgroundColor: AUREA_COLOR_VAR[color] }}
+      style={{ backgroundColor: LEIRITECH_COLOR_VAR[color] }}
     />
   );
 }
@@ -37,11 +37,11 @@ export function ColorChip({
   children,
   className,
 }: {
-  color: AureaColorToken;
+  color: LeiritechColorToken;
   children: React.ReactNode;
   className?: string;
 }) {
-  const cssVar = AUREA_COLOR_VAR[color];
+  const cssVar = LEIRITECH_COLOR_VAR[color];
   return (
     <span
       className={cn(
@@ -67,8 +67,8 @@ export function ColorPicker({
   label,
   id,
 }: {
-  value: AureaColorToken;
-  onChange: (color: AureaColorToken) => void;
+  value: LeiritechColorToken;
+  onChange: (color: LeiritechColorToken) => void;
   label?: string;
   id?: string;
 }) {
@@ -80,7 +80,7 @@ export function ColorPicker({
       id={id}
       className="flex flex-wrap gap-2"
     >
-      {AUREA_COLOR_TOKENS.map((color) => {
+      {LEIRITECH_COLOR_TOKENS.map((color) => {
         const active = color === value;
         return (
           <button
@@ -98,7 +98,7 @@ export function ColorPicker({
           >
             <span
               className="flex size-5 items-center justify-center rounded-full"
-              style={{ backgroundColor: AUREA_COLOR_VAR[color] }}
+              style={{ backgroundColor: LEIRITECH_COLOR_VAR[color] }}
             >
               {active ? (
                 <Check className="size-3.5 text-white" strokeWidth={3} aria-hidden />

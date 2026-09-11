@@ -16,7 +16,7 @@
  * edits persist for the session.
  */
 
-import { opportunitiesApi } from "@/lib/api/opportunities";
+import { opportunitiesApi, loadStageMaps } from "@/lib/api/opportunities";
 import { PIPELINE_STAGE_IDS } from "@/lib/api/opportunities-types";
 import { http, HttpError } from "@/lib/api/http";
 import type { Role } from "@/lib/session";
@@ -26,8 +26,8 @@ import {
   canInviteMembers,
   NOTIFICATION_CATEGORIES,
   PRIORITY_IDS,
-  type AureaColorToken,
-  type AureaProfile,
+  type LeiritechColorToken,
+  type LeiritechProfile,
   type ArchivedItem,
   type CreateTagInput,
   type ExportDataset,
@@ -38,7 +38,7 @@ import {
   type PipelineStageConfig,
   type PriorityConfig,
   type Tag,
-  type UpdateAureaInput,
+  type UpdateLeiritechInput,
   type UpdateMemberRoleInput,
   type UpdatePipelineStagesInput,
   type UpdatePriorityInput,
@@ -73,7 +73,7 @@ function assertAdmin(role: Role): void {
 
 export const settingsRoutes = {
   index: () => "/settings",
-  aurea: () => "/settings/aurea",
+  leiritech: () => "/settings/leiritech",
   members: () => "/settings/members",
   roles: () => "/settings/roles",
   pipeline: () => "/settings/pipeline",
@@ -92,12 +92,12 @@ export const settingsRoutes = {
  * Stores
  * ------------------------------------------------------------------ */
 
-let aurea: AureaProfile = {
-  name: "Aurea System",
-  tagline: "O sistema operativo interno da Aurea.",
-  email: "geral@aurea.pt",
+let leiritech: LeiritechProfile = {
+  name: "LeiriTech",
+  tagline: "O sistema operativo interno da LeiriTech.",
+  email: "geral@leiritech.pt",
   phone: "+351 220 000 000",
-  website: "https://aurea.pt",
+  website: "https://leiritech.pt",
   addressLine: "Rua da Restauração, 120",
   city: "Porto",
   postalCode: "4050-499",
@@ -130,14 +130,6 @@ interface RawDirectoryUser {
   lastLoginAt: string | null;
 }
 
-/**
- * Session-only role overrides. Role changes have NO backend route (there is no
- * `PATCH /users/{id}/role`), so the change is applied on top of the real
- * directory for the session and is NOT persisted server-side — see the
- * INTEGRATION-GAP on `updateMemberRole`.
- */
-const roleOverrides = new Map<string, Role>();
-
 /** Map a backend directory entry to the members-table `MemberRecord`. */
 function toMemberRecord(raw: RawDirectoryUser): MemberRecord {
   const status = raw.status === "deactivated" ? "inactive" : "active";
@@ -145,7 +137,7 @@ function toMemberRecord(raw: RawDirectoryUser): MemberRecord {
     id: raw.id,
     name: raw.name,
     email: raw.email ?? "",
-    role: roleOverrides.get(raw.id) ?? raw.role,
+    role: raw.role,
     status,
     lastActiveAt: raw.lastLoginAt ?? null,
   };
@@ -177,14 +169,14 @@ let notifications: NotificationPreferences = {
   weeklyDigest: { inApp: false, email: true },
 };
 
-const priorityColors: Record<string, AureaColorToken> = {
+const priorityColors: Record<string, LeiritechColorToken> = {
   baixa: "teal",
   media: "info",
   alta: "gold",
   urgente: "terracotta",
 };
 
-const DEFAULT_STAGE_COLORS: AureaColorToken[] = [
+const DEFAULT_STAGE_COLORS: LeiritechColorToken[] = [
   "teal",
   "info",
   "indigo",
@@ -231,8 +223,8 @@ const EXPORT_DATASETS: ExportDataset[] = [
  * ------------------------------------------------------------------ */
 
 export interface SettingsApi {
-  getAureaProfile(): Promise<AureaProfile>;
-  updateAureaProfile(role: Role, input: UpdateAureaInput): Promise<AureaProfile>;
+  getLeiritechProfile(): Promise<LeiritechProfile>;
+  updateLeiritechProfile(role: Role, input: UpdateLeiritechInput): Promise<LeiritechProfile>;
 
   listTags(): Promise<Tag[]>;
   createTag(role: Role, input: CreateTagInput): Promise<Tag>;
@@ -262,18 +254,18 @@ export interface SettingsApi {
 
 export const settingsApi: SettingsApi = {
   // INTEGRATION-GAP: no backend endpoint — left on mock (no org-profile route).
-  async getAureaProfile() {
+  async getLeiritechProfile() {
     await delay(MOCK_LATENCY_MS);
-    return { ...aurea };
+    return { ...leiritech };
   },
 
   // INTEGRATION-GAP: no backend endpoint — left on mock (no org-profile route).
-  async updateAureaProfile(role, input) {
+  async updateLeiritechProfile(role, input) {
     assertAdmin(role);
     await delay(MOCK_LATENCY_MS);
     if (!input.name.trim()) throw new SettingsError("validation", "nameRequired");
-    aurea = { ...input, name: input.name.trim() };
-    return { ...aurea };
+    leiritech = { ...input, name: input.name.trim() };
+    return { ...leiritech };
   },
 
   // INTEGRATION-GAP: no backend endpoint — tags CRUD is entirely on mock.
@@ -376,16 +368,15 @@ export const settingsApi: SettingsApi = {
     }
   },
 
-  // INTEGRATION-GAP: no backend endpoint — there is no role-change route
-  // (`PATCH /users/{id}/role`). The change is validated against the real
-  // directory and applied as a SESSION-ONLY override (not persisted); BR-005 is
-  // still enforced client-side against live data.
+  // WIRED → PATCH /users/{id}/role (audit H15). The backend enforces the
+  // last-admin guard (BR-005) with a row lock; a rejection is mapped back to
+  // the same SettingsError the client-side pre-check used to throw.
   async updateMemberRole(role, input) {
     assertAdmin(role);
     const members = await fetchMembers();
     const member = members.find((m) => m.id === input.id);
     if (!member) throw new SettingsError("not_found");
-    // BR-005: never demote the last active admin.
+    // BR-005: never demote the last active admin (client-side pre-check).
     if (
       member.role === "admin" &&
       member.status === "active" &&
@@ -394,7 +385,16 @@ export const settingsApi: SettingsApi = {
     ) {
       throw new SettingsError("last_admin");
     }
-    roleOverrides.set(input.id, input.role);
+    try {
+      await http.patch(`/users/${input.id}/role`, { role: input.role });
+    } catch (err) {
+      if (err instanceof HttpError) {
+        if (err.code === "LAST_ADMIN" || err.status === 409) throw new SettingsError("last_admin");
+        if (err.status === 404) throw new SettingsError("not_found");
+        if (err.status === 403) throw new SettingsError("forbidden");
+      }
+      throw err;
+    }
     return this.getMembers(role);
   },
 
@@ -456,35 +456,44 @@ export const settingsApi: SettingsApi = {
 
   // Reads through opportunitiesApi.getPipelineStages() (wired separately to
   // GET /pipeline-stages). The presentation colour is a client-side default
-  // (backend stores a hex string, not an Aurea colour token).
+  // (backend stores a hex string, not a LeiriTech colour token).
   async getPipelineStageConfigs() {
     const configs = await ensureStageConfigs();
     await delay(MOCK_LATENCY_MS);
     return configs.slice().sort((a, b) => a.order - b.order).map((s) => ({ ...s }));
   },
 
-  // INTEGRATION-GAP: left on mock. PATCH /pipeline-stages/{id} exists, but the
-  // frontend keys stages by code (e.g. "new_contact") while the endpoint needs
-  // the stage UUID, and colour is an Aurea token vs the backend's hex string.
-  // Persisting cleanly needs a code→uuid + token→hex bridge; kept in-session.
+  // WIRED → PATCH /pipeline-stages/{id} per changed stage (audit H14). Resolves
+  // the frontend's code-keyed id ("new_contact") to the backend stage UUID via
+  // the shared uuid↔code cache (#57). The backend `color` column is a free-text
+  // string with no hex constraint, so the LeiriTech colour token is stored
+  // as-is — no hex bridge needed.
   async updatePipelineStages(role, input) {
     assertAdmin(role);
-    await ensureStageConfigs();
-    await delay(MOCK_LATENCY_MS);
     for (const s of input.stages) {
       if (!PIPELINE_STAGE_IDS.includes(s.id)) throw new SettingsError("not_found");
       if (s.winProbability < 0 || s.winProbability > 100)
         throw new SettingsError("validation", "probabilityRange");
     }
-    stageConfigs = input.stages
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .map((s, i) => ({
-        id: s.id,
-        order: i + 1,
-        winProbability: Math.round(s.winProbability),
-        color: s.color,
-      }));
+    const sorted = input.stages.slice().sort((a, b) => a.order - b.order);
+    const maps = await loadStageMaps();
+    await Promise.all(
+      sorted.map((s, i) => {
+        const stageUuid = maps.byCode.get(s.id);
+        if (!stageUuid) throw new SettingsError("not_found");
+        return http.patch(`/pipeline-stages/${stageUuid}`, {
+          order_index: i,
+          win_probability: Math.round(s.winProbability),
+          color: s.color,
+        });
+      })
+    );
+    stageConfigs = sorted.map((s, i) => ({
+      id: s.id,
+      order: i + 1,
+      winProbability: Math.round(s.winProbability),
+      color: s.color,
+    }));
     return stageConfigs.map((s) => ({ ...s }));
   },
 

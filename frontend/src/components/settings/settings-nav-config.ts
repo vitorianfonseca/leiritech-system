@@ -35,7 +35,7 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     labelKey: "organization",
     items: [
-      { key: "aurea", href: "/settings/aurea", icon: Building2, adminOnly: true },
+      { key: "leiritech", href: "/settings/leiritech", icon: Building2, adminOnly: true },
       { key: "members", href: "/settings/members", icon: Users, adminOnly: true },
       { key: "roles", href: "/settings/roles", icon: ShieldCheck, adminOnly: true },
     ],

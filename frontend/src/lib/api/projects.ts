@@ -93,13 +93,13 @@ export const projectRoutes = {
  * ------------------------------------------------------------------ */
 
 const DIRECTORY: Record<string, DirectoryUser> = {
-  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@aurea.pt", avatarUrl: null },
-  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@aurea.pt", avatarUrl: null },
-  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@aurea.pt", avatarUrl: null },
-  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@aurea.pt", avatarUrl: null },
-  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@aurea.pt", avatarUrl: null },
-  "u-tiago": { id: "u-tiago", name: "Tiago Lopes", email: "tiago@aurea.pt", avatarUrl: null },
-  "u-ines": { id: "u-ines", name: "Inês Duarte", email: "ines@aurea.pt", avatarUrl: null },
+  "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
+  "dev-gestor": { id: "dev-gestor", name: "Bruno Salgado", email: "bruno@leiritech.pt", avatarUrl: null },
+  "dev-membro": { id: "dev-membro", name: "Carla Nunes", email: "carla@leiritech.pt", avatarUrl: null },
+  "u-sofia": { id: "u-sofia", name: "Sofia Marques", email: "sofia@leiritech.pt", avatarUrl: null },
+  "u-diogo": { id: "u-diogo", name: "Diogo Ferreira", email: "diogo@leiritech.pt", avatarUrl: null },
+  "u-tiago": { id: "u-tiago", name: "Tiago Lopes", email: "tiago@leiritech.pt", avatarUrl: null },
+  "u-ines": { id: "u-ines", name: "Inês Duarte", email: "ines@leiritech.pt", avatarUrl: null },
 };
 
 function actor(id: string): DirectoryUser {
