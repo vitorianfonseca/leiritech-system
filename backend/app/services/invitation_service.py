@@ -10,6 +10,7 @@ from datetime import UTC, datetime, timedelta
 
 import structlog
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors, security
@@ -173,10 +174,19 @@ def accept_invitation(db: Session, payload: InvitationAccept) -> User:
         payments_grant=False,
         invites_grant=False,
     )
-    db.add(user)
-    invite.status = "accepted"
-    invite.accepted_at = _now()
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(user)
+            invite.status = "accepted"
+            invite.accepted_at = _now()
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on the email unique constraint (audit H18) → 409, not a
+        # 500; the invite stays pending/unaccepted since the whole savepoint
+        # rolls back together.
+        raise errors.conflict(
+            "Já existe um utilizador com este email.", code="EMAIL_TAKEN"
+        ) from exc
     logger.info(
         "invitation_accepted",
         invitation_id=str(invite.id),

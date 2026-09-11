@@ -21,6 +21,7 @@ from app.api.routes import (
     finance,
     interactions,
     invitations,
+    meetings,
     my_work,
     notifications,
     opportunities,
@@ -50,6 +51,7 @@ api_router.include_router(catalog.router, prefix="/catalog-items", tags=["catalo
 api_router.include_router(
     interactions.router, prefix="/interactions", tags=["crm"]
 )
+api_router.include_router(meetings.router, prefix="/meetings", tags=["crm"])
 api_router.include_router(
     pipeline_stages.router, prefix="/pipeline-stages", tags=["pipeline"]
 )

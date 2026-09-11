@@ -9,12 +9,14 @@ never touch the ORM directly.
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import ColumnElement, Select, and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.project import Project, ProjectMember
-from app.models.task import Task, TaskAssignee, TaskDependency
+from app.models.task import Task, TaskAssignee, TaskChecklistItem, TaskDependency
+from app.models.time_entry import TimeEntry
 
 
 # --------------------------------------------------------------------------- #
@@ -149,6 +151,45 @@ def project_dependency_edges(
         .where(Task.project_id == project_id)
     ).all()
     return [(r[0], r[1]) for r in rows]
+
+
+def stop_running_timers_for_task(db: Session, task_id: uuid.UUID) -> int:
+    """Stop every running timer on this one task (BR-042, audit C13). Mirrors
+    ``projects.stop_running_timers``'s cascade pattern — written at the data
+    layer, does NOT commit (caller owns the transaction)."""
+    now = datetime.now(tz=UTC)
+    open_entries = list(
+        db.execute(
+            select(TimeEntry).where(
+                TimeEntry.task_id == task_id, TimeEntry.ended_at.is_(None)
+            )
+        ).scalars()
+    )
+    for entry in open_entries:
+        entry.ended_at = now
+    if open_entries:
+        db.flush()
+    return len(open_entries)
+
+
+def list_checklist_items(db: Session, task_id: uuid.UUID) -> list[TaskChecklistItem]:
+    return list(
+        db.execute(
+            select(TaskChecklistItem)
+            .where(TaskChecklistItem.task_id == task_id)
+            .order_by(TaskChecklistItem.order_index, TaskChecklistItem.created_at)
+        ).scalars()
+    )
+
+
+def get_checklist_item(
+    db: Session, task_id: uuid.UUID, item_id: uuid.UUID
+) -> TaskChecklistItem | None:
+    return db.execute(
+        select(TaskChecklistItem).where(
+            TaskChecklistItem.id == item_id, TaskChecklistItem.task_id == task_id
+        )
+    ).scalar_one_or_none()
 
 
 def unmet_dependency_ids(db: Session, task_id: uuid.UUID) -> list[uuid.UUID]:

@@ -183,6 +183,18 @@ class ProjectTemplateCreate(BaseModel):
     phases: list[TemplatePhaseCreate] = Field(default_factory=list)
 
 
+class ProjectTemplateUpdate(BaseModel):
+    """Audit C10 — mirrors proposal_template_service's replace-on-save
+    pattern: ``phases`` (when provided) REPLACES the entire phases/tasks
+    tree, matching how the frontend's phase/task editor works (edit the
+    whole structure, save once) rather than granular per-row endpoints."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = None
+    expected_duration: int | None = Field(default=None, ge=0)
+    phases: list[TemplatePhaseCreate] | None = None
+
+
 class TemplateTaskResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -200,6 +212,7 @@ class TemplatePhaseResponse(BaseModel):
     name: str
     order_index: int
     expected_duration: int | None
+    tasks: list[TemplateTaskResponse] = Field(default_factory=list)
 
 
 class ProjectTemplateResponse(BaseModel):
@@ -209,5 +222,6 @@ class ProjectTemplateResponse(BaseModel):
     name: str
     description: str | None
     expected_duration: int | None
+    phases: list[TemplatePhaseResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime

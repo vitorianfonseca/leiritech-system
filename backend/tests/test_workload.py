@@ -280,3 +280,66 @@ def test_gestor_can_read_any_member_detail(client, make_user, track) -> None:
 
 def test_workload_requires_auth(client) -> None:
     assert client.get(f"{API}/workload").status_code == 401
+
+
+def test_capacity_config_admin_only(client, make_user) -> None:
+    gestor = make_user(role="gestor")
+    resp = client.get(
+        f"{API}/workload/capacity-config", headers=_auth(_token(client, gestor.email))
+    )
+    assert resp.status_code == 403, resp.text
+
+
+def test_capacity_config_defaults_then_update_affects_workload(
+    client, make_user, track
+) -> None:
+    """Audit H16: an Admin-edited role target must be admin-configurable via the
+    real endpoint AND actually change the live workload computation for
+    members of that role — not just be stored inertly."""
+    admin = make_user(role="admin")
+    admin_token = _token(client, admin.email)
+    membro = make_user(role="membro")
+
+    defaults = client.get(
+        f"{API}/workload/capacity-config", headers=_auth(admin_token)
+    )
+    assert defaults.status_code == 200, defaults.text
+    membro_default = next(r for r in defaults.json() if r["role"] == "membro")
+    assert membro_default["utilization_target"] == pytest.approx(0.80, abs=0.01)
+
+    updated = client.patch(
+        f"{API}/workload/capacity-config/membro",
+        json={"utilization_target_pct": 50},
+        headers=_auth(admin_token),
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["utilization_target"] == pytest.approx(0.50, abs=0.001)
+
+    # The new target must now drive this membro's net_capacity_hours.
+    detail = client.get(
+        f"{API}/workload/{membro.id}", headers=_auth(admin_token)
+    )
+    assert detail.status_code == 200, detail.text
+    body = detail.json()
+    assert body["role_utilization_target"] == pytest.approx(0.50, abs=0.001)
+    assert body["net_capacity_hours"] == pytest.approx(
+        body["weekly_capacity_hours"] * 0.50, abs=0.01
+    )
+
+    # Cleanup: restore so other tests relying on the env-var default aren't
+    # affected by this row persisting.
+    client.patch(
+        f"{API}/workload/capacity-config/membro",
+        json={"utilization_target_pct": 80},
+        headers=_auth(admin_token),
+    )
+
+
+def test_capacity_config_rejects_out_of_range_target(client, make_user) -> None:
+    admin = make_user(role="admin")
+    resp = client.patch(
+        f"{API}/workload/capacity-config/gestor",
+        json={"utilization_target_pct": 150},
+        headers=_auth(_token(client, admin.email)),
+    )
+    assert resp.status_code == 422, resp.text

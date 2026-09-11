@@ -92,6 +92,30 @@ class TaskDependencyResponse(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
+# Checklist (audit C12) — a lightweight, ordered per-task todo list.
+# --------------------------------------------------------------------------- #
+class TaskChecklistItemCreate(BaseModel):
+    text: str = Field(min_length=1, max_length=512)
+    order_index: int = Field(default=0, ge=0)
+
+
+class TaskChecklistItemUpdate(BaseModel):
+    text: str | None = Field(default=None, min_length=1, max_length=512)
+    done: bool | None = None
+    order_index: int | None = Field(default=None, ge=0)
+
+
+class TaskChecklistItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    task_id: uuid.UUID
+    text: str
+    done: bool
+    order_index: int
+
+
+# --------------------------------------------------------------------------- #
 # Response
 # --------------------------------------------------------------------------- #
 class TaskResponse(BaseModel):

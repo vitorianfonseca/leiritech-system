@@ -14,9 +14,11 @@ transitions) is NOT re-implemented here: this service calls the single seam
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
@@ -28,12 +30,14 @@ from app.core.permissions import (
     role_at_least,
 )
 from app.models.project import Project
-from app.models.task import Task, TaskDependency
+from app.models.task import Task, TaskChecklistItem, TaskDependency
 from app.models.user import User
 from app.repositories import tasks as task_repo
 from app.schemas.tasks import (
     TaskAssign,
     TaskBlock,
+    TaskChecklistItemCreate,
+    TaskChecklistItemUpdate,
     TaskCreate,
     TaskDependencyCreate,
     TaskUnblock,
@@ -573,8 +577,15 @@ def add_dependency(
     dependency = TaskDependency(
         task_id=task.id, depends_on_task_id=dep_id, created_by=user.id
     )
-    db.add(dependency)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(dependency)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on uq_task_dependency (audit H18) → 409, not a 500.
+        raise errors.conflict(
+            "A dependência já existe.", code="TASK_DEPENDENCY_EXISTS"
+        ) from exc
     activity_service.record(
         db,
         entity_type=ENTITY_TYPE,
@@ -619,3 +630,157 @@ def remove_dependency(
         depends_on=str(depends_on_task_id),
         actor_id=str(user.id),
     )
+
+
+# --------------------------------------------------------------------------- #
+# Archive / restore / duplicate (BR-060, audit C13)
+# --------------------------------------------------------------------------- #
+def archive_task(db: Session, user: User, task_id: uuid.UUID) -> Task:
+    """Soft-delete a task (BR-060 — never hard-deleted). Stops any running
+    timer on it (BR-042), same cascade pattern as a project-level freeze."""
+    task = get_task_or_404(db, user, task_id)
+    project = _load_project(db, task)
+    _require_edit(db, project, user, code="TASK_ARCHIVE_FORBIDDEN")
+    if task.archived_at is not None:
+        return task  # idempotent
+    before = _snapshot(task)
+    task.archived_at = datetime.now(tz=UTC)
+    stopped = task_repo.stop_running_timers_for_task(db, task.id)
+    db.flush()
+    activity_service.record(
+        db,
+        entity_type=ENTITY_TYPE,
+        entity_id=task.id,
+        action="task.archived",
+        actor_id=user.id,
+        before=before,
+        after=_snapshot(task),
+    )
+    logger.info(
+        "task_archived", task_id=str(task.id), actor_id=str(user.id), timers_stopped=stopped
+    )
+    return task
+
+
+def restore_task(db: Session, user: User, task_id: uuid.UUID) -> Task:
+    task = db.get(Task, task_id)
+    if task is None:
+        raise errors.not_found("Tarefa não encontrada.", code="TASK_NOT_FOUND")
+    project = _load_project(db, task)
+    _require_edit(db, project, user, code="TASK_ARCHIVE_FORBIDDEN")
+    if task.archived_at is None:
+        return task  # idempotent
+    before = _snapshot(task)
+    task.archived_at = None
+    db.flush()
+    activity_service.record(
+        db,
+        entity_type=ENTITY_TYPE,
+        entity_id=task.id,
+        action="task.restored",
+        actor_id=user.id,
+        before=before,
+        after=_snapshot(task),
+    )
+    logger.info("task_restored", task_id=str(task.id), actor_id=str(user.id))
+    return task
+
+
+def duplicate_task(db: Session, user: User, task_id: uuid.UUID) -> Task:
+    """Copy a task's editable fields into a new ``todo`` task in the same
+    project/phase. Assignee, dependencies, checklist and comments are
+    intentionally NOT copied — a duplicate is a fresh unit of work, not a full
+    clone of history/state."""
+    source = get_task_or_404(db, user, task_id)
+    project = _load_project(db, source)
+    _require_edit(db, project, user, code="TASK_CREATE_FORBIDDEN")
+    _assert_project_editable(project)
+    copy = Task(
+        project_id=source.project_id,
+        phase_id=source.phase_id,
+        title=f"{source.title} (cópia)",
+        description=source.description,
+        priority=source.priority,
+        estimate_hours=source.estimate_hours,
+        status="todo",
+        created_by=user.id,
+    )
+    db.add(copy)
+    db.flush()
+    activity_service.record(
+        db,
+        entity_type=ENTITY_TYPE,
+        entity_id=copy.id,
+        action="task.duplicated",
+        actor_id=user.id,
+        after={**_snapshot(copy), "duplicated_from": str(source.id)},
+    )
+    logger.info(
+        "task_duplicated",
+        task_id=str(copy.id),
+        source_task_id=str(source.id),
+        actor_id=str(user.id),
+    )
+    return copy
+
+
+# --------------------------------------------------------------------------- #
+# Checklist (audit C12) — ordered per-task todo list, same edit rights as the
+# task itself (no separate permission axis per the matrix).
+# --------------------------------------------------------------------------- #
+def list_checklist_items(db: Session, user: User, task_id: uuid.UUID) -> list[TaskChecklistItem]:
+    task = get_task_or_404(db, user, task_id)
+    return task_repo.list_checklist_items(db, task.id)
+
+
+def add_checklist_item(
+    db: Session, user: User, task_id: uuid.UUID, payload: TaskChecklistItemCreate
+) -> TaskChecklistItem:
+    task = get_task_or_404(db, user, task_id)
+    project = _load_project(db, task)
+    _require_edit(db, project, user, code="TASK_CHECKLIST_FORBIDDEN")
+    item = TaskChecklistItem(
+        task_id=task.id,
+        text=payload.text,
+        order_index=payload.order_index,
+        created_by=user.id,
+    )
+    db.add(item)
+    db.flush()
+    logger.info("task_checklist_item_added", task_id=str(task.id), item_id=str(item.id))
+    return item
+
+
+def update_checklist_item(
+    db: Session,
+    user: User,
+    task_id: uuid.UUID,
+    item_id: uuid.UUID,
+    payload: TaskChecklistItemUpdate,
+) -> TaskChecklistItem:
+    task = get_task_or_404(db, user, task_id)
+    project = _load_project(db, task)
+    _require_edit(db, project, user, code="TASK_CHECKLIST_FORBIDDEN")
+    item = task_repo.get_checklist_item(db, task.id, item_id)
+    if item is None:
+        raise errors.not_found("Item não encontrado.", code="TASK_CHECKLIST_ITEM_NOT_FOUND")
+    changes = payload.model_dump(exclude_unset=True)
+    for field, value in changes.items():
+        setattr(item, field, value)
+    db.flush()
+    logger.info("task_checklist_item_updated", task_id=str(task.id), item_id=str(item.id))
+    return item
+
+
+def delete_checklist_item(
+    db: Session, user: User, task_id: uuid.UUID, item_id: uuid.UUID
+) -> None:
+    task = get_task_or_404(db, user, task_id)
+    project = _load_project(db, task)
+    _require_edit(db, project, user, code="TASK_CHECKLIST_FORBIDDEN")
+    item = task_repo.get_checklist_item(db, task.id, item_id)
+    if item is None:
+        raise errors.not_found("Item não encontrado.", code="TASK_CHECKLIST_ITEM_NOT_FOUND")
+    db.delete(item)
+    db.flush()
+    logger.info("task_checklist_item_deleted", task_id=str(task.id), item_id=str(item_id))

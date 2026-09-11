@@ -67,6 +67,13 @@ class UserPreferencesResponse(BaseModel):
     notification_channels: dict[str, Any] = Field(default_factory=dict)
 
 
+class UpdateUserRoleRequest(BaseModel):
+    """Admin-only role change (audit H15). ``role`` is one of the three
+    authoritative roles (BR-001); anything else is rejected at the edge."""
+
+    role: Literal["admin", "gestor", "membro"]
+
+
 class UpdatePreferencesRequest(BaseModel):
     """Partial update of the caller's own preferences. Every field is optional;
     only the provided ones are written."""

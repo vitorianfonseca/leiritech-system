@@ -22,7 +22,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import ArchiveMixin, AuditBase
 from app.models import enums
@@ -168,6 +168,16 @@ class ProjectTemplate(AuditBase):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     expected_duration: Mapped[int | None] = mapped_column(Integer, nullable=True)  # days
 
+    # audit C10: relationship (not the codebase's usual explicit-query style)
+    # so the service can do proposal_template_service's replace-on-save
+    # pattern (`template.phases = [...]`) — the established precedent for
+    # exactly this "template with nested ordered children" shape.
+    phases: Mapped[list[TemplatePhase]] = relationship(
+        back_populates="template",
+        cascade="all, delete-orphan",
+        order_by="TemplatePhase.order_index",
+    )
+
 
 class TemplatePhase(AuditBase):
     __tablename__ = "template_phases"
@@ -179,6 +189,13 @@ class TemplatePhase(AuditBase):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     expected_duration: Mapped[int | None] = mapped_column(Integer, nullable=True)  # days
+
+    template: Mapped[ProjectTemplate] = relationship(back_populates="phases")
+    tasks: Mapped[list[TemplateTask]] = relationship(
+        back_populates="phase",
+        cascade="all, delete-orphan",
+        order_by="TemplateTask.order_index",
+    )
 
 
 class TemplateTask(AuditBase):
@@ -192,3 +209,5 @@ class TemplateTask(AuditBase):
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     role_responsible: Mapped[str | None] = mapped_column(String(128), nullable=True)
     estimate_hours: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
+
+    phase: Mapped[TemplatePhase] = relationship(back_populates="tasks")

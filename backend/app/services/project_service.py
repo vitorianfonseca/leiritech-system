@@ -30,10 +30,11 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import structlog
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
-from app.core.permissions import Role, can_manage_project, role_at_least
+from app.core.permissions import Role, can_cancel_project, can_manage_project, role_at_least
 from app.models.crm import Company
 from app.models.project import (
     Project,
@@ -54,6 +55,7 @@ from app.schemas.projects import (
     ProjectMemberAdd,
     ProjectStateChange,
     ProjectTemplateCreate,
+    ProjectTemplateUpdate,
     ProjectUpdate,
 )
 from app.services import activity_service, notification_service, opportunity_service
@@ -334,7 +336,17 @@ def change_state(
     transition against the state machine (409 on illegal), enforces the
     per-target guards, then applies the cascade."""
     project = get_project_or_404(db, user, project_id)
-    _require_manage(project, user, code="PROJECT_STATE_FORBIDDEN")
+    if target == "cancelled":
+        # Audit C17: cancellation is financially gated (design decision #9), not
+        # an ordinary owner action — a Gestor without the payments grant must
+        # NOT be able to cancel a project they merely own.
+        if not can_cancel_project(user, is_owner=_is_owner(project, user)):
+            raise errors.forbidden(
+                "Cancelar um projeto requer a permissão financeira (grant).",
+                code="PROJECT_CANCEL_FORBIDDEN",
+            )
+    else:
+        _require_manage(project, user, code="PROJECT_STATE_FORBIDDEN")
     _assert_transition_allowed(project, target)
 
     if target in _REASON_REQUIRED and not (payload.reason and payload.reason.strip()):
@@ -551,8 +563,15 @@ def add_member(
         role_in_project=payload.role_in_project,
         created_by=user.id,
     )
-    db.add(member)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(member)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on uq_project_member (audit H18) → 409, not a 500.
+        raise errors.conflict(
+            "O utilizador já é membro do projeto.", code="MEMBER_EXISTS"
+        ) from exc
     activity_service.record(
         db,
         entity_type=ENTITY_TYPE,
@@ -658,6 +677,58 @@ def create_template(
         actor_id=str(user.id),
     )
     return template
+
+
+def update_template(
+    db: Session, user: User, template_id: uuid.UUID, payload: ProjectTemplateUpdate
+) -> ProjectTemplate:
+    """Audit C10: previously only bare create/list reached the backend — the
+    phase/task editor in Settings → Templates was 100% frontend-mock, lost on
+    reload. Mirrors ``proposal_template_service.update_template``'s
+    replace-on-save pattern: when ``phases`` is provided it REPLACES the whole
+    tree (the ``cascade="all, delete-orphan"`` relationship on
+    ``ProjectTemplate.phases`` deletes the old rows automatically)."""
+    template = get_template_or_404(db, template_id)
+    for field in ("name", "description", "expected_duration"):
+        value = getattr(payload, field)
+        if value is not None:
+            setattr(template, field, value)
+    if payload.phases is not None:
+        template.phases = [
+            TemplatePhase(
+                name=phase.name,
+                order_index=phase.order_index,
+                expected_duration=phase.expected_duration,
+                created_by=user.id,
+                tasks=[
+                    TemplateTask(
+                        title=task.title,
+                        order_index=task.order_index,
+                        role_responsible=task.role_responsible,
+                        estimate_hours=task.estimate_hours,
+                        created_by=user.id,
+                    )
+                    for task in phase.tasks
+                ],
+            )
+            for phase in payload.phases
+        ]
+    db.flush()
+    logger.info("project_template_updated", template_id=str(template.id), actor_id=str(user.id))
+    return template
+
+
+def delete_template(db: Session, user: User, template_id: uuid.UUID) -> None:
+    """Templates are canonical config, not a client business record — BR-060's
+    soft-delete list (companies/opportunities/projects/tasks/proposals) does
+    not name templates, so this is a real delete (Admin-only, route-enforced).
+    Existing projects already instantiated FROM this template are untouched
+    (instantiation copies phases/tasks onto the project; no live FK back to
+    the template survives spin-up)."""
+    template = get_template_or_404(db, template_id)
+    db.delete(template)
+    db.flush()
+    logger.info("project_template_deleted", template_id=str(template_id), actor_id=str(user.id))
 
 
 def _instantiate_template(
@@ -767,6 +838,18 @@ def create_from_opportunity(
         if payload.contracted_value is not None
         else prefill.contracted_value
     )
+    # BR-035/C1: a verbal close (no accepted proposal) MUST have a manually
+    # entered contracted value — the graceful-fallback path is deliberate data
+    # reuse, never a way to skip entering a value entirely (audit C9).
+    if not prefill.has_accepted_proposal and contracted_value is None:
+        raise errors.ApiError(
+            status_code=422,
+            code="CONTRACTED_VALUE_REQUIRED",
+            message=(
+                "Sem proposta aceite, é obrigatório indicar o valor contratado "
+                "manualmente (BR-035)."
+            ),
+        )
     project = Project(
         name=payload.name,
         company_id=prefill.company_id,
@@ -779,8 +862,18 @@ def create_from_opportunity(
         status="planning",
         created_by=user.id,
     )
-    db.add(project)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(project)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on uq_projects_opportunity_live (audit C14): a
+        # concurrent conversion already created the project for this
+        # opportunity — surface as 409, not a 500 or a silent duplicate.
+        raise errors.conflict(
+            "Esta oportunidade já foi convertida noutro projeto.",
+            code="OPPORTUNITY_ALREADY_CONVERTED",
+        ) from exc
 
     if payload.template_id is not None:
         _instantiate_template(db, user, project, payload.template_id)

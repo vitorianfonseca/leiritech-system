@@ -27,6 +27,7 @@ from app.models.user import User
 from app.schemas.auth import UserResponse
 from app.schemas.users import (
     UpdatePreferencesRequest,
+    UpdateUserRoleRequest,
     UserDirectory,
     UserDirectoryEntry,
     UserPreferencesResponse,
@@ -130,4 +131,16 @@ def activate_user(
     db: DbSession,
 ) -> UserResponse:
     user = user_service.activate_user(db, user_id)
+    return UserResponse.model_validate(user)
+
+
+@router.patch("/{user_id}/role", response_model=UserResponse)
+def update_user_role(
+    user_id: uuid.UUID,
+    payload: UpdateUserRoleRequest,
+    _admin: RequireAdmin,
+    db: DbSession,
+) -> UserResponse:
+    """Audit H15 — Admin-only role change (matrix §3, BR-004/005)."""
+    user = user_service.update_user_role(db, user_id, payload.role)
     return UserResponse.model_validate(user)

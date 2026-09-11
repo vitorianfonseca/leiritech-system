@@ -202,9 +202,15 @@ def _phase_forward(source: str, target: str) -> bool:
 
 
 def _assert_phase_completable(db: Session, phase: ProjectPhase) -> None:
-    """BR-051: a phase completes only when all its non-archived tasks are done."""
+    """BR-051: a phase completes only when all its non-archived tasks are done.
+
+    Audit H19: ``total > done`` is vacuously false for a phase with zero
+    tracked tasks, so "Concluir fase" used to succeed instantly with no work
+    ever recorded — undermining the r2 "no waiver" resolution (C2). A phase
+    must have at least one task to complete.
+    """
     total, done = phase_repo.phase_task_counts(db, phase.id)
-    if total > done:
+    if total == 0 or total > done:
         raise errors.conflict(
             "Todas as tarefas da fase têm de estar concluídas.",
             code="PHASE_TASKS_INCOMPLETE",

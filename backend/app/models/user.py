@@ -46,6 +46,34 @@ class User(AuditBase):
     )
 
 
+class RoleCapacityConfig(AuditBase):
+    """Admin-configurable per-role capacity targets (BR-080/081, audit H16).
+
+    Previously the utilization target was configurable only via the
+    ``WORKLOAD_TARGET_*`` env vars — not runtime-editable by an Admin as the
+    permission matrix requires. One row per role; ``workload_service`` reads
+    from here first and falls back to the env-var defaults when a role has no
+    row yet, so the feature works out of the box before any Admin edits it.
+    """
+
+    __tablename__ = "role_capacity_configs"
+
+    role: Mapped[str] = mapped_column(
+        Enum(*enums.USER_ROLES, name="capacity_config_role", native_enum=False),
+        nullable=False,
+        unique=True,
+    )
+    weekly_capacity_hours: Mapped[float] = mapped_column(
+        Numeric(5, 2), nullable=False, default=40
+    )
+    # Fraction 0..1 (BR-081) — never a flat cross-role %.
+    utilization_target: Mapped[float] = mapped_column(Numeric(4, 3), nullable=False)
+    # EUR cents/hour (BR-069) — Admin-only, never Membro-visible.
+    internal_cost_rate_cents: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+
+
 class UserSession(UUIDPKMixin, TimestampMixin, Base):
     __tablename__ = "user_sessions"
 

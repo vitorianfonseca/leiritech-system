@@ -22,6 +22,7 @@ from app.database.session import SessionLocal
 from app.models.collaboration import ActivityLog
 from app.models.project import Milestone, Project, ProjectMember, ProjectPhase
 from app.models.task import Task
+from app.models.time_entry import TimeEntry
 
 API = "/api/v1"
 PASSWORD = "correct-horse-battery"
@@ -335,3 +336,137 @@ def test_phase_complete_requires_tasks_done(client, make_user, track):
     assert done.status_code == 200, done.text
     assert done.json()["status"] == "completed"
     assert done.json()["progress"] == 100
+
+
+def test_phase_with_zero_tasks_cannot_complete(client, make_user, track):
+    """Audit H19: total==done is vacuously true at 0==0 — a phase with no
+    tracked work must not be completable ("no waiver", C2)."""
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    project = _create_project(client, token, track)
+
+    phase = client.post(
+        f"{API}/phases",
+        json={"project_id": project["id"], "name": "Vazia"},
+        headers=_auth(token),
+    )
+    assert phase.status_code == 201, phase.text
+    phase_id = phase.json()["id"]
+
+    client.post(
+        f"{API}/phases/{phase_id}/transition",
+        json={"status": "in_progress"},
+        headers=_auth(token),
+    )
+    blocked = client.post(f"{API}/phases/{phase_id}/complete", headers=_auth(token))
+    assert blocked.status_code == 409, blocked.text
+    assert blocked.json()["error"]["code"] == "PHASE_TASKS_INCOMPLETE"
+
+
+# --------------------------------------------------------------------------- #
+# Archive / restore / duplicate (audit C13)
+# --------------------------------------------------------------------------- #
+def test_archive_restore_duplicate_task(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    project = _create_project(client, token, track)
+    task = _create_task(client, token, project["id"], estimate_hours=3)
+
+    archived = client.post(f"{API}/tasks/{task['id']}/archive", headers=_auth(token))
+    assert archived.status_code == 200, archived.text
+    assert archived.json()["archived_at"] is not None
+
+    # Archiving is idempotent.
+    again = client.post(f"{API}/tasks/{task['id']}/archive", headers=_auth(token))
+    assert again.status_code == 200, again.text
+
+    restored = client.post(f"{API}/tasks/{task['id']}/restore", headers=_auth(token))
+    assert restored.status_code == 200, restored.text
+    assert restored.json()["archived_at"] is None
+
+    dup = client.post(f"{API}/tasks/{task['id']}/duplicate", headers=_auth(token))
+    assert dup.status_code == 201, dup.text
+    assert dup.json()["id"] != task["id"]
+    assert dup.json()["status"] == "todo"
+    assert dup.json()["title"] == f"{task['title']} (cópia)"
+
+
+def test_archive_task_stops_running_timer(client, make_user, track):
+    """BR-042/audit C13: archiving a task must stop any timer running on it."""
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    project = _create_project(client, token, track)
+    task = _create_task(client, token, project["id"])
+    _add_member(project["id"], gestor.id)
+
+    started = client.post(
+        f"{API}/time/start",
+        json={"task_id": task["id"]},
+        headers=_auth(token),
+    )
+    assert started.status_code == 201, started.text
+    entry_id = started.json()["id"]
+
+    client.post(f"{API}/tasks/{task['id']}/archive", headers=_auth(token))
+
+    db = SessionLocal()
+    try:
+        entry = db.get(TimeEntry, uuid.UUID(entry_id))
+        assert entry.ended_at is not None
+    finally:
+        db.close()
+
+
+# --------------------------------------------------------------------------- #
+# Checklist (audit C12)
+# --------------------------------------------------------------------------- #
+def test_checklist_crud(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    project = _create_project(client, token, track)
+    task = _create_task(client, token, project["id"])
+
+    created = client.post(
+        f"{API}/tasks/{task['id']}/checklist",
+        json={"text": "Rever wireframes", "order_index": 0},
+        headers=_auth(token),
+    )
+    assert created.status_code == 201, created.text
+    item_id = created.json()["id"]
+    assert created.json()["done"] is False
+
+    listed = client.get(f"{API}/tasks/{task['id']}/checklist", headers=_auth(token))
+    assert listed.status_code == 200, listed.text
+    assert len(listed.json()) == 1
+
+    updated = client.patch(
+        f"{API}/tasks/{task['id']}/checklist/{item_id}",
+        json={"done": True},
+        headers=_auth(token),
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["done"] is True
+
+    deleted = client.delete(
+        f"{API}/tasks/{task['id']}/checklist/{item_id}", headers=_auth(token)
+    )
+    assert deleted.status_code == 204, deleted.text
+
+    empty = client.get(f"{API}/tasks/{task['id']}/checklist", headers=_auth(token))
+    assert empty.json() == []
+
+
+def test_checklist_forbidden_for_unrelated_membro(client, make_user, track):
+    gestor = make_user(role="gestor")
+    outsider = make_user(role="membro")
+    token = _token(client, gestor.email)
+    project = _create_project(client, token, track)
+    task = _create_task(client, token, project["id"])
+
+    resp = client.post(
+        f"{API}/tasks/{task['id']}/checklist",
+        json={"text": "x"},
+        headers=_auth(_token(client, outsider.email)),
+    )
+    # Unrelated Membro can't even see the task → 404 (BR-002, enumeration-safe).
+    assert resp.status_code == 404, resp.text

@@ -64,6 +64,12 @@ class Settings(BaseSettings):
 
     # --- Rate limiting ---
     LOGIN_RATE_LIMIT_PER_MINUTE: int = 5
+    # audit H1: previously only /auth/login was throttled; /password/forgot,
+    # /password/reset, /invitations/accept and GET /invitations/{token} were
+    # public and unthrottled (mail-bombing via forgot-password; token-guessing
+    # via reset/invitation accept).
+    PASSWORD_FORGOT_RATE_LIMIT_PER_MINUTE: int = 3
+    PUBLIC_TOKEN_RATE_LIMIT_PER_MINUTE: int = 10
 
     # --- Workload / capacity (F13, BR-080..084) ---
     # Role-dependent utilization targets (BR-081, Admin-configurable per role).

@@ -20,6 +20,9 @@ from app.schemas.common import Page
 from app.schemas.tasks import (
     TaskAssign,
     TaskBlock,
+    TaskChecklistItemCreate,
+    TaskChecklistItemResponse,
+    TaskChecklistItemUpdate,
     TaskCreate,
     TaskDependencyCreate,
     TaskDependencyResponse,
@@ -191,3 +194,77 @@ def remove_dependency(
     db: DbSession,
 ) -> None:
     task_service.remove_dependency(db, user, task_id, depends_on_task_id)
+
+
+# --------------------------------------------------------------------------- #
+# Archive / restore / duplicate (BR-060, audit C13)
+# --------------------------------------------------------------------------- #
+@router.post("/{task_id}/archive", response_model=TaskResponse)
+def archive_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
+    task = task_service.archive_task(db, user, task_id)
+    return TaskResponse.model_validate(task)
+
+
+@router.post("/{task_id}/restore", response_model=TaskResponse)
+def restore_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
+    task = task_service.restore_task(db, user, task_id)
+    return TaskResponse.model_validate(task)
+
+
+@router.post(
+    "/{task_id}/duplicate", response_model=TaskResponse, status_code=status.HTTP_201_CREATED
+)
+def duplicate_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
+    task = task_service.duplicate_task(db, user, task_id)
+    return TaskResponse.model_validate(task)
+
+
+# --------------------------------------------------------------------------- #
+# Checklist (audit C12)
+# --------------------------------------------------------------------------- #
+@router.get("/{task_id}/checklist", response_model=list[TaskChecklistItemResponse])
+def list_checklist(
+    task_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> list[TaskChecklistItemResponse]:
+    items = task_service.list_checklist_items(db, user, task_id)
+    return [TaskChecklistItemResponse.model_validate(i) for i in items]
+
+
+@router.post(
+    "/{task_id}/checklist",
+    response_model=TaskChecklistItemResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_checklist_item(
+    task_id: uuid.UUID,
+    payload: TaskChecklistItemCreate,
+    user: CurrentUser,
+    db: DbSession,
+) -> TaskChecklistItemResponse:
+    item = task_service.add_checklist_item(db, user, task_id, payload)
+    return TaskChecklistItemResponse.model_validate(item)
+
+
+@router.patch(
+    "/{task_id}/checklist/{item_id}", response_model=TaskChecklistItemResponse
+)
+def update_checklist_item(
+    task_id: uuid.UUID,
+    item_id: uuid.UUID,
+    payload: TaskChecklistItemUpdate,
+    user: CurrentUser,
+    db: DbSession,
+) -> TaskChecklistItemResponse:
+    item = task_service.update_checklist_item(db, user, task_id, item_id, payload)
+    return TaskChecklistItemResponse.model_validate(item)
+
+
+@router.delete(
+    "/{task_id}/checklist/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+)
+def delete_checklist_item(
+    task_id: uuid.UUID, item_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> None:
+    task_service.delete_checklist_item(db, user, task_id, item_id)

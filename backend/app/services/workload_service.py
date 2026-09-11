@@ -39,14 +39,20 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import structlog
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core import errors, permissions
 from app.core.config import settings
 from app.core.permissions import Role
-from app.models.user import User
+from app.models.user import RoleCapacityConfig, User
 from app.repositories import workload as workload_repo
-from app.schemas.workload import AvailabilityState, TeamWorkload, WorkloadEntry
+from app.schemas.workload import (
+    AvailabilityState,
+    RoleCapacityConfigResponse,
+    TeamWorkload,
+    WorkloadEntry,
+)
 
 logger = structlog.get_logger("aurea.workload")
 
@@ -58,9 +64,21 @@ _ROLE_TARGETS: dict[str, float] = {
 }
 
 
-def role_target(role: str) -> float:
-    """Utilization target fraction for a role (BR-081). Unknown role → membro."""
+def role_target(role: str, db_overrides: dict[str, float] | None = None) -> float:
+    """Utilization target fraction for a role (BR-081). Unknown role → membro.
+
+    ``db_overrides`` (audit H16) is the live ``role_capacity_configs`` table,
+    resolved once per request by the caller — an Admin-edited target always
+    wins over the env-var default in ``_ROLE_TARGETS``.
+    """
+    if db_overrides and role in db_overrides:
+        return db_overrides[role]
     return _ROLE_TARGETS.get(role, settings.WORKLOAD_TARGET_MEMBRO)
+
+
+def _db_role_targets(db: Session) -> dict[str, float]:
+    rows = db.execute(select(RoleCapacityConfig)).scalars().all()
+    return {r.role: float(r.utilization_target) for r in rows}
 
 
 def _week_start(now: datetime) -> datetime:
@@ -95,10 +113,19 @@ def _derive_state(
 
 
 def compute_entry(
-    user: User, allocated_hours: float, billable_hours_week: float
+    user: User,
+    allocated_hours: float,
+    billable_hours_week: float,
+    *,
+    role_targets: dict[str, float] | None = None,
 ) -> WorkloadEntry:
-    """Pure per-member derivation (BR-080..084). No DB access — unit-testable."""
-    target = role_target(user.role)
+    """Pure per-member derivation (BR-080..084) given already-resolved inputs.
+
+    ``role_targets`` (audit H16) is the caller's already-queried
+    ``role_capacity_configs`` snapshot — this function itself still does no DB
+    access, it just accepts the resolved dict instead of hardcoding env-only
+    targets, so it stays unit-testable without a database."""
+    target = role_target(user.role, role_targets)
     capacity = float(user.weekly_capacity_hours or 0.0)
     net_capacity = round(capacity * target, 2)
     allocated = round(allocated_hours, 2)
@@ -136,6 +163,7 @@ def team_workload(db: Session, requester: User) -> TeamWorkload:
     """Workload rollup. Admin/Gestor → whole team; Membro → own row only (BR-002)."""
     now = datetime.now(tz=UTC)
     since = _week_start(now)
+    role_targets = _db_role_targets(db)
 
     if not permissions.role_at_least(requester.role, Role.GESTOR):
         # BR-002 — a Membro never sees the team; scope to themselves.
@@ -143,6 +171,7 @@ def team_workload(db: Session, requester: User) -> TeamWorkload:
             requester,
             workload_repo.allocated_hours_for_user(db, requester.id),
             workload_repo.billable_hours_for_user(db, requester.id, since),
+            role_targets=role_targets,
         )
         return _rollup([entry], now)
 
@@ -150,7 +179,9 @@ def team_workload(db: Session, requester: User) -> TeamWorkload:
     allocated = workload_repo.allocated_hours_by_user(db)
     billable = workload_repo.billable_hours_by_user(db, since)
     entries = [
-        compute_entry(u, allocated.get(u.id, 0.0), billable.get(u.id, 0.0))
+        compute_entry(
+            u, allocated.get(u.id, 0.0), billable.get(u.id, 0.0), role_targets=role_targets
+        )
         for u in users
     ]
     return _rollup(entries, now)
@@ -173,6 +204,7 @@ def user_workload(
         target_user,
         workload_repo.allocated_hours_for_user(db, target_user.id),
         workload_repo.billable_hours_for_user(db, target_user.id, since),
+        role_targets=_db_role_targets(db),
     )
 
 
@@ -184,3 +216,79 @@ def _rollup(entries: list[WorkloadEntry], generated_at: datetime) -> TeamWorkloa
         over_allocated_count=over,
         generated_at=generated_at,
     )
+
+
+# --------------------------------------------------------------------------- #
+# Per-role capacity config (BR-080/081, audit H16) — Admin-only read/write.
+# --------------------------------------------------------------------------- #
+def list_role_capacity_configs(db: Session) -> list[RoleCapacityConfigResponse]:
+    """One row per role, seeded from the env-var defaults when an Admin has
+    never edited that role yet — so the Settings UI always shows the actual
+    effective values, not a blank form."""
+    rows = {r.role: r for r in db.execute(select(RoleCapacityConfig)).scalars().all()}
+    out: list[RoleCapacityConfigResponse] = []
+    for role in (Role.ADMIN, Role.GESTOR, Role.MEMBRO):
+        row = rows.get(role)
+        if row is not None:
+            out.append(RoleCapacityConfigResponse.model_validate(row))
+        else:
+            out.append(
+                RoleCapacityConfigResponse(
+                    role=role,
+                    weekly_capacity_hours=40.0,
+                    utilization_target=_ROLE_TARGETS[role],
+                    internal_cost_rate_cents=None,
+                )
+            )
+    return out
+
+
+def update_role_capacity_config(
+    db: Session,
+    role: str,
+    *,
+    weekly_capacity_hours: float | None,
+    utilization_target_pct: float | None,
+    internal_cost_rate_cents: int | None,
+) -> RoleCapacityConfigResponse:
+    """Upsert the row for ``role`` (Admin-only, enforced by the route)."""
+    if role not in (Role.ADMIN, Role.GESTOR, Role.MEMBRO):
+        raise errors.bad_request("Perfil inválido.", code="INVALID_ROLE")
+    if utilization_target_pct is not None and not (0 < utilization_target_pct <= 100):
+        raise errors.ApiError(
+            status_code=422,
+            code="TARGET_RANGE",
+            message="O alvo de utilização tem de estar entre 1 e 100%.",
+        )
+    if weekly_capacity_hours is not None and not (0 < weekly_capacity_hours <= 168):
+        raise errors.ApiError(
+            status_code=422,
+            code="CAPACITY_RANGE",
+            message="A capacidade semanal tem de estar entre 1 e 168 horas.",
+        )
+
+    row = db.execute(
+        select(RoleCapacityConfig).where(RoleCapacityConfig.role == role)
+    ).scalar_one_or_none()
+    if row is None:
+        row = RoleCapacityConfig(
+            role=role,
+            weekly_capacity_hours=weekly_capacity_hours or 40.0,
+            utilization_target=(
+                (utilization_target_pct / 100)
+                if utilization_target_pct is not None
+                else _ROLE_TARGETS[role]
+            ),
+            internal_cost_rate_cents=internal_cost_rate_cents,
+        )
+        db.add(row)
+    else:
+        if weekly_capacity_hours is not None:
+            row.weekly_capacity_hours = weekly_capacity_hours
+        if utilization_target_pct is not None:
+            row.utilization_target = utilization_target_pct / 100
+        if internal_cost_rate_cents is not None:
+            row.internal_cost_rate_cents = internal_cost_rate_cents
+    db.flush()
+    logger.info("role_capacity_config_updated", role=role)
+    return RoleCapacityConfigResponse.model_validate(row)

@@ -24,6 +24,7 @@ from decimal import Decimal
 from typing import Any
 
 import structlog
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
@@ -213,8 +214,16 @@ def create_proposal(db: Session, user: User, payload: ProposalCreate) -> Proposa
         status="draft",
         created_by=user.id,
     )
-    db.add(proposal)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(proposal)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on the reference unique constraint (audit H18) → 409.
+        raise errors.conflict(
+            "Já existe uma proposta com esta referência.",
+            code="PROPOSAL_REFERENCE_EXISTS",
+        ) from exc
     activity_service.record(
         db,
         entity_type=ENTITY_TYPE,
@@ -284,7 +293,16 @@ def _transition(
 ) -> Proposal:
     before = _snapshot(proposal)
     proposal.status = new_status
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on uq_proposals_accepted_per_opportunity (audit H4): a
+        # second proposal for the same opportunity was accepted concurrently.
+        raise errors.conflict(
+            "Já existe outra proposta aceite para esta oportunidade.",
+            code="PROPOSAL_ALREADY_ACCEPTED_ELSEWHERE",
+        ) from exc
     after = _snapshot(proposal)
     if extra_after:
         after = {**after, **extra_after}

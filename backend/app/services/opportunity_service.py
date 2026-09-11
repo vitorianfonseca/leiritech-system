@@ -14,6 +14,7 @@ from datetime import UTC, date, datetime
 from typing import Any
 
 import structlog
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
@@ -93,8 +94,15 @@ def create_stage(db: Session, user: User, payload: PipelineStageCreate) -> Pipel
         win_probability=payload.win_probability,
         created_by=user.id,
     )
-    db.add(stage)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(stage)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on the code unique constraint (audit H18) → 409, not 500.
+        raise errors.conflict(
+            "Já existe uma fase com este código.", code="STAGE_CODE_EXISTS"
+        ) from exc
     logger.info("stage_created", stage_id=str(stage.id), actor_id=str(user.id))
     return stage
 
@@ -116,14 +124,20 @@ def update_stage(
 # Opportunity reads
 # --------------------------------------------------------------------------- #
 def get_opportunity_or_404(
-    db: Session, user: User, opportunity_id: uuid.UUID
+    db: Session, user: User, opportunity_id: uuid.UUID, *, for_update: bool = False
 ) -> Opportunity:
     """Load an opportunity, enforcing the Membro visibility boundary.
 
     A Membro requesting an opportunity outside their scope gets 404 (not 403) so
     they cannot enumerate records they are not attached to (BR-002).
+
+    ``for_update`` takes a row lock (``SELECT ... FOR UPDATE``) so a concurrent
+    win/lose on the same opportunity blocks instead of racing past the terminal
+    check — otherwise both requests can read ``outcome="open"`` under READ
+    COMMITTED and both commit, producing the explicitly-forbidden won→lost
+    transition (audit C16).
     """
-    opp = db.get(Opportunity, opportunity_id)
+    opp = db.get(Opportunity, opportunity_id, with_for_update=for_update)
     if opp is None:
         raise errors.not_found(
             "Oportunidade não encontrada.", code="OPPORTUNITY_NOT_FOUND"
@@ -314,7 +328,7 @@ def win_opportunity(
 ) -> Opportunity:
     """Mark a deal won (BR-013 — committed, cannot revert). A verbal close (no
     accepted proposal) is allowed; the soft warning is a frontend concern."""
-    opp = get_opportunity_or_404(db, user, opportunity_id)
+    opp = get_opportunity_or_404(db, user, opportunity_id, for_update=True)
     _assert_open(opp)
     before = _snapshot(opp)
     opp.outcome = "won"
@@ -338,7 +352,7 @@ def lose_opportunity(
     db: Session, user: User, opportunity_id: uuid.UUID, payload: OpportunityLose
 ) -> Opportunity:
     """Mark a deal lost. BR-011: a lost reason is mandatory (schema-enforced)."""
-    opp = get_opportunity_or_404(db, user, opportunity_id)
+    opp = get_opportunity_or_404(db, user, opportunity_id, for_update=True)
     _assert_open(opp)
     before = _snapshot(opp)
     opp.outcome = "lost"

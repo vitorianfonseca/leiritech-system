@@ -59,3 +59,24 @@ class TeamWorkload(BaseModel):
     total: int
     over_allocated_count: int
     generated_at: datetime
+
+
+# --------------------------------------------------------------------------- #
+# Per-role capacity config (BR-080/081, audit H16) — Admin-configurable,
+# previously only settable via env vars.
+# --------------------------------------------------------------------------- #
+class RoleCapacityConfigResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    role: str
+    weekly_capacity_hours: float
+    utilization_target: float  # fraction 0..1
+    internal_cost_rate_cents: int | None
+
+
+class UpdateRoleCapacityConfigRequest(BaseModel):
+    weekly_capacity_hours: float | None = None
+    # Accepted as a percentage (1..100) from the client, matching the existing
+    # capacity dialog's "utilizationTargetPct" field; stored as a 0..1 fraction.
+    utilization_target_pct: float | None = None
+    internal_cost_rate_cents: int | None = None

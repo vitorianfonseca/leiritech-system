@@ -18,7 +18,10 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import CurrentUser, RequireAdmin, RequireGestor
+from app.core.permissions import can_manage_financials
 from app.database.session import get_db
+from app.models.project import Project
+from app.models.user import User
 from app.schemas.common import Page
 from app.schemas.projects import (
     ProjectCreate,
@@ -33,6 +36,7 @@ from app.schemas.projects import (
     ProjectStatus,
     ProjectTemplateCreate,
     ProjectTemplateResponse,
+    ProjectTemplateUpdate,
     ProjectUpdate,
 )
 from app.services import project_service
@@ -40,6 +44,22 @@ from app.services import project_service
 router = APIRouter()
 
 DbSession = Annotated[Session, Depends(get_db)]
+
+
+def _project_response(project: Project, user: User) -> ProjectResponse:
+    """Build the response, redacting financial fields for a caller without
+    financial visibility (BR-008/audit C1). ``GET /projects`` and
+    ``GET /projects/{id}`` are reachable by any authenticated role (Membro
+    included) and by a Gestor without the payments grant — neither may see
+    ``contracted_value``/``hours_budget``/``internal_cost_rate``, unlike
+    ``finance.py``/``reports.py``/``dashboard_service.py``, which already gate
+    this correctly."""
+    resp = ProjectResponse.model_validate(project)
+    if not can_manage_financials(user):
+        resp.contracted_value = None
+        resp.hours_budget = None
+        resp.internal_cost_rate = None
+    return resp
 
 
 # --------------------------------------------------------------------------- #
@@ -63,6 +83,34 @@ def create_template(
 ) -> ProjectTemplateResponse:
     template = project_service.create_template(db, user, payload)
     return ProjectTemplateResponse.model_validate(template)
+
+
+@router.get("/templates/{template_id}", response_model=ProjectTemplateResponse)
+def get_template(
+    template_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> ProjectTemplateResponse:
+    template = project_service.get_template_or_404(db, template_id)
+    return ProjectTemplateResponse.model_validate(template)
+
+
+@router.patch("/templates/{template_id}", response_model=ProjectTemplateResponse)
+def update_template(
+    template_id: uuid.UUID,
+    payload: ProjectTemplateUpdate,
+    user: RequireAdmin,
+    db: DbSession,
+) -> ProjectTemplateResponse:
+    template = project_service.update_template(db, user, template_id, payload)
+    return ProjectTemplateResponse.model_validate(template)
+
+
+@router.delete(
+    "/templates/{template_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+)
+def delete_template(template_id: uuid.UUID, user: RequireAdmin, db: DbSession) -> None:
+    project_service.delete_template(db, user, template_id)
 
 
 # --------------------------------------------------------------------------- #
@@ -96,7 +144,7 @@ def list_projects(
         page_size=page_size,
     )
     return Page(
-        items=[ProjectResponse.model_validate(p) for p in projects],
+        items=[_project_response(p, user) for p in projects],
         total=total,
         page=page,
         page_size=page_size,
@@ -110,7 +158,7 @@ def create_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_project(db, user, payload)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 @router.post(
@@ -124,7 +172,7 @@ def create_from_template(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_from_template(db, user, payload)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 @router.post(
@@ -138,7 +186,7 @@ def create_from_opportunity(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_from_opportunity(db, user, payload)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 # --------------------------------------------------------------------------- #
@@ -151,7 +199,7 @@ def get_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.get_project_or_404(db, user, project_id)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 @router.patch("/{project_id}", response_model=ProjectResponse)
@@ -162,7 +210,7 @@ def update_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.update_project(db, user, project_id, payload)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 # --------------------------------------------------------------------------- #
@@ -178,7 +226,7 @@ def _state_endpoint(target: str):
         project = project_service.change_state(
             db, user, project_id, target, payload or ProjectStateChange()
         )
-        return ProjectResponse.model_validate(project)
+        return _project_response(project, user)
 
     return _handler
 
@@ -248,7 +296,7 @@ def publish_health(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.publish_health(db, user, project_id, payload)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 @router.post("/{project_id}/health/suggest", response_model=ProjectResponse)
@@ -258,7 +306,7 @@ def refresh_suggested_health(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.refresh_suggested_health(db, user, project_id)
-    return ProjectResponse.model_validate(project)
+    return _project_response(project, user)
 
 
 # --------------------------------------------------------------------------- #

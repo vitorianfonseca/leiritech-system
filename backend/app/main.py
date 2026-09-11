@@ -37,8 +37,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # audit H2: this is an internal, invite-only tool — allow_methods/headers
+    # were wildcarded, unnecessarily broad given the origins list is already
+    # a closed set. Restricted to exactly what the frontend client sends
+    # (frontend/src/lib/api/http.ts: GET/POST/PATCH/PUT/DELETE,
+    # Content-Type + Authorization headers).
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 

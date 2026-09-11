@@ -39,6 +39,20 @@ login_ip_rate_limiter = SlidingWindowRateLimiter(
     max(settings.LOGIN_RATE_LIMIT_PER_MINUTE * 4, 20)
 )
 
+# audit H1: /password/forgot triggers an outbound email per hit — throttle
+# per-(ip,email) AND per-ip so an attacker can't mail-bomb one address from many
+# emails-per-request, nor spray many addresses from one IP.
+forgot_password_rate_limiter = SlidingWindowRateLimiter(
+    settings.PASSWORD_FORGOT_RATE_LIMIT_PER_MINUTE
+)
+forgot_password_ip_rate_limiter = SlidingWindowRateLimiter(
+    max(settings.PASSWORD_FORGOT_RATE_LIMIT_PER_MINUTE * 4, 20)
+)
+# /password/reset is public + tokenized — throttle per-ip against token guessing.
+reset_password_rate_limiter = SlidingWindowRateLimiter(
+    settings.PUBLIC_TOKEN_RATE_LIMIT_PER_MINUTE
+)
+
 DbSession = Annotated[Session, Depends(get_db)]
 
 
@@ -91,8 +105,16 @@ def logout(payload: LogoutRequest, db: DbSession) -> MessageResponse:
 
 
 @router.post("/password/forgot", response_model=MessageResponse)
-def forgot_password(payload: ForgotPasswordRequest, db: DbSession) -> MessageResponse:
+def forgot_password(
+    request: Request, payload: ForgotPasswordRequest, db: DbSession
+) -> MessageResponse:
     from app.services.email_service import email_service
+
+    ip = _client_ip(request)
+    if not forgot_password_ip_rate_limiter.check(ip):
+        raise errors.too_many_requests()
+    if not forgot_password_rate_limiter.check(f"{ip}:{payload.email.lower()}"):
+        raise errors.too_many_requests()
 
     link = auth_service.request_password_reset(db, payload.email)
     if link is not None:
@@ -104,7 +126,11 @@ def forgot_password(payload: ForgotPasswordRequest, db: DbSession) -> MessageRes
 
 
 @router.post("/password/reset", response_model=MessageResponse)
-def reset_password(payload: ResetPasswordRequest, db: DbSession) -> MessageResponse:
+def reset_password(
+    request: Request, payload: ResetPasswordRequest, db: DbSession
+) -> MessageResponse:
+    if not reset_password_rate_limiter.check(_client_ip(request)):
+        raise errors.too_many_requests()
     auth_service.reset_password(db, payload.token, payload.new_password)
     return MessageResponse(message="Palavra-passe redefinida com sucesso.")
 

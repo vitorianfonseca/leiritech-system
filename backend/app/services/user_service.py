@@ -6,26 +6,32 @@ Enforces BR-004/005/006/007 backend-side.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
 
 import structlog
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors, security
 from app.core.permissions import Role
 from app.models.time_entry import TimeEntry
 from app.models.user import User, UserPreference
-from app.services import auth_service
+from app.services import auth_service, time_service
 
 logger = structlog.get_logger("aurea.users")
 
 
-def _now() -> datetime:
-    return datetime.now(tz=UTC)
-
-
-def _active_admin_count(db: Session) -> int:
+def _active_admin_count(db: Session, *, for_update: bool = False) -> int:
+    """Count active Admins. ``for_update`` locks those rows (audit C15): two
+    concurrent deactivations of two different Admins, with exactly 2 active,
+    can otherwise both read count=2 under READ COMMITTED and both commit,
+    leaving zero active Administrators. Locking serializes the check-then-act
+    sequence — the second caller blocks until the first commits, then sees the
+    already-decremented count and correctly hits the LAST_ADMIN guard."""
+    query = select(User).where(User.role == Role.ADMIN, User.status == "active")
+    if for_update:
+        query = query.with_for_update()
+        return len(db.execute(query).scalars().all())
     return db.execute(
         select(func.count())
         .select_from(User)
@@ -114,7 +120,9 @@ def _stop_running_timers(db: Session, user_id: uuid.UUID) -> int:
         )
     ).scalars().all()
     for entry in running:
-        entry.ended_at = _now()  # TODO(issue #19): route through time service for rounding
+        # audit H21: route through the time service's shared closer so
+        # rounding/clock-skew handling matches the normal stop-timer flow.
+        time_service.close_running_entry(entry)
     return len(running)
 
 
@@ -125,7 +133,7 @@ def deactivate_user(db: Session, user_id: uuid.UUID) -> User:
     if user.status == "deactivated":
         return user  # idempotent
 
-    if user.role == Role.ADMIN and _active_admin_count(db) <= 1:
+    if user.role == Role.ADMIN and _active_admin_count(db, for_update=True) <= 1:
         raise errors.conflict(
             "Não é possível desativar o último Administrador ativo.",
             code="LAST_ADMIN",
@@ -152,6 +160,37 @@ def activate_user(db: Session, user_id: uuid.UUID) -> User:
     return user
 
 
+def update_user_role(db: Session, user_id: uuid.UUID, new_role: str) -> User:
+    """Change a member's role (matrix §3: Admin only — BR-004). Audit H15: this
+    previously had no backend endpoint at all; the settings UI wrote to a
+    session-only override that vanished on reload and was invisible to the real
+    permission middleware. Mirrors deactivate_user's BR-005 guard: demoting the
+    last active Admin to a non-admin role is blocked the same way deactivating
+    them is, using the same row lock to close the concurrent-demotion race."""
+    user = get_user_or_404(db, user_id)
+    if user.role == new_role:
+        return user
+    if (
+        user.role == Role.ADMIN
+        and user.status == "active"
+        and new_role != Role.ADMIN
+        and _active_admin_count(db, for_update=True) <= 1
+    ):
+        raise errors.conflict(
+            "Não é possível remover o último Administrador ativo.",
+            code="LAST_ADMIN",
+        )
+    before_role = user.role
+    user.role = new_role
+    logger.info(
+        "user_role_changed",
+        user_id=str(user.id),
+        before=before_role,
+        after=new_role,
+    )
+    return user
+
+
 def create_admin(
     db: Session, *, name: str, email: str, password: str
 ) -> User:
@@ -171,7 +210,14 @@ def create_admin(
         role=Role.ADMIN,
         status="active",
     )
-    db.add(user)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(user)
+            db.flush()
+    except IntegrityError as exc:
+        # Lost the race on the email unique constraint (audit H18) → 409.
+        raise errors.conflict(
+            "Já existe um utilizador com este email.", code="EMAIL_TAKEN"
+        ) from exc
     logger.info("admin_created", user_id=str(user.id), email=email)
     return user

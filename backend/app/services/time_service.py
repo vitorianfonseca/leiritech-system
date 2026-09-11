@@ -61,6 +61,17 @@ def _as_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
+def close_running_entry(entry: TimeEntry, *, now: datetime | None = None) -> None:
+    """Set ``ended_at`` on a running entry, guarding against clock skew so the
+    closed interval is never non-positive. The single source of truth for
+    closing a timer — used by :func:`stop_timer` and by any other caller that
+    force-closes a timer outside the normal stop flow (e.g. BR-006's
+    deactivation cascade in ``user_service``, audit H21) — so rounding stays
+    consistent everywhere a timer is closed."""
+    now = now or datetime.now(tz=UTC)
+    entry.ended_at = max(now, _as_utc(entry.started_at))
+
+
 # --------------------------------------------------------------------------- #
 # Loads / ownership (BR-002 — a user manages only their OWN time entries)
 # --------------------------------------------------------------------------- #
@@ -140,9 +151,7 @@ def stop_timer(db: Session, user: User) -> TimeEntry:
             "Não tem nenhum cronómetro ativo.", code="NO_ACTIVE_TIMER"
         )
     before = _snapshot(entry)
-    now = datetime.now(tz=UTC)
-    # Guard against clock skew so the closed interval is never non-positive.
-    entry.ended_at = max(now, _as_utc(entry.started_at))
+    close_running_entry(entry)
     db.flush()
     activity_service.record(
         db,

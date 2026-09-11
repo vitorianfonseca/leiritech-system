@@ -123,3 +123,44 @@ def test_upload_url_to_unscoped_company_is_forbidden(client, make_user, track):
     )
     # Blocked by the IDOR guard before any storage work → 404 (enumeration-safe).
     assert resp.status_code == 404, resp.text
+
+
+def test_upload_url_rejects_disallowed_content_type(client, make_user, track):
+    """Audit C2: a content-type outside the allowlist is rejected before a
+    presigned URL is ever minted for it."""
+    gestor = make_user(role="gestor")
+    company_id = _make_company(gestor.id, track)
+
+    resp = client.post(
+        f"{API}/attachments/upload-url",
+        json={
+            "entity_type": "company",
+            "entity_id": str(company_id),
+            "filename": "payload.exe",
+            "content_type": "application/x-msdownload",
+            "size_bytes": 1024,
+        },
+        headers=_auth(_token(client, gestor.email)),
+    )
+    assert resp.status_code == 422, resp.text
+    assert resp.json()["error"]["code"] == "ATTACHMENT_TYPE_NOT_ALLOWED"
+
+
+def test_upload_url_rejects_oversized_declared_size(client, make_user, track):
+    """Audit C2: size_bytes above MAX_ATTACHMENT_SIZE_BYTES fails schema
+    validation before the handler ever runs."""
+    gestor = make_user(role="gestor")
+    company_id = _make_company(gestor.id, track)
+
+    resp = client.post(
+        f"{API}/attachments/upload-url",
+        json={
+            "entity_type": "company",
+            "entity_id": str(company_id),
+            "filename": "huge.zip",
+            "content_type": "application/zip",
+            "size_bytes": 100 * 1024 * 1024,  # 100 MiB > 25 MiB cap
+        },
+        headers=_auth(_token(client, gestor.email)),
+    )
+    assert resp.status_code == 422, resp.text

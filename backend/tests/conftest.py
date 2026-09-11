@@ -13,11 +13,33 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete
 
-from app.api.routes.auth import login_ip_rate_limiter, login_rate_limiter
+from app.api.routes.auth import (
+    forgot_password_ip_rate_limiter,
+    forgot_password_rate_limiter,
+    login_ip_rate_limiter,
+    login_rate_limiter,
+    reset_password_rate_limiter,
+)
+from app.api.routes.invitations import (
+    accept_invitation_rate_limiter,
+    get_invitation_rate_limiter,
+)
 from app.core import security
+from app.core.config import settings
 from app.database.session import SessionLocal
 from app.main import app
 from app.models.user import User
+
+# audit H3: hardcoded test credentials (PASSWORD in every test file) are only
+# ever safe against a disposable local/CI database. Refuse to run the suite if
+# ENVIRONMENT looks like production, so this can never accidentally execute
+# (and seed accounts) against a shared/staging database.
+if settings.ENVIRONMENT == "production":
+    raise RuntimeError(
+        "Refusing to run the test suite with ENVIRONMENT=production — tests use "
+        "shared hardcoded credentials and must only ever run against a "
+        "disposable local/CI database."
+    )
 
 
 @pytest.fixture
@@ -28,12 +50,18 @@ def client() -> Iterator[TestClient]:
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limiter() -> None:
-    # Reset BOTH login limiters between tests. The per-IP limiter is keyed on the
-    # constant TestClient IP, so without this its budget accumulates across the
-    # whole suite and later tests spuriously get 429. This resets test state only
-    # and does not change the production limits (config is untouched).
+    # Reset every process-local rate limiter between tests — each is keyed
+    # (partly or wholly) on the constant TestClient IP, so without this their
+    # budgets accumulate across the whole suite and later tests spuriously get
+    # 429. This resets test state only and does not change the production
+    # limits (config is untouched).
     login_rate_limiter.reset()
     login_ip_rate_limiter.reset()
+    forgot_password_rate_limiter.reset()
+    forgot_password_ip_rate_limiter.reset()
+    reset_password_rate_limiter.reset()
+    accept_invitation_rate_limiter.reset()
+    get_invitation_rate_limiter.reset()
 
 
 @pytest.fixture

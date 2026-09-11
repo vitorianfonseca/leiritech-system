@@ -273,7 +273,9 @@ def test_pause_requires_reason_and_stops_timers(client, make_user, track):
 
 
 def test_cancel_cascade_stops_timers(client, make_user, track):
-    gestor = make_user(role="gestor")
+    # Cancellation is financially gated (audit C17) — the owning Gestor needs
+    # the payments grant, same as any other financial action.
+    gestor = make_user(role="gestor", payments_grant=True)
     token = _token(client, gestor.email)
     proj = _create_project(client, token, track)
     pid = uuid.UUID(proj["id"])
@@ -287,6 +289,24 @@ def test_cancel_cascade_stops_timers(client, make_user, track):
     assert cancelled.status_code == 200, cancelled.text
     assert cancelled.json()["status"] == "cancelled"
     assert not _timer_running(entry_id)
+
+
+def test_cancel_forbidden_without_financial_grant(client, make_user, track):
+    """Audit C17: an owning Gestor without the payments grant must NOT be able
+    to cancel a project — cancellation has financial/margin consequences and is
+    gated like other financial actions (matrix §3: "🔒/owner-with-grant")."""
+    gestor = make_user(role="gestor", payments_grant=False)
+    token = _token(client, gestor.email)
+    proj = _create_project(client, token, track)
+    pid = uuid.UUID(proj["id"])
+
+    resp = client.post(
+        f"{API}/projects/{pid}/cancel",
+        json={"reason": "Deal caiu"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 403, resp.text
+    assert resp.json()["error"]["code"] == "PROJECT_CANCEL_FORBIDDEN"
 
 
 def test_complete_requires_all_phases_completed(client, make_user, track):
@@ -439,6 +459,92 @@ def test_only_admin_creates_template(client, make_user, track):
     assert forbidden.json()["error"]["code"] == "ADMIN_REQUIRED"
 
 
+def test_template_create_get_shows_nested_phases_and_tasks(client, make_user, track):
+    """Audit C10: create/get must round-trip the full nested tree — previously
+    ProjectTemplateResponse didn't return phases/tasks at all."""
+    admin = make_user(role="admin")
+    token = _token(client, admin.email)
+
+    created = client.post(
+        f"{API}/projects/templates",
+        json={
+            "name": "Website",
+            "phases": [
+                {
+                    "name": "Descoberta",
+                    "order_index": 0,
+                    "tasks": [{"title": "Kickoff", "order_index": 0, "estimate_hours": 4}],
+                }
+            ],
+        },
+        headers=_auth(token),
+    )
+    assert created.status_code == 201, created.text
+    template_id = created.json()["id"]
+    track["template"].append(uuid.UUID(template_id))
+    assert len(created.json()["phases"]) == 1
+    assert created.json()["phases"][0]["name"] == "Descoberta"
+    assert len(created.json()["phases"][0]["tasks"]) == 1
+    assert created.json()["phases"][0]["tasks"][0]["title"] == "Kickoff"
+
+    fetched = client.get(f"{API}/projects/templates/{template_id}", headers=_auth(token))
+    assert fetched.status_code == 200, fetched.text
+    assert fetched.json()["phases"][0]["tasks"][0]["title"] == "Kickoff"
+
+
+def test_template_update_replaces_phases_tree(client, make_user, track):
+    """Audit C10: PATCH with a new `phases` list replaces the whole tree
+    (frontend editor saves the entire structure at once)."""
+    admin = make_user(role="admin")
+    token = _token(client, admin.email)
+    template_id = _add_template(track)
+
+    updated = client.patch(
+        f"{API}/projects/templates/{template_id}",
+        json={
+            "phases": [
+                {"name": "Fase única", "order_index": 0, "tasks": []},
+            ]
+        },
+        headers=_auth(token),
+    )
+    assert updated.status_code == 200, updated.text
+    assert len(updated.json()["phases"]) == 1
+    assert updated.json()["phases"][0]["name"] == "Fase única"
+    assert updated.json()["phases"][0]["tasks"] == []
+
+    refetched = client.get(f"{API}/projects/templates/{template_id}", headers=_auth(token))
+    assert len(refetched.json()["phases"]) == 1
+    assert refetched.json()["phases"][0]["name"] == "Fase única"
+
+
+def test_template_delete(client, make_user, track):
+    admin = make_user(role="admin")
+    token = _token(client, admin.email)
+    template_id = _add_template(track)
+
+    deleted = client.delete(f"{API}/projects/templates/{template_id}", headers=_auth(token))
+    assert deleted.status_code == 204, deleted.text
+
+    gone = client.get(f"{API}/projects/templates/{template_id}", headers=_auth(token))
+    assert gone.status_code == 404, gone.text
+    track["template"].remove(template_id)
+
+
+def test_only_admin_updates_or_deletes_template(client, make_user, track):
+    gestor = make_user(role="gestor")
+    token = _token(client, gestor.email)
+    template_id = _add_template(track)
+
+    patch_resp = client.patch(
+        f"{API}/projects/templates/{template_id}", json={"name": "x"}, headers=_auth(token)
+    )
+    assert patch_resp.status_code == 403
+
+    delete_resp = client.delete(f"{API}/projects/templates/{template_id}", headers=_auth(token))
+    assert delete_resp.status_code == 403
+
+
 def test_create_from_template_instantiates_phases_and_tasks(client, make_user, track):
     gestor = make_user(role="gestor")
     token = _token(client, gestor.email)
@@ -548,3 +654,48 @@ def test_from_opportunity_consumes_prefill(client, make_user, track):
         assert db.get(Company, cid).status == "active"
     finally:
         db.close()
+
+
+def test_financial_fields_redacted_without_finance_access(client, make_user, track):
+    """Audit C1/BR-008: contracted_value/hours_budget/internal_cost_rate must be
+    null for a Membro and for a Gestor without the payments grant, on both
+    GET /projects and GET /projects/{id} — they must NOT leak via list/detail
+    just because create/lifecycle endpoints are correctly gated elsewhere."""
+    admin = make_user(role="admin")
+    admin_token = _token(client, admin.email)
+    gestor_no_grant = make_user(role="gestor", payments_grant=False)
+    gestor_token = _token(client, gestor_no_grant.email)
+    membro = make_user(role="membro")
+    membro_token = _token(client, membro.email)
+
+    proj = _create_project(
+        client,
+        admin_token,
+        track,
+        manager_id=str(admin.id),
+        contracted_value=500000,
+        hours_budget=100,
+        internal_cost_rate=3000,
+    )
+    pid = uuid.UUID(proj["id"])
+    _add_member(pid, gestor_no_grant.id)
+    _add_member(pid, membro.id)
+
+    for token in (gestor_token, membro_token):
+        detail = client.get(f"{API}/projects/{pid}", headers=_auth(token))
+        assert detail.status_code == 200, detail.text
+        body = detail.json()
+        assert body["contracted_value"] is None
+        assert body["hours_budget"] is None
+        assert body["internal_cost_rate"] is None
+
+        listed = client.get(f"{API}/projects", headers=_auth(token))
+        assert listed.status_code == 200, listed.text
+        item = next(p for p in listed.json()["items"] if p["id"] == str(pid))
+        assert item["contracted_value"] is None
+        assert item["hours_budget"] is None
+        assert item["internal_cost_rate"] is None
+
+    # Admin still sees the real values.
+    admin_detail = client.get(f"{API}/projects/{pid}", headers=_auth(admin_token))
+    assert admin_detail.json()["contracted_value"] == 500000

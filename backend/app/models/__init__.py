@@ -23,13 +23,6 @@ from app.models.crm import (
     Proposal,
 )
 from app.models.finance import PaymentMilestone, ProjectCost
-from app.models.proposal_content import (
-    ProposalItem,
-    ProposalSection,
-    ProposalTemplate,
-    ProposalTemplateItem,
-    ProposalTemplateSection,
-)
 from app.models.project import (
     Milestone,
     Project,
@@ -39,9 +32,22 @@ from app.models.project import (
     TemplatePhase,
     TemplateTask,
 )
+from app.models.proposal_content import (
+    ProposalItem,
+    ProposalSection,
+    ProposalTemplate,
+    ProposalTemplateItem,
+    ProposalTemplateSection,
+)
 from app.models.task import Task, TaskAssignee, TaskChecklistItem, TaskDependency
 from app.models.time_entry import TimeEntry
-from app.models.user import Invitation, User, UserPreference, UserSession
+from app.models.user import (
+    Invitation,
+    RoleCapacityConfig,
+    User,
+    UserPreference,
+    UserSession,
+)
 
 __all__ = [
     "Base",
@@ -80,6 +86,7 @@ __all__ = [
     "TaskDependency",
     "TimeEntry",
     "Invitation",
+    "RoleCapacityConfig",
     "User",
     "UserPreference",
     "UserSession",

@@ -110,6 +110,19 @@ def can_manage_project(user: UserLike, *, is_owner: bool) -> bool:
     return False
 
 
+def can_cancel_project(user: UserLike, *, is_owner: bool) -> bool:
+    """Cancel a project (matrix §3: "🔒/owner-with-grant"; design decision #9 —
+    cancellation has financial/margin consequences, so it is gated like other
+    financial actions, not treated as an ordinary lifecycle transition).
+    Admin: always. Gestor: only when they own the project AND hold the
+    financial grant. Membro: never (audit C17)."""
+    if user.role == Role.ADMIN:
+        return True
+    if user.role == Role.GESTOR:
+        return is_owner and bool(getattr(user, "payments_grant", False))
+    return False
+
+
 def can_edit_task(
     user: UserLike, *, is_member: bool, is_owner: bool = False
 ) -> bool:
