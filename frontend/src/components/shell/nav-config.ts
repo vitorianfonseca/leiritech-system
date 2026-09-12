@@ -14,7 +14,6 @@ import {
   Timer,
   UsersRound,
   Wallet,
-  ChartColumn,
   Settings,
   UserPlus,
 } from "lucide-react";
@@ -80,7 +79,6 @@ export const NAV_SECTIONS: NavSection[] = [
       // without opening full admin settings. Admin always passes.
       { key: "invite", href: "/settings/members/invite", icon: UserPlus, roles: MANAGERS, grant: "invites" },
       { key: "finance", href: "/finance", icon: Wallet, roles: MANAGERS, grant: "payments" },
-      { key: "reports", href: "/reports", icon: ChartColumn, roles: ALL },
       { key: "settings", href: "/settings", icon: Settings, roles: ADMIN },
     ],
   },

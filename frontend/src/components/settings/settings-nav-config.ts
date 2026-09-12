@@ -8,7 +8,6 @@ import {
   Coins,
   Bell,
   Archive,
-  Download,
 } from "lucide-react";
 import type { Role } from "@/lib/session";
 
@@ -59,7 +58,6 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     labelKey: "data",
     items: [
       { key: "archive", href: "/settings/archive", icon: Archive, adminOnly: true },
-      { key: "export", href: "/settings/export", icon: Download, adminOnly: true },
     ],
   },
   {

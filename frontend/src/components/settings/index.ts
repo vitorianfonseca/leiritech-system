@@ -13,7 +13,6 @@ export { PipelineStagesView } from "./pipeline-stages-view";
 export { FunctionConfigView } from "./function-config-view";
 export { NotificationsSettingsView } from "./notifications-settings-view";
 export { ArchiveSettingsView } from "./archive-settings-view";
-export { ExportSettingsView } from "./export-settings-view";
 export {
   visibleSettingsGroups,
   visibleSettingsItems,

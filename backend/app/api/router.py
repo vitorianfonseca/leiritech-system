@@ -31,7 +31,6 @@ from app.api.routes import (
     projects,
     proposal_templates,
     proposals,
-    reports,
     search,
     tasks,
     time,
@@ -79,7 +78,6 @@ api_router.include_router(
     notifications.router, prefix="/notifications", tags=["notifications"]
 )
 api_router.include_router(search.router, prefix="/search", tags=["search"])
-api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(
     dashboard.router, prefix="/dashboard", tags=["dashboard"]
 )

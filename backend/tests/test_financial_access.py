@@ -8,14 +8,14 @@ the way BR-008 says. Two distinct failure modes, because passing (a) tells you
 nothing about (b):
 
 (a) **Endpoint enforcement** — every route in ``app/api/routes/finance.py``
-    (payment milestones, project costs, live margin) plus ``/reports/financial``
+    (payment milestones, project costs, live margin)
     returns 403 for a Membro and for a Gestor *without* the payments grant. The
     ids used are REAL (a milestone and a cost created by an Admin first), so a
     green test cannot be an accidental 404.
 
 (b) **Field-level leakage** — BR-008 says financial data is *invisible*, not
     merely that ``/finance`` 403s. A Membro browsing ordinary, legitimately
-    visible surfaces (project detail/list, dashboard, calendar, reports, search,
+    visible surfaces (project detail/list, dashboard, calendar, search,
     my-work, workload, notifications, activity feed) must not receive
     ``contracted_value`` / ``hours_budget`` / ``internal_cost_rate``, milestone
     amounts, cost lines or margin embedded in those responses.
@@ -342,8 +342,6 @@ def _finance_surface(
             None,
         ),
         # Financial report group (BR-008 gated at the route layer)
-        ("GET /reports/financial", "GET", f"{API}/reports/financial", None),
-        ("GET /reports/financial/export", "GET", f"{API}/reports/financial/export", None),
     ]
 
 
@@ -682,21 +680,6 @@ def test_calendar_hides_payment_events_from_membro(client, make_user, track) -> 
     )
 
 
-def test_reports_hide_financials_from_membro(client, make_user, track) -> None:
-    """Non-financial report groups a Membro may read must not smuggle money in,
-    and the commercial group stays Gestor+ (matrix §3)."""
-    membro = make_user(role="membro")
-    project = _make_project(track)
-    _add_member(project.id, membro.id)
-    token = _token(client, membro.email)
-
-    for path in ("/reports/projects", "/reports/team"):
-        _assert_no_financial_leak(
-            client.get(f"{API}{path}", headers=_auth(token)), f"GET {path} as Membro"
-        )
-
-    assert client.get(f"{API}/reports/commercial", headers=_auth(token)).status_code == 403
-
 
 def test_no_sentinel_leaks_across_membro_readable_surface(
     client, make_user, track
@@ -732,8 +715,6 @@ def test_no_sentinel_leaks_across_membro_readable_surface(
         "/my-work",
         "/workload",
         "/notifications",
-        "/reports/projects",
-        "/reports/team",
         f"/calendar?from={today - timedelta(days=30)}&to={today + timedelta(days=90)}",
         f"/search?q={project.name.split()[1]}",
         f"/tasks?project_id={project.id}",

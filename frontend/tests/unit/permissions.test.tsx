@@ -142,7 +142,7 @@ describe("role-scoped navigation", () => {
     for (const hidden of [nav.crmPipeline, nav.crmProposals, nav.crmCatalog, nav.finance, nav.settings]) {
       expect(screen.queryByRole("link", { name: hidden })).not.toBeInTheDocument();
     }
-    for (const visible of [nav.home, nav.myWork, nav.projects, nav.tasks, nav.reports]) {
+    for (const visible of [nav.home, nav.myWork, nav.projects, nav.tasks, nav.calendar]) {
       expect(screen.getByRole("link", { name: visible })).toBeInTheDocument();
     }
   });
