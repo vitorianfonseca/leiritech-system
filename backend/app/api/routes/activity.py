@@ -12,12 +12,13 @@ inside their own domain transactions).
 from __future__ import annotations
 
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import CurrentUser
+from app.core.permissions import can_manage_financials
 from app.database.session import get_db
 from app.repositories import comments as comment_repo
 from app.schemas.activity import ActivityActor, ActivityFeed, ActivityLogEntry
@@ -26,6 +27,38 @@ from app.services import activity_service, attachment_service
 router = APIRouter()
 
 DbSession = Annotated[Session, Depends(get_db)]
+
+# BR-008 — financial keys that producers write into their raw before/after
+# snapshots. The feed's access gate is BR-002 visibility only (can the caller see
+# the parent entity), which is a *weaker* condition than financial visibility:
+# ``project_service._SNAPSHOT_FIELDS`` carries ``contracted_value``, so a Membro
+# project-member reading the audit trail of a project they legitimately belong to
+# was receiving the contracted amount verbatim — routing around the redaction in
+# ``projects.py::_project_response``. Stripped per-caller at serialization time,
+# never at record time, so the stored log stays complete and tamper-evident
+# (BR-064) and an Admin still sees every value.
+_FINANCIAL_SNAPSHOT_KEYS = frozenset(
+    {
+        "contracted_value",
+        "hours_budget",
+        "internal_cost_rate",
+        "internal_cost_rate_cents",
+        "received_amount",
+        "costs_total",
+        "labor_cost",
+        "margin",
+    }
+)
+
+
+def _redact_snapshot(
+    snapshot: dict[str, Any] | None, *, can_finance: bool
+) -> dict[str, Any] | None:
+    """Drop BR-008 financial keys from one audit snapshot for a caller without
+    financial visibility (Membro always; Gestor without the payments grant)."""
+    if snapshot is None or can_finance:
+        return snapshot
+    return {k: v for k, v in snapshot.items() if k not in _FINANCIAL_SNAPSHOT_KEYS}
 
 
 @router.get("", response_model=ActivityFeed)
@@ -40,6 +73,9 @@ def list_activity(
     the parent entity (same gate as comments/attachments)."""
     # Raises 404 when out of scope — enumeration-safe (BR-002).
     attachment_service.authorize_entity_access(db, user, entity_type, entity_id)
+
+    # BR-008 — entity visibility does not imply financial visibility.
+    can_finance = can_manage_financials(user)
 
     rows = activity_service.list_for_entity(
         db, entity_type=entity_type, entity_id=entity_id, limit=limit
@@ -68,8 +104,8 @@ def list_activity(
                 entity_id=row.entity_id,
                 actor=_actor(row.actor_id),
                 action=row.action,
-                before=row.before,
-                after=row.after,
+                before=_redact_snapshot(row.before, can_finance=can_finance),
+                after=_redact_snapshot(row.after, can_finance=can_finance),
                 created_at=row.occurred_at,
             )
             for row in rows
