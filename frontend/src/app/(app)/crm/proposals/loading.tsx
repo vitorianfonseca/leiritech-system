@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="h-8 w-48 animate-pulse rounded-md bg-muted" />
-          <div className="h-4 w-72 animate-pulse rounded-md bg-muted/70" />
+          <div className="h-4 w-72 animate-pulse rounded-md bg-muted" />
         </div>
         <div className="h-9 w-36 animate-pulse rounded-md bg-muted" />
       </div>

@@ -49,7 +49,7 @@ export function ViewSwitcher({ value, onChange, className }: ViewSwitcherProps) 
       aria-label={t("viewSwitcher.label")}
       onKeyDown={onKeyDown}
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5",
+        "inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-0.5",
         className
       )}
     >

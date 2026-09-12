@@ -4,7 +4,6 @@ import {
   Users,
   GitBranch,
   LayoutTemplate,
-  Gauge,
   Coins,
   Bell,
   Archive,
@@ -44,7 +43,6 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     labelKey: "resources",
     items: [
-      { key: "capacity", href: "/settings/capacity", icon: Gauge, adminOnly: true },
       { key: "costs", href: "/settings/costs", icon: Coins, adminOnly: true },
     ],
   },

@@ -136,7 +136,7 @@ function BoardColumn({
       <div
         className={cn(
           "flex items-center justify-between gap-2 rounded-t-xl border-x border-t border-border px-3 py-2.5",
-          state === "blocked" ? "bg-status-blocked-bg/60" : "bg-muted/40"
+          state === "blocked" ? "bg-status-blocked-bg/60" : "bg-muted"
         )}
       >
         <h2 className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -157,7 +157,7 @@ function BoardColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card/30 p-2 transition-colors",
+          "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card p-2 transition-colors",
           isOver && "bg-signal-muted/60 ring-2 ring-inset ring-signal/40"
         )}
       >

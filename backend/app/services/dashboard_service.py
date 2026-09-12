@@ -11,7 +11,7 @@ scoping (BR-002) and financial gating (BR-008):
   no financial or team-wide surfaces).
 
 Every number is derived live from ``repositories.reports``; margin/pending come
-from the finance rollups and team load reuses ``workload_service`` — nothing is
+from the finance rollups — nothing is
 recomputed from scratch and nothing is cached. Attention items carry i18n keys +
 params, never pre-translated strings (localized in the view).
 """
@@ -40,9 +40,7 @@ from app.schemas.dashboard import (
     ProjectRef,
     ProjectStatePoint,
     TaskFlowPoint,
-    TeamLoadPoint,
 )
-from app.services import workload_service
 
 logger = structlog.get_logger("leiritech.dashboard")
 
@@ -246,19 +244,6 @@ def _full_attention(db: Session, today: date) -> list[AttentionGroup]:
     ]
     groups.append(AttentionGroup(key="proposalsAwaiting", financial=False, items=proposal_items))
 
-    overloaded_items = [
-        AttentionItem(
-            id=f"member-{e.user_id}",
-            entity_type="member",
-            entity_id=str(e.user_id),
-            title=e.name,
-            meta_key="overloadedMember",
-            meta_params={"alloc": e.allocation_pct},
-            severity="attention",
-        )
-        for e in _overloaded_members(db)
-    ]
-    groups.append(AttentionGroup(key="overloadedMembers", financial=False, items=overloaded_items))
 
     payment_items = [
         AttentionItem(
@@ -314,9 +299,6 @@ def _scoped_attention(db: Session, user: User, today: date) -> list[AttentionGro
     ]
 
 
-def _overloaded_members(db: Session):
-    return [e for e in _all_team_entries(db) if e.over_allocated]
-
 
 # --------------------------------------------------------------------------- #
 # Charts
@@ -356,21 +338,13 @@ def _full_charts(db: Session, today: date, can_finance: bool) -> DashboardCharts
             for (y, m) in months
         ]
 
-    team_load = [
-        TeamLoadPoint(
-            member_id=str(e.user_id),
-            member_name=e.name,
-            allocation_pct=e.allocation_pct,
-        )
-        for e in _all_team_entries(db)
-    ]
 
     return DashboardCharts(
         pipeline=pipeline,
         projects_by_state=projects_by_state,
         task_flow=task_flow,
         contracted_received=contracted_received,
-        team_load=team_load,
+        team_load=[],
     )
 
 
@@ -391,16 +365,6 @@ def _task_flow(db: Session, today: date, scope_id) -> list[TaskFlowPoint]:
         points.append(TaskFlowPoint(week=f"w{idx}", done=done, overdue=overdue))
     return points
 
-
-def _all_team_entries(db: Session):
-    from app.repositories import workload as workload_repo
-
-    users = workload_repo.active_users(db)
-    allocated = workload_repo.allocated_hours_by_user(db)
-    return [
-        workload_service.compute_entry(u, allocated.get(u.id, 0.0), 0.0)
-        for u in users
-    ]
 
 
 # --------------------------------------------------------------------------- #

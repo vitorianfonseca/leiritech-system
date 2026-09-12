@@ -382,7 +382,7 @@ function StepDetails({
       {/* Company (read-only, pre-filled) */}
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-foreground">{t("company")}</span>
-        <div className="flex items-center justify-between rounded-md border border-input bg-muted/40 px-3 py-2 text-sm">
+        <div className="flex items-center justify-between rounded-md border border-input bg-muted px-3 py-2 text-sm">
           <span className="inline-flex items-center gap-2">
             <Building2 className="size-4 text-muted-foreground" strokeWidth={1.6} aria-hidden />
             {ctx.company.name}
@@ -531,7 +531,7 @@ function StepTemplate({
       ) : null}
 
       {draft.templateId && !loading && draft.phases.length > 0 ? (
-        <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <div className="rounded-lg border border-border bg-muted p-4">
           <p className="mb-2 text-sm font-medium text-foreground">{t("preview")}</p>
           <ol className="flex flex-col gap-1.5">
             {draft.phases.map((p, i) => (
@@ -923,7 +923,7 @@ function StepReview({
       </dl>
 
       {/* BR-036 preserved links */}
-      <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
+      <div className="rounded-lg border border-border bg-muted px-4 py-3 text-sm">
         <p className="mb-1.5 font-medium text-foreground">{t("linksTitle")}</p>
         <ul className="flex flex-col gap-1 text-muted-foreground">
           <li className="inline-flex items-center gap-1.5">
@@ -998,10 +998,10 @@ function WizardSkeleton() {
       <div className="h-4 w-32 animate-pulse rounded bg-muted" />
       <div className="space-y-2">
         <div className="h-8 w-64 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-80 animate-pulse rounded bg-muted/70" />
+        <div className="h-4 w-80 animate-pulse rounded bg-muted" />
       </div>
-      <div className="h-10 w-full max-w-md animate-pulse rounded bg-muted/60" />
-      <div className="h-80 w-full max-w-3xl animate-pulse rounded-xl bg-muted/50" />
+      <div className="h-10 w-full max-w-md animate-pulse rounded bg-muted" />
+      <div className="h-80 w-full max-w-3xl animate-pulse rounded-xl bg-muted" />
     </div>
   );
 }

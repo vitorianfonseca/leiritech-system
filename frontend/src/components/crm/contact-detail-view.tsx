@@ -234,7 +234,7 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
               ) : (
                 <ul className="space-y-3">
                   {interactions.map((it) => (
-                    <li key={it.id} className="rounded-lg border border-border bg-muted/20 p-3">
+                    <li key={it.id} className="rounded-lg border border-border bg-muted p-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                           {tType(it.type)}

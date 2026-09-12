@@ -288,7 +288,7 @@ export function GithubIssuesPanel({
 
             <div className="space-y-1.5">
               <Label>{t("dialog.fields.labels")}</Label>
-              <div className="flex flex-wrap gap-1.5 rounded-lg border border-input bg-muted/30 p-2">
+              <div className="flex flex-wrap gap-1.5 rounded-lg border border-input bg-muted p-2">
                 {labelsQuery.isLoading ? (
                   <span className="text-xs text-muted-foreground">{t("loading")}</span>
                 ) : availableLabels.length === 0 ? (
@@ -498,7 +498,7 @@ function IssueComments({
   const comments = query.data ?? [];
 
   return (
-    <div className="border-t border-border bg-muted/20 px-3 py-3">
+    <div className="border-t border-border bg-muted px-3 py-3">
       {query.isLoading ? (
         <p className="text-xs text-muted-foreground">{t("loading")}</p>
       ) : comments.length === 0 ? (

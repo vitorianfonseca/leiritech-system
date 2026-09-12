@@ -137,7 +137,7 @@ export function EventDetailPanel({
           {event.description}
         </p>
       ) : null}
-      <p className="mt-6 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+      <p className="mt-6 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
         {t("detail.readOnlyNote")}
       </p>
     </DetailSidePanel>

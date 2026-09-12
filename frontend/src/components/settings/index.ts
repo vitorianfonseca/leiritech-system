@@ -10,7 +10,6 @@ export { LeiritechSettingsView } from "./leiritech-settings-view";
 export { MembersSettingsView } from "./members-settings-view";
 export { InviteMemberView } from "./invite-member-view";
 export { PipelineStagesView } from "./pipeline-stages-view";
-export { FunctionConfigView } from "./function-config-view";
 export { NotificationsSettingsView } from "./notifications-settings-view";
 export { ArchiveSettingsView } from "./archive-settings-view";
 export {
@@ -18,3 +17,4 @@ export {
   visibleSettingsItems,
   canSeeSettingsItem,
 } from "./settings-nav-config";
+export { FunctionConfigView } from "./function-config-view";

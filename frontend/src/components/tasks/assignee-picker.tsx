@@ -40,7 +40,7 @@ export function AssigneePicker({
       {selected.map((u) => (
         <span
           key={u.userId}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 py-0.5 pl-1 pr-2 text-xs"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted py-0.5 pl-1 pr-2 text-xs"
         >
           <Avatar className="size-5">
             <AvatarFallback className="text-[0.5rem]">{initials(u.name)}</AvatarFallback>

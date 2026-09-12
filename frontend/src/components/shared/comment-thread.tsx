@@ -151,7 +151,7 @@ function AttachmentChip({
 }) {
   const t = useTranslations("collaboration");
   return (
-    <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-border bg-muted/40 py-1 pl-2 pr-1 text-xs">
+    <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-border bg-muted py-1 pl-2 pr-1 text-xs">
       <FileText className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.8} aria-hidden />
       <span className="truncate font-medium">{attachment.name}</span>
       <span className="shrink-0 text-muted-foreground">

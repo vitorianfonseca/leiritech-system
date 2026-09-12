@@ -153,7 +153,7 @@ export function LeiritechSettingsView({ role }: LeiritechSettingsViewProps) {
             <h2 className="font-heading text-base font-semibold text-foreground">{t("logo.title")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("logo.description")}</p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
-              <span className="flex size-16 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/40">
+              <span className="flex size-16 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted">
                 {logo ? (
                   <Image
                     src={logo}

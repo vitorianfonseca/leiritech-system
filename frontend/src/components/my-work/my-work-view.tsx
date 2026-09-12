@@ -563,7 +563,7 @@ function LoadingState() {
     <div className="space-y-8">
       <div className="space-y-2 pb-2">
         <div className="h-8 w-64 animate-pulse rounded-md bg-muted" />
-        <div className="h-4 w-80 animate-pulse rounded-md bg-muted/70" />
+        <div className="h-4 w-80 animate-pulse rounded-md bg-muted" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (

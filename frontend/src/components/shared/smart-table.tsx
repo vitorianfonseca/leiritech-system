@@ -406,10 +406,10 @@ export function SmartTable<T>({
     body = (
       <>
         {/* Desktop / tablet table */}
-        <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
-          <table className="w-full caption-bottom text-sm">
+        <div className="hidden overflow-x-auto rounded-xl border border-border bg-card md:block">
+          <table className="reveal w-full caption-bottom text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
+              <tr className="border-b border-border bg-muted">
                 {visibleColumns.map((col) => {
                   const active = sort?.columnId === col.id;
                   const SortIcon = !active

@@ -1,6 +1,6 @@
 """Automation registry (F15 §6.1).
 
-Maps each automation code (AUTO-01..12) to its pure ``execute(db, *, now)``
+Maps each automation code to its pure ``execute(db, *, now)``
 callable and defines the canonical run order. The dispatcher (``run.py``) is the
 only caller; it owns the session/transaction per job so one failing automation
 never rolls back the others.
@@ -25,12 +25,13 @@ from app.automations import (
     proposal_expiry,
     tasks_overdue,
     won_without_project,
-    workload_recompute,
 )
 
 Job = Callable[..., int]
 
-# Ordered AUTO-01..12 so ``run all`` executes them predictably.
+# Ordered so ``run all`` executes them predictably. AUTO-09 (workload
+# over-allocation) was retired with the team-capacity feature; the codes are
+# stable identifiers, so the gap is deliberate and 09 is not reused.
 REGISTRY: dict[str, Job] = {
     "AUTO-01": tasks_overdue.execute,
     "AUTO-02": payment_overdue.execute,
@@ -40,7 +41,6 @@ REGISTRY: dict[str, Job] = {
     "AUTO-06": milestone_due_soon.execute,
     "AUTO-07": phase_completion.execute,
     "AUTO-08": payment_due_soon.execute,
-    "AUTO-09": workload_recompute.execute,
     "AUTO-10": meeting_reminder.execute,
     "AUTO-11": won_without_project.execute,
     "AUTO-12": forgotten_timer.execute,

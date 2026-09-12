@@ -166,7 +166,7 @@ export function SecuritySection({ user }: { user: SessionUser }) {
       </div>
 
       {/* Deactivate own account — Admin-managed, not self-serve (§1.11) */}
-      <div className="rounded-xl border border-border bg-muted/40 p-4">
+      <div className="rounded-xl border border-border bg-muted p-4">
         <p className="text-sm text-muted-foreground">{t("deactivate.note")}</p>
       </div>
 

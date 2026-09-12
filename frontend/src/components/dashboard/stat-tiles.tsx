@@ -15,10 +15,10 @@ import {
   UsersRound,
   ArrowUpRight,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { AnimatedCounter } from "@/components/shared";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { MASK, useHideAmounts } from "@/lib/use-privacy";
 import { formatEURWhole } from "@/components/finance/finance-format";
 import type { DashboardMetric, MetricKey, MetricTone } from "@/lib/api/dashboard-types";
 
@@ -34,13 +34,18 @@ const METRIC_ICON: Record<MetricKey, LucideIcon> = {
   teamLoad: UsersRound,
 };
 
-const TONE_CHIP: Record<MetricTone, string> = {
-  neutral: "bg-secondary text-secondary-foreground",
-  signal: "bg-signal-muted text-signal",
-  success: "bg-success-muted text-success",
-  warning: "bg-warning-muted text-warning-foreground",
-  destructive: "bg-status-overdue-bg text-status-overdue",
-  info: "bg-info-muted text-info",
+/** State is a 2px rule along the cell's top edge — readable at a glance,
+    and it does not turn six figures into six coloured badges. */
+/** Only a non-neutral state earns a mark, and it is the icon that carries it.
+    A coloured rule across the top of every cell turned a quiet strip of
+    figures into a row of warning tape. */
+const TONE_ICON: Record<MetricTone, string> = {
+  neutral: "text-muted-foreground",
+  signal: "text-muted-foreground",
+  success: "text-health-healthy",
+  warning: "text-health-attention",
+  destructive: "text-status-overdue",
+  info: "text-muted-foreground",
 };
 
 const TONE_VALUE: Record<MetricTone, string> = {
@@ -67,25 +72,27 @@ export function StatTiles({
 }) {
   const t = useTranslations("dashboard.metrics");
   const locale = useLocale();
+  const { hidden } = useHideAmounts();
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-px border border-border bg-border sm:grid-cols-3 lg:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="gap-3 p-5">
-            <div className="flex items-center justify-between">
-              <div className="h-3.5 w-20 animate-pulse rounded bg-muted" />
-              <div className="size-8 animate-pulse rounded-lg bg-muted" />
-            </div>
-            <div className="h-8 w-24 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-16 animate-pulse rounded bg-muted/70" />
-          </Card>
+          <div key={i} className="space-y-2.5 bg-card p-3">
+            <div className="h-2.5 w-16 animate-pulse rounded-sm bg-muted" />
+            <div className="h-7 w-20 animate-pulse rounded-sm bg-muted" />
+          </div>
         ))}
       </div>
     );
   }
 
   function renderValue(m: DashboardMetric): React.ReactNode {
+    // The curtain covers money only. Counts of overdue tasks or projects at
+    // risk are not sensitive, and blanking them would make the toggle useless.
+    if (hidden && m.financial) {
+      return <span aria-label={MASK}>{MASK}</span>;
+    }
     switch (m.format) {
       case "currencyCents":
         return (
@@ -99,50 +106,45 @@ export function StatTiles({
   }
 
   return (
-    // 3-up on ≥sm: every role payload has a count divisible by 3 (9 full / 6
-    // finance-gated / 3 scoped-membro), so rows always fill with no dead column.
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+    // A strip of cells sharing hairline gutters — one instrument, six
+    // readouts. Not six cards, each with its own border, radius and shadow.
+    <div className="grid grid-cols-2 gap-px border border-border bg-border sm:grid-cols-3 lg:grid-cols-6">
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (
-          <Card key={m.key} className="p-0">
-            <Link
-              href={m.href}
-              className="group flex h-full flex-col gap-3 rounded-[inherit] p-5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              aria-label={t(`${m.key}.label`)}
+          <Link
+            key={m.key}
+            href={m.href}
+            aria-label={t(`${m.key}.label`)}
+            className="group relative bg-card p-3.5 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+          >
+            {/* Labels wrap rather than truncate: "Oportunidades abertas"
+                clipped to "Oportunidades abert…" tells a reader less than a
+                second line costs them. */}
+            <p className="label-micro flex items-start gap-1.5 text-muted-foreground">
+              <Icon
+                className={cn("mt-px size-3.5 shrink-0", TONE_ICON[m.tone])}
+                strokeWidth={2}
+                aria-hidden
+              />
+              <span className="leading-[1.35]">{t(`${m.key}.label`)}</span>
+            </p>
+            <p
+              className={cn(
+                "font-data mt-2.5 text-[1.7rem] leading-none font-normal tracking-[-0.045em]",
+                TONE_VALUE[m.tone]
+              )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t(`${m.key}.label`)}
-                </p>
-                <span
-                  className={cn(
-                    "flex size-8 shrink-0 items-center justify-center rounded-lg",
-                    TONE_CHIP[m.tone]
-                  )}
-                >
-                  <Icon className="size-4" strokeWidth={1.8} aria-hidden />
-                </span>
-              </div>
-
-              <p
-                className={cn(
-                  "font-heading text-2xl font-semibold tracking-tight tabular-nums md:text-3xl",
-                  TONE_VALUE[m.tone]
-                )}
-              >
-                {renderValue(m)}
-              </p>
-
-              <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                {t(`${m.key}.hint`)}
-                <ArrowUpRight
-                  className="size-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-hidden
-                />
-              </p>
-            </Link>
-          </Card>
+              {renderValue(m)}
+            </p>
+            <p className="mt-1.5 flex items-start gap-1 text-[0.7rem] leading-[1.35] text-muted-foreground">
+              <span>{t(`${m.key}.hint`)}</span>
+              <ArrowUpRight
+                className="size-2.5 shrink-0 opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100 motion-reduce:transition-none"
+                aria-hidden
+              />
+            </p>
+          </Link>
         );
       })}
     </div>

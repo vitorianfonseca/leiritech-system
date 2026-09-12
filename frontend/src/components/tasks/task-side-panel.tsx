@@ -612,7 +612,7 @@ function PanelBody({
               {task.dependencies.map((dep) => (
                 <li
                   key={dep.id}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-1.5"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-muted px-2.5 py-1.5"
                 >
                   <StateBadge state={dep.state} />
                   <span className="min-w-0 flex-1 truncate text-sm">{dep.title}</span>

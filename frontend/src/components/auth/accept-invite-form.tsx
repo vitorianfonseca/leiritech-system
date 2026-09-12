@@ -111,7 +111,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
       ) : null}
 
       {/* Read-only invite context: who was invited and with which role. */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 px-4 py-3">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted px-4 py-3">
         <div className="flex items-center gap-2 text-sm">
           <Mail className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="text-muted-foreground">{t("invite.emailLabel")}</span>

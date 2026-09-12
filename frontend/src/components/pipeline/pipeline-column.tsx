@@ -38,7 +38,7 @@ export function PipelineColumn({
       <div className="overflow-hidden rounded-t-xl">
         <div className="h-1 w-full" style={stageAccentStyle(stage.order - 1, total)} aria-hidden />
       </div>
-      <div className="flex items-center justify-between gap-2 border-x border-t border-border bg-muted/40 px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2 border-x border-t border-border bg-muted px-3 py-2.5">
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold text-foreground">
             {t(`stages.${stage.id}`)}
@@ -61,7 +61,7 @@ export function PipelineColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card/30 p-2 transition-colors",
+          "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card p-2 transition-colors",
           isOver && "bg-signal-muted/60 ring-2 ring-inset ring-signal/40"
         )}
       >

@@ -42,7 +42,7 @@ export function WeekView({ anchor, events, onOpenEvent }: WeekViewProps) {
             <div
               key={day.toISOString()}
               className={cn(
-                "flex flex-col rounded-lg border border-border bg-card/40",
+                "flex flex-col rounded-lg border border-border bg-card",
                 today && "border-signal/60"
               )}
             >

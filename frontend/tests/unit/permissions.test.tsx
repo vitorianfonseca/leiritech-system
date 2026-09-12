@@ -113,7 +113,6 @@ describe("role-scoped navigation", () => {
 
     expect(screen.getByRole("link", { name: nav.settings })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: nav.finance })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: nav.invite })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: nav.crmPipeline })).toBeInTheDocument();
   });
 
@@ -121,17 +120,15 @@ describe("role-scoped navigation", () => {
     renderWithProviders(<NavList user={gestorUser} collapsed={false} />);
 
     expect(screen.queryByRole("link", { name: nav.finance })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: nav.invite })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: nav.settings })).not.toBeInTheDocument();
     // Manager-level commercial access is NOT grant-gated.
     expect(screen.getByRole("link", { name: nav.crmPipeline })).toBeInTheDocument();
   });
 
-  it("reveals finance and invites once the grants are set", () => {
+  it("reveals finance once the grant is set", () => {
     renderWithProviders(<NavList user={grantedGestorUser} collapsed={false} />);
 
     expect(screen.getByRole("link", { name: nav.finance })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: nav.invite })).toBeInTheDocument();
     // Still not an Admin.
     expect(screen.queryByRole("link", { name: nav.settings })).not.toBeInTheDocument();
   });

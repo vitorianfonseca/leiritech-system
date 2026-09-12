@@ -405,39 +405,7 @@ def test_auto08_payment_due_soon(make_user, track) -> None:
 
 
 # --------------------------------------------------------------------------- #
-# AUTO-09 — workload over-allocation
-# --------------------------------------------------------------------------- #
-def test_auto09_over_allocation(make_user, track) -> None:
-    admin = make_user(role="admin")
-    member = make_user(role="membro")  # net capacity 32h
-    project = _project(track, status="active")
 
-    db = SessionLocal()
-    try:
-        db.add(
-            Task(
-                project_id=project.id,
-                title="Huge",
-                status="todo",
-                estimate_hours=100,  # 100 / 32 = 312% → over-allocated
-                primary_assignee_id=member.id,
-            )
-        )
-        db.commit()
-    finally:
-        db.close()
-
-    track["entities"].append(member.id)
-    assert _run("AUTO-09") >= 1
-    # Warning is about the member; the recipient is the management audience.
-    assert admin.id in _recipients(member.id)
-
-    before = len(_entity_notifs(member.id))
-    _run("AUTO-09")
-    assert len(_entity_notifs(member.id)) == before
-
-
-# --------------------------------------------------------------------------- #
 # AUTO-10 — meeting reminder
 # --------------------------------------------------------------------------- #
 def test_auto10_meeting_reminder(make_user, track) -> None:

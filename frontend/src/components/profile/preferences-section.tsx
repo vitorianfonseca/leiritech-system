@@ -263,7 +263,7 @@ function NotificationChannels({ user }: { user: SessionUser }) {
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <div className="hidden grid-cols-[1fr_auto_auto] items-center gap-6 border-b border-border bg-muted/40 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
+        <div className="hidden grid-cols-[1fr_auto_auto] items-center gap-6 border-b border-border bg-muted px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
           <span>{t("columns.category")}</span>
           <span className="inline-flex w-16 items-center justify-center gap-1">
             <Bell className="size-3.5" aria-hidden /> {t("columns.inApp")}

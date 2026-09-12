@@ -126,7 +126,7 @@ export function CommandPalette({ user }: { user: SessionUser }) {
             onKeyDown={onListKeyDown}
             placeholder={t("shell.commandPalette.placeholder")}
             aria-label={t("shell.commandPalette.title")}
-            className="h-14 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-14 w-full bg-popover text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
 

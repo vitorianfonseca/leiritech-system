@@ -125,7 +125,7 @@ export function ArchiveCompanyDialog({
               {groups.map(([kind, items]) => {
                 const Icon = BLOCKER_ICON[kind];
                 return (
-                  <li key={kind} className="rounded-lg border border-border bg-muted/30 p-3">
+                  <li key={kind} className="rounded-lg border border-border bg-muted p-3">
                     <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       <Icon className="size-3.5" strokeWidth={1.8} aria-hidden />
                       {t(`blocker.${kind}`)}

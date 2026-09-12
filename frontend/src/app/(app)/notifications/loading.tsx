@@ -5,7 +5,7 @@ export default function Loading() {
     <div className="space-y-6" role="status" aria-live="polite">
       <div className="space-y-2 pb-2">
         <div className="h-8 w-56 animate-pulse rounded-md bg-muted" />
-        <div className="h-4 w-80 animate-pulse rounded-md bg-muted/70" />
+        <div className="h-4 w-80 animate-pulse rounded-md bg-muted" />
       </div>
       <div className="flex gap-3">
         <div className="h-9 w-48 animate-pulse rounded-lg bg-muted" />

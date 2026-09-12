@@ -96,7 +96,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
         <div className="h-4 w-40 animate-pulse rounded bg-muted" />
         <div className="space-y-2">
           <div className="h-8 w-72 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-48 animate-pulse rounded bg-muted/70" />
+          <div className="h-4 w-48 animate-pulse rounded bg-muted" />
         </div>
         <SkeletonCard />
       </div>

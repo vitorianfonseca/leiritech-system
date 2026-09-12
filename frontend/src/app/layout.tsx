@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,6 +8,15 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { TEXT_SIZE_COOKIE, parseTextSize } from "@/lib/text-size";
 import "./globals.css";
 
+/**
+ * Two faces, two jobs.
+ *
+ * Satoshi carries everything read as language — it is warm, geometric and has
+ * actual character, which a condensed technical face does not. IBM Plex Mono
+ * carries every figure, so numbers align down a column and read as data
+ * rather than prose. The split is what keeps the interface elegant *and*
+ * precise: warmth where there are words, rigour where there are numbers.
+ */
 const satoshi = localFont({
   variable: "--font-satoshi",
   display: "swap",
@@ -19,11 +28,12 @@ const satoshi = localFont({
   ],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
-
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");
@@ -50,7 +60,7 @@ export default async function RootLayout({
       lang={locale}
       data-text-size={textSize}
       suppressHydrationWarning
-      className={`${satoshi.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${satoshi.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <NextIntlClientProvider locale={locale} messages={messages}>

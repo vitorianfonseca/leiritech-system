@@ -34,7 +34,7 @@ export function EmptyState({
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-3 px-6 py-12 text-center",
-        variant === "card" && "rounded-xl border border-dashed border-border bg-card/40",
+        variant === "card" && "rounded-xl border border-dashed border-border bg-card",
         className
       )}
       {...props}

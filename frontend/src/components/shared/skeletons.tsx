@@ -59,7 +59,7 @@ export function SkeletonTable({
     >
       {header ? (
         <div
-          className="grid gap-4 border-b border-border bg-muted/40 px-4 py-3"
+          className="grid gap-4 border-b border-border bg-muted px-4 py-3"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))` }}
         >
           {Array.from({ length: columns }).map((_, c) => (

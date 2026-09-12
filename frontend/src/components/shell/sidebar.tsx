@@ -53,11 +53,11 @@ function NavLink({
         // The active state is a lifted white surface on warm paper, not a
         // tinted pill — and deliberately carries no signal blue. Navigating
         // is orientation, not action; blue is reserved for what to do next.
-        "group/nav relative flex h-9 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+        "group/nav relative flex h-8 items-center gap-2.5 rounded-sm px-2.5 text-[0.8125rem] transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
         collapsed && "justify-center px-0",
         active
-          ? "bg-card font-semibold text-foreground shadow-[0_1px_2px_oklch(0.28_0.012_95/0.05)]"
-          : "font-medium text-muted-foreground hover:bg-card/60 hover:text-foreground"
+          ? "bg-card font-semibold text-foreground"
+          : "font-medium text-muted-foreground hover:bg-card hover:text-foreground"
       )}
     >
       {/* One indicator for the whole nav, not one per item: `layoutId` makes
@@ -73,7 +73,7 @@ function NavLink({
       )}
       <Icon
         className={cn(
-          "size-[18px] shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+          "size-4 shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
           active ? "text-foreground" : "text-muted-foreground/80"
         )}
         strokeWidth={active ? 2 : 1.75}
@@ -106,11 +106,11 @@ function NavList({
   const sections = visibleSections(user);
 
   return (
-    <nav className="flex flex-col gap-6 px-3 py-5" aria-label={t("home")}>
+    <nav className="flex flex-col gap-5 px-2 py-4" aria-label={t("home")}>
       {sections.map((section) => (
-        <div key={section.labelKey} className="flex flex-col gap-0.5">
+        <div key={section.labelKey} className="flex flex-col gap-px">
           {!collapsed && (
-            <p className="px-3 pb-1.5 text-xs font-medium text-muted-foreground/70">
+            <p className="label-micro px-2.5 pb-1.5 text-muted-foreground/60">
               {t(section.labelKey)}
             </p>
           )}
@@ -146,7 +146,7 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
     >
       <div
         className={cn(
-          "flex h-16 items-center border-b border-sidebar-border px-4",
+          "flex h-12 items-center border-b border-sidebar-border px-3",
           collapsed && "justify-center px-0"
         )}
       >

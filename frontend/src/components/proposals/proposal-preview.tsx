@@ -244,7 +244,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
 
                 {/* Totals */}
                 <div className="grid gap-6 pt-2 sm:grid-cols-2">
-                  <div className="rounded-xl bg-muted/60 p-5">
+                  <div className="rounded-xl bg-muted p-5">
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between text-muted-foreground">
                         <span>{t("oneTimeNet")}</span>
@@ -294,7 +294,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
 
           {/* Terms */}
           {content.terms ? (
-            <section className="rounded-xl border border-border bg-muted/40 p-6">
+            <section className="rounded-xl border border-border bg-muted p-6">
               <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.12em] text-foreground">
                 {t("terms")}
               </h2>
@@ -306,7 +306,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
         </div>
 
         {/* Footer */}
-        <footer className="border-t border-border bg-muted/30 px-10 py-6 sm:px-14">
+        <footer className="border-t border-border bg-muted px-10 py-6 sm:px-14">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
             <span className="font-heading font-medium text-foreground">{brandName}</span>
             <span>{t("footer", { reference: p.reference })}</span>

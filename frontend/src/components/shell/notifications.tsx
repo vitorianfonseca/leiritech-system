@@ -145,7 +145,7 @@ export function Notifications({ user }: { user: Pick<SessionUser, "id" | "role">
                     }}
                     className={cn(
                       "flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none",
-                      isUnread ? "bg-accent/40" : "bg-transparent"
+                      isUnread ? "bg-accent" : "bg-popover"
                     )}
                   >
                     <span

@@ -20,11 +20,8 @@
     "projects": "Projects",
     "tasks": "Tasks",
     "calendar": "Calendar",
-    "team": "Team",
     "finance": "Finance",
-    "settings": "Settings",
-    "time": "Time tracking",
-    "invite": "Invite"
+    "settings": "Settings"
   },
   "catalog": {
     "list": {
@@ -236,6 +233,10 @@
     "sound": {
       "enable": "Turn sound on",
       "disable": "Turn sound off"
+    },
+    "privacy": {
+      "hide": "Hide amounts",
+      "show": "Show amounts"
     }
   },
   "roles": {
@@ -2730,166 +2731,6 @@
       "checklistTextRequired": "Enter the checklist item."
     }
   },
-  "time": {
-    "title": "Time",
-    "subtitle": "Track your time with the timer or manual entries and analyse hours by project, phase and billing.",
-    "addEntry": "Add entry",
-    "addEntryShort": "Add",
-    "panelLabel": "Time view",
-    "scopeLabel": "Entries scope",
-    "panels": {
-      "entries": "Entries",
-      "rollups": "Rollups"
-    },
-    "scopes": {
-      "own": "Mine",
-      "team": "Team"
-    },
-    "toasts": {
-      "created": "Time entry logged.",
-      "updated": "Entry updated.",
-      "deleted": "Entry deleted."
-    },
-    "delete": {
-      "title": "Delete time entry?",
-      "description": "This entry will be removed from the rollups. You can undo for a few seconds.",
-      "confirm": "Delete"
-    },
-    "summary": {
-      "total": {
-        "label": "Total"
-      },
-      "billable": {
-        "label": "Billable",
-        "share": "{pct}% of total"
-      },
-      "nonBillable": {
-        "label": "Non-billable"
-      },
-      "entries": {
-        "label": "Entries"
-      }
-    },
-    "activeTimer": {
-      "regionLabel": "Active timer",
-      "title": "Timer",
-      "taskLabel": "Task",
-      "taskPlaceholder": "Select a task…",
-      "taskHint": "You can only time tasks on active projects.",
-      "start": "Start",
-      "stop": "Stop",
-      "started": "Timer started on “{task}”.",
-      "projectFrozen": "This task's project is paused or closed — stop the timer to log the time.",
-      "logged": {
-        "title": "Time logged",
-        "description": "{minutes, plural, one {# minute} other {# minutes}} on “{task}”."
-      },
-      "switch": {
-        "title": "A timer is already running",
-        "description": "“{running}” is being timed. Stop it and start “{next}”?",
-        "confirm": "Stop and start"
-      }
-    },
-    "billable": {
-      "on": "Billable",
-      "off": "Non-billable"
-    },
-    "entryForm": {
-      "createTitle": "New time entry",
-      "editTitle": "Edit time entry",
-      "description": "Attribute the time to a task and set the interval worked.",
-      "duration": "Duration: {hours} h",
-      "cancel": "Cancel",
-      "submit": "Log",
-      "save": "Save",
-      "processing": "Saving…",
-      "fields": {
-        "task": "Task",
-        "taskPlaceholder": "Select a task…",
-        "start": "Start",
-        "end": "End",
-        "description": "Description",
-        "descriptionPlaceholder": "What was done (optional)",
-        "billable": "Billing"
-      },
-      "errors": {
-        "taskRequired": "Select a task.",
-        "startRequired": "Enter a start time.",
-        "endRequired": "Enter an end time.",
-        "endBeforeStart": "End must be after start.",
-        "future": "The entry can't be in the future.",
-        "tooLong": "The entry can't exceed 24 hours.",
-        "projectInactive": "This task's project is paused or closed."
-      }
-    },
-    "table": {
-      "searchPlaceholder": "Search by task, project…",
-      "columns": {
-        "date": "Date",
-        "task": "Task",
-        "user": "Author",
-        "billable": "Billing",
-        "source": "Source",
-        "duration": "Hours"
-      },
-      "filters": {
-        "billable": "Billable",
-        "nonBillable": "Non-billable"
-      },
-      "source": {
-        "timer": "Timer",
-        "manual": "Manual"
-      },
-      "actions": {
-        "edit": "Edit",
-        "delete": "Delete"
-      },
-      "empty": {
-        "title": "No time entries",
-        "description": "Start the timer or add a manual entry to begin tracking time."
-      }
-    },
-    "rollups": {
-      "dimensionLabel": "Group by",
-      "noPhase": "No phase",
-      "noBudget": "—",
-      "overBudget": "Over budget",
-      "budgetValue": "{used} of {budget} h",
-      "budgetBarLabel": "Hours vs. budget — {name}",
-      "dimensions": {
-        "project": "Project",
-        "phase": "Phase",
-        "task": "Task",
-        "user": "Person"
-      },
-      "columns": {
-        "name": "Name",
-        "billable": "Billable",
-        "nonBillable": "Non-billable",
-        "total": "Total",
-        "budget": "Hours vs. budget"
-      },
-      "empty": {
-        "title": "Nothing to roll up",
-        "description": "Log time to see totals by project, phase, task and person."
-      }
-    },
-    "errors": {
-      "loadTitle": "Couldn't load time",
-      "loadDescription": "An error occurred loading time entries. Please try again.",
-      "retry": "Try again",
-      "logFailed": "Couldn't log the time",
-      "saveFailed": "Couldn't save the entry",
-      "validation": "Check the entry fields.",
-      "taskRequired": "Select a task.",
-      "startRequired": "Enter a start time.",
-      "endRequired": "Enter an end time.",
-      "endBeforeStart": "End must be after start.",
-      "future": "The entry can't be in the future.",
-      "tooLong": "The entry can't exceed 24 hours.",
-      "projectInactive": "This task's project is paused or closed."
-    }
-  },
   "conversion": {
     "title": "Convert to project",
     "subtitle": "Turn “{title}” into a project without re-entering any data.",
@@ -3020,105 +2861,6 @@
       "notWonDescription": "Only opportunities marked as won can be converted.",
       "backToOpportunity": "Back to opportunity",
       "viewProject": "View project",
-      "retry": "Try again"
-    }
-  },
-  "team": {
-    "title": "Team",
-    "subtitle": "Weekly workload, availability and capacity across the team.",
-    "subtitleOwn": "Your workload and capacity for this week.",
-    "ownNotice": "You only see your own workload. The full team view is available to Administrators and Managers.",
-    "loading": "Loading workload…",
-    "viewLabel": "View mode",
-    "views": {
-      "heatmap": "Heatmap",
-      "table": "Table"
-    },
-    "week": {
-      "current": "This week",
-      "previous": "Previous week",
-      "next": "Next week",
-      "weeksAgo": "{n} weeks ago",
-      "weeksAhead": "In {n} weeks",
-      "prev": "Previous week",
-      "today": "This week"
-    },
-    "stats": {
-      "team": "Members",
-      "overloaded": "Overloaded",
-      "available": "Available",
-      "avgUtil": "Avg. utilization"
-    },
-    "availability": {
-      "disponivel": "Available",
-      "equilibrado": "Balanced",
-      "sobrecarregado": "Overloaded",
-      "ausente": "Away"
-    },
-    "heatmap": {
-      "member": "Member",
-      "weekTotal": "Week total",
-      "cellLabel": "{name}, {day}: {hours}h allocated",
-      "overAllocated": "Overloaded",
-      "utilizationPct": "{pct}% of capacity",
-      "legend": {
-        "title": "Intensity:",
-        "light": "Slack",
-        "moderate": "Moderate",
-        "full": "Near capacity",
-        "over": "Overloaded"
-      },
-      "function": {
-        "engineering": "Engineering",
-        "design": "Design",
-        "qa": "Quality",
-        "management": "Management",
-        "leadership": "Leadership"
-      }
-    },
-    "table": {
-      "member": "Member",
-      "function": "Function",
-      "availability": "State",
-      "activeProjects": "Active projects",
-      "openTasks": "Current tasks",
-      "overdueTasks": "Overdue tasks",
-      "allocated": "Estimated load",
-      "logged": "Hours this week",
-      "capacity": "Weekly capacity",
-      "hours": "{n}h",
-      "searchPlaceholder": "Search member…",
-      "emptyTitle": "No members",
-      "emptyDescription": "There are no team members to show for this week."
-    },
-    "capacity": {
-      "open": "Configure capacity",
-      "openShort": "Capacity",
-      "title": "Capacity by function",
-      "description": "Set weekly capacity, non-project hours, utilization target and internal cost per function. Net capacity is derived from these values (BR-080/081).",
-      "functionLabel": "Function",
-      "fields": {
-        "weeklyCapacity": "Weekly capacity (h)",
-        "nonProject": "Non-project hours (h)",
-        "target": "Utilization target (%)",
-        "costRate": "Internal cost (€/h)"
-      },
-      "netPreview": "Net delivery capacity: {hours}h/week.",
-      "cancel": "Cancel",
-      "save": "Save",
-      "saving": "Saving…",
-      "saved": "{fn} capacity updated.",
-      "errors": {
-        "saveFailed": "Could not save the configuration.",
-        "capacityRange": "Capacity must be between 1 and 168 hours.",
-        "nonProjectRange": "Non-project hours must be lower than capacity.",
-        "targetRange": "Utilization target must be between 1 and 100%.",
-        "costRange": "Internal cost cannot be negative."
-      }
-    },
-    "errors": {
-      "loadTitle": "Could not load the team",
-      "loadDescription": "An error occurred while fetching team workload. Please try again.",
       "retry": "Try again"
     }
   },
@@ -3339,30 +3081,6 @@
         "saveFailed": "Couldn't save the stages.",
         "loadTitle": "Couldn't load the stages",
         "loadDescription": "Something went wrong loading the stages. Please try again.",
-        "retry": "Try again"
-      }
-    },
-    "capacity": {
-      "title": "Weekly capacity",
-      "subtitle": "Contracted hours, non-project hours and utilization target per function.",
-      "notice": "These values drive team availability in /team.",
-      "save": "Save",
-      "saving": "Saving…",
-      "saved": "{fn} capacity updated.",
-      "saveFailed": "Couldn't save.",
-      "fields": {
-        "weeklyCapacity": "Weekly capacity (h)",
-        "nonProject": "Non-project hours (h)",
-        "target": "Utilization target",
-        "costRate": "Internal cost (€/h)",
-        "netCapacity": "Net capacity"
-      },
-      "hoursValue": "{hours} h",
-      "netPreview": "Net delivery capacity: {hours} h/week.",
-      "weeklyCostPreview": "Estimated weekly cost: {cost}.",
-      "errors": {
-        "loadTitle": "Couldn't load the configuration",
-        "loadDescription": "Something went wrong loading the functions. Please try again.",
         "retry": "Try again"
       }
     },

@@ -104,7 +104,7 @@ function ActivityRow({ log, isLast }: { log: ActivityLog; isLast: boolean }) {
         {log.before || log.after ? (
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
             {log.before ? (
-              <span className="rounded border border-border bg-muted/50 px-1.5 py-0.5 text-muted-foreground line-through">
+              <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-muted-foreground line-through">
                 {log.before}
               </span>
             ) : null}

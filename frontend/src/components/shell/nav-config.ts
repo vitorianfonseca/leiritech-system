@@ -11,11 +11,8 @@ import {
   FolderKanban,
   ListChecks,
   CalendarDays,
-  Timer,
-  UsersRound,
   Wallet,
   Settings,
-  UserPlus,
 } from "lucide-react";
 import type { Role, SessionUser } from "@/lib/session";
 
@@ -67,17 +64,14 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { key: "projects", href: "/projects", icon: FolderKanban, roles: ALL },
       { key: "tasks", href: "/tasks", icon: ListChecks, roles: ALL },
-      { key: "time", href: "/time", icon: Timer, roles: ALL },
       { key: "calendar", href: "/calendar", icon: CalendarDays, roles: ALL },
     ],
   },
   {
     labelKey: "sectionOrg",
     items: [
-      { key: "team", href: "/team", icon: UsersRound, roles: ALL },
       // BR-003 / §3: a Gestor with an explicit invites grant can invite members
       // without opening full admin settings. Admin always passes.
-      { key: "invite", href: "/settings/members/invite", icon: UserPlus, roles: MANAGERS, grant: "invites" },
       { key: "finance", href: "/finance", icon: Wallet, roles: MANAGERS, grant: "payments" },
       { key: "settings", href: "/settings", icon: Settings, roles: ADMIN },
     ],

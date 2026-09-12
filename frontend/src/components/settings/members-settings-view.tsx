@@ -252,7 +252,7 @@ export function MembersSettingsView({ role, invitesGrant }: MembersSettingsViewP
         }
       />
 
-      <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
         <p>{t("lastAdminNotice")}</p>
       </div>

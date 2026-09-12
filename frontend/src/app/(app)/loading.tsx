@@ -11,7 +11,7 @@ export default function Loading() {
       {/* Header */}
       <div className="space-y-2 pb-2">
         <div className="h-8 w-64 animate-pulse rounded-md bg-muted" />
-        <div className="h-4 w-80 animate-pulse rounded-md bg-muted/70" />
+        <div className="h-4 w-80 animate-pulse rounded-md bg-muted" />
       </div>
 
       {/* Stat tiles */}
@@ -23,7 +23,7 @@ export default function Loading() {
               <div className="size-8 animate-pulse rounded-lg bg-muted" />
             </div>
             <div className="h-8 w-24 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-16 animate-pulse rounded bg-muted/70" />
+            <div className="h-3 w-16 animate-pulse rounded bg-muted" />
           </Card>
         ))}
       </div>
@@ -36,7 +36,7 @@ export default function Loading() {
           </CardHeader>
           <CardContent className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-14 w-full animate-pulse rounded-lg bg-muted/70" />
+              <div key={i} className="h-14 w-full animate-pulse rounded-lg bg-muted" />
             ))}
           </CardContent>
         </Card>

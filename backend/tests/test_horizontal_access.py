@@ -637,13 +637,6 @@ def test_role_gate_fires_before_scoping_and_leaks_nothing(client, world, outside
 # --------------------------------------------------------------------------- #
 # 5. Workload / team reads
 # --------------------------------------------------------------------------- #
-def test_membro_team_workload_is_scoped_to_self_only(client, world, outsider_auth):
-    resp = client.get(f"{API}/workload", headers=outsider_auth)
-    assert resp.status_code == 200, resp.text
-    user_ids = {str(e["user_id"]) for e in resp.json()["items"]}
-    assert user_ids <= {str(world.outsider.id)}, user_ids
-
-
 # --------------------------------------------------------------------------- #
 # 6. USER ENUMERATION — login
 # --------------------------------------------------------------------------- #

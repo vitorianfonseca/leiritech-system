@@ -37,7 +37,7 @@ const TYPE_ICON: Record<CalendarEventType, LucideIcon> = {
 const URGENCY_DOT: Record<string, string> = {
   overdue: "bg-status-overdue",
   due: "bg-status-due",
-  upcoming: "bg-muted-foreground/50",
+  upcoming: "bg-status-done",
   done: "bg-status-done",
 };
 
@@ -116,7 +116,7 @@ export function AgendaCard({
                       <li key={ev.id}>
                         <Link
                           href={ev.sourceHref}
-                          className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <span
                             className={cn(

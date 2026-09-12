@@ -38,7 +38,7 @@ const HEALTH_META: Record<ProjectHealth, { variant: BadgeVariant; tone: Progress
 function rowBase(interactive: boolean): string {
   return cn(
     "flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 text-left",
-    interactive && "w-full transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    interactive && "w-full transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   );
 }
 

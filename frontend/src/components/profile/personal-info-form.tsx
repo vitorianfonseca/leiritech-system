@@ -134,7 +134,7 @@ export function PersonalInfoForm({ user }: { user: SessionUser }) {
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       {/* Avatar */}
       <div className="flex flex-wrap items-center gap-4">
-        <span className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted/40 text-lg font-medium text-muted-foreground">
+        <span className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-lg font-medium text-muted-foreground">
           {avatar ? (
             <Image
               src={avatar}

@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, SkeletonList } from "@/components/shared";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
   AttentionEntityType,
@@ -44,25 +45,21 @@ const GROUP_ICON: Record<AttentionGroupKey, LucideIcon> = {
   overduePayments: Wallet,
 };
 
-/** Badge variant + `status.*` label key per urgency zone (DESIGN.md). */
-const SEVERITY: Record<
-  AttentionSeverity,
-  { variant: React.ComponentProps<typeof Badge>["variant"]; statusKey: string }
-> = {
-  overdue: { variant: "overdue", statusKey: "overdue" },
-  atRisk: { variant: "atRisk", statusKey: "atRisk" },
-  due: { variant: "due", statusKey: "due" },
-  blocked: { variant: "blocked", statusKey: "blocked" },
-  attention: { variant: "attention", statusKey: "attention" },
-};
-
-/** Icon chip tint per severity — icon + colour, never colour alone. */
-const SEVERITY_CHIP: Record<AttentionSeverity, string> = {
-  overdue: "bg-status-overdue-bg text-status-overdue",
-  atRisk: "bg-health-at-risk-bg text-health-at-risk",
-  due: "bg-status-due-bg text-status-due",
-  blocked: "bg-status-blocked-bg text-status-blocked",
-  attention: "bg-health-attention-bg text-health-attention",
+/**
+ * Severity is a 3px bar down the left edge of the row.
+ *
+ * In a dense queue a coloured pill on the right competes with the title it is
+ * meant to qualify, and eight of them turn the panel into confetti. A stripe
+ * at the start of the line is read before the text and never fights it — the
+ * convention every log viewer and issue tracker converged on for good reason.
+ * The status word stays in the row, so colour is never the sole carrier.
+ */
+const SEVERITY_BAR: Record<AttentionSeverity, string> = {
+  overdue: "bg-status-overdue",
+  atRisk: "bg-health-at-risk",
+  due: "bg-status-due",
+  blocked: "bg-status-blocked",
+  attention: "bg-health-attention",
 };
 
 function hrefFor(entityType: AttentionEntityType, entityId: string): string {
@@ -116,7 +113,7 @@ export function AttentionPanel({
             description={t("empty.description")}
           />
         ) : (
-          <div className="space-y-6">
+          <div className="reveal reveal-1 space-y-6">
             {nonEmpty.map((group) => (
               <AttentionSection key={group.key} group={group} />
             ))}
@@ -137,7 +134,6 @@ const GROUP_PREVIEW = 4;
  */
 function AttentionSection({ group }: { group: AttentionGroup }) {
   const t = useTranslations("dashboard.attention");
-  const ts = useTranslations("status");
   const [expanded, setExpanded] = React.useState(false);
 
   const GroupIcon = GROUP_ICON[group.key];
@@ -146,52 +142,66 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
 
   return (
     <section aria-label={t(`groups.${group.key}`)}>
-      <h3 className="mb-2 flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <GroupIcon className="size-3.5" strokeWidth={1.8} aria-hidden />
+      <h3 className="label-micro flex items-center gap-2 border-b border-border px-3 py-2 text-muted-foreground">
+        <GroupIcon className="size-3 shrink-0" strokeWidth={2.2} aria-hidden />
         {t(`groups.${group.key}`)}
-        <span className="text-muted-foreground/60">({group.items.length})</span>
+        <span className="font-data text-[0.7rem] font-normal opacity-70">
+          {group.items.length}
+        </span>
       </h3>
-      <ul className="overflow-hidden rounded-lg border border-border divide-y divide-border">
-        {visible.map((item) => {
-          const sev = SEVERITY[item.severity];
-          return (
-            <li key={`${group.key}-${item.id}`}>
-              <Link
-                href={hrefFor(item.entityType, item.entityId)}
-                className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-              >
-                <span
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${SEVERITY_CHIP[item.severity]}`}
-                >
-                  <GroupIcon className="size-4" strokeWidth={1.8} aria-hidden />
+
+      <ul>
+        {visible.map((item) => (
+          <li key={`${group.key}-${item.id}`}>
+            <Link
+              href={hrefFor(item.entityType, item.entityId)}
+              className="group/row grid grid-cols-[2px_1fr_auto] items-stretch gap-3.5 border-b border-border pr-3 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+            >
+              {/* A hairline tick, inset from the row's edges. A full-bleed
+                  slab of colour reads as a warning stripe on machinery; this
+                  marks the row without shouting over its title. */}
+              <span
+                aria-hidden
+                className={`my-2.5 w-0.5 rounded-full ${SEVERITY_BAR[item.severity]}`}
+              />
+              <span className="min-w-0 py-2.5">
+                <span className="block truncate text-[0.8125rem] font-medium text-foreground">
+                  {item.title}
                 </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {item.title}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {t(`meta.${item.metaKey}`, item.metaParams)}
-                  </p>
-                </div>
-                <Badge variant={sev.variant}>{ts(sev.statusKey)}</Badge>
+                {/* The meta string already opens with the status ("Bloqueada ·
+                    aguarda cliente"), so prefixing the severity word repeated
+                    it. The colour bar carries the severity; this line carries
+                    the detail. */}
+                {/* Prose, so it is set in the text face. Mono is for figures;
+                    using it for a sentence is what made this read as a log. */}
+                <span className="mt-0.5 block truncate text-[0.75rem] text-muted-foreground">
+                  {t(`meta.${item.metaKey}`, item.metaParams)}
+                </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1 self-center text-[0.8125rem] font-medium text-signal">
+                {t(`actions.${group.key}`)}
                 <ChevronRight
-                  className="size-4 shrink-0 text-muted-foreground/40"
+                  className="size-3 transition-transform duration-[var(--duration-fast)] group-hover/row:translate-x-0.5 motion-reduce:transition-none"
                   aria-hidden
                 />
-              </Link>
-            </li>
-          );
-        })}
+              </span>
+            </Link>
+          </li>
+        ))}
       </ul>
+
       {overflow > 0 ? (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-2 flex items-center gap-1 px-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+          className="label-micro flex w-full items-center gap-1 border-b border-border px-3 py-1.5 text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
         >
           <ChevronRight
-            className={`size-3.5 transition-transform ${expanded ? "rotate-90" : ""}`}
+            className={cn(
+              "size-3 transition-transform duration-[var(--duration-fast)] motion-reduce:transition-none",
+              expanded && "rotate-90"
+            )}
             aria-hidden
           />
           {expanded ? t("showLess") : t("showMore", { count: overflow })}

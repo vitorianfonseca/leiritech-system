@@ -91,7 +91,7 @@ export function HealthDialog({
         </div>
 
         <div className="mt-5 space-y-4">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm">
             <Sparkles className="size-4 shrink-0 text-signal" strokeWidth={1.8} aria-hidden />
             <span className="text-muted-foreground">
               {t("suggestion", { health: tHealth(suggested) })}

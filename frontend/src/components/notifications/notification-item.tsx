@@ -55,7 +55,7 @@ export function NotificationItem({
     <div
       className={cn(
         "group/item relative flex items-start gap-3 rounded-lg px-3 py-3 transition-colors",
-        unread ? "bg-accent/40" : "bg-transparent",
+        unread ? "bg-accent" : "bg-card",
         "hover:bg-accent",
         nested && "ml-4 border-l border-border pl-4"
       )}
@@ -66,7 +66,7 @@ export function NotificationItem({
         {unread ? (
           <span className="size-2 rounded-full bg-signal" />
         ) : (
-          <span className="size-2 rounded-full bg-transparent" />
+          <span className="invisible size-2 rounded-full" />
         )}
       </span>
 

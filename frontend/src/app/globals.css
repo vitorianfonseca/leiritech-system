@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
 
   --font-sans: var(--font-satoshi);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --font-heading: var(--font-satoshi);
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -88,9 +88,9 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --shadow-sm: 0 1px 2px oklch(0.28 0.012 95 / 0.06), 0 1px 3px oklch(0.28 0.012 95 / 0.05);
-  --shadow-md: 0 2px 6px oklch(0.28 0.012 95 / 0.07), 0 6px 16px oklch(0.28 0.012 95 / 0.06);
-  --shadow-lg: 0 8px 24px oklch(0.28 0.012 95 / 0.10), 0 2px 6px oklch(0.28 0.012 95 / 0.06);
+  --shadow-sm: 0 1px 1px oklch(0.24 0.010 82 / 0.04);
+  --shadow-md: 0 1px 2px oklch(0.24 0.010 82 / 0.06), 0 2px 8px oklch(0.24 0.010 82 / 0.05);
+  --shadow-lg: 0 4px 16px oklch(0.24 0.010 82 / 0.12), 0 1px 3px oklch(0.24 0.010 82 / 0.08);
 
   /* Motion — one vocabulary, used everywhere. Durations are deliberately
      short: this is software people use for hours, not a landing page. */
@@ -112,155 +112,158 @@
  * colour of every link, active row, or hover state — if everything is
  * signal, nothing is. Ink and slate carry the rest of the interface.
  * ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
+ * LeiriTech — "Consola".
+ *
+ * A workstation, not a report. Cool neutrals so nothing competes with the
+ * data; one accent (#315CFF) that means "act on this" and appears nowhere
+ * else; and semantic red/amber/green reserved strictly for state. Surfaces
+ * separate with a 1px rule, not a shadow — in a dense grid, shadows read as
+ * noise and make every cell look like a separate object.
+ *
+ * Light and dark are the same instrument at two exposures: identical
+ * structure, identical meaning per colour, contrast tuned per ground.
+ * ------------------------------------------------------------------ */
 :root {
-  --radius: 0.625rem;
+  --radius: 0.3rem;
 
-  /* Warm paper surfaces */
-  --background: oklch(0.973 0.005 95);        /* #F7F6F2 */
-  --foreground: oklch(0.217 0.011 261);       /* #171A1F */
-  --card: oklch(1 0 0);                       /* #FFFFFF */
-  --card-foreground: oklch(0.217 0.011 261);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.217 0.011 261);
+  --background: oklch(0.966 0.006 92);
+  --foreground: oklch(0.212 0.010 78);
+  --card: oklch(0.995 0.003 92);
+  --card-foreground: oklch(0.212 0.010 78);
+  --popover: oklch(0.995 0.003 92);
+  --popover-foreground: oklch(0.212 0.010 78);
 
-  /* Signal — the next action */
-  --primary: oklch(0.554 0.245 266);          /* #315CFF */
+  --primary: oklch(0.435 0.105 262);
   --primary-foreground: oklch(0.995 0 0);
 
-  --secondary: oklch(0.948 0.004 95);
-  --secondary-foreground: oklch(0.217 0.011 261);
-  --muted: oklch(0.958 0.004 95);
-  --muted-foreground: oklch(0.551 0.013 264);  /* #6E727A */
-  --accent: oklch(0.953 0.004 95);
-  --accent-foreground: oklch(0.217 0.011 261);
+  --secondary: oklch(0.940 0.008 92);
+  --secondary-foreground: oklch(0.212 0.010 78);
+  --muted: oklch(0.948 0.007 92);
+  --muted-foreground: oklch(0.530 0.014 82);
+  --accent: oklch(0.936 0.009 92);
+  --accent-foreground: oklch(0.212 0.010 78);
 
-  --border: oklch(0.902 0.004 95);
-  --input: oklch(0.902 0.004 95);
-  --ring: oklch(0.554 0.245 266);
+  --border: oklch(0.893 0.010 90);
+  --input: oklch(0.893 0.010 90);
+  --ring: oklch(0.435 0.105 262);
 
-  /* Signal scale */
-  --signal: oklch(0.554 0.245 266);
+  --signal: oklch(0.435 0.105 262);
   --signal-foreground: oklch(0.995 0 0);
-  --signal-muted: oklch(0.945 0.045 266);
+  --signal-muted: oklch(0.930 0.028 262);
 
-  /* Semantic — discreet, never shouty */
-  --destructive: oklch(0.552 0.190 27);
+  --destructive: oklch(0.501 0.178 29);
   --destructive-foreground: oklch(0.995 0 0);
-  --destructive-muted: oklch(0.955 0.030 27);
-  --success: oklch(0.565 0.115 152);
+  --destructive-muted: oklch(0.950 0.032 29);
+  --success: oklch(0.476 0.089 154);
   --success-foreground: oklch(0.995 0 0);
-  --success-muted: oklch(0.955 0.028 152);
-  --warning: oklch(0.705 0.125 72);
-  --warning-foreground: oklch(0.255 0.025 60);
-  --warning-muted: oklch(0.958 0.035 78);
-  --info: oklch(0.554 0.245 266);
+  --success-muted: oklch(0.950 0.026 154);
+  --warning: oklch(0.508 0.108 73);
+  --warning-foreground: oklch(0.995 0 0);
+  --warning-muted: oklch(0.952 0.034 73);
+  --info: oklch(0.435 0.105 262);
   --info-foreground: oklch(0.995 0 0);
-  --info-muted: oklch(0.945 0.045 266);
+  --info-muted: oklch(0.930 0.028 262);
 
-  /* PSA status zones */
-  --health-healthy: oklch(0.545 0.115 152);
-  --health-healthy-bg: oklch(0.957 0.028 152);
-  --health-attention: oklch(0.625 0.125 72);
-  --health-attention-bg: oklch(0.958 0.035 78);
-  --health-at-risk: oklch(0.545 0.190 27);
-  --health-at-risk-bg: oklch(0.957 0.030 27);
-  --status-overdue: oklch(0.545 0.190 27);
-  --status-overdue-bg: oklch(0.957 0.030 27);
-  --status-blocked: oklch(0.515 0.125 305);
-  --status-blocked-bg: oklch(0.957 0.028 305);
-  --status-due: oklch(0.625 0.125 72);
-  --status-due-bg: oklch(0.958 0.035 78);
-  --status-done: oklch(0.620 0.005 95);
-  --status-done-bg: oklch(0.957 0.004 95);
+  --health-healthy: oklch(0.476 0.089 154);
+  --health-healthy-bg: oklch(0.950 0.026 154);
+  --health-attention: oklch(0.508 0.108 73);
+  --health-attention-bg: oklch(0.952 0.034 73);
+  --health-at-risk: oklch(0.501 0.178 29);
+  --health-at-risk-bg: oklch(0.950 0.032 29);
+  --status-overdue: oklch(0.501 0.178 29);
+  --status-overdue-bg: oklch(0.950 0.032 29);
+  --status-blocked: oklch(0.470 0.130 290);
+  --status-blocked-bg: oklch(0.950 0.028 290);
+  --status-due: oklch(0.508 0.108 73);
+  --status-due-bg: oklch(0.952 0.034 73);
+  --status-done: oklch(0.600 0.008 85);
+  --status-done-bg: oklch(0.945 0.006 92);
 
-  /* Charts — signal first, then a warm-to-cool spread that stays legible
-     side by side and in greyscale. */
-  --chart-1: oklch(0.554 0.245 266);
-  --chart-2: oklch(0.620 0.095 215);
-  --chart-3: oklch(0.600 0.110 152);
-  --chart-4: oklch(0.680 0.130 55);
-  --chart-5: oklch(0.575 0.140 320);
+  --chart-1: oklch(0.435 0.105 262);
+  --chart-2: oklch(0.560 0.095 215);
+  --chart-3: oklch(0.510 0.090 154);
+  --chart-4: oklch(0.600 0.120 60);
+  --chart-5: oklch(0.520 0.130 315);
 
-  /* Sidebar — a shade deeper than the page, same warmth */
-  --sidebar: oklch(0.958 0.005 95);
-  --sidebar-foreground: oklch(0.300 0.009 261);
-  --sidebar-primary: oklch(0.554 0.245 266);
+  --sidebar: oklch(0.947 0.008 92);
+  --sidebar-foreground: oklch(0.300 0.011 80);
+  --sidebar-primary: oklch(0.435 0.105 262);
   --sidebar-primary-foreground: oklch(0.995 0 0);
-  --sidebar-accent: oklch(0.930 0.005 95);
-  --sidebar-accent-foreground: oklch(0.217 0.011 261);
-  --sidebar-border: oklch(0.902 0.004 95);
-  --sidebar-ring: oklch(0.554 0.245 266);
+  --sidebar-accent: oklch(0.995 0.003 92);
+  --sidebar-accent-foreground: oklch(0.212 0.010 78);
+  --sidebar-border: oklch(0.893 0.010 90);
+  --sidebar-ring: oklch(0.435 0.105 262);
 }
 
 .dark {
-  /* Warm charcoal — never pure black, keeps the paper's temperature */
-  --background: oklch(0.196 0.006 95);
-  --foreground: oklch(0.950 0.003 95);
-  --card: oklch(0.236 0.006 95);
-  --card-foreground: oklch(0.950 0.003 95);
-  --popover: oklch(0.236 0.006 95);
-  --popover-foreground: oklch(0.950 0.003 95);
+  --background: oklch(0.190 0.006 82);
+  --foreground: oklch(0.936 0.004 88);
+  --card: oklch(0.228 0.007 84);
+  --card-foreground: oklch(0.936 0.004 88);
+  --popover: oklch(0.228 0.007 84);
+  --popover-foreground: oklch(0.936 0.004 88);
 
-  --primary: oklch(0.700 0.185 266);
-  --primary-foreground: oklch(0.165 0.006 95);
+  --primary: oklch(0.735 0.110 262);
+  --primary-foreground: oklch(0.165 0.005 248);
 
-  --secondary: oklch(0.276 0.006 95);
-  --secondary-foreground: oklch(0.950 0.003 95);
-  --muted: oklch(0.256 0.005 95);
-  --muted-foreground: oklch(0.700 0.008 264);
-  --accent: oklch(0.292 0.006 95);
-  --accent-foreground: oklch(0.950 0.003 95);
+  --secondary: oklch(0.262 0.008 84);
+  --secondary-foreground: oklch(0.936 0.004 88);
+  --muted: oklch(0.250 0.007 84);
+  --muted-foreground: oklch(0.660 0.012 86);
+  --accent: oklch(0.278 0.009 84);
+  --accent-foreground: oklch(0.936 0.004 88);
 
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.700 0.185 266);
+  --border: oklch(0.298 0.010 84);
+  --input: oklch(0.318 0.010 84);
+  --ring: oklch(0.735 0.110 262);
 
-  --signal: oklch(0.700 0.185 266);
-  --signal-foreground: oklch(0.165 0.006 95);
-  --signal-muted: oklch(0.320 0.075 266);
+  --signal: oklch(0.735 0.110 262);
+  --signal-foreground: oklch(0.165 0.005 248);
+  --signal-muted: oklch(0.310 0.050 262);
 
-  --destructive: oklch(0.700 0.175 25);
-  --destructive-foreground: oklch(0.995 0 0);
-  --destructive-muted: oklch(0.320 0.055 25);
-  --success: oklch(0.700 0.110 152);
-  --success-foreground: oklch(0.180 0.018 152);
-  --success-muted: oklch(0.300 0.045 152);
-  --warning: oklch(0.790 0.120 78);
-  --warning-foreground: oklch(0.220 0.018 60);
-  --warning-muted: oklch(0.320 0.045 78);
-  --info: oklch(0.700 0.185 266);
-  --info-foreground: oklch(0.165 0.006 95);
-  --info-muted: oklch(0.320 0.075 266);
+  --destructive: oklch(0.709 0.183 28);
+  --destructive-foreground: oklch(0.165 0.005 248);
+  --destructive-muted: oklch(0.300 0.055 28);
+  --success: oklch(0.806 0.158 160);
+  --success-foreground: oklch(0.165 0.005 248);
+  --success-muted: oklch(0.290 0.050 160);
+  --warning: oklch(0.824 0.141 70);
+  --warning-foreground: oklch(0.165 0.005 248);
+  --warning-muted: oklch(0.300 0.048 70);
+  --info: oklch(0.735 0.110 262);
+  --info-foreground: oklch(0.165 0.005 248);
+  --info-muted: oklch(0.310 0.050 262);
 
-  --health-healthy: oklch(0.715 0.110 152);
-  --health-healthy-bg: oklch(0.300 0.045 152);
-  --health-attention: oklch(0.790 0.120 78);
-  --health-attention-bg: oklch(0.320 0.045 78);
-  --health-at-risk: oklch(0.700 0.175 25);
-  --health-at-risk-bg: oklch(0.320 0.055 25);
-  --status-overdue: oklch(0.700 0.175 25);
-  --status-overdue-bg: oklch(0.320 0.055 25);
-  --status-blocked: oklch(0.700 0.120 305);
-  --status-blocked-bg: oklch(0.300 0.045 305);
-  --status-due: oklch(0.790 0.120 78);
-  --status-due-bg: oklch(0.320 0.045 78);
-  --status-done: oklch(0.620 0.006 95);
-  --status-done-bg: oklch(0.280 0.005 95);
+  --health-healthy: oklch(0.806 0.158 160);
+  --health-healthy-bg: oklch(0.290 0.050 160);
+  --health-attention: oklch(0.824 0.141 70);
+  --health-attention-bg: oklch(0.300 0.048 70);
+  --health-at-risk: oklch(0.709 0.183 28);
+  --health-at-risk-bg: oklch(0.300 0.055 28);
+  --status-overdue: oklch(0.709 0.183 28);
+  --status-overdue-bg: oklch(0.300 0.055 28);
+  --status-blocked: oklch(0.720 0.130 292);
+  --status-blocked-bg: oklch(0.295 0.050 292);
+  --status-due: oklch(0.824 0.141 70);
+  --status-due-bg: oklch(0.300 0.048 70);
+  --status-done: oklch(0.610 0.008 85);
+  --status-done-bg: oklch(0.258 0.007 84);
 
-  --chart-1: oklch(0.700 0.185 266);
-  --chart-2: oklch(0.690 0.095 215);
-  --chart-3: oklch(0.700 0.110 152);
-  --chart-4: oklch(0.750 0.130 55);
-  --chart-5: oklch(0.690 0.130 320);
+  --chart-1: oklch(0.735 0.110 262);
+  --chart-2: oklch(0.700 0.095 215);
+  --chart-3: oklch(0.806 0.158 160);
+  --chart-4: oklch(0.824 0.141 70);
+  --chart-5: oklch(0.720 0.130 315);
 
-  --sidebar: oklch(0.216 0.006 95);
-  --sidebar-foreground: oklch(0.920 0.003 95);
-  --sidebar-primary: oklch(0.700 0.185 266);
-  --sidebar-primary-foreground: oklch(0.165 0.006 95);
-  --sidebar-accent: oklch(0.300 0.006 95);
-  --sidebar-accent-foreground: oklch(0.950 0.003 95);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.700 0.185 266);
+  --sidebar: oklch(0.210 0.007 82);
+  --sidebar-foreground: oklch(0.890 0.005 88);
+  --sidebar-primary: oklch(0.735 0.110 262);
+  --sidebar-primary-foreground: oklch(0.165 0.005 248);
+  --sidebar-accent: oklch(0.278 0.009 84);
+  --sidebar-accent-foreground: oklch(0.936 0.004 88);
+  --sidebar-border: oklch(0.298 0.010 84);
+  --sidebar-ring: oklch(0.735 0.110 262);
 }
 
 @layer base {
@@ -294,6 +297,21 @@
     letter-spacing: -0.02em;
     font-optical-sizing: auto;
   }
+  /* Every figure in the product is mono and tabular, so columns of numbers
+     align without each table asking for it. */
+  .font-data {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "zero" 1;
+  }
+  /* The section label. Sentence case, not tracked-out caps: shouting is not
+     the same as emphasis, and caps in a dense grid read as chrome. */
+  .label-micro {
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+  }
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
@@ -306,5 +324,73 @@
   }
   100% {
     transform: translateX(300%);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Anything you can click says so.
+ *
+ * The UA stylesheet gives <button> `cursor: default`, which is correct for a
+ * native form and wrong for an application — half the interface then looks
+ * inert. Disabled controls keep the default on purpose: the cursor is the
+ * cheapest way to tell "not now" from "not a control".
+ * ------------------------------------------------------------------ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="switch"]:not([aria-disabled="true"]),
+  [role="checkbox"]:not([aria-disabled="true"]),
+  [role="radio"]:not([aria-disabled="true"]),
+  a[href],
+  summary,
+  label[for],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="range"]:not(:disabled),
+  input[type="file"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Content arriving.
+ *
+ * A page's frame animates in, but its data lands later — the query resolves,
+ * the skeleton is swapped, and the real content used to appear in a single
+ * frame. `.reveal` covers that seam: content rises a few pixels as it fades,
+ * fast enough never to delay reading.
+ * ------------------------------------------------------------------ */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@layer utilities {
+  .reveal {
+    animation: reveal-in var(--duration-slow, 360ms) var(--ease-out-quint, ease-out) both;
+  }
+  /* Successive blocks trail the first slightly, so a page reads as one
+     arrival rather than several. */
+  .reveal-1 { animation-delay: 40ms; }
+  .reveal-2 { animation-delay: 80ms; }
+  .reveal-3 { animation-delay: 120ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-1,
+  .reveal-2,
+  .reveal-3 {
+    animation: none;
   }
 }

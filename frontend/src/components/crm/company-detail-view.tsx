@@ -108,7 +108,7 @@ export function CompanyDetailView({ companyId, user }: CompanyDetailViewProps) {
           <div className="size-14 animate-pulse rounded-full bg-muted" />
           <div className="space-y-2">
             <div className="h-7 w-56 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-40 animate-pulse rounded bg-muted/70" />
+            <div className="h-4 w-40 animate-pulse rounded bg-muted" />
           </div>
         </div>
         <SkeletonCard />

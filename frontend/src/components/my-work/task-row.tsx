@@ -105,7 +105,7 @@ export function TaskRow({
         "group flex flex-wrap items-start gap-x-3 gap-y-2 rounded-lg border px-3 py-2.5 transition-colors",
         task.blocked
           ? "border-status-blocked/30 bg-status-blocked-bg/40"
-          : "border-border bg-card hover:bg-accent/40"
+          : "border-border bg-card hover:bg-accent"
       )}
     >
       {/* Complete toggle */}

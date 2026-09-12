@@ -104,7 +104,7 @@ export function RecordPaymentDialog({
         </div>
 
         {milestone ? (
-          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted/50 p-3 text-sm">
+          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted p-3 text-sm">
             <dt className="text-muted-foreground">{t("recordPayment.amount")}</dt>
             <dd className="text-right tabular-nums font-medium">
               {formatEUR(milestone.amountCents, locale)}

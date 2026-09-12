@@ -97,7 +97,7 @@ export function SearchableCombobox({
           id={id}
           aria-label={ariaLabel}
           placeholder={placeholder ?? t("placeholder")}
-          className="h-full w-full rounded-lg bg-transparent pl-3 pr-16 text-foreground outline-none placeholder:text-muted-foreground"
+          className="h-full w-full rounded-lg bg-card pl-3 pr-16 text-foreground outline-none placeholder:text-muted-foreground"
         />
         <div className="absolute right-1 flex h-full items-center gap-0.5 text-muted-foreground">
           {loading ? (

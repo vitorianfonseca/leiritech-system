@@ -35,7 +35,6 @@ from app.api.routes import (
     tasks,
     time,
     users,
-    workload,
 )
 
 api_router = APIRouter()
@@ -72,8 +71,6 @@ api_router.include_router(
 api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(time.router, prefix="/time", tags=["time"])
 api_router.include_router(finance.router, prefix="/finance", tags=["finance"])
-api_router.include_router(workload.router, prefix="/workload", tags=["workload"])
-api_router.include_router(github.router, prefix="/github", tags=["github"])
 api_router.include_router(
     notifications.router, prefix="/notifications", tags=["notifications"]
 )
@@ -90,3 +87,4 @@ api_router.include_router(
 api_router.include_router(calendar.router, prefix="/calendar", tags=["calendar"])
 api_router.include_router(my_work.router, prefix="/my-work", tags=["my-work"])
 api_router.include_router(activity.router, prefix="/activity", tags=["activity"])
+api_router.include_router(github.router, prefix="/github", tags=["github"])

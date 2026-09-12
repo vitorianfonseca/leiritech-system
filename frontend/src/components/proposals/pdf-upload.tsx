@@ -82,7 +82,7 @@ export function PdfUpload({
       />
 
       {file ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-signal-muted text-signal">
               <FileText className="size-5" strokeWidth={1.8} aria-hidden />
@@ -134,7 +134,7 @@ export function PdfUpload({
           onClick={pick}
           disabled={uploading}
           className={cn(
-            "flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-8 text-center outline-none transition-colors",
+            "flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted px-6 py-8 text-center outline-none transition-colors",
             "hover:border-signal hover:bg-signal-muted/30 focus-visible:ring-2 focus-visible:ring-ring",
             "disabled:cursor-not-allowed disabled:opacity-60"
           )}
@@ -148,7 +148,7 @@ export function PdfUpload({
           <span className="text-xs text-muted-foreground">{t("dropHint")}</span>
         </button>
       ) : (
-        <div className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
           <FileText className="size-4 shrink-0" strokeWidth={1.8} aria-hidden />
           {t("none")}
         </div>

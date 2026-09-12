@@ -62,7 +62,7 @@ export function MonthView({
                 key={day.toISOString()}
                 className={cn(
                   "min-h-[104px] border-b border-r border-border p-1.5 [&:nth-child(7n)]:border-r-0",
-                  !inMonth && "bg-muted/30"
+                  !inMonth && "bg-muted"
                 )}
               >
                 <div className="mb-1 flex items-center justify-between px-0.5">
