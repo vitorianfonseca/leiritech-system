@@ -88,9 +88,9 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --shadow-sm: 0 1px 2px oklch(0.30 0.03 265 / 0.04), 0 2px 8px oklch(0.30 0.03 265 / 0.04);
-  --shadow-md: 0 2px 6px oklch(0.30 0.03 265 / 0.05), 0 8px 24px oklch(0.30 0.03 265 / 0.06);
-  --shadow-lg: 0 8px 32px oklch(0.30 0.03 265 / 0.10), 0 2px 8px oklch(0.30 0.03 265 / 0.05);
+  --shadow-sm: 0 1px 2px oklch(0.28 0.06 285 / 0.04), 0 2px 8px oklch(0.28 0.06 285 / 0.04);
+  --shadow-md: 0 2px 6px oklch(0.28 0.06 285 / 0.05), 0 8px 24px oklch(0.28 0.06 285 / 0.06);
+  --shadow-lg: 0 8px 32px oklch(0.28 0.06 285 / 0.10), 0 2px 8px oklch(0.28 0.06 285 / 0.05);
 
   /* Motion — one vocabulary, used everywhere. Durations are deliberately
      short: this is software people use for hours, not a landing page. */
@@ -127,30 +127,30 @@
 :root {
   --radius: 1rem;
 
-  --background: oklch(0.978 0.004 255);
-  --foreground: oklch(0.300 0.030 265);
+  --background: oklch(0.976 0.005 285);
+  --foreground: oklch(0.295 0.035 285);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.300 0.030 265);
+  --card-foreground: oklch(0.295 0.035 285);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.300 0.030 265);
+  --popover-foreground: oklch(0.295 0.035 285);
 
-  --primary: oklch(0.605 0.165 264);
+  --primary: oklch(0.575 0.215 292);
   --primary-foreground: oklch(0.995 0 0);
 
-  --secondary: oklch(0.952 0.006 255);
-  --secondary-foreground: oklch(0.300 0.030 265);
-  --muted: oklch(0.960 0.005 255);
-  --muted-foreground: oklch(0.550 0.020 262);
-  --accent: oklch(0.945 0.007 255);
-  --accent-foreground: oklch(0.300 0.030 265);
+  --secondary: oklch(0.950 0.008 285);
+  --secondary-foreground: oklch(0.295 0.035 285);
+  --muted: oklch(0.958 0.007 285);
+  --muted-foreground: oklch(0.545 0.024 285);
+  --accent: oklch(0.943 0.010 285);
+  --accent-foreground: oklch(0.295 0.035 285);
 
-  --border: oklch(0.922 0.007 255);
-  --input: oklch(0.922 0.007 255);
-  --ring: oklch(0.605 0.165 264);
+  --border: oklch(0.920 0.009 285);
+  --input: oklch(0.920 0.009 285);
+  --ring: oklch(0.575 0.215 292);
 
-  --signal: oklch(0.605 0.165 264);
+  --signal: oklch(0.575 0.215 292);
   --signal-foreground: oklch(0.995 0 0);
-  --signal-muted: oklch(0.940 0.045 264);
+  --signal-muted: oklch(0.940 0.045 292);
 
   --destructive: oklch(0.501 0.178 29);
   --destructive-foreground: oklch(0.995 0 0);
@@ -161,9 +161,9 @@
   --warning: oklch(0.508 0.108 73);
   --warning-foreground: oklch(0.995 0 0);
   --warning-muted: oklch(0.952 0.034 73);
-  --info: oklch(0.605 0.165 264);
+  --info: oklch(0.575 0.215 292);
   --info-foreground: oklch(0.995 0 0);
-  --info-muted: oklch(0.940 0.045 264);
+  --info-muted: oklch(0.940 0.045 292);
 
   --health-healthy: oklch(0.560 0.095 175);
   --health-healthy-bg: oklch(0.930 0.055 175);
@@ -173,27 +173,27 @@
   --health-at-risk-bg: oklch(0.935 0.055 27);
   --status-overdue: oklch(0.600 0.155 27);
   --status-overdue-bg: oklch(0.935 0.055 27);
-  --status-blocked: oklch(0.600 0.130 289);
-  --status-blocked-bg: oklch(0.940 0.045 289);
+  --status-blocked: oklch(0.575 0.215 292);
+  --status-blocked-bg: oklch(0.940 0.045 292);
   --status-due: oklch(0.640 0.105 57);
   --status-due-bg: oklch(0.935 0.055 57);
   --status-done: oklch(0.600 0.020 290);
   --status-done-bg: oklch(0.940 0.014 299);
 
-  --chart-1: oklch(0.605 0.165 264);
-  --chart-2: oklch(0.640 0.120 290);
+  --chart-1: oklch(0.575 0.215 292);
+  --chart-2: oklch(0.660 0.140 250);
   --chart-3: oklch(0.620 0.095 175);
   --chart-4: oklch(0.700 0.110 57);
   --chart-5: oklch(0.620 0.110 330);
 
   --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.410 0.024 265);
-  --sidebar-primary: oklch(0.605 0.165 264);
+  --sidebar-foreground: oklch(0.405 0.028 285);
+  --sidebar-primary: oklch(0.575 0.215 292);
   --sidebar-primary-foreground: oklch(0.995 0 0);
-  --sidebar-accent: oklch(0.958 0.006 255);
-  --sidebar-accent-foreground: oklch(0.300 0.030 265);
-  --sidebar-border: oklch(0.928 0.007 255);
-  --sidebar-ring: oklch(0.605 0.165 264);
+  --sidebar-accent: oklch(0.956 0.008 285);
+  --sidebar-accent-foreground: oklch(0.295 0.035 285);
+  --sidebar-border: oklch(0.926 0.009 285);
+  --sidebar-ring: oklch(0.575 0.215 292);
 }
 
 .dark {
@@ -411,4 +411,50 @@ textarea:not(:disabled),
     inset-block: -0.5rem;
     inset-inline: -0.25rem;
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Glass buttons.
+ *
+ * The accent taken from the assistant itself: a violet-to-navy gradient with
+ * a lit top edge and a highlight sweeping the upper half, which is what the
+ * glass in the illustration actually does to light. The inset highlight is
+ * what sells it — a flat gradient alone reads as a coloured rectangle.
+ *
+ * Scoped to primary actions on purpose. This is the only place in the
+ * product carrying an effect like this; spread across tables and panels it
+ * would cost legibility, which is why the surfaces stay opaque and plain.
+ * ------------------------------------------------------------------ */
+.btn-glass {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(
+    140deg,
+    oklch(0.600 0.215 295) 0%,
+    oklch(0.430 0.185 288) 52%,
+    oklch(0.285 0.115 278) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.30),
+    inset 0 -1px 0 oklch(0 0 0 / 0.18),
+    0 1px 2px oklch(0.28 0.06 285 / 0.30),
+    0 8px 18px -6px oklch(0.28 0.06 285 / 0.42);
+}
+.btn-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 45% 0;
+  background: linear-gradient(
+    to bottom,
+    oklch(1 0 0 / 0.22),
+    oklch(1 0 0 / 0)
+  );
+  pointer-events: none;
+}
+.btn-glass:hover {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.38),
+    inset 0 -1px 0 oklch(0 0 0 / 0.18),
+    0 2px 4px oklch(0.28 0.06 285 / 0.32),
+    0 12px 24px -8px oklch(0.28 0.06 285 / 0.50);
 }
