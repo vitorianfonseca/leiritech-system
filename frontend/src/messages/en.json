@@ -2493,7 +2493,20 @@
         "title": "No files",
         "description": "There are no files attached to this project yet."
       },
-      "comingSoon": "File upload is coming in a later phase."
+      "upload": "Upload file",
+      "uploading": "Uploading…",
+      "uploaded": "{name} uploaded.",
+      "uploadFailed": "Could not upload the file.",
+      "removed": "{name} removed.",
+      "removeFailed": "Could not remove the file.",
+      "remove": "Remove",
+      "download": "Download",
+      "confirmRemove": "Remove {name}?",
+      "confirmRemoveBody": "The file is deleted permanently.",
+      "loadFailed": "Could not load files.",
+      "uploadedBy": "{name} · {size}",
+      "tooLarge": "The file exceeds the maximum allowed size.",
+      "notAllowed": "File type not allowed."
     },
     "activityTab": {
       "notesTitle": "Notes",

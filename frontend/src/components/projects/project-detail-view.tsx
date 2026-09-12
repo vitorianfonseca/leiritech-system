@@ -47,7 +47,8 @@ import { HealthDialog } from "./health-dialog";
 import { OverviewTab } from "./overview-tab";
 import { PhasesTab } from "./phases-tab";
 import { FinanceiroTab } from "./financeiro-tab";
-import { CalendarTab, FilesTab, ActivityTab } from "./simple-tabs";
+import { CalendarTab, ActivityTab } from "./simple-tabs";
+import { FilesTab } from "./files-tab";
 import { TasksView } from "@/components/tasks";
 import { formatDate, formatEUR, initials } from "./project-format";
 

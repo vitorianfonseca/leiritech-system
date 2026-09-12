@@ -4,17 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
-  Paperclip,
   ListTodo,
   CalendarDays,
   ExternalLink,
-  FileText,
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ActivityFeed, CommentThread, EmptyState } from "@/components/shared";
+import { ActivityFeed, CommentThread } from "@/components/shared";
 import { projectCollaborationApi } from "@/lib/api/projects";
 import type { Project } from "@/lib/api/projects-types";
 import { PhaseStateBadge, DeliveryMilestoneBadge, TaskFlagBadge } from "./status-badges";
@@ -176,58 +174,6 @@ export function CalendarTab({ project }: { project: Project }) {
 /* --------------------------- Ficheiros (mock) --------------------------- */
 
 // Dates computed once at module load (never during render — purity rule).
-function daysAgoIso(n: number): string {
-  return new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
-}
-const MOCK_FILES = [
-  { id: "f1", name: "Briefing_inicial.pdf", size: "1,2 MB", dateIso: daysAgoIso(18) },
-  { id: "f2", name: "Guia_de_estilo_v2.pdf", size: "3,8 MB", dateIso: daysAgoIso(5) },
-];
-
-export function FilesTab({ project }: { project: Project }) {
-  const t = useTranslations("projects.filesTab");
-  // A tiny deterministic mock so the tab reads as real without F17 wired.
-  const hasFiles = project.state !== "planning";
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Paperclip className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-          {t("title")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!hasFiles ? (
-          <EmptyState
-            variant="bare"
-            icon={Paperclip}
-            title={t("empty.title")}
-            description={t("empty.description")}
-          />
-        ) : (
-          <ul className="divide-y divide-border">
-            {MOCK_FILES.map((f) => (
-              <li key={f.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  <FileText className="size-4" strokeWidth={1.8} aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-foreground">{f.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {f.size} · {formatDate(f.dateIso)}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="mt-4 text-xs text-muted-foreground">{t("comingSoon")}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
 /* --------------------------- Atividade --------------------------- */
 
 export function ActivityTab({

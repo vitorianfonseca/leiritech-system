@@ -67,12 +67,17 @@ export interface AttachmentsApi {
   upload(entityType: string, entityId: string, file: File): Promise<AttachmentMeta>;
   /** Resolve a short-lived presigned GET URL for an existing attachment. */
   getDownloadUrl(attachmentId: string): Promise<string>;
+  /** Delete the row and its stored object. */
+  remove(attachmentId: string): Promise<void>;
 }
 
 export const attachmentsApi: AttachmentsApi = {
   async list(entityType, entityId) {
     return http.get<AttachmentMeta[]>("/attachments", {
-      query: { entityType, entityId },
+      // snake_case: `http` camelCases response bodies, not request queries,
+      // and the route's parameters are entity_type / entity_id. Sending the
+      // camelCase spelling made every list call a 422.
+      query: { entity_type: entityType, entity_id: entityId },
     });
   },
 
@@ -125,6 +130,14 @@ export const attachmentsApi: AttachmentsApi = {
         `/attachments/${attachmentId}/download-url`,
       );
       return ticket.downloadUrl;
+    } catch (err) {
+      rethrow(err);
+    }
+  },
+
+  async remove(attachmentId) {
+    try {
+      await http.delete(`/attachments/${attachmentId}`);
     } catch (err) {
       rethrow(err);
     }

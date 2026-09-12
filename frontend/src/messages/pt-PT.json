@@ -2493,7 +2493,20 @@
         "title": "Sem ficheiros",
         "description": "Ainda não há ficheiros associados a este projeto."
       },
-      "comingSoon": "O carregamento de ficheiros chega numa próxima fase."
+      "upload": "Carregar ficheiro",
+      "uploading": "A carregar…",
+      "uploaded": "{name} carregado.",
+      "uploadFailed": "Não foi possível carregar o ficheiro.",
+      "removed": "{name} removido.",
+      "removeFailed": "Não foi possível remover o ficheiro.",
+      "remove": "Remover",
+      "download": "Descarregar",
+      "confirmRemove": "Remover {name}?",
+      "confirmRemoveBody": "O ficheiro é apagado definitivamente.",
+      "loadFailed": "Não foi possível carregar os ficheiros.",
+      "uploadedBy": "{name} · {size}",
+      "tooLarge": "O ficheiro excede o tamanho máximo permitido.",
+      "notAllowed": "Tipo de ficheiro não permitido."
     },
     "activityTab": {
       "notesTitle": "Notas",

@@ -27,7 +27,10 @@ export function formatEURWhole(cents: number, locale: string): string {
 /** Format an ISO date (yyyy-mm-dd) as dd/mm/yyyy. */
 export function formatDate(iso: string | null, fallback = "—"): string {
   if (!iso) return fallback;
-  const [y, m, d] = iso.split("-");
+  // Accept a full timestamp as well as a plain date. Splitting the whole
+  // string on "-" made the day of `2026-09-12T17:16:36+01:00` come out as
+  // "12T17:16:36+01:00", which is what a caller passing `createdAt` saw.
+  const [y, m, d] = iso.slice(0, 10).split("-");
   if (!y || !m || !d) return iso;
   return `${d}/${m}/${y}`;
 }
