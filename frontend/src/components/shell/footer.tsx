@@ -15,10 +15,10 @@ export function Footer() {
           © {year} {t("name")} · {t("tagline")}
         </p>
         <div className="flex items-center gap-4">
-          <a className="transition-colors hover:text-foreground" href="#">
+          <a className="hit-area transition-colors hover:text-foreground" href="#">
             Privacidade
           </a>
-          <a className="transition-colors hover:text-foreground" href="#">
+          <a className="hit-area transition-colors hover:text-foreground" href="#">
             Termos
           </a>
           <LocaleSwitcher variant="full" />
