@@ -1,27 +1,28 @@
 /**
  * The LeiriTech motion vocabulary.
  *
- * Motion here is orchestration, not decoration: a screen arrives as one
- * composed sequence — frame, then figures, then the queue — so the eye is
- * led through the page in the order the page wants to be read. Numbers count
- * up because a figure settling reads as a measurement being taken; rows
- * cascade because a list arriving as one block reads as a screenshot.
+ * A page arrives as a fade running top to bottom: whatever sits higher
+ * resolves first, each block a beat behind the one above it. Opacity and a
+ * few pixels of travel, nothing else — no blur, no scale. Compositing a blur
+ * on a full page is expensive enough to drop frames, which is exactly the
+ * "not smooth" it was meant to avoid.
  *
- * Everything a person triggers still resolves fast (under 260ms). Only the
- * opening sequence is allowed to take its time, and even then it is under
- * three quarters of a second end to end.
+ * The whole opening is under 300ms end to end. Delay is the thing that makes
+ * an interface feel slow, and a stagger is only legible while it is short:
+ * past about 40ms a cascade stops reading as one movement and starts
+ * reading as waiting.
  *
  * Every variant collapses to a cut under `prefers-reduced-motion`, which
- * `useReducedMotion()` reports and framer-motion honours on `MotionConfig`.
+ * `useReducedMotion()` reports and framer-motion honours via `MotionConfig`.
  */
 
 import type { Transition, Variants } from "framer-motion";
 
 export const duration = {
   instant: 0.1,
-  fast: 0.16,
-  base: 0.26,
-  slow: 0.42,
+  fast: 0.14,
+  base: 0.2,
+  slow: 0.28,
 } as const;
 
 export const ease = {
@@ -44,49 +45,49 @@ export const transition = {
  * ------------------------------------------------------------------ */
 
 export const pageVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: transition.slow },
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transition.base },
 };
 
-/** The screen's opening sequence: children arrive in reading order. */
+/** The page's cascade. No `delayChildren`: the first block starts at once. */
 export const stageVariants: Variants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.06 },
-  },
+  visible: { transition: { staggerChildren: 0.035 } },
 };
 
-/** A block within the sequence — a panel, a chart, a section. */
+/** A block in the cascade — a panel, a strip, a section. */
 export const blockVariants: Variants = {
-  hidden: { opacity: 0, y: 14, scale: 0.985 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    transition: { duration: duration.slow, ease: ease.out },
+    transition: { duration: duration.base, ease: ease.out },
   },
 };
 
-/** A strip of figures: each cell lifts a beat after the one before it. */
+/**
+ * Figures and rows inherit the page's cascade rather than starting their own.
+ * Nesting a second stagger inside the first is what pushed the last row past
+ * half a second; these keep the same downward direction and add no delay.
+ */
 export const cellsVariants: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.02 } },
 };
 
 export const cellVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: transition.spring },
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transition.fast },
 };
 
-/** A queue of rows. Tighter than the cells — a list should feel quick. */
 export const listVariants: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.035, delayChildren: 0.14 } },
+  visible: { transition: { staggerChildren: 0.02 } },
 };
 
 export const rowVariants: Variants = {
-  hidden: { opacity: 0, x: -8 },
-  visible: { opacity: 1, x: 0, transition: transition.base },
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transition.fast },
 };
 
 /* ------------------------------------------------------------------ *

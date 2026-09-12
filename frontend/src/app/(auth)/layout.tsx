@@ -6,8 +6,9 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 /**
  * Public auth layout — lives OUTSIDE the `(app)` route group, so it has NO app
- * shell (no sidebar/topbar). A calm, centered, editorial surface: cool paper
- * canvas, a single discreet cobalt aura, the LeiriTech wordmark, and the auth card.
+ * shell (no sidebar/topbar). A calm, centered surface: warm paper, a soft
+ * mesh of the brand ink blue blooming in from the edges, the wordmark, and
+ * the auth card.
  */
 export default async function AuthLayout({
   children,
@@ -18,11 +19,17 @@ export default async function AuthLayout({
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
-      {/* Signature cobalt aura — the single flash of brand color on the canvas. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-signal/10 blur-3xl"
-      />
+      {/* The mesh. Four overlapping radial blooms of the brand ink, each at
+          single-digit opacity, so the paper stays paper and the colour reads
+          as light falling on it rather than as a gradient laid over it.
+          Painted as CSS gradients — no image, no blur filter, nothing for the
+          compositor to redraw. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(55rem_34rem_at_12%_-8%,var(--signal),transparent_58%)] opacity-[0.22] dark:opacity-[0.16]" />
+        <div className="absolute inset-0 bg-[radial-gradient(42rem_28rem_at_92%_4%,var(--signal),transparent_54%)] opacity-[0.18] dark:opacity-[0.14]" />
+        <div className="absolute inset-0 bg-[radial-gradient(46rem_30rem_at_82%_102%,var(--signal),transparent_56%)] opacity-[0.20] dark:opacity-[0.15]" />
+        <div className="absolute inset-0 bg-[radial-gradient(36rem_26rem_at_2%_92%,var(--signal),transparent_52%)] opacity-[0.16] dark:opacity-[0.12]" />
+      </div>
 
       <header className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6">
         <LeiritechWordmark />

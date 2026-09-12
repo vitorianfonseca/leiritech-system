@@ -99,9 +99,9 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --duration-instant: 100ms;   /* state flips: checkbox, toggle */
-  --duration-fast: 160ms;      /* hover, focus, press */
-  --duration-base: 240ms;      /* dropdowns, popovers, toasts */
-  --duration-slow: 360ms;      /* modals, drawers, page transitions */
+  --duration-fast: 140ms;      /* hover, focus, press */
+  --duration-base: 200ms;      /* dropdowns, popovers, toasts */
+  --duration-slow: 280ms;      /* modals, drawers, page transitions */
 }
 
 /* ------------------------------------------------------------------ *
@@ -377,13 +377,13 @@
 
 @layer utilities {
   .reveal {
-    animation: reveal-in var(--duration-slow, 360ms) var(--ease-out-quint, ease-out) both;
+    animation: reveal-in var(--duration-slow, 280ms) var(--ease-out-quint, ease-out) both;
   }
-  /* Successive blocks trail the first slightly, so a page reads as one
-     arrival rather than several. */
-  .reveal-1 { animation-delay: 40ms; }
-  .reveal-2 { animation-delay: 80ms; }
-  .reveal-3 { animation-delay: 120ms; }
+  /* Successive blocks trail the first by a frame or two — enough to read as
+     a cascade, not enough to read as waiting. */
+  .reveal-1 { animation-delay: 20ms; }
+  .reveal-2 { animation-delay: 40ms; }
+  .reveal-3 { animation-delay: 60ms; }
 }
 
 @media (prefers-reduced-motion: reduce) {
