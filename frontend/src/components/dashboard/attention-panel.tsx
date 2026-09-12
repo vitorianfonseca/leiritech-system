@@ -154,39 +154,50 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
 
       <motion.ul variants={listVariants} initial="hidden" animate="visible">
         {visible.map((item) => (
-          <motion.li variants={rowVariants} key={`${group.key}-${item.id}`}>
+          <motion.li
+            variants={rowVariants}
+            key={`${group.key}-${item.id}`}
+            className="group/row relative grid grid-cols-[2px_1fr_auto] items-center gap-3.5 border-b border-border pr-3 transition-colors duration-[var(--duration-fast)] hover:bg-accent motion-reduce:transition-none"
+          >
+            {/* A hairline tick, inset from the row's edges. A full-bleed slab
+                of colour reads as a warning stripe on machinery; this marks
+                the row without shouting over its title. */}
+            <span
+              aria-hidden
+              className={`my-2.5 h-[calc(100%-1.25rem)] w-0.5 rounded-full ${SEVERITY_BAR[item.severity]}`}
+            />
+
+            <span className="min-w-0 py-2.5">
+              {/*
+                The title's link stretches across the whole row via `after`,
+                so anywhere in the row opens the record — while the action
+                beside it stays a separate control that can be clicked on its
+                own. A <button> nested inside an <a> would be invalid markup
+                and unreachable by keyboard; this is the pattern that gives
+                both behaviours honestly.
+              */}
+              <Link
+                href={hrefFor(item.entityType, item.entityId)}
+                className="block truncate text-[0.8125rem] font-medium text-foreground after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
+              >
+                {item.title}
+              </Link>
+              {/* The meta string already opens with the status, and it is
+                  prose — so it is set in the text face, not the mono one. */}
+              <span className="mt-0.5 block truncate text-[0.75rem] text-muted-foreground">
+                {t(`meta.${item.metaKey}`, item.metaParams)}
+              </span>
+            </span>
+
             <Link
               href={hrefFor(item.entityType, item.entityId)}
-              className="group/row grid grid-cols-[2px_1fr_auto] items-stretch gap-3.5 border-b border-border pr-3 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+              className="relative z-10 inline-flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-[0.8125rem] font-medium text-signal shadow-sm transition-[background-color,border-color,transform] duration-[var(--duration-fast)] hover:border-signal hover:bg-signal-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none"
             >
-              {/* A hairline tick, inset from the row's edges. A full-bleed
-                  slab of colour reads as a warning stripe on machinery; this
-                  marks the row without shouting over its title. */}
-              <span
+              {t(`actions.${group.key}`)}
+              <ChevronRight
+                className="size-3.5 transition-transform duration-[var(--duration-fast)] group-hover/row:translate-x-0.5 motion-reduce:transition-none"
                 aria-hidden
-                className={`my-2.5 w-0.5 rounded-full ${SEVERITY_BAR[item.severity]}`}
               />
-              <span className="min-w-0 py-2.5">
-                <span className="block truncate text-[0.8125rem] font-medium text-foreground">
-                  {item.title}
-                </span>
-                {/* The meta string already opens with the status ("Bloqueada ·
-                    aguarda cliente"), so prefixing the severity word repeated
-                    it. The colour bar carries the severity; this line carries
-                    the detail. */}
-                {/* Prose, so it is set in the text face. Mono is for figures;
-                    using it for a sentence is what made this read as a log. */}
-                <span className="mt-0.5 block truncate text-[0.75rem] text-muted-foreground">
-                  {t(`meta.${item.metaKey}`, item.metaParams)}
-                </span>
-              </span>
-              <span className="flex shrink-0 items-center gap-1 self-center text-[0.8125rem] font-medium text-signal">
-                {t(`actions.${group.key}`)}
-                <ChevronRight
-                  className="size-3 transition-transform duration-[var(--duration-fast)] group-hover/row:translate-x-0.5 motion-reduce:transition-none"
-                  aria-hidden
-                />
-              </span>
             </Link>
           </motion.li>
         ))}
