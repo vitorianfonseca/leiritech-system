@@ -9,6 +9,7 @@ boundary (BR-002) restricts projects to those a user manages or is a member of.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterable
 from datetime import UTC, datetime
 
 from sqlalchemy import ColumnElement, Select, and_, func, or_, select
@@ -24,6 +25,7 @@ from app.models.project import (
     TemplateTask,
 )
 from app.models.task import Task
+from app.models.user import User
 from app.models.time_entry import TimeEntry
 
 
@@ -123,6 +125,15 @@ def list_members(db: Session, project_id: uuid.UUID) -> list[ProjectMember]:
             .order_by(ProjectMember.created_at.asc())
         ).scalars()
     )
+
+
+def names_for(db: Session, user_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Map user ids to display names in one query."""
+    ids = {i for i in user_ids if i is not None}
+    if not ids:
+        return {}
+    rows = db.execute(select(User.id, User.name).where(User.id.in_(ids))).all()
+    return {row[0]: row[1] for row in rows}
 
 
 def get_member(

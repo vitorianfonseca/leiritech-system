@@ -2375,17 +2375,15 @@
         "decision": "Decision",
         "next_step": "Next step"
       },
-      "activityTitle": "Recent activity",
       "milestonesTitle": "Upcoming milestones",
       "noMilestones": "No milestones scheduled.",
-      "hoursTitle": "Hours",
-      "ofBudget": "of {budget}h",
-      "hoursOver": "Over the hours budget.",
-      "consumed": "consumed",
-      "budgetTitle": "Contracted value",
-      "contractedHint": "Total value contracted for the project.",
       "teamTitle": "Team",
-      "noTeam": "No members assigned."
+      "noTeam": "No members assigned.",
+      "phaseTasks": "{done} of {total} tasks",
+      "phaseNoTasks": "No tasks",
+      "quietTitle": "Nothing to flag",
+      "quietBody": "No phases, overdue tasks or risks recorded on this project.",
+      "managerLabel": "Manager"
     },
     "phases": {
       "subtitle": "Project phases. Drag to reorder.",

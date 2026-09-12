@@ -2375,17 +2375,15 @@
         "decision": "Decisão",
         "next_step": "Próximo passo"
       },
-      "activityTitle": "Atividade recente",
       "milestonesTitle": "Próximos marcos",
       "noMilestones": "Sem marcos agendados.",
-      "hoursTitle": "Horas",
-      "ofBudget": "de {budget}h",
-      "hoursOver": "Acima do orçamento de horas.",
-      "consumed": "consumido",
-      "budgetTitle": "Valor contratado",
-      "contractedHint": "Valor total contratado para o projeto.",
       "teamTitle": "Equipa",
-      "noTeam": "Sem membros atribuídos."
+      "noTeam": "Sem membros atribuídos.",
+      "phaseTasks": "{done} de {total} tarefas",
+      "phaseNoTasks": "Sem tarefas",
+      "quietTitle": "Nada a assinalar",
+      "quietBody": "Sem fases, tarefas em atraso ou riscos registados neste projeto.",
+      "managerLabel": "Gestor"
     },
     "phases": {
       "subtitle": "Fases do projeto. Arraste para reordenar.",

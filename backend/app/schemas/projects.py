@@ -73,6 +73,7 @@ class ProjectResponse(BaseModel):
     opportunity_id: uuid.UUID | None
     accepted_proposal_id: uuid.UUID | None
     manager_id: uuid.UUID | None
+    manager_name: str | None = None
     description: str | None
     start_date: date | None
     deadline: date | None
@@ -130,6 +131,10 @@ class ProjectMemberResponse(BaseModel):
     id: uuid.UUID
     project_id: uuid.UUID
     user_id: uuid.UUID
+    # The id alone forced the UI to print a raw UUID where a person's name
+    # belongs. Resolving it here rather than in the client keeps it correct
+    # for a Membro too, whose own /users view is scoped to their own row.
+    user_name: str | None = None
     role_in_project: str | None
 
 

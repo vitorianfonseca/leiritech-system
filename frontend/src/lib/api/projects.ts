@@ -562,6 +562,7 @@ interface ApiProject {
   opportunityId: string | null;
   acceptedProposalId: string | null;
   managerId: string | null;
+  managerName: string | null;
   description: string | null;
   startDate: string | null;
   deadline: string | null;
@@ -600,6 +601,7 @@ interface ApiMember {
   id: string;
   projectId: string;
   userId: string;
+  userName: string | null;
   roleInProject: string | null;
 }
 
@@ -673,8 +675,10 @@ function mapDeliveryMilestone(m: ApiMilestone): DeliveryMilestone {
 function mapMember(m: ApiMember): ProjectMember {
   return {
     userId: m.userId,
-    // INTEGRATION-GAP: name/avatarUrl — members endpoint returns only user_id.
-    name: m.userId,
+    // The endpoint joins the name now. The fallback is deliberately not the
+    // id: a raw UUID in a team list is worse than saying the name is missing,
+    // because it reads as data rather than as an absence.
+    name: m.userName ?? "",
     roleLabel: m.roleInProject ?? "",
     avatarUrl: null,
   };
@@ -690,8 +694,7 @@ function mapListItem(p: ApiProject, teamCount: number, progress: number): Projec
     clientName: "",
     name: p.name,
     managerId: p.managerId ?? "",
-    // INTEGRATION-GAP: managerName — backend returns manager_id only (no join).
-    managerName: "",
+    managerName: p.managerName ?? "",
     teamCount,
     state: p.status as ProjectState,
     suggestedHealth: asHealth(p.suggestedHealth),

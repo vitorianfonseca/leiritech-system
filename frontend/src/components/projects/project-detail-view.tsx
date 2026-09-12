@@ -284,7 +284,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
         <div className="pt-6">
           <Tabs.Panel value="overview">
-            <OverviewTab project={project} canFinance={canFinance} />
+            <OverviewTab project={project} />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
             <TasksTab project={project} />

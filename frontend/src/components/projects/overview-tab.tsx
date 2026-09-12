@@ -1,58 +1,77 @@
 "use client";
 
-import * as React from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   CalendarClock,
   Users,
-  Clock,
   ListChecks,
   ShieldAlert,
   Lightbulb,
   CircleCheck,
   Circle,
   Rocket,
+  CheckCheck,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ActivityFeed, ProgressBar } from "@/components/shared";
+import { EmptyState, ProgressBar } from "@/components/shared";
 import { cn } from "@/lib/utils";
-import { projectCollaborationApi } from "@/lib/api/projects";
 import type { Project } from "@/lib/api/projects-types";
 import { PhaseStateBadge, DeliveryMilestoneBadge, TaskFlagBadge } from "./status-badges";
 import { startReadiness } from "./lifecycle-actions";
-import { formatDate, formatEUR, formatPercent, initials } from "./project-format";
+import { formatDate, initials } from "./project-format";
 
 export interface OverviewTabProps {
   project: Project;
-  canFinance: boolean;
 }
 
-export function OverviewTab({ project, canFinance }: OverviewTabProps) {
+/**
+ * The project overview.
+ *
+ * Two rules keep this tab worth opening.
+ *
+ * It does not repeat itself. Hours and contracted value already sit in the
+ * summary bar directly above; activity has a tab of its own. Cards that only
+ * restated those were removed, because a reader who has to check three places
+ * for the same number stops trusting any of them.
+ *
+ * And a card with nothing in it does not render. A column of "no description",
+ * "no milestones", "no tasks needing attention", "no entries" is five frames
+ * around an absence — it buries the one card that does have something to say.
+ * When the whole column is quiet, that is stated once.
+ */
+export function OverviewTab({ project }: OverviewTabProps) {
   const t = useTranslations("projects.overview");
-  const locale = useLocale();
 
-  const hoursRatio = project.hoursBudget > 0 ? project.hoursUsed / project.hoursBudget : 0;
-  const hoursOver = project.hoursUsed > project.hoursBudget;
   const readiness = startReadiness(project);
+  const showReadiness = project.state === "planning";
+  const hasDescription = Boolean(project.description?.trim());
+  const hasPhases = project.phases.length > 0;
+  const hasAttention = project.attentionTasks.length > 0;
+  const hasRisks = project.risks.length > 0;
+  const hasMilestones = project.deliveryMilestones.length > 0;
+
+  const mainIsQuiet = !showReadiness && !hasDescription && !hasPhases && !hasAttention && !hasRisks;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
       {/* Main column */}
       <div className="space-y-6 lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t("descriptionTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {project.description || t("noDescription")}
-            </p>
-          </CardContent>
-        </Card>
+        {hasDescription ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t("descriptionTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {project.description}
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
 
-        {project.state === "planning" ? (
+        {showReadiness ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -82,52 +101,63 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
           </Card>
         ) : null}
 
-        {/* Phase progress */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ListChecks className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-              {t("phaseProgressTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {project.phases.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noPhases")}</p>
-            ) : (
-              project.phases.map((ph) => {
-                const p = ph.tasksTotal > 0 ? Math.round((ph.tasksDone / ph.tasksTotal) * 100) : 0;
+        {hasPhases ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ListChecks className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
+                {t("phaseProgressTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {project.phases.map((ph) => {
+                // A phase marked completed is at 100%, whatever its task
+                // count says. Deriving the bar purely from tasksDone/tasksTotal
+                // rendered "Completed — 0%" on any phase tracked outside the
+                // task list, which reads as a broken number rather than as an
+                // empty one.
+                const pct =
+                  ph.state === "completed"
+                    ? 100
+                    : ph.tasksTotal > 0
+                      ? Math.round((ph.tasksDone / ph.tasksTotal) * 100)
+                      : 0;
                 return (
-                  <div key={ph.id} className="space-y-1.5">
+                  <div key={ph.id} className="space-y-1">
                     <div className="flex items-center justify-between gap-2 text-sm">
                       <span className="truncate text-foreground">{ph.name}</span>
                       <PhaseStateBadge state={ph.state} />
                     </div>
                     <ProgressBar
-                      value={p}
+                      value={pct}
                       tone={ph.state === "completed" ? "success" : "primary"}
                       size="sm"
                       showValue
                       aria-label={ph.name}
                     />
+                    {/* Says where the number comes from, so a 0% bar is
+                        legibly "nothing started" and not "something failed". */}
+                    <p className="pt-0.5 text-xs text-muted-foreground">
+                      {ph.tasksTotal > 0
+                        ? t("phaseTasks", { done: ph.tasksDone, total: ph.tasksTotal })
+                        : t("phaseNoTasks")}
+                    </p>
                   </div>
                 );
-              })
-            )}
-          </CardContent>
-        </Card>
+              })}
+            </CardContent>
+          </Card>
+        ) : null}
 
-        {/* Attention: overdue / blocked tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldAlert className="size-4 text-status-overdue" strokeWidth={1.8} aria-hidden />
-              {t("attentionTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project.attentionTasks.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noAttention")}</p>
-            ) : (
+        {hasAttention ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ShieldAlert className="size-4 text-status-overdue" strokeWidth={1.8} aria-hidden />
+                {t("attentionTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <ul className="space-y-2">
                 {project.attentionTasks.map((task) => (
                   <li
@@ -145,22 +175,19 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
                   </li>
                 ))}
               </ul>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : null}
 
-        {/* Risks / decisions / next steps */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Lightbulb className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
-              {t("risksTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project.risks.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noRisks")}</p>
-            ) : (
+        {hasRisks ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Lightbulb className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
+                {t("risksTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <ul className="space-y-2.5">
                 {project.risks.map((r) => (
                   <li key={r.id} className="flex items-start gap-2 text-sm">
@@ -174,97 +201,27 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
                   </li>
                 ))}
               </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent activity (#40) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t("activityTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityFeed entityType="project" entityId={project.id} api={projectCollaborationApi} />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Side column */}
-      <div className="space-y-6 lg:col-span-1">
-        {/* Next delivery milestones */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CalendarClock className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-              {t("milestonesTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project.deliveryMilestones.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noMilestones")}</p>
-            ) : (
-              <ul className="space-y-2.5">
-                {project.deliveryMilestones.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm text-foreground">{m.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(m.dueDate)}</p>
-                    </div>
-                    <DeliveryMilestoneBadge status={m.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Hours */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-              {t("hoursTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-baseline justify-between">
-              <span className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                {project.hoursUsed}h
-              </span>
-              <span className="text-sm text-muted-foreground tabular-nums">
-                {t("ofBudget", { budget: project.hoursBudget })}
-              </span>
-            </div>
-            <ProgressBar
-              value={Math.min(100, Math.round(hoursRatio * 100))}
-              tone={hoursOver ? "destructive" : hoursRatio > 0.85 ? "warning" : "success"}
-              size="sm"
-              label={t("hoursTitle")}
-            />
-            {hoursOver ? (
-              <p className="text-xs text-status-overdue">{t("hoursOver")}</p>
-            ) : (
-              <p className="text-xs text-muted-foreground">{formatPercent(hoursRatio, locale)} {t("consumed")}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Budget consumed (finance-gated) */}
-        {canFinance && project.contractedValueCents != null ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t("budgetTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              <p className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                {formatEUR(project.contractedValueCents, locale)}
-              </p>
-              <p className="text-xs text-muted-foreground">{t("contractedHint")}</p>
             </CardContent>
           </Card>
         ) : null}
 
-        {/* Team */}
+        {mainIsQuiet ? (
+          <Card>
+            <CardContent className="py-2">
+              <EmptyState
+                icon={CheckCheck}
+                title={t("quietTitle")}
+                description={t("quietBody")}
+              />
+            </CardContent>
+          </Card>
+        ) : null}
+      </div>
+
+      {/* Side column */}
+      <div className="space-y-6 lg:col-span-1">
+        {/* Team stays even when empty: "no one is assigned" is a fact about
+            the project that someone needs to act on, not an absence of one. */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -284,7 +241,9 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
                     </Avatar>
                     <div className="min-w-0">
                       <p className="truncate text-sm text-foreground">{m.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{m.roleLabel}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {m.userId === project.managerId ? t("managerLabel") : m.roleLabel}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -292,6 +251,30 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
             )}
           </CardContent>
         </Card>
+
+        {hasMilestones ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarClock className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
+                {t("milestonesTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2.5">
+                {project.deliveryMilestones.map((m) => (
+                  <li key={m.id} className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-foreground">{m.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(m.dueDate)}</p>
+                    </div>
+                    <DeliveryMilestoneBadge status={m.status} />
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </div>
   );
