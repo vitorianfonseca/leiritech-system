@@ -47,6 +47,14 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    labelKey: "sectionDelivery",
+    items: [
+      { key: "projects", href: "/projects", icon: FolderKanban, roles: ALL },
+      { key: "tasks", href: "/tasks", icon: ListChecks, roles: ALL },
+      { key: "calendar", href: "/calendar", icon: CalendarDays, roles: ALL },
+    ],
+  },
+  {
     labelKey: "sectionCommercial",
     items: [
       { key: "crmCompanies", href: "/crm/companies", icon: Building2, roles: ALL },
@@ -57,14 +65,6 @@ export const NAV_SECTIONS: NavSection[] = [
       { key: "crmProposals", href: "/crm/proposals", icon: FileText, roles: MANAGERS },
       { key: "crmCatalog", href: "/crm/catalog", icon: Package, roles: MANAGERS },
       { key: "crmProposalTemplates", href: "/crm/proposal-templates", icon: FileStack, roles: MANAGERS },
-    ],
-  },
-  {
-    labelKey: "sectionDelivery",
-    items: [
-      { key: "projects", href: "/projects", icon: FolderKanban, roles: ALL },
-      { key: "tasks", href: "/tasks", icon: ListChecks, roles: ALL },
-      { key: "calendar", href: "/calendar", icon: CalendarDays, roles: ALL },
     ],
   },
   {

@@ -51,6 +51,7 @@ export function DashboardView({ user }: DashboardViewProps) {
     <WelcomeBanner
       greeting={greeting}
       attentionCount={attentionCount}
+      groups={data?.attention ?? []}
       loading={isLoading}
     />
   );

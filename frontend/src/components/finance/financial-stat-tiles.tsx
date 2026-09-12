@@ -60,12 +60,12 @@ export function FinancialStatTiles({
   ];
 
   const chipTone: Record<Tile["tone"], string> = {
-    neutral: "bg-muted text-muted-foreground",
-    success: "bg-success-muted text-success",
-    warning: "bg-warning-muted text-warning-foreground",
+    neutral: "text-muted-foreground",
+    success: "text-success",
+    warning: "text-warning",
     margin: marginPositive
-      ? "bg-health-healthy-bg text-health-healthy"
-      : "bg-status-overdue-bg text-status-overdue",
+      ? "text-health-healthy"
+      : "text-status-overdue",
   };
 
   return (
@@ -85,7 +85,7 @@ export function FinancialStatTiles({
               </p>
               <span
                 className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                  "glass-chip glass-chip-neutral flex size-8 shrink-0 items-center justify-center rounded-lg",
                   chipTone[tile.tone]
                 )}
               >

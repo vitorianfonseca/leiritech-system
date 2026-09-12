@@ -59,7 +59,7 @@ function NavLink({
         collapsed && "justify-center px-0",
         active
           ? "font-semibold text-foreground"
-          : "font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+          : "glass glass-ghost glass-quiet font-medium text-muted-foreground hover:text-foreground"
       )}
     >
       {/* The pill itself travels between entries on a shared layout id, so
@@ -70,7 +70,7 @@ function NavLink({
           aria-hidden
           layoutId="nav-pill"
           transition={spring.layout}
-          className="absolute inset-0 rounded-2xl bg-signal-muted"
+          className="glass glass-active pointer-events-none absolute inset-0 rounded-2xl"
         />
       )}
       <Icon
@@ -142,7 +142,7 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "hidden shrink-0 bg-sidebar transition-[width] duration-200 ease-out md:flex md:flex-col",
+        "hidden shrink-0 border-r border-border bg-sidebar transition-[width] duration-200 ease-out md:flex md:flex-col",
         collapsed ? "w-[4.5rem]" : "w-[16.5rem]"
       )}
     >

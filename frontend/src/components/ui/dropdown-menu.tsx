@@ -32,7 +32,7 @@ function DropdownMenuContent({
         <MenuPrimitive.Popup
           data-slot="dropdown-content"
           className={cn(
-            "bg-popover text-popover-foreground z-50 min-w-52 overflow-hidden rounded-lg border border-border p-1 shadow-md",
+            "glass glass-overlay text-popover-foreground z-50 min-w-52 rounded-2xl p-1.5",
             "origin-[var(--transform-origin)] transition-[transform,opacity] data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
             className
           )}
@@ -57,8 +57,8 @@ function DropdownMenuItem({
       data-slot="dropdown-item"
       data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none transition-colors",
-        "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
+        "relative flex cursor-pointer select-none items-center gap-2 rounded-xl px-2.5 py-2 text-sm outline-none transition-colors",
+        "glass-item data-[highlighted]:text-foreground",
         "data-[variant=destructive]:text-destructive data-[variant=destructive]:data-[highlighted]:bg-destructive-muted",
         "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground data-[variant=destructive]:[&_svg]:text-destructive",
         className

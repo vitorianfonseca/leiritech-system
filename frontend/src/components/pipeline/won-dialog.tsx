@@ -96,7 +96,7 @@ export function WonDialog({
               {!opportunity.proposalSentReached ? (
                 <div
                   role="note"
-                  className="mt-4 flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning-foreground"
+                  className="mt-4 flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning"
                 >
                   <TriangleAlert className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} aria-hidden />
                   <span>{t("proposalWarning")}</span>

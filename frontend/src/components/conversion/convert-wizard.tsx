@@ -689,7 +689,7 @@ function StepMilestones({
       {mismatch ? (
         <div
           role="note"
-          className="flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning-foreground"
+          className="flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning"
         >
           <TriangleAlert className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} aria-hidden />
           <span>{t("mismatch", { target: formatEUR(target, locale), total: formatEUR(total, locale) })}</span>

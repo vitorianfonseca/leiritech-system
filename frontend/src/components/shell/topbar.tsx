@@ -30,7 +30,7 @@ export function Topbar({ user }: { user: SessionUser }) {
       <button
         type="button"
         onClick={openCommand}
-        className="group flex h-9 w-full max-w-md items-center gap-2.5 rounded-lg border border-input bg-card px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:border-ring/50 hover:text-foreground"
+        className="glass group flex h-9 w-full max-w-md items-center gap-2.5 rounded-xl px-3 text-sm text-muted-foreground hover:text-foreground"
         aria-label={t("commandPalette.openLabel")}
       >
         <Search className="size-4 shrink-0" aria-hidden />

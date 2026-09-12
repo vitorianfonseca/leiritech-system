@@ -110,7 +110,7 @@ export function ArchiveCompanyDialog({
         {blockers ? (
           <>
             <div className="flex gap-4">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-warning-muted text-warning-foreground">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-warning-muted text-warning">
                 <AlertTriangle className="size-5" strokeWidth={1.8} aria-hidden />
               </span>
               <div className="min-w-0 flex-1 space-y-1.5">

@@ -356,7 +356,7 @@ function Banner({
   text: string;
 }) {
   const styles: Record<"warning" | "destructive" | "done", string> = {
-    warning: "border-warning/30 bg-warning-muted text-warning-foreground",
+    warning: "border-warning/30 bg-warning-muted text-warning",
     destructive: "border-destructive/30 bg-destructive-muted text-destructive",
     done: "border-border bg-status-done-bg text-status-done",
   };

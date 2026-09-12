@@ -36,12 +36,12 @@ const METRIC_ICON: Record<MetricKey, LucideIcon> = {
 
 /** Pastel chips, one family per tone — the reference's visual signature. */
 const TONE_CHIP: Record<MetricTone, string> = {
-  neutral: "bg-status-blocked-bg text-status-blocked",
-  signal: "bg-signal-muted text-signal",
-  success: "bg-health-healthy-bg text-health-healthy",
-  warning: "bg-health-attention-bg text-health-attention",
-  destructive: "bg-status-overdue-bg text-status-overdue",
-  info: "bg-info-muted text-info",
+  neutral: "text-status-blocked",
+  signal: "text-signal",
+  success: "text-health-healthy",
+  warning: "text-health-attention",
+  destructive: "text-status-overdue",
+  info: "text-info",
 };
 
 const TONE_VALUE: Record<MetricTone, string> = {
@@ -139,7 +139,7 @@ export function StatTiles({
                 </p>
                 <span
                   className={cn(
-                    "flex size-10 shrink-0 items-center justify-center rounded-2xl",
+                    "glass-chip glass-chip-neutral flex size-9 shrink-0 items-center justify-center rounded-lg",
                     TONE_CHIP[m.tone]
                   )}
                 >

@@ -141,7 +141,7 @@ export function OpportunityCardView({
       <div
         className={cn(
           "mt-2.5 flex items-start gap-1.5 rounded-lg px-2 py-1.5 text-xs",
-          missing && "bg-warning-muted text-warning-foreground",
+          missing && "bg-warning-muted text-warning",
           overdue && "bg-status-overdue-bg text-status-overdue",
           !missing && !overdue && "text-muted-foreground"
         )}

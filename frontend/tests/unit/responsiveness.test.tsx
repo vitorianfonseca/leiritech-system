@@ -229,11 +229,11 @@ describe("navigation chrome across breakpoints", () => {
     renderShell();
 
     const aside = screen.getByRole("complementary");
-    expect(classesOf(aside)).toContain("w-64");
+    expect(classesOf(aside)).toContain("w-[16.5rem]");
 
     await user.click(screen.getByRole("button", { name: sidebar.collapse }));
 
-    await waitFor(() => expect(classesOf(aside)).toContain("w-16"));
+    await waitFor(() => expect(classesOf(aside)).toContain("w-[4.5rem]"));
     expect(aside).toHaveAttribute("data-collapsed", "true");
   });
 });

@@ -132,7 +132,7 @@ const toneAccent: Record<ToastTone, string> = {
 const toneIconColor: Record<ToastTone, string> = {
   default: "text-muted-foreground",
   success: "text-success",
-  warning: "text-warning-foreground",
+  warning: "text-warning",
   destructive: "text-destructive",
   info: "text-info",
 };

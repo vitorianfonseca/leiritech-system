@@ -80,13 +80,17 @@
   --color-status-done: var(--status-done);
   --color-status-done-bg: var(--status-done-bg);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  /* The scale is flat on purpose. Multiplying a 16px base out to 2.2x put
+     35px on every card, which is what made the product read as a toy rather
+     than a tool. Controls stay in the 14-18px the glass wants; panels barely
+     move above it, so a card is a panel with a soft corner, not a bubble. */
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.7);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) * 1.15);
+  --radius-2xl: calc(var(--radius) * 1.3);
+  --radius-3xl: calc(var(--radius) * 1.45);
+  --radius-4xl: calc(var(--radius) * 1.6);
 
   --shadow-sm: 0 1px 2px oklch(0.28 0.06 285 / 0.04), 0 2px 8px oklch(0.28 0.06 285 / 0.04);
   --shadow-md: 0 2px 6px oklch(0.28 0.06 285 / 0.05), 0 8px 24px oklch(0.28 0.06 285 / 0.06);
@@ -125,7 +129,7 @@
  * structure, identical meaning per colour, contrast tuned per ground.
  * ------------------------------------------------------------------ */
 :root {
-  --radius: 1rem;
+  --radius: 0.875rem;
 
   --background: oklch(0.976 0.005 285);
   --foreground: oklch(0.295 0.035 285);
@@ -134,7 +138,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.295 0.035 285);
 
-  --primary: oklch(0.575 0.215 292);
+  --primary: oklch(0.554 0.245 266);
   --primary-foreground: oklch(0.995 0 0);
 
   --secondary: oklch(0.950 0.008 285);
@@ -146,11 +150,11 @@
 
   --border: oklch(0.920 0.009 285);
   --input: oklch(0.920 0.009 285);
-  --ring: oklch(0.575 0.215 292);
+  --ring: oklch(0.554 0.245 266);
 
-  --signal: oklch(0.575 0.215 292);
+  --signal: oklch(0.554 0.245 266);
   --signal-foreground: oklch(0.995 0 0);
-  --signal-muted: oklch(0.940 0.045 292);
+  --signal-muted: oklch(0.950 0.022 266);
 
   --destructive: oklch(0.501 0.178 29);
   --destructive-foreground: oklch(0.995 0 0);
@@ -413,48 +417,355 @@ textarea:not(:disabled),
   }
 }
 
-/* ------------------------------------------------------------------ *
- * Glass buttons.
+/* ==================================================================== *
+ * LIQUID GLASS
  *
- * The accent taken from the assistant itself: a violet-to-navy gradient with
- * a lit top edge and a highlight sweeping the upper half, which is what the
- * glass in the illustration actually does to light. The inset highlight is
- * what sells it — a flat gradient alone reads as a coloured rectangle.
+ * One material for every interactive surface in the product.
  *
- * Scoped to primary actions on purpose. This is the only place in the
- * product carrying an effect like this; spread across tables and panels it
- * would cost legibility, which is why the surfaces stay opaque and plain.
- * ------------------------------------------------------------------ */
-.btn-glass {
-  position: relative;
-  overflow: hidden;
-  background-image: linear-gradient(
-    140deg,
-    oklch(0.600 0.215 295) 0%,
-    oklch(0.430 0.185 288) 52%,
-    oklch(0.285 0.115 278) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.30),
-    inset 0 -1px 0 oklch(0 0 0 / 0.18),
-    0 1px 2px oklch(0.28 0.06 285 / 0.30),
-    0 8px 18px -6px oklch(0.28 0.06 285 / 0.42);
+ * The order of the layers is the whole idea: a translucent white pane
+ * first, and only then a trace of pastel refracted through it. If the colour
+ * announces itself before the glass does, the mix is wrong — so the tints
+ * below sit between 6% and 20% opacity, which looks like almost nothing in
+ * isolation and like light passing through a pane in place.
+ *
+ * One deliberate departure from pure white: a hairline cool ring under the
+ * white inner highlight. A 58%-white pane bordered in 72%-white is literally
+ * invisible on a white card, which is where most of these controls sit. The
+ * ring is what gives the pane an edge; it is cool, not coloured, and at 0.14
+ * it reads as the shadowed side of a bevel rather than as a border.
+ *
+ * Layer order, back to front:
+ *   1. backdrop-filter   — blurs and saturates whatever is behind
+ *   2. ::before          — pastel refraction, drifting on the compositor
+ *   3. white pane        — the material itself
+ *   4. inner highlight   — the lit top edge where light meets the curve
+ *   5. ring + shadow     — the edge, then a short cool shadow
+ * ==================================================================== */
+
+:root {
+  /* The pane */
+  --glass-alpha: 0.58;
+  --glass-blur: 16px;
+  --glass-saturate: 1.8;
+
+  /* Edges: white where the light hits, cool where it does not */
+  --glass-highlight: 255 255 255;
+  --glass-highlight-alpha: 0.85;
+  --glass-ring: 122 132 173;
+  --glass-ring-alpha: 0.14;
+
+  /* Refracted light — held low on purpose; see the note above */
+  --refract-cyan: 191 239 255;
+  --refract-blue: 201 216 255;
+  --refract-lavender: 208 219 255;
+  --refract-violet: 216 228 255;
+  --refract-pink: 245 221 242;
+  --refract-peach: 255 232 210;
+  --refract-strength: 1;
+
+  --glass-shadow: 0 1px 2px rgb(122 132 173 / 0.05), 0 8px 22px -12px rgb(122 132 173 / 0.16);
+  --glass-shadow-hover: 0 2px 5px rgb(122 132 173 / 0.07), 0 14px 30px -14px rgb(122 132 173 / 0.22);
 }
-.btn-glass::after {
-  content: "";
-  position: absolute;
-  inset: 0 0 45% 0;
-  background: linear-gradient(
-    to bottom,
-    oklch(1 0 0 / 0.22),
-    oklch(1 0 0 / 0)
-  );
-  pointer-events: none;
+
+.dark {
+  /* Same material logic, inverted: a smoked pane rather than a white one,
+     with the refraction dimmed so it never glows. */
+  --glass-alpha: 0.08;
+  --glass-highlight-alpha: 0.10;
+  --glass-ring: 255 255 255;
+  --glass-ring-alpha: 0.10;
+  --glass-saturate: 1.35;
+  --refract-strength: 0.55;
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.28), 0 8px 22px -12px rgb(0 0 0 / 0.45);
+  --glass-shadow-hover: 0 2px 5px rgb(0 0 0 / 0.32), 0 14px 30px -14px rgb(0 0 0 / 0.55);
 }
-.btn-glass:hover {
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.38),
-    inset 0 -1px 0 oklch(0 0 0 / 0.18),
-    0 2px 4px oklch(0.28 0.06 285 / 0.32),
-    0 12px 24px -8px oklch(0.28 0.06 285 / 0.50);
+
+/* Composited drift: a transform, not a background-position, so the light
+   moves without repainting. 60s and 2% of travel — you should never catch
+   it moving, only notice the surface is not dead. */
+@keyframes glass-drift {
+  0%,
+  100% { transform: translate3d(-1.5%, -1%, 0) scale(1.06); }
+  50%  { transform: translate3d(1.5%, 1%, 0) scale(1.06); }
+}
+
+@layer components {
+  .glass {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: rgb(255 255 255 / var(--glass-alpha));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / var(--glass-ring-alpha)),
+      inset 0 1px 0 rgb(var(--glass-highlight) / var(--glass-highlight-alpha)),
+      var(--glass-shadow);
+    transition:
+      background-color var(--duration-base) var(--ease-out-quint),
+      box-shadow var(--duration-base) var(--ease-out-quint),
+      transform var(--duration-fast) var(--ease-out-quint);
+  }
+
+  /* The refraction lives here so it can drift on the compositor and so it
+     never fights a `bg-*` utility on the element itself. */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--refract-strength);
+    background-image:
+      radial-gradient(60% 120% at 8% 0%, rgb(var(--refract-cyan) / 0.16), transparent 70%),
+      radial-gradient(55% 110% at 95% 5%, rgb(var(--refract-lavender) / 0.15), transparent 70%),
+      radial-gradient(70% 100% at 50% 105%, rgb(var(--refract-peach) / 0.10), transparent 70%);
+    transition: opacity var(--duration-base) var(--ease-out-quint);
+  }
+
+  .glass:hover {
+    --glass-alpha: 0.72;
+    --glass-saturate: 2;
+    --glass-highlight-alpha: 0.95;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / calc(var(--glass-ring-alpha) + 0.04)),
+      inset 0 1px 0 rgb(var(--glass-highlight) / var(--glass-highlight-alpha)),
+      var(--glass-shadow-hover);
+    transform: scale(1.01);
+  }
+
+  .glass:active {
+    transform: scale(0.985);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / var(--glass-ring-alpha)),
+      inset 0 1px 0 rgb(var(--glass-highlight) / 0.6),
+      0 1px 2px rgb(122 132 173 / 0.06);
+  }
+
+  .dark .glass:active {
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / var(--glass-ring-alpha)),
+      inset 0 1px 0 rgb(var(--glass-highlight) / 0.06),
+      0 1px 2px rgb(0 0 0 / 0.3);
+  }
+
+  /* The primary action: the same pane, thicker and catching more light.
+     Hierarchy from density, never from hue. */
+  .glass-primary {
+    --glass-alpha: 0.82;
+    --glass-ring-alpha: 0.2;
+    --refract-strength: 1.5;
+    animation: none;
+  }
+  .glass-primary::before { animation: glass-drift 60s ease-in-out infinite; }
+  .glass-primary:hover { --glass-alpha: 0.94; --glass-ring-alpha: 0.24; }
+
+  .dark .glass-primary { --glass-alpha: 0.16; --glass-ring-alpha: 0.18; }
+  .dark .glass-primary:hover { --glass-alpha: 0.22; }
+
+  /* A thinner pane for the supporting action — it should recede next to the
+     primary without becoming a different material. */
+  .glass-quiet {
+    --glass-alpha: 0.4;
+    --glass-ring-alpha: 0.1;
+    --refract-strength: 0.7;
+  }
+  .glass-quiet:hover { --glass-alpha: 0.62; }
+  .dark .glass-quiet { --glass-alpha: 0.05; }
+
+  /* Selected, current, on: more light caught inside the pane and a touch
+     more pastel through it. Still white first. */
+  .glass-active {
+    --glass-alpha: 0.9;
+    --glass-ring-alpha: 0.18;
+    --refract-strength: 2.2;
+  }
+  .glass-active::before { animation: glass-drift 60s ease-in-out infinite; }
+  .dark .glass-active { --glass-alpha: 0.14; --refract-strength: 1.1; }
+
+  /* A pane that holds content rather than answering a pointer: no lift, no
+     press, and it sits still. */
+  .glass-panel {
+    --glass-alpha: 0.72;
+    --refract-strength: 0.8;
+  }
+  .glass-panel:hover {
+    --glass-alpha: 0.72;
+    --glass-saturate: 1.8;
+    transform: none;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / var(--glass-ring-alpha)),
+      inset 0 1px 0 rgb(var(--glass-highlight) / var(--glass-highlight-alpha)),
+      var(--glass-shadow);
+  }
+  .glass-panel:active { transform: none; }
+
+  /* Menus, popovers and dialogs sit over live content, so they carry a
+     heavier blur and enough pane to stay readable over anything. */
+  .glass-overlay {
+    --glass-alpha: 0.88;
+    --glass-blur: 28px;
+    --refract-strength: 0.9;
+  }
+  .glass-overlay:hover { --glass-alpha: 0.88; transform: none; }
+  .dark .glass-overlay { --glass-alpha: 0.72; }
+
+  /* No pane until you reach for it. The rest state zeroes the material out;
+     `.glass:hover` is more specific than these, so the pane returns on hover
+     without a single duplicated value. */
+  .glass-ghost {
+    --glass-alpha: 0;
+    --glass-ring-alpha: 0;
+    --glass-highlight-alpha: 0;
+    --refract-strength: 0;
+    box-shadow: none;
+  }
+  .glass-ghost:hover { --refract-strength: 0.7; }
+
+  /* Pills: badges, chips, filters, counts.
+     Same pane as everything else, but a status pill has one job the pane
+     must not take away — saying "at risk" from across the room. So the
+     semantic hue is what gets refracted through the glass, and the label
+     keeps it at full strength. White first, status second, still one
+     material. Each variant sets --chip and nothing else. */
+  .glass-chip {
+    --chip: var(--muted-foreground);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: rgb(255 255 255 / 0.55);
+    -webkit-backdrop-filter: blur(10px) saturate(1.9);
+    backdrop-filter: blur(10px) saturate(1.9);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--chip), transparent 74%),
+      inset 0 1px 0 rgb(255 255 255 / 0.75);
+  }
+
+  .glass-chip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: linear-gradient(
+      145deg,
+      color-mix(in oklch, var(--chip), transparent 84%),
+      color-mix(in oklch, var(--chip), transparent 94%)
+    );
+  }
+
+  .dark .glass-chip {
+    background-color: rgb(255 255 255 / 0.06);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--chip), transparent 70%),
+      inset 0 1px 0 rgb(255 255 255 / 0.07);
+  }
+  .dark .glass-chip::before {
+    background-image: linear-gradient(
+      145deg,
+      color-mix(in oklch, var(--chip), transparent 80%),
+      color-mix(in oklch, var(--chip), transparent 92%)
+    );
+  }
+
+  /* A chip that carries a tone in its icon and nothing else: the pane stays
+     neutral glass, and the hairline only hints at the colour. */
+  .glass-chip-neutral {
+    --chip: var(--muted-foreground);
+  }
+  .glass-chip-neutral::before { opacity: 0.35; }
+
+  /* Fields read as recessed, not raised: the light lands on the top inner
+     edge and there is no outer shadow to lift them off the page. The tint
+     goes on the element because `::before` never renders on an <input>. */
+  .glass-field {
+    --glass-alpha: 0.75;
+    background-color: rgb(255 255 255 / var(--glass-alpha));
+    background-image: linear-gradient(
+      170deg,
+      rgb(var(--refract-blue) / 0.10),
+      rgb(var(--refract-lavender) / 0.06) 60%,
+      transparent
+    );
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    backdrop-filter: blur(12px) saturate(1.5);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / 0.16),
+      inset 0 2px 3px -2px rgb(var(--glass-ring) / 0.28);
+    transition:
+      background-color var(--duration-base) var(--ease-out-quint),
+      box-shadow var(--duration-base) var(--ease-out-quint);
+  }
+  .glass-field:hover { --glass-alpha: 0.85; }
+  .dark .glass-field {
+    --glass-alpha: 0.07;
+    background-image: none;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.1),
+      inset 0 2px 3px -2px rgb(0 0 0 / 0.4);
+  }
+
+  /* Menu, combobox and option rows. The highlight lives in CSS rather than
+     as a `data-[highlighted]:` utility because a Tailwind variant can only
+     prefix a utility — it cannot prefix `.glass`. */
+  .glass-item {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-quint),
+      box-shadow var(--duration-fast) var(--ease-out-quint);
+  }
+  .glass-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background-image:
+      radial-gradient(70% 140% at 5% 0%, rgb(var(--refract-cyan) / 0.22), transparent 70%),
+      radial-gradient(60% 120% at 95% 10%, rgb(var(--refract-lavender) / 0.20), transparent 70%);
+    transition: opacity var(--duration-fast) var(--ease-out-quint);
+  }
+  .glass-item[data-highlighted],
+  .glass-item[data-selected],
+  .glass-item[aria-selected="true"],
+  .glass-item:hover {
+    background-color: rgb(255 255 255 / 0.7);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / 0.12),
+      inset 0 1px 0 rgb(255 255 255 / 0.8);
+  }
+  .glass-item[data-highlighted]::before,
+  .glass-item[data-selected]::before,
+  .glass-item[aria-selected="true"]::before,
+  .glass-item:hover::before { opacity: 1; }
+
+  .dark .glass-item[data-highlighted],
+  .dark .glass-item[data-selected],
+  .dark .glass-item[aria-selected="true"],
+  .dark .glass-item:hover {
+    background-color: rgb(255 255 255 / 0.08);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.08),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
+  /* Danger keeps the material and swaps which light comes through it —
+     a red button would break the system, an invisible one would break the
+     user. */
+  .glass-danger::before {
+    background-image:
+      radial-gradient(70% 120% at 10% 0%, oklch(0.72 0.19 25 / 0.16), transparent 70%),
+      radial-gradient(60% 110% at 95% 10%, oklch(0.75 0.15 35 / 0.12), transparent 70%);
+  }
+  .glass-danger { --glass-ring: 200 90 80; --glass-ring-alpha: 0.22; }
+  .glass-danger:hover { --glass-ring-alpha: 0.32; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass::before { animation: none !important; }
+  .glass:hover,
+  .glass:active { transform: none; }
 }

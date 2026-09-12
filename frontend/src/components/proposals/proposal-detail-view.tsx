@@ -396,7 +396,7 @@ export function ProposalDetailView({ proposalId, user }: ProposalDetailViewProps
                 <span className="text-muted-foreground">{p.sentAt ? formatDate(p.sentAt) : "—"}</span>
               </Fact>
               <Fact label={t("validUntil")}>
-                <span className={overdue ? "font-medium text-warning-foreground" : "text-muted-foreground"}>
+                <span className={overdue ? "font-medium text-warning" : "text-muted-foreground"}>
                   {p.validUntil ? formatDate(p.validUntil) : "—"}
                 </span>
               </Fact>
@@ -488,7 +488,7 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 
 const BANNER_TONE = {
   success: "border-success/30 bg-success-muted text-success",
-  warning: "border-warning/40 bg-warning-muted text-warning-foreground",
+  warning: "border-warning/40 bg-warning-muted text-warning",
   muted: "border-border bg-muted text-muted-foreground",
 } as const;
 

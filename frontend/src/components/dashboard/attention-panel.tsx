@@ -56,12 +56,15 @@ const SEVERITY: Record<
 };
 
 /** Icon chip tint per severity — icon + colour, never colour alone. */
+// The pane stays neutral glass; the severity lives in the glyph alone. A
+// tinted panel under a tinted icon says the same thing twice, and a column
+// of them turns a work queue into a colour chart.
 const SEVERITY_CHIP: Record<AttentionSeverity, string> = {
-  overdue: "bg-status-overdue-bg text-status-overdue",
-  atRisk: "bg-health-at-risk-bg text-health-at-risk",
-  due: "bg-status-due-bg text-status-due",
-  blocked: "bg-status-blocked-bg text-status-blocked",
-  attention: "bg-health-attention-bg text-health-attention",
+  overdue: "text-status-overdue",
+  atRisk: "text-health-at-risk",
+  due: "text-status-due",
+  blocked: "text-status-blocked",
+  attention: "text-health-attention",
 };
 
 function hrefFor(entityType: AttentionEntityType, entityId: string): string {
@@ -166,7 +169,7 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
                 className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               >
                 <span
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${SEVERITY_CHIP[item.severity]}`}
+                  className={`glass-chip glass-chip-neutral flex size-8 shrink-0 items-center justify-center rounded-lg ${SEVERITY_CHIP[item.severity]}`}
                 >
                   <GroupIcon className="size-4" strokeWidth={1.8} aria-hidden />
                 </span>

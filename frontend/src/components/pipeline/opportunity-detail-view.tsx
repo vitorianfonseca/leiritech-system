@@ -338,7 +338,7 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
                     </span>
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1.5 text-warning-foreground">
+                  <span className="flex items-center gap-1.5 text-warning">
                     <TriangleAlert className="size-3.5" strokeWidth={1.8} aria-hidden />
                     {t("noNextAction")}
                   </span>

@@ -8,18 +8,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // The glass treatment is the primary action's signature — see
-        // .btn-glass in globals.css. Only primary carries it; every other
-        // variant stays flat so one button per view reads as the action.
-        default: "btn-glass text-white",
-        outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted",
-        destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+        // Every variant is the same glass (see LIQUID GLASS in globals.css).
+        // What separates them is how much pane there is: the primary is
+        // dense and catches the most light, the supporting action is thin,
+        // ghost has no pane until you reach for it. Rank by density, never
+        // by hue — so a screen full of controls still reads as one material.
+        default: "glass glass-primary font-semibold text-foreground",
+        outline: "glass",
+        secondary: "glass glass-quiet",
+        ghost: "glass glass-ghost glass-quiet",
+        destructive: "glass glass-danger text-destructive",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
