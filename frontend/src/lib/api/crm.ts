@@ -98,9 +98,6 @@ function ownerName(id: string): string {
 }
 
 /** Internal-owner directory (responsável interno) for form selects. */
-export const CRM_OWNERS: { id: string; name: string }[] = Object.entries(OWNERS).map(
-  ([id, name]) => ({ id, name })
-);
 
 /* ------------------------------------------------------------------ *
  * Internal seed shape (superset of the public models). Financial fields are

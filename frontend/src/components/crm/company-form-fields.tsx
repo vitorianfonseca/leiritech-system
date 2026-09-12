@@ -6,7 +6,7 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { SearchableCombobox, type ComboboxItem } from "@/components/shared";
 import { CrmField } from "./crm-field";
-import { CRM_OWNERS } from "@/lib/api/crm";
+import { useOwnerOptions } from "@/lib/use-owner-options";
 import { COMPANY_SOURCES, COMPANY_STATUSES } from "@/lib/api/crm-types";
 import type { CompanyFormValues } from "@/lib/validation/crm-schemas";
 
@@ -51,10 +51,7 @@ export function CompanyFormFields({
     value: s,
     label: tSource(s),
   }));
-  const ownerOptions: ComboboxItem[] = CRM_OWNERS.map((o) => ({
-    value: o.id,
-    label: o.name,
-  }));
+  const { options: ownerOptions } = useOwnerOptions();
 
   return (
     <div className="flex flex-col gap-4">

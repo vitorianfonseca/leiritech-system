@@ -16,7 +16,8 @@ import { SearchableCombobox, type ComboboxItem } from "@/components/shared";
 import { CrmField } from "./crm-field";
 import { zodResolver } from "@/lib/form/zod-resolver";
 import { contactSchema, type ContactFormValues } from "@/lib/validation/crm-schemas";
-import { crmApi, CRM_OWNERS } from "@/lib/api/crm";
+import { crmApi } from "@/lib/api/crm";
+import { useOwnerOptions } from "@/lib/use-owner-options";
 import type { Contact, ContactInput } from "@/lib/api/crm-types";
 import type { Role } from "@/lib/session";
 
@@ -120,7 +121,7 @@ export function ContactFormDialog({
     value: c.id,
     label: c.name,
   }));
-  const ownerOptions: ComboboxItem[] = CRM_OWNERS.map((o) => ({ value: o.id, label: o.name }));
+  const { options: ownerOptions } = useOwnerOptions();
   const statusOptions: ComboboxItem[] = (["active", "inactive"] as const).map((s) => ({
     value: s,
     label: tStatus(s),

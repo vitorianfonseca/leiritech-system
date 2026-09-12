@@ -20,7 +20,7 @@ import {
   type CreateOpportunityFormValues,
 } from "@/lib/validation/opportunity-schemas";
 import { crmApi } from "@/lib/api/crm";
-import { PIPELINE_OWNERS } from "@/lib/api/opportunities";
+import { useOwnerOptions } from "@/lib/use-owner-options";
 import {
   PIPELINE_STAGE_IDS,
   type CreateOpportunityInput,
@@ -102,7 +102,7 @@ export function CreateOpportunityDialog({
     value: c.id,
     label: c.name,
   }));
-  const ownerOptions: ComboboxItem[] = PIPELINE_OWNERS.map((o) => ({ value: o.id, label: o.name }));
+  const { options: ownerOptions } = useOwnerOptions();
   const stageOptions: ComboboxItem[] = PIPELINE_STAGE_IDS.map((s) => ({ value: s, label: tStages(s) }));
 
   async function submit(values: CreateOpportunityFormValues) {

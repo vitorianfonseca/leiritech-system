@@ -82,9 +82,6 @@ function ownerName(id: string): string {
   return OWNERS[id] ?? id;
 }
 
-export const PIPELINE_OWNERS: { id: string; name: string }[] = Object.entries(
-  OWNERS
-).map(([id, name]) => ({ id, name }));
 
 const ACTORS: Record<string, DirectoryUser> = {
   "dev-admin": { id: "dev-admin", name: "Rita Andrade", email: "rita@leiritech.pt", avatarUrl: null },
