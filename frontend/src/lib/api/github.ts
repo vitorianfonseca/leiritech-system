@@ -100,7 +100,58 @@ function mapError(err: unknown): never {
   throw new GithubIntegrationError("network", "Não foi possível ligar ao servidor.");
 }
 
+export interface GithubRepoSummary {
+  name: string;
+  fullName: string;
+  description: string | null;
+  htmlUrl: string;
+  defaultBranch: string;
+  openIssues: number;
+  stars: number;
+  pushedAt: string | null;
+  language: string | null;
+}
+
+export interface GithubCommit {
+  sha: string;
+  shortSha: string;
+  message: string;
+  authorName: string | null;
+  authorLogin: string | null;
+  authorAvatarUrl: string | null;
+  committedAt: string | null;
+  htmlUrl: string;
+}
+
+export interface GithubPull {
+  number: number;
+  title: string;
+  state: string;
+  draft: boolean;
+  authorLogin: string | null;
+  authorAvatarUrl: string | null;
+  updatedAt: string | null;
+  htmlUrl: string;
+}
+
+export interface GithubRepoActivity {
+  repo: GithubRepoSummary;
+  commits: GithubCommit[];
+  pulls: GithubPull[];
+}
+
 export const githubApi = {
+  /** The repository itself, its recent commits and its open pull requests. */
+  async getActivity(repo?: string): Promise<GithubRepoActivity | null> {
+    try {
+      return await http.get<GithubRepoActivity>("/github/activity", { query: { repo } });
+    } catch {
+      // No token, no repo, or a rate limit: the issues below still work, so
+      // the panel renders without this rather than failing whole.
+      return null;
+    }
+  },
+
   /** List issues already filed for one entity (a project, an audit finding, …). */
   async listIssues(
     entityType: string,

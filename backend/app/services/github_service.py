@@ -168,3 +168,31 @@ def create_comment(repo: str, number: int, body: str) -> dict[str, Any]:
         json={"body": body},
         action="comment_create",
     )
+
+
+# --------------------------------------------------------------------------- #
+# Repository activity
+#
+# Beyond the linked issues: what the repository itself is doing. All reads,
+# all through the same PAT and the same `_request` error translation, so a
+# missing token or a rate limit surfaces identically to the issue calls.
+# --------------------------------------------------------------------------- #
+def get_repo(repo: str) -> dict[str, Any]:
+    """GET /repos/{repo} — description, default branch, counts, last push."""
+    return _request("GET", f"/repos/{repo}", action="repo_get")
+
+
+def list_commits(repo: str, *, limit: int = 10) -> list[dict[str, Any]]:
+    """Most recent commits on the default branch."""
+    return _request(
+        "GET", f"/repos/{repo}/commits?per_page={limit}", action="commits_list"
+    )
+
+
+def list_pull_requests(repo: str, *, state: str = "open", limit: int = 10) -> list[dict[str, Any]]:
+    """Pull requests, newest first. `state` is open | closed | all."""
+    return _request(
+        "GET",
+        f"/repos/{repo}/pulls?state={state}&per_page={limit}&sort=updated&direction=desc",
+        action="pulls_list",
+    )

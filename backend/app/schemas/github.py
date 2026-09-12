@@ -68,3 +68,52 @@ class GithubCommentResponse(BaseModel):
     body: str
     created_at: datetime
     url: str
+
+
+# --------------------------------------------------------------------------- #
+# Repository activity (read-only projections of the GitHub payloads)
+# --------------------------------------------------------------------------- #
+class GithubRepoSummary(BaseModel):
+    """Headline facts about the repository itself."""
+
+    name: str
+    full_name: str
+    description: str | None = None
+    html_url: str
+    default_branch: str
+    open_issues: int
+    stars: int
+    pushed_at: datetime | None = None
+    language: str | None = None
+
+
+class GithubCommitInfo(BaseModel):
+    sha: str
+    short_sha: str
+    message: str
+    author_name: str | None = None
+    author_login: str | None = None
+    author_avatar_url: str | None = None
+    committed_at: datetime | None = None
+    html_url: str
+
+
+class GithubPullInfo(BaseModel):
+    number: int
+    title: str
+    state: str
+    draft: bool = False
+    author_login: str | None = None
+    author_avatar_url: str | None = None
+    updated_at: datetime | None = None
+    html_url: str
+
+
+class GithubRepoActivity(BaseModel):
+    """One payload for the whole tab: the repo, its recent commits and its open
+    pull requests. Fetched together so the client makes a single request rather
+    than three that can disagree about which moment they describe."""
+
+    repo: GithubRepoSummary
+    commits: list[GithubCommitInfo]
+    pulls: list[GithubPullInfo]

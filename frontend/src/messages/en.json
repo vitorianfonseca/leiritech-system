@@ -469,7 +469,22 @@
         "cancel": "Cancel",
         "save": "Create issue",
         "saving": "Creating..."
-      }
+      },
+      "repoTitle": "Repository",
+      "commits": "Recent commits",
+      "pulls": "Open pull requests",
+      "noCommits": "No recent commits.",
+      "noPulls": "No open pull requests.",
+      "openIssues": "open issues",
+      "stars": "stars",
+      "branch": "branch",
+      "draft": "draft",
+      "lastPush": "last push",
+      "assign": "Assign",
+      "assignees": "Assignees",
+      "unassigned": "Unassigned",
+      "assignFailed": "Could not change assignees.",
+      "assigned": "Assignees updated."
     }
   },
   "foundation": {

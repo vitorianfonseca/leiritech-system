@@ -19,6 +19,10 @@ from app.api.dependencies.auth import CurrentUser, RequireGestor
 from app.core.config import settings
 from app.database.session import get_db
 from app.schemas.github import (
+    GithubCommitInfo,
+    GithubPullInfo,
+    GithubRepoActivity,
+    GithubRepoSummary,
     GithubAssigneeInfo,
     GithubCommentCreate,
     GithubCommentResponse,
@@ -27,7 +31,7 @@ from app.schemas.github import (
     GithubIssueUpdate,
     GithubLabelInfo,
 )
-from app.services import github_issue_service
+from app.services import github_issue_service, github_service
 
 router = APIRouter()
 
@@ -98,6 +102,72 @@ def list_collaborators(
 ) -> list[GithubAssigneeInfo]:
     raw = github_issue_service.list_repo_assignable_users(_resolve_repo(repo))
     return [GithubAssigneeInfo(login=u["login"], avatar_url=u.get("avatar_url")) for u in raw]
+
+
+@router.get("/activity", response_model=GithubRepoActivity)
+def repo_activity(
+    user: CurrentUser, repo: Annotated[str | None, Query(max_length=255)] = None
+) -> GithubRepoActivity:
+    """The repository itself, its recent commits and its open pull requests.
+
+    One endpoint rather than three: the tab wants a single coherent picture,
+    and three round trips from the client can each describe a different moment.
+    """
+    target = _resolve_repo(repo)
+    raw_repo = github_service.get_repo(target)
+    raw_commits = github_service.list_commits(target, limit=8)
+    raw_pulls = github_service.list_pull_requests(target, state="open", limit=8)
+
+    commits = []
+    for c in raw_commits:
+        commit = c.get("commit") or {}
+        author = c.get("author") or {}
+        commit_author = commit.get("author") or {}
+        message = (commit.get("message") or "").split("\n", 1)[0]
+        commits.append(
+            GithubCommitInfo(
+                sha=c["sha"],
+                short_sha=c["sha"][:7],
+                message=message,
+                author_name=commit_author.get("name"),
+                author_login=author.get("login"),
+                author_avatar_url=author.get("avatar_url"),
+                committed_at=commit_author.get("date"),
+                html_url=c.get("html_url", ""),
+            )
+        )
+
+    pulls = []
+    for pr in raw_pulls:
+        pr_user = pr.get("user") or {}
+        pulls.append(
+            GithubPullInfo(
+                number=pr["number"],
+                title=pr.get("title", ""),
+                state=pr.get("state", "open"),
+                draft=bool(pr.get("draft")),
+                author_login=pr_user.get("login"),
+                author_avatar_url=pr_user.get("avatar_url"),
+                updated_at=pr.get("updated_at"),
+                html_url=pr.get("html_url", ""),
+            )
+        )
+
+    return GithubRepoActivity(
+        repo=GithubRepoSummary(
+            name=raw_repo.get("name", target),
+            full_name=raw_repo.get("full_name", target),
+            description=raw_repo.get("description"),
+            html_url=raw_repo.get("html_url", ""),
+            default_branch=raw_repo.get("default_branch", "main"),
+            open_issues=raw_repo.get("open_issues_count", 0),
+            stars=raw_repo.get("stargazers_count", 0),
+            pushed_at=raw_repo.get("pushed_at"),
+            language=raw_repo.get("language"),
+        ),
+        commits=commits,
+        pulls=pulls,
+    )
 
 
 @router.get("/issues/{link_id}/comments", response_model=list[GithubCommentResponse])

@@ -26,7 +26,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { EmptyState, GithubIssuesPanel, ProgressBar, SkeletonCard, toast } from "@/components/shared";
+import {
+  EmptyState,
+  GithubIssuesPanel,
+  GithubRepoActivity,
+  ProgressBar,
+  SkeletonCard,
+  toast,
+} from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { crmRoutes } from "@/lib/api/crm";
 import { projectsApi } from "@/lib/api/projects";
@@ -43,7 +50,6 @@ import type { Role } from "@/lib/session";
 import { HealthBadge, ProjectStateBadge } from "./status-badges";
 import { LifecycleActions } from "./lifecycle-actions";
 import { HealthDialog } from "./health-dialog";
-import { OverviewTab } from "./overview-tab";
 import { WorkTab } from "./work-tab";
 import { FinanceiroTab } from "./financeiro-tab";
 import { ActivityTab } from "./simple-tabs";
@@ -68,7 +74,6 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   const tTabs = useTranslations("projects.tabs");
   const tEdit = useTranslations("projects.editDialog");
   const [editOpen, setEditOpen] = React.useState(false);
-  const [openTask, setOpenTask] = React.useState<{ id: string; at: number } | null>(null);
   const tHealth = useTranslations("projects.health");
   const locale = useLocale();
   const qc = useQueryClient();
@@ -87,7 +92,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
     retry: (count, err) => !(err instanceof ProjectError) && count < 1,
   });
 
-  const [tab, setTab] = React.useState("overview");
+  const [tab, setTab] = React.useState("tasks");
   const [healthOpen, setHealthOpen] = React.useState(false);
 
   const refresh = React.useCallback(async () => {
@@ -158,7 +163,6 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   }
 
   const tabItems: Array<{ value: string; label: string; icon: typeof LayoutGrid }> = [
-    { value: "overview", label: tTabs("overview"), icon: LayoutGrid },
     { value: "tasks", label: tTabs("tasks"), icon: ListTodo },
     { value: "calendar", label: tTabs("calendar"), icon: CalendarDays },
     { value: "files", label: tTabs("files"), icon: Paperclip },
@@ -293,20 +297,6 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
         </div>
 
         <div className="pt-6">
-          <Tabs.Panel value="overview">
-            <OverviewTab
-              project={project}
-              canManage={canManage && !isArchived}
-              onEdit={() => setEditOpen(true)}
-              canFinance={canFinance}
-              onChanged={refresh}
-              onGoToTab={setTab}
-              onOpenTask={(taskId) => {
-                setOpenTask({ id: taskId, at: Date.now() });
-                setTab("tasks");
-              }}
-            />
-          </Tabs.Panel>
           <Tabs.Panel value="tasks">
             <WorkTab
               project={project}
@@ -318,7 +308,6 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               }}
               canManage={canManage && !isArchived}
               onChanged={refresh}
-              focusTask={openTask}
             />
           </Tabs.Panel>
           <Tabs.Panel value="calendar">
@@ -344,12 +333,15 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
             />
           </Tabs.Panel>
           <Tabs.Panel value="github">
-            <GithubIssuesPanel
-              entityType="project"
-              entityId={project.id}
-              canCreate={canManage}
-              titlePrefix={`${project.name} — `}
-            />
+            <div className="space-y-6">
+              <GithubRepoActivity />
+              <GithubIssuesPanel
+                entityType="project"
+                entityId={project.id}
+                canCreate={canManage}
+                titlePrefix={`${project.name} — `}
+              />
+            </div>
           </Tabs.Panel>
           {canFinance ? (
             <Tabs.Panel value="finance">

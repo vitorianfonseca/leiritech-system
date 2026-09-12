@@ -11,6 +11,8 @@ import {
   RefreshCw,
   MessageSquare,
   Send,
+  UserPlus,
+  Check,
 } from "lucide-react";
 import {
   Dialog,
@@ -18,6 +20,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -121,7 +129,10 @@ export function GithubIssuesPanel({
   const collaboratorsQuery = useQuery({
     queryKey: ["github-collaborators", repo],
     queryFn: () => githubApi.listCollaborators(repo),
-    enabled: createOpen,
+    // Was gated on the create dialog being open, which is why assigning
+    // someone to an existing issue had no one to offer. The roster is small
+    // and cached for five minutes, so fetching it with the panel is cheap.
+    enabled: canCreate,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -160,6 +171,18 @@ export function GithubIssuesPanel({
     mutationFn: (linkId: string) => githubApi.refreshIssue(linkId),
     onSuccess: invalidateList,
     onError: () => toast({ tone: "destructive", title: t("refreshFailedToast") }),
+  });
+
+  // GitHub's PATCH replaces the assignee set rather than merging, so toggling
+  // one person means sending the whole desired list.
+  const assignMutation = useMutation({
+    mutationFn: ({ issue, logins }: { issue: GithubIssueLink; logins: string[] }) =>
+      githubApi.updateIssue(issue.id, { assignees: logins }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["github-issues", entityType, entityId] });
+      toast({ tone: "success", title: t("assigned") });
+    },
+    onError: () => toast({ tone: "destructive", title: t("assignFailed") }),
   });
 
   const toggleStateMutation = useMutation({
@@ -238,6 +261,17 @@ export function GithubIssuesPanel({
               onToggleExpand={() => setExpandedId((cur) => (cur === issue.id ? null : issue.id))}
               onRefresh={() => refreshMutation.mutate(issue.id)}
               onToggleState={() => toggleStateMutation.mutate(issue)}
+              collaborators={collaborators}
+              onToggleAssignee={(login) => {
+                const has = issue.assignees.some((a) => a.login === login);
+                assignMutation.mutate({
+                  issue,
+                  logins: has
+                    ? issue.assignees.filter((a) => a.login !== login).map((a) => a.login)
+                    : [...issue.assignees.map((a) => a.login), login],
+                });
+              }}
+              assignPending={assignMutation.isPending}
               refreshPending={refreshMutation.isPending}
               statePending={toggleStateMutation.isPending}
               t={t}
@@ -364,6 +398,9 @@ interface IssueRowProps {
   onToggleExpand: () => void;
   onRefresh: () => void;
   onToggleState: () => void;
+  collaborators: GithubAssignee[];
+  onToggleAssignee: (login: string) => void;
+  assignPending: boolean;
   refreshPending: boolean;
   statePending: boolean;
   t: ReturnType<typeof useTranslations>;
@@ -376,6 +413,9 @@ function IssueRow({
   onToggleExpand,
   onRefresh,
   onToggleState,
+  collaborators,
+  onToggleAssignee,
+  assignPending,
   refreshPending,
   statePending,
   t,
@@ -429,6 +469,40 @@ function IssueRow({
           >
             <MessageSquare aria-hidden />
           </Button>
+          {canManage && collaborators.length > 0 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("assign")}
+                    disabled={assignPending}
+                  >
+                    <UserPlus aria-hidden />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                {collaborators.map((c) => {
+                  const assigned = issue.assignees.some((a) => a.login === c.login);
+                  return (
+                    <DropdownMenuItem
+                      key={c.login}
+                      onClick={() => onToggleAssignee(c.login)}
+                    >
+                      <Check
+                        className={assigned ? "opacity-100" : "opacity-0"}
+                        aria-hidden
+                      />
+                      {c.login}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
           {canManage ? (
             <Button
               type="button"

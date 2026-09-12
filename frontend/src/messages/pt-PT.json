@@ -469,7 +469,22 @@
         "cancel": "Cancelar",
         "save": "Criar issue",
         "saving": "A criar..."
-      }
+      },
+      "repoTitle": "Repositório",
+      "commits": "Commits recentes",
+      "pulls": "Pull requests abertas",
+      "noCommits": "Sem commits recentes.",
+      "noPulls": "Sem pull requests abertas.",
+      "openIssues": "issues abertas",
+      "stars": "estrelas",
+      "branch": "branch",
+      "draft": "rascunho",
+      "lastPush": "último push",
+      "assign": "Atribuir",
+      "assignees": "Responsáveis",
+      "unassigned": "Sem responsável",
+      "assignFailed": "Não foi possível alterar os responsáveis.",
+      "assigned": "Responsáveis atualizados."
     }
   },
   "foundation": {
