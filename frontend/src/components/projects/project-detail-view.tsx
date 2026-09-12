@@ -7,7 +7,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tabs } from "@base-ui/react/tabs";
 import {
   ArrowLeft,
-  Building2,
   RefreshCw,
   TriangleAlert,
   FolderKanban,
@@ -200,29 +199,40 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2.5">
-          {/* The client above the project: a bare name has nothing to be
-              bigger than, and the building icon beside the badges was the
-              only place this appeared at all. */}
+        <div className="min-w-0">
+          {/* The client is an identity, not a caption. A grey icon beside grey
+              capitals is a third line of text in a stack of three; a marked
+              chip gives the block something to start from and puts the only
+              colour in this region on the one thing here you can click
+              through to. */}
           {project.clientName ? (
             <Link
               href={crmRoutes.company(project.clientId)}
-              className="page-eyebrow inline-flex items-center gap-1.5 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="glass glass-quiet mb-3 inline-flex items-center gap-2 rounded-full py-1 pr-3.5 pl-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Building2 className="size-3.5" strokeWidth={2} aria-hidden />
-              {project.clientName}
+              <span className="glass-chip [--chip:var(--signal)] flex size-6 items-center justify-center rounded-full text-[0.625rem] font-bold text-signal">
+                {initials(project.clientName)}
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {project.clientName}
+              </span>
             </Link>
           ) : null}
-          <h1 className="page-title">{project.name}</h1>
-          <div className="flex flex-wrap items-center gap-2">
-            <ProjectStateBadge state={project.state} />
-            <HealthBadge
-              health={effectiveHealth(project)}
-              suggested={live && project.publishedHealth === null}
-            />
+
+          {/* The title and its state read as one object: the badges sit on the
+              same line at large widths rather than starting a fourth row. */}
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <h1 className="page-title">{project.name}</h1>
+            <span className="flex flex-wrap items-center gap-2 pb-0.5">
+              <ProjectStateBadge state={project.state} />
+              <HealthBadge
+                health={effectiveHealth(project)}
+                suggested={live && project.publishedHealth === null}
+              />
+            </span>
           </div>
           {suggestedHint ? (
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Sparkles className="size-3.5 shrink-0 text-signal" strokeWidth={1.8} aria-hidden />
               {t("suggestionHint", { health: tHealth(project.suggestedHealth) })}
               {project.healthReason ? ` · ${project.healthReason}` : ""}

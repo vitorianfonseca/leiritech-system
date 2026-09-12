@@ -1141,12 +1141,16 @@ textarea:not(:disabled),
    */
   .page-title {
     font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-    font-size: clamp(1.875rem, 2.9vw, 2.5rem);
-    /* Satoshi ships 400/500/700/900. 600 was being synthesised, which is what
-       made it look dead; 900 overcorrected into a slab. Bold is the face's
-       own weight and carries at this size without shouting. */
-    font-weight: 700;
-    letter-spacing: -0.034em;
+    font-size: clamp(1.625rem, 2.2vw, 2rem);
+    /* Satoshi ships 400/500/700/900. 600 was synthesised (dead), 900 was a
+       slab, and 700 at 44px was heavier than anything else on a page whose
+       body sits at 11-14px — the jump is what made it read as detached
+       rather than as the top of a hierarchy. Medium at 32px is still clearly
+       the largest thing without being the loudest; the client chip and the
+       state badges beside it carry the interest the title was carrying
+       alone. */
+    font-weight: 500;
+    letter-spacing: -0.028em;
     line-height: 1.02;
     text-wrap: balance;
     color: var(--foreground);
