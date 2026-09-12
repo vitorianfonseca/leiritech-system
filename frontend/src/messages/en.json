@@ -215,9 +215,6 @@
       "unreadCount": "{count} unread",
       "actionFailed": "Couldn’t complete the action."
     },
-    "help": {
-      "label": "Help"
-    },
     "userMenu": {
       "profile": "My profile",
       "preferences": "Preferences",
@@ -1300,6 +1297,11 @@
         "transition": "changed the status of {entity}",
         "won": "won {entity}"
       }
+    },
+    "banner": {
+      "action": "See what needs me",
+      "needsAttention": "{count, plural, =1 {One thing needs} other {# things need}} your attention.",
+      "needsAttentionSuffix": "{count, plural, =1 {thing needs} other {things need}} your attention."
     }
   },
   "crm": {

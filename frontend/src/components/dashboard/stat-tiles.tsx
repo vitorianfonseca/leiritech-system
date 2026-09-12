@@ -34,11 +34,12 @@ const METRIC_ICON: Record<MetricKey, LucideIcon> = {
   teamLoad: UsersRound,
 };
 
+/** Pastel chips, one family per tone — the reference's visual signature. */
 const TONE_CHIP: Record<MetricTone, string> = {
-  neutral: "bg-secondary text-secondary-foreground",
+  neutral: "bg-status-blocked-bg text-status-blocked",
   signal: "bg-signal-muted text-signal",
-  success: "bg-success-muted text-success",
-  warning: "bg-warning-muted text-warning-foreground",
+  success: "bg-health-healthy-bg text-health-healthy",
+  warning: "bg-health-attention-bg text-health-attention",
   destructive: "bg-status-overdue-bg text-status-overdue",
   info: "bg-info-muted text-info",
 };
@@ -58,20 +59,43 @@ const TONE_VALUE: Record<MetricTone, string> = {
  * State is conveyed with icon + label + token colour, never colour alone.
  * Financial tiles are already stripped upstream for unauthorized users (BR-008).
  */
+/**
+ * The four figures that answer the question this app is opened with — what
+ * needs me, and what is the work doing. Ordered by urgency: what is wrong,
+ * what is late, what lands next, what is running.
+ *
+ * The commercial pair (open opportunities, pipeline value) is deliberately
+ * absent. Money belongs in Finance, where someone goes when that is the
+ * question; on the home screen it pushed the urgent figures below the fold.
+ */
+const SHOWN: MetricKey[] = [
+  "projectsAtRisk",
+  "overdueTasks",
+  "deliveriesNext7Days",
+  "activeProjects",
+];
+
 export function StatTiles({
-  metrics,
+  metrics: allMetrics,
   loading = false,
 }: {
   metrics: DashboardMetric[];
   loading?: boolean;
 }) {
+  const metrics = React.useMemo(
+    () =>
+      SHOWN.map((key) => allMetrics.find((m) => m.key === key)).filter(
+        (m): m is DashboardMetric => m !== undefined,
+      ),
+    [allMetrics],
+  );
   const t = useTranslations("dashboard.metrics");
   const locale = useLocale();
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="gap-3 p-5">
             <div className="flex items-center justify-between">
               <div className="h-3.5 w-20 animate-pulse rounded bg-muted" />
@@ -99,25 +123,23 @@ export function StatTiles({
   }
 
   return (
-    // 3-up on ≥sm: every role payload has a count divisible by 3 (9 full / 6
-    // finance-gated / 3 scoped-membro), so rows always fill with no dead column.
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (
-          <Card key={m.key} className="p-0">
+          <Card key={m.key} className="gap-0 p-0 py-0">
             <Link
               href={m.href}
               className="group flex h-full flex-col gap-3 rounded-[inherit] p-5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label={t(`${m.key}.label`)}
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="text-xs font-medium text-muted-foreground">
                   {t(`${m.key}.label`)}
                 </p>
                 <span
                   className={cn(
-                    "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                    "flex size-10 shrink-0 items-center justify-center rounded-2xl",
                     TONE_CHIP[m.tone]
                   )}
                 >

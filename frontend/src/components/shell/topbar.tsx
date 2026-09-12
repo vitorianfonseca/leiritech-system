@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Search, Menu, CircleHelp } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
 import { OPEN_COMMAND_EVENT } from "./command-palette";
 import { MobileNavTrigger } from "./mobile-nav";
@@ -13,13 +13,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { SoundToggle } from "@/components/shared/sound-toggle";
 import { PrivacyToggle } from "@/components/shared/privacy-toggle";
-import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 
 function openCommand() {
   window.dispatchEvent(new Event(OPEN_COMMAND_EVENT));
@@ -29,7 +23,7 @@ export function Topbar({ user }: { user: SessionUser }) {
   const t = useTranslations("shell");
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-border bg-background px-4 backdrop-blur-md md:px-6">
+    <header className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-border bg-sidebar px-4 md:px-6">
       <MobileNavTrigger icon={<Menu />} />
 
       {/* Search / command palette trigger */}
@@ -55,21 +49,6 @@ export function Topbar({ user }: { user: SessionUser }) {
         <QuickCreate user={user} />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <Notifications user={user} />
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("help.label")}
-                className="hidden sm:inline-flex"
-              />
-            }
-          >
-            <CircleHelp />
-          </TooltipTrigger>
-          <TooltipContent side="bottom">{t("help.label")}</TooltipContent>
-        </Tooltip>
         <PrivacyToggle />
         <SoundToggle />
         <ThemeToggle />

@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { ClearWeekIllustration } from "@/components/shared";
 import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
-  CalendarClock,
   CheckSquare,
   Users,
   Flag,
@@ -98,9 +98,11 @@ export function AgendaCard({
             ))}
           </ul>
         ) : groups.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 py-8 text-center">
-            <CalendarClock className="size-6 text-muted-foreground/60" aria-hidden />
-            <p className="text-sm text-muted-foreground">{t("empty")}</p>
+          <div className="flex h-full flex-col items-center justify-center gap-3 py-8 text-center">
+            <ClearWeekIllustration className="h-24 w-32" />
+            <p className="max-w-[28ch] text-sm text-pretty text-muted-foreground">
+              {t("empty")}
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

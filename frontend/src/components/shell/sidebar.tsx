@@ -55,32 +55,33 @@ function NavLink({
         // it is simply the only ink-weight label in the column, with a short
         // rule at the leading edge. Chrome that announces itself competes
         // with the content it is supposed to be a frame for.
-        "group/nav relative flex h-8 items-center gap-2.5 rounded-md pr-2.5 pl-3 text-[0.8125rem] transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+        "group/nav relative flex h-11 items-center gap-3 rounded-2xl px-3.5 text-sm transition-all duration-[var(--duration-base)] motion-reduce:transition-none",
         collapsed && "justify-center px-0",
         active
           ? "font-semibold text-foreground"
           : "font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
-      {active && !collapsed && (
-        // One indicator for the whole nav: `layoutId` makes it travel from
-        // the previous entry to this one, so you can see where you came from.
+      {/* The pill itself travels between entries on a shared layout id, so
+          moving through the nav reads as one object sliding rather than two
+          separate highlights blinking on and off. */}
+      {active && (
         <motion.span
           aria-hidden
-          layoutId="nav-indicator"
+          layoutId="nav-pill"
           transition={spring.layout}
-          className="absolute top-1/2 left-0 h-3.5 w-[2px] -translate-y-1/2 rounded-full bg-foreground"
+          className="absolute inset-0 rounded-2xl bg-signal-muted"
         />
       )}
       <Icon
         className={cn(
-          "size-4 shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
-          active ? "text-foreground" : "text-muted-foreground/70"
+          "relative z-10 size-[1.15rem] shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+          active ? "text-signal" : "text-muted-foreground/60"
         )}
-        strokeWidth={active ? 2 : 1.75}
+        strokeWidth={active ? 2.1 : 1.75}
         aria-hidden
       />
-      {!collapsed && <span className="truncate">{label}</span>}
+      {!collapsed && <span className="relative z-10 truncate">{label}</span>}
     </Link>
   );
 
@@ -107,11 +108,11 @@ function NavList({
   const sections = visibleSections(user);
 
   return (
-    <nav className="flex flex-col gap-5 px-2 py-4" aria-label={t("home")}>
+    <nav className="flex flex-col gap-6 px-3 py-5" aria-label={t("home")}>
       {sections.map((section) => (
-        <div key={section.labelKey} className="flex flex-col gap-px">
+        <div key={section.labelKey} className="flex flex-col gap-1">
           {!collapsed && (
-            <p className="px-3 pb-1.5 text-[0.6875rem] font-medium text-muted-foreground/55">
+            <p className="px-3.5 pb-2 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground/50 uppercase">
               {t(section.labelKey)}
             </p>
           )}
@@ -141,8 +142,8 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "hidden shrink-0 border-r border-border bg-card transition-[width] duration-200 ease-out md:flex md:flex-col",
-        collapsed ? "w-16" : "w-64"
+        "hidden shrink-0 bg-sidebar transition-[width] duration-200 ease-out md:flex md:flex-col",
+        collapsed ? "w-[4.5rem]" : "w-[16.5rem]"
       )}
     >
       <div
@@ -162,7 +163,7 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
 
       <div
         className={cn(
-          "border-t border-border p-2",
+          "p-3",
           collapsed ? "flex justify-center" : ""
         )}
       >

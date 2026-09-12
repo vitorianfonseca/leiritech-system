@@ -6,7 +6,10 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border border-border/70 py-6 shadow-sm",
+        // Cards float on the tinted ground rather than being fenced off it:
+        // a generous radius, no border, and a soft wide shadow doing the
+        // separating. A border plus a shadow reads as two devices for one job.
+        "bg-card text-card-foreground flex flex-col gap-6 rounded-3xl py-6 shadow-[0_2px_8px_oklch(0.30_0.03_265/0.05),0_12px_32px_-12px_oklch(0.30_0.03_265/0.10)]",
         className
       )}
       {...props}

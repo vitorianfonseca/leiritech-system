@@ -13,7 +13,6 @@ import {
   UserRoundCog,
   Wallet,
   ChevronRight,
-  CheckCircle2,
 } from "lucide-react";
 import {
   Card,
@@ -23,7 +22,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState, SkeletonList } from "@/components/shared";
+import { SkeletonList, AllClearIllustration } from "@/components/shared";
 import { Link } from "@/i18n/navigation";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
@@ -110,11 +109,17 @@ export function AttentionPanel({
         {loading ? (
           <SkeletonList rows={5} />
         ) : totalItems === 0 ? (
-          <EmptyState
-            icon={CheckCircle2}
-            title={t("empty.title")}
-            description={t("empty.description")}
-          />
+          <div className="flex flex-col items-center gap-4 py-10 text-center">
+            <AllClearIllustration className="h-24 w-32" />
+            <div>
+              <p className="font-heading text-base font-semibold text-foreground">
+                {t("empty.title")}
+              </p>
+              <p className="mx-auto mt-1 max-w-[34ch] text-sm text-pretty text-muted-foreground">
+                {t("empty.description")}
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="space-y-6">
             {nonEmpty.map((group) => (

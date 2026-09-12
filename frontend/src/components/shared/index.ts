@@ -78,3 +78,9 @@ export type { MentionInputProps } from "./mention-input";
 export { LocaleSwitcher } from "./locale-switcher";
 export { ThemeToggle } from "./theme-toggle";
 export { TextSizeSwitcher } from "./text-size-switcher";
+export {
+  AllClearIllustration,
+  ClearWeekIllustration,
+  NoHistoryIllustration,
+  EmptyBoxIllustration,
+} from "./illustrations";

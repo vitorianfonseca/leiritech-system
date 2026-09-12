@@ -215,9 +215,6 @@
       "unreadCount": "{count} não lidas",
       "actionFailed": "Não foi possível concluir a ação."
     },
-    "help": {
-      "label": "Ajuda"
-    },
     "userMenu": {
       "profile": "O meu perfil",
       "preferences": "Preferências",
@@ -1300,6 +1297,11 @@
         "transition": "mudou o estado de {entity}",
         "won": "ganhou {entity}"
       }
+    },
+    "banner": {
+      "action": "Ver o que precisa de mim",
+      "needsAttention": "{count, plural, =1 {Uma coisa merece} other {# coisas merecem}} a sua atenção.",
+      "needsAttentionSuffix": "{count, plural, =1 {coisa merece} other {coisas merecem}} a sua atenção."
     }
   },
   "crm": {
