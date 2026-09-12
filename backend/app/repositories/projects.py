@@ -136,6 +136,26 @@ def names_for(db: Session, user_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str
     return {row[0]: row[1] for row in rows}
 
 
+def project_names_for(db: Session, project_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Map project ids to names in one query."""
+    ids = {i for i in project_ids if i is not None}
+    if not ids:
+        return {}
+    rows = db.execute(select(Project.id, Project.name).where(Project.id.in_(ids))).all()
+    return {row[0]: row[1] for row in rows}
+
+
+def phase_names_for(db: Session, phase_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Map phase ids to names in one query."""
+    ids = {i for i in phase_ids if i is not None}
+    if not ids:
+        return {}
+    rows = db.execute(
+        select(ProjectPhase.id, ProjectPhase.name).where(ProjectPhase.id.in_(ids))
+    ).all()
+    return {row[0]: row[1] for row in rows}
+
+
 def get_member(
     db: Session, project_id: uuid.UUID, user_id: uuid.UUID
 ) -> ProjectMember | None:

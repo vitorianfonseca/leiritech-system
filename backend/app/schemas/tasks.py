@@ -123,10 +123,16 @@ class TaskResponse(BaseModel):
 
     id: uuid.UUID
     project_id: uuid.UUID
+    # Ids alone left the board unreadable: every card showed a blank avatar
+    # and nothing said which project a task belonged to, so four tasks with
+    # the same title were indistinguishable.
+    project_name: str | None = None
     phase_id: uuid.UUID | None
+    phase_name: str | None = None
     title: str
     description: str | None
     primary_assignee_id: uuid.UUID | None
+    primary_assignee_name: str | None = None
     priority: str
     start_date: date | None
     due_date: date | None

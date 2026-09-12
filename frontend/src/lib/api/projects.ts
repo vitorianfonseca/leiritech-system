@@ -1047,13 +1047,13 @@ export const projectsApi: ProjectsApi = {
   },
 
   async getProjectFinance(id, role, paymentsGrant) {
-    // INTEGRATION-GAP: no backend endpoint — there is no per-project finance
-    // rollup route; the Financeiro tab reuses the (separate) finance client and
-    // the live-margin computation below (BR-065), left on the mock source.
-    seed();
+    // There is still no per-project rollup route, so the tab scopes the shared
+    // finance overview to this project and computes the live margin (BR-065)
+    // here. What it must NOT do is read the project from the mock store: the id
+    // in the URL is a real backend UUID, `requireProject` never found it, and
+    // the tab failed with "could not load financial data" on every project.
     if (!canAccessFinance(role, paymentsGrant)) throw new ProjectError("forbidden");
-    const rec = requireProject(id);
-    // Reuse the single finance source (BR-065 live margin), scoped to this project.
+    const rec = await fetchFullProject(id);
     const overview = await financeApi.getOverview(role, paymentsGrant);
     const milestones = overview.milestones.filter((m) => m.projectId === id);
     const costs = overview.costs.filter((c) => c.projectId === id);

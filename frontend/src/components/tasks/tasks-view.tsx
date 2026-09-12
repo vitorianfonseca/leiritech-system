@@ -13,7 +13,7 @@ import {
   toastWithUndo,
 } from "@/components/shared";
 import { CalendarView } from "@/components/calendar";
-import { tasksApi, canEditTask, projectOptions, TASK_DIRECTORY } from "@/lib/api/tasks";
+import { tasksApi, canEditTask } from "@/lib/api/tasks";
 import {
   checkTaskTransition,
   type CreateTaskInput,
@@ -66,14 +66,32 @@ export function TasksView({ user }: TasksViewProps) {
     [tasks, filters]
   );
 
-  const projects = React.useMemo(
-    () => projectOptions().map((p) => ({ value: p.id, label: p.name })),
-    []
-  );
-  const assignees = React.useMemo(
-    () => TASK_DIRECTORY.map((u) => ({ value: u.userId, label: u.name })),
-    []
-  );
+  // Filter options come from the tasks on screen, not from a roster held
+  // elsewhere. Both lists used to be built from the mock fixtures, so the
+  // assignee filter offered people who do not work here and the project
+  // filter offered ids the backend has never seen — every option looked
+  // usable and matched nothing. Deriving them from loaded data means an
+  // option exists only when something can match it, costs no extra request,
+  // and is scoped by BR-002 for free.
+  const projects = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const task of tasks) {
+      if (task.projectId && task.projectName) map.set(task.projectId, task.projectName);
+    }
+    return [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, "pt-PT"));
+  }, [tasks]);
+
+  const assignees = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const task of tasks) {
+      for (const a of task.assignees) if (a.name) map.set(a.userId, a.name);
+    }
+    return [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, "pt-PT"));
+  }, [tasks]);
   const labels = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const task of tasks) for (const l of task.labels) map.set(l.id, l.name);

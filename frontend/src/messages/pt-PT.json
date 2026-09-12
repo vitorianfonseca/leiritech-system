@@ -3232,6 +3232,20 @@
         "loadDescription": "Ocorreu um problema ao carregar o arquivo. Tente novamente.",
         "retry": "Tentar novamente"
       }
+    },
+    "functions": {
+      "engineering": "Engenharia",
+      "design": "Design",
+      "qa": "Qualidade",
+      "management": "Gestão",
+      "leadership": "Direção"
+    },
+    "fieldErrors": {
+      "required": "Obrigatório.",
+      "invalid": "Valor inválido.",
+      "min": "Valor demasiado baixo.",
+      "max": "Valor demasiado alto.",
+      "range": "Valor fora do intervalo permitido."
     }
   },
   "profile": {

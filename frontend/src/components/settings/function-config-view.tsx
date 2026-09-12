@@ -52,8 +52,8 @@ function toDraft(cfg: FunctionCapacityConfig): RowDraft {
  */
 export function FunctionConfigView({ role, mode }: FunctionConfigViewProps) {
   const t = useTranslations(mode === "capacity" ? "settings.capacity" : "settings.costs");
-  const tf = useTranslations("team.heatmap.function");
-  const tCommonErr = useTranslations("team.capacity.errors");
+  const tf = useTranslations("settings.functions");
+  const tCommonErr = useTranslations("settings.fieldErrors");
   const format = useFormatter();
   const qc = useQueryClient();
 

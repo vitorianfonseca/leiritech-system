@@ -577,10 +577,13 @@ function touch(rec: StoredTask): void {
 interface TaskDto {
   id: string;
   projectId: string;
+  projectName: string | null;
   phaseId: string | null;
+  phaseName: string | null;
   title: string;
   description: string | null;
   primaryAssigneeId: string | null;
+  primaryAssigneeName: string | null;
   priority: TaskPriority;
   startDate: string | null;
   dueDate: string | null;
@@ -625,16 +628,18 @@ function fromBackend(dto: TaskDto): Task {
     title: dto.title,
     description: dto.description ?? "",
     projectId: dto.projectId,
-    // INTEGRATION-GAP: projectName — not provided by backend
-    projectName: "",
+    projectName: dto.projectName ?? "",
     phaseId: dto.phaseId,
-    // INTEGRATION-GAP: phaseName — not provided by backend
-    phaseName: null,
+    phaseName: dto.phaseName ?? null,
     state: dto.status,
     priority: dto.priority,
-    // INTEGRATION-GAP: assignee name/avatar — backend returns only primaryAssigneeId
+    // INTEGRATION-GAP: avatarUrl — the payload joins the name, not the image.
     assignees: dto.primaryAssigneeId
-      ? [{ userId: dto.primaryAssigneeId, name: "", avatarUrl: null }]
+      ? [{
+          userId: dto.primaryAssigneeId,
+          name: dto.primaryAssigneeName ?? "",
+          avatarUrl: null,
+        }]
       : [],
     dueDate: dto.dueDate,
     // INTEGRATION-GAP: labels — no backend endpoint

@@ -99,10 +99,13 @@ export function TaskCardView({
       <div className="mt-2.5 flex items-center justify-between gap-2">
         <div className="flex -space-x-1.5">
           {task.assignees.slice(0, 3).map((a) => (
-            <Avatar key={a.userId} className="size-6 ring-2 ring-card">
+            // Initials alone are ambiguous once a second person shares them;
+            // the full name is one hover away and reaches a screen reader.
+            <Avatar key={a.userId} className="size-6 ring-2 ring-card" title={a.name}>
               <AvatarFallback className="text-[0.625rem]">
                 {initials(a.name)}
               </AvatarFallback>
+              <span className="sr-only">{a.name}</span>
             </Avatar>
           ))}
           {task.assignees.length === 0 ? (

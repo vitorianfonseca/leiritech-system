@@ -32,11 +32,32 @@ from app.schemas.tasks import (
     TaskUnblock,
     TaskUpdate,
 )
+from app.repositories import projects as project_repo
 from app.services import task_service
 
 router = APIRouter()
 
 DbSession = Annotated[Session, Depends(get_db)]
+
+
+def _task_response(task, names: dict) -> TaskResponse:
+    """Attach the display names a card needs. `names` is pre-fetched by the
+    caller so a page of tasks costs three lookups, not three per row."""
+    resp = TaskResponse.model_validate(task)
+    resp.project_name = names["projects"].get(task.project_id)
+    resp.phase_name = names["phases"].get(task.phase_id) if task.phase_id else None
+    resp.primary_assignee_name = (
+        names["users"].get(task.primary_assignee_id) if task.primary_assignee_id else None
+    )
+    return resp
+
+
+def _names_for_tasks(db, tasks: list) -> dict:
+    return {
+        "projects": project_repo.project_names_for(db, [t.project_id for t in tasks]),
+        "phases": project_repo.phase_names_for(db, [t.phase_id for t in tasks]),
+        "users": project_repo.names_for(db, [t.primary_assignee_id for t in tasks]),
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -71,8 +92,9 @@ def list_tasks(
         page=page,
         page_size=page_size,
     )
+    names = _names_for_tasks(db, tasks)
     return Page(
-        items=[TaskResponse.model_validate(t) for t in tasks],
+        items=[_task_response(t, names) for t in tasks],
         total=total,
         page=page,
         page_size=page_size,
@@ -86,7 +108,7 @@ def create_task(
     db: DbSession,
 ) -> TaskResponse:
     task = task_service.create_task(db, user, payload)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 # --------------------------------------------------------------------------- #
@@ -95,7 +117,7 @@ def create_task(
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
     task = task_service.get_task_or_404(db, user, task_id)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
@@ -106,7 +128,7 @@ def update_task(
     db: DbSession,
 ) -> TaskResponse:
     task = task_service.update_task(db, user, task_id, payload)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.post("/{task_id}/assign", response_model=TaskResponse)
@@ -117,7 +139,7 @@ def assign_task(
     db: DbSession,
 ) -> TaskResponse:
     task = task_service.assign_task(db, user, task_id, payload)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 # --------------------------------------------------------------------------- #
@@ -131,7 +153,7 @@ def transition_task(
     db: DbSession,
 ) -> TaskResponse:
     task = task_service.transition_task(db, user, task_id, payload.status)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.post("/{task_id}/block", response_model=TaskResponse)
@@ -142,7 +164,7 @@ def block_task(
     db: DbSession,
 ) -> TaskResponse:
     task = task_service.block_task(db, user, task_id, payload)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.post("/{task_id}/unblock", response_model=TaskResponse)
@@ -153,7 +175,7 @@ def unblock_task(
     payload: TaskUnblock | None = None,
 ) -> TaskResponse:
     task = task_service.unblock_task(db, user, task_id, payload or TaskUnblock())
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 # --------------------------------------------------------------------------- #
@@ -202,13 +224,13 @@ def remove_dependency(
 @router.post("/{task_id}/archive", response_model=TaskResponse)
 def archive_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
     task = task_service.archive_task(db, user, task_id)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.post("/{task_id}/restore", response_model=TaskResponse)
 def restore_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
     task = task_service.restore_task(db, user, task_id)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 @router.post(
@@ -216,7 +238,7 @@ def restore_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskRe
 )
 def duplicate_task(task_id: uuid.UUID, user: CurrentUser, db: DbSession) -> TaskResponse:
     task = task_service.duplicate_task(db, user, task_id)
-    return TaskResponse.model_validate(task)
+    return _task_response(task, _names_for_tasks(db, [task]))
 
 
 # --------------------------------------------------------------------------- #

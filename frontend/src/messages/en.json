@@ -3232,6 +3232,20 @@
         "loadDescription": "Something went wrong loading the archive. Please try again.",
         "retry": "Try again"
       }
+    },
+    "functions": {
+      "engineering": "Engineering",
+      "design": "Design",
+      "qa": "QA",
+      "management": "Management",
+      "leadership": "Leadership"
+    },
+    "fieldErrors": {
+      "required": "Required.",
+      "invalid": "Invalid value.",
+      "min": "Value too low.",
+      "max": "Value too high.",
+      "range": "Value outside the allowed range."
     }
   },
   "profile": {
