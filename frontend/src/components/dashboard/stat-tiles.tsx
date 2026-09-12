@@ -44,15 +44,6 @@ const TONE_CHIP: Record<MetricTone, string> = {
   info: "text-info",
 };
 
-const TONE_VALUE: Record<MetricTone, string> = {
-  neutral: "text-foreground",
-  signal: "text-foreground",
-  success: "text-health-healthy",
-  warning: "text-foreground",
-  destructive: "text-status-overdue",
-  info: "text-foreground",
-};
-
 /**
  * Dashboard headline tiles (F2). Values count up via AnimatedCounter (respecting
  * prefers-reduced-motion) and each tile is a link into the underlying list.
@@ -126,20 +117,35 @@ export function StatTiles({
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
+        // Colour has to mean "act on this". A metric only earns the alert
+        // treatment when it is both a problem tone and actually non-zero:
+        // "0 overdue" is good news and must not look like a warning, and four
+        // tinted tiles are decoration rather than hierarchy.
+        const raising =
+          (m.tone === "destructive" || m.tone === "warning") &&
+          typeof m.value === "number" &&
+          m.value > 0;
+        const alertVar =
+          m.tone === "destructive" ? "var(--status-overdue)" : "var(--health-attention)";
         return (
-          <Card key={m.key} className="gap-0 p-0 py-0">
+          <Card
+            key={m.key}
+            className={cn("gap-0 p-0 py-0", raising && "card-alert")}
+            style={raising ? ({ "--alert": alertVar } as React.CSSProperties) : undefined}
+          >
             <Link
               href={m.href}
               className="group flex h-full flex-col gap-3 rounded-[inherit] p-5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label={t(`${m.key}.label`)}
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t(`${m.key}.label`)}
                 </p>
                 <span
                   className={cn(
-                    "glass-chip glass-chip-neutral flex size-9 shrink-0 items-center justify-center rounded-lg",
+                    "glass-chip flex size-9 shrink-0 items-center justify-center rounded-lg",
+                    raising ? "[--chip:var(--alert)]" : "glass-chip-neutral",
                     TONE_CHIP[m.tone]
                   )}
                 >
@@ -147,10 +153,12 @@ export function StatTiles({
                 </span>
               </div>
 
+              {/* The figure is the point of the tile, so it is set at display
+                  size rather than at heading size. */}
               <p
                 className={cn(
-                  "font-heading text-2xl font-semibold tracking-tight tabular-nums md:text-3xl",
-                  TONE_VALUE[m.tone]
+                  "font-heading text-3xl font-bold tracking-tight tabular-nums md:text-4xl",
+                  raising ? "text-[var(--alert)]" : "text-foreground"
                 )}
               >
                 {renderValue(m)}

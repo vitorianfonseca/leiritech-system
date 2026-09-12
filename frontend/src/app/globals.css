@@ -152,7 +152,7 @@
   --input: oklch(0.915 0.016 340);
   --ring: oklch(0.600 0.145 358);
 
-  --signal: oklch(0.600 0.145 358);
+  --signal: oklch(0.565 0.150 358);
   --signal-foreground: oklch(0.995 0 0);
   --signal-muted: oklch(0.945 0.035 358);
 
@@ -171,24 +171,27 @@
 
   --health-healthy: oklch(0.560 0.095 175);
   --health-healthy-bg: oklch(0.930 0.055 175);
-  --health-attention: oklch(0.640 0.105 57);
+  --health-attention: oklch(0.545 0.110 57);
   --health-attention-bg: oklch(0.935 0.055 57);
-  --health-at-risk: oklch(0.600 0.155 27);
+  --health-at-risk: oklch(0.545 0.160 27);
   --health-at-risk-bg: oklch(0.935 0.055 27);
-  --status-overdue: oklch(0.600 0.155 27);
+  --status-overdue: oklch(0.545 0.160 27);
   --status-overdue-bg: oklch(0.935 0.055 27);
   --status-blocked: oklch(0.575 0.215 292);
   --status-blocked-bg: oklch(0.940 0.045 292);
-  --status-due: oklch(0.640 0.105 57);
+  --status-due: oklch(0.545 0.110 57);
   --status-due-bg: oklch(0.935 0.055 57);
   --status-done: oklch(0.600 0.020 290);
   --status-done-bg: oklch(0.940 0.014 299);
 
-  --chart-1: oklch(0.575 0.215 292);
-  --chart-2: oklch(0.660 0.140 250);
+  /* Hue of the current accent. Every theme sets it, and the chart ramp is
+     derived from it, so a palette change carries into the charts. */
+  --accent-hue: 358;
+  --chart-1: oklch(0.600 0.145 var(--accent-hue));
+  --chart-2: oklch(0.660 0.120 calc(var(--accent-hue) + 45));
   --chart-3: oklch(0.620 0.095 175);
   --chart-4: oklch(0.700 0.110 57);
-  --chart-5: oklch(0.620 0.110 330);
+  --chart-5: oklch(0.640 0.110 calc(var(--accent-hue) - 55));
 
   --sidebar: oklch(0.988 0.008 340);
   --sidebar-foreground: oklch(0.400 0.026 340);
@@ -254,8 +257,8 @@
   --status-done: oklch(0.610 0.008 85);
   --status-done-bg: oklch(0.258 0.007 84);
 
-  --chart-1: oklch(0.735 0.110 262);
-  --chart-2: oklch(0.700 0.095 215);
+  --chart-1: oklch(0.780 0.105 var(--accent-hue));
+  --chart-2: oklch(0.740 0.095 calc(var(--accent-hue) + 45));
   --chart-3: oklch(0.806 0.158 160);
   --chart-4: oklch(0.824 0.141 70);
   --chart-5: oklch(0.720 0.130 315);
@@ -451,6 +454,7 @@ textarea:not(:disabled),
  * ==================================================================== */
 
 [data-accent="blue"] {
+  --accent-hue: 262;
   --primary: oklch(0.545 0.170 262);
   --ring: oklch(0.545 0.170 262);
   --signal: oklch(0.545 0.170 262);
@@ -477,6 +481,7 @@ textarea:not(:disabled),
 }
 
 .dark[data-accent="blue"] {
+  --accent-hue: 262;
   --primary: oklch(0.760 0.110 262);
   --ring: oklch(0.760 0.110 262);
   --signal: oklch(0.760 0.110 262);
@@ -502,6 +507,7 @@ textarea:not(:disabled),
 }
 
 [data-accent="violet"] {
+  --accent-hue: 300;
   --primary: oklch(0.565 0.165 300);
   --ring: oklch(0.565 0.165 300);
   --signal: oklch(0.565 0.165 300);
@@ -528,6 +534,7 @@ textarea:not(:disabled),
 }
 
 .dark[data-accent="violet"] {
+  --accent-hue: 300;
   --primary: oklch(0.775 0.110 300);
   --ring: oklch(0.775 0.110 300);
   --signal: oklch(0.775 0.110 300);
@@ -553,6 +560,7 @@ textarea:not(:disabled),
 }
 
 [data-accent="green"] {
+  --accent-hue: 168;
   --primary: oklch(0.540 0.105 168);
   --ring: oklch(0.540 0.105 168);
   --signal: oklch(0.540 0.105 168);
@@ -579,6 +587,7 @@ textarea:not(:disabled),
 }
 
 .dark[data-accent="green"] {
+  --accent-hue: 168;
   --primary: oklch(0.780 0.095 168);
   --ring: oklch(0.780 0.095 168);
   --signal: oklch(0.780 0.095 168);
@@ -604,6 +613,7 @@ textarea:not(:disabled),
 }
 
 [data-accent="amber"] {
+  --accent-hue: 58;
   --primary: oklch(0.585 0.125 58);
   --ring: oklch(0.585 0.125 58);
   --signal: oklch(0.585 0.125 58);
@@ -630,6 +640,7 @@ textarea:not(:disabled),
 }
 
 .dark[data-accent="amber"] {
+  --accent-hue: 58;
   --primary: oklch(0.800 0.105 58);
   --ring: oklch(0.800 0.105 58);
   --signal: oklch(0.800 0.105 58);
@@ -945,6 +956,51 @@ textarea:not(:disabled),
     --chip: var(--muted-foreground);
   }
   .glass-chip-neutral::before { opacity: 0.35; }
+
+  /* A card that is raising something, not merely reporting it.
+   *
+   * Colour here has to mean "act on this" or it means nothing: four tiles all
+   * tinted is decoration, and decoration is what makes a dashboard read flat
+   * however many colours it has. So only a tile with a non-zero count in a
+   * warning or danger tone gets this, and the calm ones stay plain glass —
+   * the difference between them is the hierarchy.
+   *
+   * The tint is a wash from the top-left plus a bar down the leading edge.
+   * The bar is what carries at a glance; the wash keeps the card from looking
+   * like a plain card with a stripe stuck on it. */
+  .card-alert {
+    --alert: var(--status-overdue);
+    position: relative;
+    background-color: color-mix(in oklch, var(--alert), var(--card) 92%);
+    background-image:
+      radial-gradient(90% 130% at 0% 0%, color-mix(in oklch, var(--alert), transparent 86%), transparent 62%),
+      radial-gradient(70% 100% at 100% 0%, rgb(var(--refract-peach) / 0.10), transparent 60%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--alert), transparent 82%),
+      inset 0 1px 0 rgb(255 255 255 / 0.7),
+      0 1px 2px rgb(122 132 173 / 0.05),
+      0 12px 32px -14px color-mix(in oklch, var(--alert), transparent 78%);
+  }
+
+  .card-alert::after {
+    content: "";
+    position: absolute;
+    inset-block: 0.875rem;
+    inset-inline-start: 0;
+    width: 3px;
+    border-start-end-radius: 3px;
+    border-end-end-radius: 3px;
+    background: var(--alert);
+    pointer-events: none;
+  }
+
+  .dark .card-alert {
+    background-color: color-mix(in oklch, var(--alert), var(--card) 88%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--alert), transparent 76%),
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 12px 32px -14px rgb(0 0 0 / 0.5);
+  }
 
   /* Fields read as recessed, not raised: the light lands on the top inner
      edge and there is no outer shadow to lift them off the page. The tint

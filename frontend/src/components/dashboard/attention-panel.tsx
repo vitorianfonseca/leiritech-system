@@ -157,7 +157,7 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
       <h3 className="mb-2 flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         <GroupIcon className="size-3.5" strokeWidth={1.8} aria-hidden />
         {t(`groups.${group.key}`)}
-        <span className="text-muted-foreground/60">({group.items.length})</span>
+        <span className="text-muted-foreground">({group.items.length})</span>
       </h3>
       <ul className="overflow-hidden rounded-lg border border-border divide-y divide-border">
         {visible.map((item) => {
