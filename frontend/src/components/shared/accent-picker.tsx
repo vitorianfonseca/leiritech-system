@@ -97,9 +97,15 @@ export function AccentPicker() {
             `onInput` as well as `onChange` so the page recolours while the
             picker is being dragged, not only when it is dismissed. */}
         <div className="flex items-center gap-2.5 px-2 py-1.5">
+          {/* The swatch shows the derived accent while a custom theme is
+              live, so what the menu shows is what the page uses. Before one is
+              chosen it shows the raw pick, which is all there is. */}
           <label
             className="relative size-6 shrink-0 cursor-pointer rounded-full ring-1 ring-black/15"
-            style={{ backgroundColor: customHex }}
+            style={{
+              backgroundColor:
+                accent === "custom" ? "var(--custom-accent, currentColor)" : customHex,
+            }}
             aria-label={t("custom")}
           >
             <input

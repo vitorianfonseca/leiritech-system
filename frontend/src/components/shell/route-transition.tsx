@@ -59,9 +59,11 @@ export function RouteTransition({ children }: { children: React.ReactNode }) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          // The page owns its own scroll container, so the transform must not
-          // create a containing block that traps it.
-          style={{ willChange: "transform, opacity" }}
+          // No `will-change`. It was set permanently here, which keeps a
+          // compositor layer alive under the whole page for its entire life —
+          // the property is meant to be a hint given just before an animation
+          // and withdrawn after, and framer-motion already applies it for the
+          // duration of the transition itself.
         >
           <FrozenRouter>{children}</FrozenRouter>
         </motion.div>

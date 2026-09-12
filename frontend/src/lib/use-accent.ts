@@ -39,7 +39,7 @@ export const DEFAULT_CUSTOM_HEX = "#6E7FD6";
  * variable carries the choice through the whole system.
  */
 export function applyCustomAccent(hex: string): void {
-  const { light, dark, hue } = accentFromHex(hex);
+  const { light, dark, hue, chroma } = accentFromHex(hex);
   const root = document.documentElement;
   const isDark = root.classList.contains("dark");
   const accent = isDark ? dark : light;
@@ -53,10 +53,13 @@ export function applyCustomAccent(hex: string): void {
   );
   // The illustration is a flat PNG whose accent sits near hue 340.
   root.style.setProperty("--brand-rotate", `${hue - 340}deg`);
+  // What the picker shows as the swatch: the colour the app will actually
+  // use, not the raw pick, so there is no gap between the two.
+  root.style.setProperty("--custom-accent", accent);
 
   // The neutrals too. Without these only the details move and the page keeps
   // the default theme's tinted paper, which reads as the colour not applying.
-  for (const [token, value] of Object.entries(neutralTokens(hue, isDark))) {
+  for (const [token, value] of Object.entries(neutralTokens(hue, isDark, chroma))) {
     root.style.setProperty(token, value);
   }
 }
@@ -74,6 +77,7 @@ function clearCustomAccent(): void {
     "--brand-rotate",
     ...Object.keys(neutralTokens(0, false)),
     ...Object.keys(neutralTokens(0, true)),
+    "--custom-accent",
   ];
   for (const token of tokens) root.style.removeProperty(token);
 }

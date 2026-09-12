@@ -96,9 +96,18 @@ function contrast(a: [number, number, number], b: [number, number, number]): num
 const CARD_LIGHT: [number, number, number] = [253, 250, 252];
 const CARD_DARK: [number, number, number] = [40, 35, 39];
 
-export function accentFromHex(hex: string): { light: string; dark: string; hue: number } {
+export function accentFromHex(hex: string): {
+  light: string;
+  dark: string;
+  hue: number;
+  chroma: number;
+} {
   const { c, h } = hexToOklch(hex);
-  const chroma = Math.min(0.18, Math.max(0.04, c));
+  // Their saturation, kept. There was a 0.04 floor here, which turned a soft
+  // grey-blue into a confident one — someone who picks a muted colour gets a
+  // muted accent. The cap is only there to stay inside sRGB at the lightness
+  // the contrast search lands on.
+  const chroma = Math.min(0.2, c);
 
   let lightL = 0.62;
   while (lightL > 0.3 && contrast(oklchToRgb(lightL, chroma, h), CARD_LIGHT) < 4.5) {
@@ -111,8 +120,9 @@ export function accentFromHex(hex: string): { light: string; dark: string; hue: 
 
   return {
     light: `oklch(${lightL.toFixed(3)} ${chroma.toFixed(3)} ${h.toFixed(1)})`,
-    dark: `oklch(${darkL.toFixed(3)} ${Math.min(0.12, chroma).toFixed(3)} ${h.toFixed(1)})`,
+    dark: `oklch(${darkL.toFixed(3)} ${Math.min(0.14, chroma).toFixed(3)} ${h.toFixed(1)})`,
     hue: Math.round(h),
+    chroma,
   };
 }
 
@@ -141,22 +151,31 @@ export function oklchToRgbPublic(L: number, C: number, h: number): [number, numb
  * keeps the default theme's tinted paper, which reads as the colour not
  * applying at all.
  */
-export function neutralTokens(hue: number, dark: boolean): Record<string, string> {
+export function neutralTokens(
+  hue: number,
+  dark: boolean,
+  chroma = 0.14
+): Record<string, string> {
   const n = hue.toFixed(1);
+  // The paper carries a fraction of the accent's saturation rather than a
+  // fixed amount: a muted accent over vividly tinted paper is the mismatch
+  // people describe as "that is not the colour I picked".
+  const k = Math.max(0.25, Math.min(1.4, chroma / 0.14));
+  const t = (base: number) => (base * k).toFixed(4);
   if (dark) {
     return {
-      "--background": `oklch(0.170 0.010 ${n})`,
-      "--card": `oklch(0.224 0.012 ${n})`,
-      "--popover": `oklch(0.224 0.012 ${n})`,
-      "--secondary": `oklch(0.260 0.013 ${n})`,
-      "--muted": `oklch(0.250 0.013 ${n})`,
-      "--muted-foreground": `oklch(0.670 0.016 ${n})`,
-      "--accent": `oklch(0.284 0.014 ${n})`,
-      "--border": `oklch(0.332 0.016 ${n})`,
-      "--input": `oklch(0.350 0.016 ${n})`,
-      "--sidebar": `oklch(0.192 0.011 ${n})`,
-      "--sidebar-accent": `oklch(0.280 0.014 ${n})`,
-      "--sidebar-border": `oklch(0.332 0.016 ${n})`,
+      "--background": `oklch(0.170 ${t(0.010)} ${n})`,
+      "--card": `oklch(0.224 ${t(0.012)} ${n})`,
+      "--popover": `oklch(0.224 ${t(0.012)} ${n})`,
+      "--secondary": `oklch(0.260 ${t(0.013)} ${n})`,
+      "--muted": `oklch(0.250 ${t(0.013)} ${n})`,
+      "--muted-foreground": `oklch(0.670 ${t(0.016)} ${n})`,
+      "--accent": `oklch(0.284 ${t(0.014)} ${n})`,
+      "--border": `oklch(0.332 ${t(0.016)} ${n})`,
+      "--input": `oklch(0.350 ${t(0.016)} ${n})`,
+      "--sidebar": `oklch(0.192 ${t(0.011)} ${n})`,
+      "--sidebar-accent": `oklch(0.280 ${t(0.014)} ${n})`,
+      "--sidebar-border": `oklch(0.332 ${t(0.016)} ${n})`,
       "--refract-cyan": pastel(hue, 0.4, 0.05),
       "--refract-blue": pastel(hue + 30, 0.4, 0.045),
       "--refract-lavender": pastel(hue - 30, 0.4, 0.045),
@@ -164,20 +183,20 @@ export function neutralTokens(hue: number, dark: boolean): Record<string, string
     };
   }
   return {
-    "--background": `oklch(0.972 0.012 ${n})`,
-    "--foreground": `oklch(0.285 0.030 ${n})`,
-    "--card": `oklch(0.995 0.004 ${n})`,
-    "--card-foreground": `oklch(0.285 0.030 ${n})`,
-    "--popover": `oklch(0.995 0.004 ${n})`,
-    "--popover-foreground": `oklch(0.285 0.030 ${n})`,
-    "--secondary": `oklch(0.948 0.016 ${n})`,
-    "--muted": `oklch(0.955 0.014 ${n})`,
-    "--muted-foreground": `oklch(0.500 0.024 ${n})`,
-    "--accent": `oklch(0.940 0.020 ${n})`,
-    "--border": `oklch(0.915 0.016 ${n})`,
-    "--input": `oklch(0.915 0.016 ${n})`,
-    "--sidebar": `oklch(0.988 0.008 ${n})`,
-    "--sidebar-foreground": `oklch(0.400 0.026 ${n})`,
+    "--background": `oklch(0.972 ${t(0.012)} ${n})`,
+    "--foreground": `oklch(0.285 ${t(0.030)} ${n})`,
+    "--card": `oklch(0.995 ${t(0.004)} ${n})`,
+    "--card-foreground": `oklch(0.285 ${t(0.030)} ${n})`,
+    "--popover": `oklch(0.995 ${t(0.004)} ${n})`,
+    "--popover-foreground": `oklch(0.285 ${t(0.030)} ${n})`,
+    "--secondary": `oklch(0.948 ${t(0.016)} ${n})`,
+    "--muted": `oklch(0.955 ${t(0.014)} ${n})`,
+    "--muted-foreground": `oklch(0.500 ${t(0.024)} ${n})`,
+    "--accent": `oklch(0.940 ${t(0.020)} ${n})`,
+    "--border": `oklch(0.915 ${t(0.016)} ${n})`,
+    "--input": `oklch(0.915 ${t(0.016)} ${n})`,
+    "--sidebar": `oklch(0.988 ${t(0.008)} ${n})`,
+    "--sidebar-foreground": `oklch(0.400 ${t(0.026)} ${n})`,
     "--refract-cyan": pastel(hue),
     "--refract-blue": pastel(hue + 30),
     "--refract-lavender": pastel(hue - 30),
