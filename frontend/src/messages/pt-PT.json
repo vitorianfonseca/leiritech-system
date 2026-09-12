@@ -1176,6 +1176,16 @@
         "proposalExpiring": "Expira em {days, plural, one {# dia} other {# dias}}",
         "overloadedMember": "Sobrecarga de {alloc}% esta semana",
         "overduePayment": "Recebimento em atraso há {days, plural, one {# dia} other {# dias}} · {amount}"
+      },
+      "actions": {
+        "overdueTasks": "Abrir tarefa",
+        "blockedTasks": "Abrir tarefa",
+        "projectsAtRisk": "Ver projeto",
+        "lowProgressNearDelivery": "Ver projeto",
+        "opportunitiesNoNextAction": "Definir próxima ação",
+        "proposalsAwaiting": "Acompanhar",
+        "overloadedMembers": "Ver carga",
+        "overduePayments": "Ver pagamento"
       }
     },
     "weekAgenda": {

@@ -1176,6 +1176,16 @@
         "proposalExpiring": "Expires in {days, plural, one {# day} other {# days}}",
         "overloadedMember": "{alloc}% overload this week",
         "overduePayment": "Collection overdue by {days, plural, one {# day} other {# days}} · {amount}"
+      },
+      "actions": {
+        "overdueTasks": "Open task",
+        "blockedTasks": "Open task",
+        "projectsAtRisk": "View project",
+        "lowProgressNearDelivery": "View project",
+        "opportunitiesNoNextAction": "Set next action",
+        "proposalsAwaiting": "Follow up",
+        "overloadedMembers": "View load",
+        "overduePayments": "View payment"
       }
     },
     "weekAgenda": {
