@@ -23,6 +23,7 @@ import {
   Paperclip,
   History,
   Wallet,
+  Bug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -158,6 +159,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
     { value: "calendar", label: tTabs("calendar"), icon: CalendarDays },
     { value: "files", label: tTabs("files"), icon: Paperclip },
     { value: "activity", label: tTabs("activity"), icon: History },
+    { value: "github", label: tTabs("github"), icon: Bug },
     ...(canFinance ? [{ value: "finance", label: tTabs("finance"), icon: Wallet }] : []),
   ];
 
@@ -282,15 +284,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
         <div className="pt-6">
           <Tabs.Panel value="overview">
-            <div className="space-y-6">
-              <OverviewTab project={project} canFinance={canFinance} />
-              <GithubIssuesPanel
-                entityType="project"
-                entityId={project.id}
-                canCreate={canManage}
-                titlePrefix={`${project.name} — `}
-              />
-            </div>
+            <OverviewTab project={project} canFinance={canFinance} />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
             <TasksTab project={project} />
@@ -312,6 +306,14 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
                   ? { id: user.userId, name: user.name, avatarUrl: user.avatarUrl }
                   : undefined
               }
+            />
+          </Tabs.Panel>
+          <Tabs.Panel value="github">
+            <GithubIssuesPanel
+              entityType="project"
+              entityId={project.id}
+              canCreate={canManage}
+              titlePrefix={`${project.name} — `}
             />
           </Tabs.Panel>
           {canFinance ? (
