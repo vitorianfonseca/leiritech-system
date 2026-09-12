@@ -679,6 +679,11 @@ def main(argv: list[str] | None = None) -> int:
             demo_password=demo_password,
         )
         db.commit()
+        # The catalogue and both template families: master data every install
+        # needs, and idempotent by name so a re-run changes nothing.
+        from app.database.seed_catalog import seed_catalog_and_templates
+
+        summary.update(seed_catalog_and_templates(db))
     except Exception as exc:  # noqa: BLE001 — surface any failure to the operator
         db.rollback()
         print(f"error: seed failed — {exc}", file=sys.stderr)
