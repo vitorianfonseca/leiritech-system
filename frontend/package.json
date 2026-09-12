@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npm run build:standalone && node .next/standalone/server.js",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "start:next": "next start",
+    "build:standalone": "cp -R public .next/standalone/public 2>/dev/null; mkdir -p .next/standalone/.next && cp -R .next/static .next/standalone/.next/static"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
