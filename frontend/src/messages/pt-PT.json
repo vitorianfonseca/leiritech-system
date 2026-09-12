@@ -253,7 +253,14 @@
       "blue": "Azul",
       "violet": "Violeta",
       "green": "Verde",
-      "amber": "Âmbar"
+      "amber": "Âmbar",
+      "vivid": "Com cor",
+      "muted": "Tons neutros",
+      "slate": "Ardósia",
+      "sand": "Areia",
+      "olive": "Azeitona",
+      "plum": "Ameixa",
+      "custom": "Cor exata…"
     }
   },
   "locale": {

@@ -253,7 +253,14 @@
       "blue": "Blue",
       "violet": "Violet",
       "green": "Green",
-      "amber": "Amber"
+      "amber": "Amber",
+      "vivid": "Colour",
+      "muted": "Muted",
+      "slate": "Slate",
+      "sand": "Sand",
+      "olive": "Olive",
+      "plum": "Plum",
+      "custom": "Exact colour…"
     }
   },
   "locale": {

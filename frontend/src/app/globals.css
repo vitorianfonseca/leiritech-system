@@ -665,6 +665,223 @@ textarea:not(:disabled),
   --refract-violet: 255 223 238;
 }
 
+
+/* The quiet half of the set: same structure, chroma held low so the accent
+   reads as a tint of the paper rather than as a colour laid on it. Someone
+   who wants the tool to disappear picks from here. */
+
+[data-accent="slate"] {
+  --accent-hue: 255;
+  --primary: oklch(0.500 0.045 255);
+  --ring: oklch(0.500 0.045 255);
+  --signal: oklch(0.500 0.045 255);
+  --signal-muted: oklch(0.945 0.026 255);
+  --sidebar-ring: oklch(0.500 0.045 255);
+  --background: oklch(0.974 0.008 255);
+  --foreground: oklch(0.285 0.022 255);
+  --card: oklch(0.996 0.003 255);
+  --card-foreground: oklch(0.285 0.022 255);
+  --popover: oklch(0.996 0.003 255);
+  --popover-foreground: oklch(0.285 0.022 255);
+  --secondary: oklch(0.950 0.011 255);
+  --muted: oklch(0.957 0.010 255);
+  --muted-foreground: oklch(0.500 0.018 255);
+  --accent: oklch(0.942 0.014 255);
+  --border: oklch(0.917 0.012 255);
+  --input: oklch(0.917 0.012 255);
+  --sidebar: oklch(0.989 0.006 255);
+  --sidebar-foreground: oklch(0.400 0.020 255);
+  --refract-cyan: 222 232 245;
+  --refract-blue: 214 224 240;
+  --refract-lavender: 224 226 242;
+  --refract-violet: 230 232 244;
+}
+
+.dark[data-accent="slate"] {
+  --accent-hue: 255;
+  --primary: oklch(0.760 0.045 255);
+  --ring: oklch(0.760 0.045 255);
+  --signal: oklch(0.760 0.045 255);
+  --signal-muted: oklch(0.320 0.040 255);
+  --sidebar-primary: oklch(0.760 0.045 255);
+  --sidebar-ring: oklch(0.760 0.045 255);
+  --background: oklch(0.170 0.008 255);
+  --card: oklch(0.224 0.010 255);
+  --popover: oklch(0.224 0.010 255);
+  --secondary: oklch(0.260 0.011 255);
+  --muted: oklch(0.250 0.011 255);
+  --muted-foreground: oklch(0.670 0.014 255);
+  --accent: oklch(0.284 0.012 255);
+  --border: oklch(0.332 0.014 255);
+  --input: oklch(0.350 0.014 255);
+  --sidebar: oklch(0.192 0.009 255);
+  --sidebar-accent: oklch(0.280 0.012 255);
+  --sidebar-border: oklch(0.332 0.014 255);
+  --refract-cyan: 222 232 245;
+  --refract-blue: 214 224 240;
+  --refract-lavender: 224 226 242;
+  --refract-violet: 230 232 244;
+}
+
+[data-accent="sand"] {
+  --accent-hue: 70;
+  --primary: oklch(0.520 0.060 70);
+  --ring: oklch(0.520 0.060 70);
+  --signal: oklch(0.520 0.060 70);
+  --signal-muted: oklch(0.945 0.026 70);
+  --sidebar-ring: oklch(0.520 0.060 70);
+  --background: oklch(0.974 0.008 70);
+  --foreground: oklch(0.285 0.022 70);
+  --card: oklch(0.996 0.003 70);
+  --card-foreground: oklch(0.285 0.022 70);
+  --popover: oklch(0.996 0.003 70);
+  --popover-foreground: oklch(0.285 0.022 70);
+  --secondary: oklch(0.950 0.011 70);
+  --muted: oklch(0.957 0.010 70);
+  --muted-foreground: oklch(0.500 0.018 70);
+  --accent: oklch(0.942 0.014 70);
+  --border: oklch(0.917 0.012 70);
+  --input: oklch(0.917 0.012 70);
+  --sidebar: oklch(0.989 0.006 70);
+  --sidebar-foreground: oklch(0.400 0.020 70);
+  --refract-cyan: 245 236 222;
+  --refract-blue: 243 232 214;
+  --refract-lavender: 240 231 220;
+  --refract-violet: 246 238 226;
+}
+
+.dark[data-accent="sand"] {
+  --accent-hue: 70;
+  --primary: oklch(0.775 0.055 70);
+  --ring: oklch(0.775 0.055 70);
+  --signal: oklch(0.775 0.055 70);
+  --signal-muted: oklch(0.320 0.040 70);
+  --sidebar-primary: oklch(0.775 0.055 70);
+  --sidebar-ring: oklch(0.775 0.055 70);
+  --background: oklch(0.170 0.008 70);
+  --card: oklch(0.224 0.010 70);
+  --popover: oklch(0.224 0.010 70);
+  --secondary: oklch(0.260 0.011 70);
+  --muted: oklch(0.250 0.011 70);
+  --muted-foreground: oklch(0.670 0.014 70);
+  --accent: oklch(0.284 0.012 70);
+  --border: oklch(0.332 0.014 70);
+  --input: oklch(0.350 0.014 70);
+  --sidebar: oklch(0.192 0.009 70);
+  --sidebar-accent: oklch(0.280 0.012 70);
+  --sidebar-border: oklch(0.332 0.014 70);
+  --refract-cyan: 245 236 222;
+  --refract-blue: 243 232 214;
+  --refract-lavender: 240 231 220;
+  --refract-violet: 246 238 226;
+}
+
+[data-accent="olive"] {
+  --accent-hue: 130;
+  --primary: oklch(0.505 0.065 130);
+  --ring: oklch(0.505 0.065 130);
+  --signal: oklch(0.505 0.065 130);
+  --signal-muted: oklch(0.945 0.026 130);
+  --sidebar-ring: oklch(0.505 0.065 130);
+  --background: oklch(0.974 0.008 130);
+  --foreground: oklch(0.285 0.022 130);
+  --card: oklch(0.996 0.003 130);
+  --card-foreground: oklch(0.285 0.022 130);
+  --popover: oklch(0.996 0.003 130);
+  --popover-foreground: oklch(0.285 0.022 130);
+  --secondary: oklch(0.950 0.011 130);
+  --muted: oklch(0.957 0.010 130);
+  --muted-foreground: oklch(0.500 0.018 130);
+  --accent: oklch(0.942 0.014 130);
+  --border: oklch(0.917 0.012 130);
+  --input: oklch(0.917 0.012 130);
+  --sidebar: oklch(0.989 0.006 130);
+  --sidebar-foreground: oklch(0.400 0.020 130);
+  --refract-cyan: 228 240 220;
+  --refract-blue: 232 241 226;
+  --refract-lavender: 226 238 224;
+  --refract-violet: 236 243 226;
+}
+
+.dark[data-accent="olive"] {
+  --accent-hue: 130;
+  --primary: oklch(0.765 0.060 130);
+  --ring: oklch(0.765 0.060 130);
+  --signal: oklch(0.765 0.060 130);
+  --signal-muted: oklch(0.320 0.040 130);
+  --sidebar-primary: oklch(0.765 0.060 130);
+  --sidebar-ring: oklch(0.765 0.060 130);
+  --background: oklch(0.170 0.008 130);
+  --card: oklch(0.224 0.010 130);
+  --popover: oklch(0.224 0.010 130);
+  --secondary: oklch(0.260 0.011 130);
+  --muted: oklch(0.250 0.011 130);
+  --muted-foreground: oklch(0.670 0.014 130);
+  --accent: oklch(0.284 0.012 130);
+  --border: oklch(0.332 0.014 130);
+  --input: oklch(0.350 0.014 130);
+  --sidebar: oklch(0.192 0.009 130);
+  --sidebar-accent: oklch(0.280 0.012 130);
+  --sidebar-border: oklch(0.332 0.014 130);
+  --refract-cyan: 228 240 220;
+  --refract-blue: 232 241 226;
+  --refract-lavender: 226 238 224;
+  --refract-violet: 236 243 226;
+}
+
+[data-accent="plum"] {
+  --accent-hue: 320;
+  --primary: oklch(0.510 0.080 320);
+  --ring: oklch(0.510 0.080 320);
+  --signal: oklch(0.510 0.080 320);
+  --signal-muted: oklch(0.945 0.026 320);
+  --sidebar-ring: oklch(0.510 0.080 320);
+  --background: oklch(0.974 0.008 320);
+  --foreground: oklch(0.285 0.022 320);
+  --card: oklch(0.996 0.003 320);
+  --card-foreground: oklch(0.285 0.022 320);
+  --popover: oklch(0.996 0.003 320);
+  --popover-foreground: oklch(0.285 0.022 320);
+  --secondary: oklch(0.950 0.011 320);
+  --muted: oklch(0.957 0.010 320);
+  --muted-foreground: oklch(0.500 0.018 320);
+  --accent: oklch(0.942 0.014 320);
+  --border: oklch(0.917 0.012 320);
+  --input: oklch(0.917 0.012 320);
+  --sidebar: oklch(0.989 0.006 320);
+  --sidebar-foreground: oklch(0.400 0.020 320);
+  --refract-cyan: 238 226 240;
+  --refract-blue: 236 224 238;
+  --refract-lavender: 234 222 242;
+  --refract-violet: 240 228 242;
+}
+
+.dark[data-accent="plum"] {
+  --accent-hue: 320;
+  --primary: oklch(0.770 0.070 320);
+  --ring: oklch(0.770 0.070 320);
+  --signal: oklch(0.770 0.070 320);
+  --signal-muted: oklch(0.320 0.040 320);
+  --sidebar-primary: oklch(0.770 0.070 320);
+  --sidebar-ring: oklch(0.770 0.070 320);
+  --background: oklch(0.170 0.008 320);
+  --card: oklch(0.224 0.010 320);
+  --popover: oklch(0.224 0.010 320);
+  --secondary: oklch(0.260 0.011 320);
+  --muted: oklch(0.250 0.011 320);
+  --muted-foreground: oklch(0.670 0.014 320);
+  --accent: oklch(0.284 0.012 320);
+  --border: oklch(0.332 0.014 320);
+  --input: oklch(0.350 0.014 320);
+  --sidebar: oklch(0.192 0.009 320);
+  --sidebar-accent: oklch(0.280 0.012 320);
+  --sidebar-border: oklch(0.332 0.014 320);
+  --refract-cyan: 238 226 240;
+  --refract-blue: 236 224 238;
+  --refract-lavender: 234 222 242;
+  --refract-violet: 240 228 242;
+}
+
 /* The brand illustration is a flat PNG with one accent colour baked in, so it
    cannot read a token. Its accent sits at roughly hue 340; rotating by the
    difference lands it near each theme's. `hue-rotate` is an approximation of
@@ -674,6 +891,12 @@ textarea:not(:disabled),
 [data-accent="violet"] .brand-illustration { filter: hue-rotate(-40deg); }
 [data-accent="green"] .brand-illustration { filter: hue-rotate(-172deg); }
 [data-accent="amber"] .brand-illustration { filter: hue-rotate(78deg); }
+[data-accent="slate"] .brand-illustration { filter: hue-rotate(-85deg) saturate(0.5); }
+[data-accent="sand"] .brand-illustration { filter: hue-rotate(90deg) saturate(0.5); }
+[data-accent="olive"] .brand-illustration { filter: hue-rotate(150deg) saturate(0.5); }
+[data-accent="plum"] .brand-illustration { filter: hue-rotate(-20deg) saturate(0.7); }
+[data-accent="custom"] .brand-illustration { filter: hue-rotate(var(--brand-rotate, 0deg)); }
+.dark[data-accent="custom"] .brand-illustration { filter: invert(1) hue-rotate(calc(var(--brand-rotate, 0deg) + 180deg)); }
 
 /* Dark mode already inverts the ink; the rotation composes with it. */
 .dark[data-accent="blue"] .brand-illustration { filter: invert(1) hue-rotate(102deg); }
@@ -744,14 +967,16 @@ textarea:not(:disabled),
   --glass-shadow-hover: 0 2px 5px rgb(0 0 0 / 0.32), 0 14px 30px -14px rgb(0 0 0 / 0.55);
 }
 
-/* Composited drift: a transform, not a background-position, so the light
-   moves without repainting. 60s and 2% of travel — you should never catch
-   it moving, only notice the surface is not dead. */
-@keyframes glass-drift {
-  0%,
-  100% { transform: translate3d(-1.5%, -1%, 0) scale(1.06); }
-  50%  { transform: translate3d(1.5%, 1%, 0) scale(1.06); }
-}
+/* The drifting light is gone.
+ *
+ * It ran forever on exactly the elements a pointer rests on — primary buttons
+ * and the current nav item — and a perpetually animating layer under a
+ * stationary cursor is a known way to have Chromium stop updating the cursor
+ * until the mouse moves again, which is the symptom reported here. It was also
+ * a compositor job that never ended, for movement of 2% over 60 seconds that
+ * nobody was ever going to notice.
+ *
+ * The refraction stays; it just holds still. */
 
 @layer components {
   .glass {
@@ -822,7 +1047,6 @@ textarea:not(:disabled),
     --refract-strength: 1.5;
     animation: none;
   }
-  .glass-primary::before { animation: glass-drift 60s ease-in-out infinite; }
   .glass-primary:hover { --glass-alpha: 0.94; --glass-ring-alpha: 0.24; }
 
   .dark .glass-primary { --glass-alpha: 0.16; --glass-ring-alpha: 0.18; }
@@ -845,7 +1069,6 @@ textarea:not(:disabled),
     --glass-ring-alpha: 0.18;
     --refract-strength: 2.2;
   }
-  .glass-active::before { animation: glass-drift 60s ease-in-out infinite; }
   .dark .glass-active { --glass-alpha: 0.14; --refract-strength: 1.1; }
 
   /* A pane that holds content rather than answering a pointer: no lift, no
