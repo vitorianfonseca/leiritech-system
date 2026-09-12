@@ -15,7 +15,9 @@ import {
   UsersRound,
   ArrowUpRight,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { AnimatedCounter } from "@/components/shared";
+import { cellVariants, cellsVariants, lift } from "@/lib/motion";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { MASK, useHideAmounts } from "@/lib/use-privacy";
@@ -108,15 +110,20 @@ export function StatTiles({
   return (
     // A strip of cells sharing hairline gutters — one instrument, six
     // readouts. Not six cards, each with its own border, radius and shadow.
-    <div className="grid grid-cols-2 gap-px border border-border bg-border sm:grid-cols-3 lg:grid-cols-6">
+    <motion.div
+      variants={cellsVariants}
+      initial="hidden"
+      animate="visible"
+      className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3 lg:grid-cols-6"
+    >
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (
+          <motion.div key={m.key} variants={cellVariants} {...lift}>
           <Link
-            key={m.key}
             href={m.href}
             aria-label={t(`${m.key}.label`)}
-            className="group relative bg-card p-3.5 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+            className="group relative block h-full bg-card p-3.5 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
           >
             {/* Labels wrap rather than truncate: "Oportunidades abertas"
                 clipped to "Oportunidades abert…" tells a reader less than a
@@ -145,8 +152,9 @@ export function StatTiles({
               />
             </p>
           </Link>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

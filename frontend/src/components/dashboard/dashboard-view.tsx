@@ -4,7 +4,9 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { blockVariants, stageVariants } from "@/lib/motion";
 import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState } from "@/components/shared";
 import { dashboardApi } from "@/lib/api/dashboard";
@@ -84,15 +86,25 @@ export function DashboardView({ user }: DashboardViewProps) {
   const showTaskFlow = !!charts && charts.taskFlow.length > 0;
 
   return (
-    <div className="space-y-8">
-      {header}
+    // The screen opens as one composed sequence: header, then the strip of
+    // figures, then the queue and its rail — reading order, not all at once.
+    <motion.div
+      variants={stageVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8"
+    >
+      <motion.div variants={blockVariants}>{header}</motion.div>
 
-      <div className={isLoading ? undefined : "reveal"}>
+      <motion.div variants={blockVariants}>
         <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
-      </div>
+      </motion.div>
 
       {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <motion.div
+        variants={blockVariants}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
         <AttentionPanel
           groups={data?.attention ?? []}
           loading={isLoading}
@@ -104,9 +116,7 @@ export function DashboardView({ user }: DashboardViewProps) {
           ) : null}
           <AgendaCard user={{ id: user.id, role: user.role }} className="min-h-0 flex-1" />
         </div>
-      </div>
-
-
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

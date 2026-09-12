@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, SkeletonList } from "@/components/shared";
+import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
+import { listVariants, rowVariants } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
@@ -113,7 +115,7 @@ export function AttentionPanel({
             description={t("empty.description")}
           />
         ) : (
-          <div className="reveal reveal-1 space-y-6">
+          <div className="space-y-6">
             {nonEmpty.map((group) => (
               <AttentionSection key={group.key} group={group} />
             ))}
@@ -150,9 +152,9 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
         </span>
       </h3>
 
-      <ul>
+      <motion.ul variants={listVariants} initial="hidden" animate="visible">
         {visible.map((item) => (
-          <li key={`${group.key}-${item.id}`}>
+          <motion.li variants={rowVariants} key={`${group.key}-${item.id}`}>
             <Link
               href={hrefFor(item.entityType, item.entityId)}
               className="group/row grid grid-cols-[2px_1fr_auto] items-stretch gap-3.5 border-b border-border pr-3 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
@@ -186,9 +188,9 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
                 />
               </span>
             </Link>
-          </li>
+          </motion.li>
         ))}
-      </ul>
+      </motion.ul>
 
       {overflow > 0 ? (
         <button

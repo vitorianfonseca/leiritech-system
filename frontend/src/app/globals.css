@@ -125,7 +125,7 @@
  * structure, identical meaning per colour, contrast tuned per ground.
  * ------------------------------------------------------------------ */
 :root {
-  --radius: 0.3rem;
+  --radius: 0.85rem;
 
   --background: oklch(0.966 0.006 92);
   --foreground: oklch(0.212 0.010 78);
@@ -392,5 +392,47 @@
   .reveal-2,
   .reveal-3 {
     animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * The pointer.
+ *
+ * The same two elements as the mark: an ink arrow, and the signal block
+ * that means "this does something". Drawn as an SVG data URI and handed to
+ * `cursor`, so the compositor moves it — a div chasing pointermove always
+ * trails the real cursor by a frame and feels broken.
+ *
+ * The hotspot is pinned to the tip (0 0), and every rule ends in a native
+ * keyword, so a browser that will not take the image still gets the right
+ * cursor. Text, resize and disabled cursors are deliberately left native:
+ * they carry meaning a custom drawing would lose.
+ * ------------------------------------------------------------------ */
+@layer base {
+  html {
+    cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><path d='M3 2.2 3 16.4l3.6-3.4 2.2 5.2 2.5-1.1-2.2-5.1 4.9-.5Z' fill='%23171A1F' stroke='%23FFFFFF' stroke-width='1.1' stroke-linejoin='round'/></svg>") 0 0, default;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="switch"]:not([aria-disabled="true"]),
+  [role="checkbox"]:not([aria-disabled="true"]),
+  a[href],
+  summary,
+  label[for],
+  select:not(:disabled) {
+    cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2.2 3 16.4l3.6-3.4 2.2 5.2 2.5-1.1-2.2-5.1 4.9-.5Z' fill='%23171A1F' stroke='%23FFFFFF' stroke-width='1.1' stroke-linejoin='round'/><rect x='16' y='15' width='5.4' height='5.4' rx='0.9' fill='%23304F8A'/></svg>") 0 0, pointer;
+  }
+  /* Typing, sizing and refusal keep the system cursors. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 }

@@ -1,69 +1,100 @@
 /**
  * The LeiriTech motion vocabulary.
  *
- * One set of durations and curves for the whole app, mirroring the CSS
- * tokens in `globals.css`. The rule behind the numbers: this is software
- * someone uses for hours, so motion exists to explain what changed — never
- * to perform. Anything a person triggers resolves in under 240ms; only
- * things that enter or leave the screen entirely are allowed 360ms.
+ * Motion here is orchestration, not decoration: a screen arrives as one
+ * composed sequence — frame, then figures, then the queue — so the eye is
+ * led through the page in the order the page wants to be read. Numbers count
+ * up because a figure settling reads as a measurement being taken; rows
+ * cascade because a list arriving as one block reads as a screenshot.
  *
- * Every variant here degrades to an instant cut under
- * `prefers-reduced-motion`, via `useReducedMotion` in `useMotion()`.
+ * Everything a person triggers still resolves fast (under 260ms). Only the
+ * opening sequence is allowed to take its time, and even then it is under
+ * three quarters of a second end to end.
+ *
+ * Every variant collapses to a cut under `prefers-reduced-motion`, which
+ * `useReducedMotion()` reports and framer-motion honours on `MotionConfig`.
  */
 
 import type { Transition, Variants } from "framer-motion";
 
 export const duration = {
-  instant: 0.1, // state flips: checkbox, toggle
-  fast: 0.16, // hover, focus, press
-  base: 0.24, // dropdowns, popovers, toasts
-  slow: 0.36, // modals, drawers, page transitions
+  instant: 0.1,
+  fast: 0.16,
+  base: 0.26,
+  slow: 0.42,
 } as const;
 
 export const ease = {
-  /** Decelerating. The default for anything arriving. */
-  out: [0.22, 1, 0.36, 1],
-  /** Symmetric. For things that move without arriving or leaving. */
+  /** Decelerating. Anything arriving. */
+  out: [0.16, 1, 0.3, 1],
   inOut: [0.76, 0, 0.24, 1],
-  /** Slight overshoot. Toggles and checkmarks only — never layout. */
-  spring: [0.34, 1.56, 0.64, 1],
+  /** A little overshoot. Toggles, checks, counters — never layout. */
+  spring: [0.34, 1.4, 0.64, 1],
 } as const;
 
 export const transition = {
   fast: { duration: duration.fast, ease: ease.out },
   base: { duration: duration.base, ease: ease.out },
   slow: { duration: duration.slow, ease: ease.out },
-  spring: { duration: duration.base, ease: ease.spring },
+  spring: { type: "spring", stiffness: 420, damping: 32, mass: 0.8 },
 } satisfies Record<string, Transition>;
 
 /* ------------------------------------------------------------------ *
- * Variants
+ * Page
  * ------------------------------------------------------------------ */
 
-/** Page-level. Content settles downward by a few pixels, never sideways. */
 export const pageVariants: Variants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: transition.slow },
 };
 
-/**
- * List container. Staggers children so a list reads as one arrival rather
- * than N separate ones. The stagger is short on purpose — a long cascade
- * is the thing that makes an interface feel slow.
- */
+/** The screen's opening sequence: children arrive in reading order. */
+export const stageVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.06 },
+  },
+};
+
+/** A block within the sequence — a panel, a chart, a section. */
+export const blockVariants: Variants = {
+  hidden: { opacity: 0, y: 14, scale: 0.985 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: duration.slow, ease: ease.out },
+  },
+};
+
+/** A strip of figures: each cell lifts a beat after the one before it. */
+export const cellsVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
+};
+
+export const cellVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: transition.spring },
+};
+
+/** A queue of rows. Tighter than the cells — a list should feel quick. */
 export const listVariants: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.03, delayChildren: 0.02 } },
+  visible: { transition: { staggerChildren: 0.035, delayChildren: 0.14 } },
 };
 
 export const rowVariants: Variants = {
-  hidden: { opacity: 0, y: 6 },
-  visible: { opacity: 1, y: 0, transition: transition.base },
+  hidden: { opacity: 0, x: -8 },
+  visible: { opacity: 1, x: 0, transition: transition.base },
 };
 
-/** Modals and drawers: scale is subtle — this is not a photo viewer. */
+/* ------------------------------------------------------------------ *
+ * Surfaces
+ * ------------------------------------------------------------------ */
+
 export const modalVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.98, y: 6 },
+  hidden: { opacity: 0, scale: 0.97, y: 8 },
   visible: { opacity: 1, scale: 1, y: 0, transition: transition.slow },
   exit: { opacity: 0, scale: 0.98, y: 4, transition: transition.fast },
 };
@@ -74,18 +105,20 @@ export const backdropVariants: Variants = {
   exit: { opacity: 0, transition: transition.fast },
 };
 
-/** Dropdowns and popovers: translate only, anchored to their trigger. */
 export const popoverVariants: Variants = {
-  hidden: { opacity: 0, y: -4, scale: 0.98 },
+  hidden: { opacity: 0, y: -6, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: transition.base },
-  exit: { opacity: 0, y: -2, transition: transition.fast },
+  exit: { opacity: 0, y: -3, transition: transition.fast },
 };
 
 export const toastVariants: Variants = {
-  hidden: { opacity: 0, y: 12, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: transition.base },
+  hidden: { opacity: 0, y: 14, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: transition.spring },
   exit: { opacity: 0, y: 8, transition: transition.fast },
 };
 
-/** Press feedback shared by every interactive surface. */
-export const press = { scale: 0.985 } as const;
+/** Shared hover/press feel for anything that lifts off the page. */
+export const lift = {
+  whileHover: { y: -2, transition: { duration: duration.fast, ease: ease.out } },
+  whileTap: { scale: 0.985, transition: { duration: 0.08 } },
+} as const;
