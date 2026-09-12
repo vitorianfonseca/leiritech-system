@@ -298,7 +298,9 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               project={project}
               canManage={canManage && !isArchived}
               onEdit={() => setEditOpen(true)}
+              canFinance={canFinance}
               onChanged={refresh}
+              onGoToTab={setTab}
               onOpenTask={(taskId) => {
                 setOpenTask({ id: taskId, at: Date.now() });
                 setTab("tasks");
@@ -322,8 +324,9 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
           <Tabs.Panel value="calendar">
             <CalendarTab
               project={project}
+              user={{ role: user.role, userId: user.userId }}
               actorId={user.userId}
-              canManage={canManage}
+              canManage={canManage && !isArchived}
               onChanged={refresh}
             />
           </Tabs.Panel>
