@@ -18,13 +18,14 @@ Money is integer EUR cents throughout.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 from typing import Any
 
 import structlog
 from sqlalchemy.orm import Session
 
 from app.core import errors
+from app.core.clock import today as app_today
 from app.models.finance import PaymentMilestone, ProjectCost
 from app.models.project import Project
 from app.models.user import User
@@ -39,7 +40,7 @@ from app.schemas.finance import (
 )
 from app.services import activity_service, notification_service
 
-logger = structlog.get_logger("aurea.finance")
+logger = structlog.get_logger("leiritech.finance")
 
 MILESTONE_ENTITY = "payment_milestone"
 COST_ENTITY = "project_cost"
@@ -243,7 +244,7 @@ def change_milestone_status(
         )
 
     before = _snapshot(milestone)
-    today = datetime.now(tz=UTC).date()
+    today = app_today()
 
     if target == "invoiced":
         _apply_invoiced(milestone, payload, today)
@@ -517,7 +518,7 @@ def expire_overdue_milestones(
     ``overdue`` is not re-selected. Does NOT commit — the caller owns the
     transaction. Notification is the automation layer's job, not this function's.
     """
-    today = today or datetime.now(tz=UTC).date()
+    today = today or app_today()
     overdue = finance_repo.overdue_open_milestones(db, today=today)
     for milestone in overdue:
         before = _snapshot(milestone)

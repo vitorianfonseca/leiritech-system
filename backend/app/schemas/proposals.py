@@ -18,9 +18,17 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.proposal_templates import (
     ItemInput as ContentItemInput,
+)
+from app.schemas.proposal_templates import (
     ItemResponse as ContentItemResponse,
+)
+from app.schemas.proposal_templates import (
     SectionInput as ContentSectionInput,
+)
+from app.schemas.proposal_templates import (
     SectionResponse as ContentSectionResponse,
+)
+from app.schemas.proposal_templates import (
     TotalsResponse as ContentTotalsResponse,
 )
 

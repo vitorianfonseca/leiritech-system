@@ -25,12 +25,13 @@ import structlog
 from sqlalchemy.orm import Session
 
 from app.core import permissions
+from app.core.clock import today as app_today
 from app.core.permissions import Role
 from app.models.user import User
 from app.repositories import calendar as repo
 from app.schemas.calendar import CalendarEvent, CalendarEventType, CalendarUrgency
 
-logger = structlog.get_logger("aurea.calendar")
+logger = structlog.get_logger("leiritech.calendar")
 
 _ALL_TYPES: tuple[CalendarEventType, ...] = (
     "task",
@@ -82,7 +83,7 @@ def get_calendar(
     project_id: uuid.UUID | None = None,
 ) -> list[CalendarEvent]:
     """Assemble the role-scoped, finance-gated calendar feed for ``[start, end)``."""
-    today = datetime.now(tz=UTC).date()
+    today = app_today()
     wanted = types or set(_ALL_TYPES)
     scope_id = user.id if user.role == Role.MEMBRO else None
     can_finance = permissions.can_manage_financials(user)

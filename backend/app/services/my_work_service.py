@@ -15,11 +15,12 @@ the orthogonal ``blocked`` flag (status → ``in_progress``), and priority
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 import structlog
 from sqlalchemy.orm import Session
 
+from app.core.clock import today as app_today
 from app.core.permissions import Role
 from app.models.user import User
 from app.repositories import my_work as repo
@@ -34,7 +35,7 @@ from app.schemas.my_work import (
     MyWork,
 )
 
-logger = structlog.get_logger("aurea.my_work")
+logger = structlog.get_logger("leiritech.my_work")
 
 _PRIORITY_MAP = {"low": "low", "normal": "medium", "high": "high", "urgent": "urgent"}
 _STATUS_MAP = {
@@ -225,7 +226,7 @@ def _active_timer(db: Session, user: User) -> MyActiveTimer | None:
 
 def get_my_work(db: Session, user: User) -> MyWork:
     """Assemble the caller's personal daily hub (F3/F17), scoped to own work."""
-    today = datetime.now(tz=UTC).date()
+    today = app_today()
 
     raw_tasks = repo.assigned_open_tasks(db, user.id)
     counts = repo.comment_counts(db, [t.id for t, _ in raw_tasks])

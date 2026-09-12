@@ -34,6 +34,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
+from app.core.clock import today as app_today
 from app.core.permissions import Role, can_cancel_project, can_manage_project, role_at_least
 from app.models.crm import Company
 from app.models.project import (
@@ -60,7 +61,7 @@ from app.schemas.projects import (
 )
 from app.services import activity_service, notification_service, opportunity_service
 
-logger = structlog.get_logger("aurea.project")
+logger = structlog.get_logger("leiritech.project")
 
 ENTITY_TYPE = "project"
 
@@ -444,7 +445,7 @@ def compute_suggested_health(db: Session, project: Project) -> str | None:
     """
     if project.status not in _LIVE_STATUSES:
         return None
-    today = date.today()
+    today = app_today()
     if project.deadline is not None:
         remaining = (project.deadline - today).days
         if remaining < 0:

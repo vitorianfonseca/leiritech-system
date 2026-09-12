@@ -18,12 +18,13 @@ params, never pre-translated strings (localized in the view).
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, timedelta
 
 import structlog
 from sqlalchemy.orm import Session
 
 from app.core import permissions
+from app.core.clock import today as app_today
 from app.core.permissions import Role
 from app.models.user import User
 from app.repositories import my_work as my_work_repo
@@ -43,7 +44,7 @@ from app.schemas.dashboard import (
 )
 from app.services import workload_service
 
-logger = structlog.get_logger("aurea.dashboard")
+logger = structlog.get_logger("leiritech.dashboard")
 
 _MONTH_KEYS = (
     "jan", "feb", "mar", "apr", "may", "jun",
@@ -54,7 +55,7 @@ _HEALTH_TO_STATE = {"healthy": "healthy", "attention": "attention", "at_risk": "
 
 
 def _today() -> date:
-    return datetime.now(tz=UTC).date()
+    return app_today()
 
 
 def _last_months(today: date, n: int) -> list[tuple[int, int]]:

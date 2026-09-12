@@ -28,6 +28,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import errors
+from app.core.clock import today as app_today
 from app.core.permissions import Role, role_at_least
 from app.models.collaboration import Attachment, Notification
 from app.models.crm import Company, Opportunity, Proposal
@@ -49,7 +50,7 @@ from app.services import (
     proposal_totals,
 )
 
-logger = structlog.get_logger("aurea.proposal")
+logger = structlog.get_logger("leiritech.proposal")
 
 ENTITY_TYPE = "proposal"
 
@@ -207,7 +208,7 @@ def create_proposal(db: Session, user: User, payload: ProposalCreate) -> Proposa
         company_id=payload.company_id,
         contact_id=payload.contact_id,
         value=payload.value,
-        created_date=payload.created_date or date.today(),
+        created_date=payload.created_date or app_today(),
         valid_until=payload.valid_until,
         pdf_attachment_id=payload.pdf_attachment_id,
         notes=payload.notes,
@@ -349,7 +350,7 @@ def send_proposal(db: Session, user: User, proposal_id: uuid.UUID) -> Proposal:
             details={"missing": missing},
         )
     _assert_opportunity_not_lost(db, proposal)
-    proposal.sent_date = date.today()
+    proposal.sent_date = app_today()
     return _transition(
         db, user, proposal, new_status="sent", action="proposal.sent"
     )
@@ -442,7 +443,7 @@ def resend_proposal(
             "Só uma proposta expirada pode ser reenviada.",
             code="PROPOSAL_INVALID_TRANSITION",
         )
-    if payload.valid_until <= date.today():
+    if payload.valid_until <= app_today():
         raise errors.ApiError(
             status_code=422,
             code="PROPOSAL_VALIDITY_IN_PAST",
@@ -453,7 +454,7 @@ def resend_proposal(
         _validate_attachment(db, payload.pdf_attachment_id)
         proposal.pdf_attachment_id = payload.pdf_attachment_id
     proposal.valid_until = payload.valid_until
-    proposal.sent_date = date.today()
+    proposal.sent_date = app_today()
     return _transition(
         db, user, proposal, new_status="sent", action="proposal.resent"
     )
@@ -519,7 +520,7 @@ def expire_overdue_proposals(
     expired/terminal are skipped by the query. Does NOT commit — the caller owns
     the transaction (the CLI entrypoint commits; tests can roll back).
     """
-    today = today or date.today()
+    today = today or app_today()
     overdue = proposal_repo.overdue_open_proposals(db, today=today)
     for proposal in overdue:
         before = _snapshot(proposal)
@@ -592,7 +593,7 @@ def _require_draft(proposal: Proposal) -> None:
 
 def _placeholder_context(db: Session, proposal: Proposal) -> dict[str, str | None]:
     company = db.get(Company, proposal.company_id) if proposal.company_id else None
-    today = date.today()
+    today = app_today()
     return {
         "cliente": company.name if company else None,
         "empresa": company.name if company else None,
@@ -617,7 +618,7 @@ def apply_template(
     proposal.template_id = tpl.id
     proposal.discount_bps = tpl.default_discount_bps
     if tpl.default_validity_days is not None:
-        proposal.valid_until = date.today() + timedelta(days=tpl.default_validity_days)
+        proposal.valid_until = app_today() + timedelta(days=tpl.default_validity_days)
 
     ctx = _placeholder_context(db, proposal)
     proposal.terms = (

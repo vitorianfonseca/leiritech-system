@@ -14,6 +14,8 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, date, datetime
 
+from app.core.clock import today as app_today
+
 # BR-054 — project-linked crons run ONLY for live projects. Mirrors
 # ``project_service._LIVE_STATUSES`` (kept as a local constant so the automations
 # layer does not reach into a service's private name).
@@ -26,8 +28,12 @@ def resolve_now(now: datetime | None) -> datetime:
 
 
 def resolve_today(now: datetime | None) -> date:
-    """The reference calendar date (UTC) for a daily run."""
-    return resolve_now(now).astimezone(UTC).date()
+    """The reference **civil** date (Europe/Lisbon) for a daily run.
+
+    Crons commonly fire just after midnight local time; resolving this in UTC
+    made every such run operate on the previous day (see ``app.core.clock``).
+    """
+    return app_today(resolve_now(now))
 
 
 def group_key(code: str, entity_id: uuid.UUID, run_date: date) -> str:
