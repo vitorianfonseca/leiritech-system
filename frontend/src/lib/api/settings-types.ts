@@ -112,25 +112,6 @@ export type UpdateLeiritechInput = LeiritechProfile;
  * Tags (genuinely new config)
  * ------------------------------------------------------------------ */
 
-export interface Tag {
-  id: string;
-  label: string;
-  color: LeiritechColorToken;
-  /** How many records currently carry the tag (drives the delete warning). */
-  usageCount: number;
-}
-
-export interface CreateTagInput {
-  label: string;
-  color: LeiritechColorToken;
-}
-
-export interface UpdateTagInput {
-  id: string;
-  label: string;
-  color: LeiritechColorToken;
-}
-
 /* ------------------------------------------------------------------ *
  * Members (directory + invite/deactivate — BR-005 last-admin guard)
  * ------------------------------------------------------------------ */

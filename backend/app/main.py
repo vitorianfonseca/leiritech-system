@@ -1,4 +1,4 @@
-"""FastAPI application entrypoint for Aurea System."""
+"""FastAPI application entrypoint for LeiriTech."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ structlog.configure(
         structlog.processors.JSONRenderer(),
     ]
 )
-logger = structlog.get_logger("aurea")
+logger = structlog.get_logger("leiritech")
 
 app = FastAPI(
     title=settings.APP_NAME,

@@ -22,7 +22,7 @@ from app.repositories import notifications as notification_repo
 from app.repositories import workload as workload_repo
 from app.services import notification_service, workload_service
 
-logger = structlog.get_logger("aurea.automation.workload_recompute")
+logger = structlog.get_logger("leiritech.automation.workload_recompute")
 
 CODE = "AUTO-09"
 

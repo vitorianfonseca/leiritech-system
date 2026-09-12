@@ -21,7 +21,7 @@ from app.repositories import finance as finance_repo
 from app.repositories import notifications as notification_repo
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.payment_due_soon")
+logger = structlog.get_logger("leiritech.automation.payment_due_soon")
 
 CODE = "AUTO-08"
 WINDOW_DAYS = 7

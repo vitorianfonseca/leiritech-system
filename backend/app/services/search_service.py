@@ -31,7 +31,7 @@ from app.repositories import search as search_repo
 from app.repositories import tasks as task_repo
 from app.schemas.search import SearchGroup, SearchHit, SearchResponse
 
-logger = structlog.get_logger("aurea.search")
+logger = structlog.get_logger("leiritech.search")
 
 # Query hygiene knobs.
 MIN_QUERY_LEN = 2

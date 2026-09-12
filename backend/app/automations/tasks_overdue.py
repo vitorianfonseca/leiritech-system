@@ -25,7 +25,7 @@ from app.models.project import Project
 from app.models.task import Task
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.tasks_overdue")
+logger = structlog.get_logger("leiritech.automation.tasks_overdue")
 
 CODE = "AUTO-01"
 

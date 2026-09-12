@@ -21,7 +21,7 @@ from app.repositories import crm as crm_repo
 from app.schemas.crm import ContactCreate, ContactUpdate
 from app.services import activity_service
 
-logger = structlog.get_logger("aurea.crm.contact")
+logger = structlog.get_logger("leiritech.crm.contact")
 
 ENTITY_TYPE = "contact"
 

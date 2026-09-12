@@ -18,7 +18,7 @@ from app.core import errors, security
 from app.core.config import settings
 from app.models.user import User, UserSession
 
-logger = structlog.get_logger("aurea.auth")
+logger = structlog.get_logger("leiritech.auth")
 
 _GENERIC_LOGIN_ERROR = "Email ou palavra-passe incorretos."
 _DEACTIVATED_ERROR = "Conta desativada. Contacte um Administrador."

@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.models.collaboration import ActivityLog
 
-logger = structlog.get_logger("aurea.activity")
+logger = structlog.get_logger("leiritech.activity")
 
 
 def record(

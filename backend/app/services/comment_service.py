@@ -34,7 +34,7 @@ from app.schemas.comments import (
 )
 from app.services import attachment_service, notification_service
 
-logger = structlog.get_logger("aurea.comment")
+logger = structlog.get_logger("leiritech.comment")
 
 
 # --------------------------------------------------------------------------- #

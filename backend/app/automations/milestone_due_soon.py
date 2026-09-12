@@ -21,7 +21,7 @@ from app.automations._helpers import (
 from app.models.project import Milestone, Project, ProjectMember, ProjectPhase
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.milestone_due_soon")
+logger = structlog.get_logger("leiritech.automation.milestone_due_soon")
 
 CODE = "AUTO-06"
 WINDOW_DAYS = 3

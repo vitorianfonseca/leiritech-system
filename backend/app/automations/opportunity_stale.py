@@ -18,7 +18,7 @@ from app.models.crm import Interaction, Opportunity
 from app.repositories import notifications as notification_repo
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.opportunity_stale")
+logger = structlog.get_logger("leiritech.automation.opportunity_stale")
 
 CODE = "AUTO-03"
 STALE_DAYS = 14

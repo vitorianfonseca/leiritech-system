@@ -23,7 +23,7 @@ from app.models.project import Project
 from app.repositories import notifications as notification_repo
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.won_without_project")
+logger = structlog.get_logger("leiritech.automation.won_without_project")
 
 CODE = "AUTO-11"
 GRACE_DAYS = 3

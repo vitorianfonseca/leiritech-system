@@ -29,7 +29,6 @@ import {
   type LeiritechColorToken,
   type LeiritechProfile,
   type ArchivedItem,
-  type CreateTagInput,
   type ExportDataset,
   type InviteMemberInput,
   type MemberRecord,
@@ -37,12 +36,10 @@ import {
   type NotificationPreferences,
   type PipelineStageConfig,
   type PriorityConfig,
-  type Tag,
   type UpdateLeiritechInput,
   type UpdateMemberRoleInput,
   type UpdatePipelineStagesInput,
   type UpdatePriorityInput,
-  type UpdateTagInput,
 } from "./settings-types";
 
 const MOCK_LATENCY_MS = 300;
@@ -78,7 +75,6 @@ export const settingsRoutes = {
   roles: () => "/settings/roles",
   pipeline: () => "/settings/pipeline",
   states: () => "/settings/states",
-  tags: () => "/settings/tags",
   templates: () => "/settings/templates",
   capacity: () => "/settings/capacity",
   costs: () => "/settings/costs",
@@ -105,19 +101,6 @@ let leiritech: LeiritechProfile = {
   logoDataUrl: null,
 };
 
-const tagStore = new Map<string, Tag>();
-function seedTags(): void {
-  if (tagStore.size > 0) return;
-  const seed: Tag[] = [
-    { id: "t-1", label: "Prioritário", color: "signal", usageCount: 12 },
-    { id: "t-2", label: "Novo cliente", color: "green", usageCount: 8 },
-    { id: "t-3", label: "Recorrente", color: "teal", usageCount: 21 },
-    { id: "t-4", label: "Em risco", color: "terracotta", usageCount: 3 },
-    { id: "t-5", label: "Referência", color: "indigo", usageCount: 5 },
-    { id: "t-6", label: "Interno", color: "violet", usageCount: 7 },
-  ];
-  for (const tag of seed) tagStore.set(tag.id, tag);
-}
 
 /** Backend `UserDirectoryEntry` (camelCased by the HTTP client). */
 interface RawDirectoryUser {
@@ -226,11 +209,6 @@ export interface SettingsApi {
   getLeiritechProfile(): Promise<LeiritechProfile>;
   updateLeiritechProfile(role: Role, input: UpdateLeiritechInput): Promise<LeiritechProfile>;
 
-  listTags(): Promise<Tag[]>;
-  createTag(role: Role, input: CreateTagInput): Promise<Tag>;
-  updateTag(role: Role, input: UpdateTagInput): Promise<Tag>;
-  deleteTag(role: Role, id: string): Promise<void>;
-  restoreTag(role: Role, tag: Tag): Promise<Tag>;
 
   getMembers(role: Role): Promise<MembersSnapshot>;
   inviteMember(role: Role, invitesGrant: boolean, input: InviteMemberInput): Promise<MemberRecord>;
@@ -268,60 +246,10 @@ export const settingsApi: SettingsApi = {
     return { ...leiritech };
   },
 
-  // INTEGRATION-GAP: no backend endpoint — tags CRUD is entirely on mock.
-  async listTags() {
-    seedTags();
-    await delay(MOCK_LATENCY_MS);
-    return [...tagStore.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-PT"));
-  },
 
-  async createTag(role, input) {
-    assertAdmin(role);
-    seedTags();
-    await delay(MOCK_LATENCY_MS);
-    const label = input.label.trim();
-    if (!label) throw new SettingsError("validation", "labelRequired");
-    const dup = [...tagStore.values()].some(
-      (t) => t.label.toLowerCase() === label.toLowerCase()
-    );
-    if (dup) throw new SettingsError("validation", "labelDuplicate");
-    const tag: Tag = { id: uid("t"), label, color: input.color, usageCount: 0 };
-    tagStore.set(tag.id, tag);
-    return { ...tag };
-  },
 
-  async updateTag(role, input) {
-    assertAdmin(role);
-    seedTags();
-    await delay(MOCK_LATENCY_MS);
-    const existing = tagStore.get(input.id);
-    if (!existing) throw new SettingsError("not_found");
-    const label = input.label.trim();
-    if (!label) throw new SettingsError("validation", "labelRequired");
-    const dup = [...tagStore.values()].some(
-      (t) => t.id !== input.id && t.label.toLowerCase() === label.toLowerCase()
-    );
-    if (dup) throw new SettingsError("validation", "labelDuplicate");
-    const next: Tag = { ...existing, label, color: input.color };
-    tagStore.set(next.id, next);
-    return { ...next };
-  },
 
-  async deleteTag(role, id) {
-    assertAdmin(role);
-    seedTags();
-    await delay(MOCK_LATENCY_MS);
-    if (!tagStore.has(id)) throw new SettingsError("not_found");
-    tagStore.delete(id);
-  },
 
-  async restoreTag(role, tag) {
-    assertAdmin(role);
-    seedTags();
-    await delay(MOCK_LATENCY_MS / 2);
-    tagStore.set(tag.id, { ...tag });
-    return { ...tag };
-  },
 
   // WIRED — GET /users?include_inactive=true. The backend directory is the real
   // source; invited users live in the invitations table and are not listed here.

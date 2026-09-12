@@ -22,7 +22,7 @@ from app.automations._helpers import group_key, resolve_today
 from app.repositories import notifications as notification_repo
 from app.services import finance_service, notification_service
 
-logger = structlog.get_logger("aurea.automation.payment_overdue")
+logger = structlog.get_logger("leiritech.automation.payment_overdue")
 
 CODE = "AUTO-02"
 

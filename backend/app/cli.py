@@ -71,7 +71,7 @@ def main(argv: list[str] | None = None) -> int:
     admin.set_defaults(func=_create_admin)
 
     seed = sub.add_parser(
-        "seed", help="Idempotent seed: first admin + Aurea demo data (Issue #11)"
+        "seed", help="Idempotent seed: first admin + LeiriTech demo data (Issue #11)"
     )
     seed.add_argument("--name", default=None)
     seed.add_argument("--email", default=None)

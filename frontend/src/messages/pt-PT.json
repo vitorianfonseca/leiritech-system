@@ -3560,36 +3560,6 @@
         "invited": "Convite enviado para {email}."
       }
     },
-    "roles": {
-      "title": "Perfis e permissões",
-      "subtitle": "O que cada perfil pode ver e fazer na LeiriTech.",
-      "notice": "Estas permissões são aplicadas de forma consistente em todo o sistema.",
-      "summary": {
-        "admin": "Acesso total à configuração, à equipa e aos valores financeiros.",
-        "gestor": "Gere o comercial e a entrega; valores financeiros só com autorização.",
-        "membro": "Acede apenas aos projetos e tarefas onde participa."
-      },
-      "matrix": {
-        "capability": "Área"
-      },
-      "capabilities": {
-        "crm": "CRM (empresas e contactos)",
-        "pipeline": "Pipeline e propostas",
-        "projects": "Projetos",
-        "tasks": "Tarefas",
-        "time": "Registo de tempo",
-        "financial": "Valores financeiros",
-        "team": "Equipa e carga",
-        "reports": "Relatórios",
-        "settings": "Definições"
-      },
-      "levels": {
-        "full": "Total",
-        "scoped": "Próprio",
-        "grant": "Com autorização",
-        "none": "Sem acesso"
-      }
-    },
     "pipeline": {
       "title": "Etapas do pipeline",
       "subtitle": "Ordene as etapas e defina a cor e a probabilidade de fecho de cada uma.",
@@ -3608,48 +3578,6 @@
         "loadTitle": "Não foi possível carregar as etapas",
         "loadDescription": "Ocorreu um problema ao carregar as etapas. Tente novamente.",
         "retry": "Tentar novamente"
-      }
-    },
-    "states": {
-      "title": "Estados e prioridades",
-      "subtitle": "Os estados do fluxo de tarefas e as cores das prioridades.",
-      "taskStatesTitle": "Estados de tarefas",
-      "taskStatesNotice": "Os estados são definidos pelo fluxo de trabalho e não podem ser alterados.",
-      "prioritiesTitle": "Prioridades",
-      "prioritiesNotice": "Ajuste a cor de cada prioridade.",
-      "color": "Cor",
-      "changeColor": "Alterar a cor de {name}",
-      "prioritySaved": "Cor de {name} atualizada.",
-      "taskStates": {
-        "a_fazer": {
-          "title": "A fazer",
-          "description": "Ainda não iniciada."
-        },
-        "em_curso": {
-          "title": "Em curso",
-          "description": "Em execução por um membro."
-        },
-        "em_revisao": {
-          "title": "Em revisão",
-          "description": "À espera de aprovação do gestor."
-        },
-        "concluida": {
-          "title": "Concluída",
-          "description": "Aprovada e fechada."
-        },
-        "bloqueada": {
-          "title": "Bloqueada",
-          "description": "Impedida por uma dependência."
-        }
-      },
-      "priorities": {
-        "baixa": "Baixa",
-        "media": "Média",
-        "alta": "Alta",
-        "urgente": "Urgente"
-      },
-      "errors": {
-        "saveFailed": "Não foi possível guardar."
       }
     },
     "capacity": {
@@ -3700,53 +3628,6 @@
         "retry": "Tentar novamente"
       }
     },
-    "tags": {
-      "title": "Etiquetas",
-      "subtitle": "Etiquetas reutilizáveis para classificar empresas, negócios e projetos.",
-      "createAction": "Nova etiqueta",
-      "createShort": "Nova",
-      "searchPlaceholder": "Procurar etiquetas…",
-      "emptyTitle": "Ainda não há etiquetas",
-      "emptyDescription": "Crie a primeira etiqueta para começar a classificar.",
-      "columns": {
-        "label": "Etiqueta",
-        "usage": "Utilização"
-      },
-      "usageValue": "{count, plural, =0 {sem utilização} one {# registo} other {# registos}}",
-      "created": "Etiqueta “{label}” criada.",
-      "updated": "Etiqueta “{label}” atualizada.",
-      "deleted": "Etiqueta “{label}” eliminada.",
-      "restored": "Etiqueta “{label}” reposta.",
-      "createTitle": "Nova etiqueta",
-      "editTitle": "Editar etiqueta",
-      "formDescription": "Escolha um nome claro e uma cor distinta.",
-      "preview": "Pré-visualização",
-      "previewPlaceholder": "Etiqueta",
-      "fields": {
-        "label": "Nome",
-        "color": "Cor"
-      },
-      "cancel": "Cancelar",
-      "saving": "A guardar…",
-      "save": "Guardar",
-      "actions": {
-        "edit": "Editar",
-        "delete": "Eliminar"
-      },
-      "deleteConfirm": {
-        "title": "Eliminar etiqueta?",
-        "description": "A etiqueta “{label}” será removida definitivamente.",
-        "descriptionInUse": "A etiqueta “{label}” está em {count, plural, one {# registo} other {# registos}}. Ao eliminar, deixa de estar associada."
-      },
-      "errors": {
-        "saveFailed": "Não foi possível guardar a etiqueta.",
-        "loadTitle": "Não foi possível carregar as etiquetas",
-        "loadDescription": "Ocorreu um problema ao carregar as etiquetas. Tente novamente.",
-        "retry": "Tentar novamente",
-        "labelRequired": "Indique um nome para a etiqueta.",
-        "labelDuplicate": "Já existe uma etiqueta com este nome."
-      }
-    },
     "notifications": {
       "title": "Notificações",
       "subtitle": "Escolha o que recebe dentro da app e por email.",
@@ -3789,29 +3670,6 @@
         "loadTitle": "Não foi possível carregar as preferências",
         "loadDescription": "Ocorreu um problema ao carregar as notificações. Tente novamente.",
         "retry": "Tentar novamente"
-      }
-    },
-    "theme": {
-      "title": "Tema",
-      "subtitle": "Ajuste a aparência e o idioma da interface.",
-      "appearanceTitle": "Aparência",
-      "languageTitle": "Idioma",
-      "languageLabel": "Idioma da interface",
-      "languageDescription": "Aplica-se apenas a si e não altera o endereço.",
-      "profileNote": "Outras preferências pessoais estão disponíveis no seu perfil.",
-      "options": {
-        "light": {
-          "title": "Claro",
-          "description": "O tema por omissão da LeiriTech."
-        },
-        "dark": {
-          "title": "Escuro",
-          "description": "Ideal para ambientes com pouca luz."
-        },
-        "system": {
-          "title": "Sistema",
-          "description": "Segue a preferência do dispositivo."
-        }
       }
     },
     "archive": {
@@ -3868,12 +3726,6 @@
         "loadDescription": "Ocorreu um problema ao carregar a exportação. Tente novamente.",
         "retry": "Tentar novamente"
       }
-    },
-    "audit": {
-      "title": "Auditoria",
-      "subtitle": "Achados da revisão forge-audit, com acompanhamento real de issues no GitHub por achado.",
-      "openTitle": "Em aberto ({count})",
-      "fixedTitle": "Corrigidos nesta sessão ({count})"
     }
   },
   "profile": {

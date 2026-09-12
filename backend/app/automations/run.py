@@ -20,7 +20,7 @@ import structlog
 from app.automations.registry import ORDER, REGISTRY, run_job
 from app.database.session import SessionLocal
 
-logger = structlog.get_logger("aurea.automation.run")
+logger = structlog.get_logger("leiritech.automation.run")
 
 
 def _run_one(name: str) -> int:

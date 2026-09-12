@@ -1,20 +1,20 @@
 services:
   db:
     image: postgres:16
-    container_name: aurea-postgres
+    container_name: leiritech-postgres
     environment:
-      POSTGRES_USER: aurea
-      POSTGRES_PASSWORD: aurea
-      POSTGRES_DB: aurea
+      POSTGRES_USER: leiritech
+      POSTGRES_PASSWORD: leiritech
+      POSTGRES_DB: leiritech
     ports:
       - "5433:5432"
     volumes:
-      - aurea_pgdata:/var/lib/postgresql/data
+      - leiritech_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aurea -d aurea"]
+      test: ["CMD-SHELL", "pg_isready -U leiritech -d leiritech"]
       interval: 5s
       timeout: 5s
       retries: 10
 
 volumes:
-  aurea_pgdata:
+  leiritech_pgdata:

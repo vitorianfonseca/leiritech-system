@@ -5,9 +5,9 @@ import { mkdirSync } from "node:fs";
 
 const BASE = process.env.E2E_BASE ?? "http://localhost:3200";
 const BACKEND = process.env.E2E_BACKEND ?? "localhost:8010";
-const EMAIL = process.env.E2E_EMAIL ?? "intglogin@aurea.pt";
-const PASSWORD = process.env.E2E_PASSWORD ?? "aurea-int-2026";
-const OUT = "/private/tmp/claude-501/-Users-vitoriafonseca-aurea-system/b2fda71f-8dd0-4145-9e4c-637f6c241357/scratchpad/shots";
+const EMAIL = process.env.E2E_EMAIL ?? "intglogin@leiritech.pt";
+const PASSWORD = process.env.E2E_PASSWORD ?? "leiritech-int-2026";
+const OUT = "/private/tmp/claude-501/-Users-vitoriafonseca-leiritech-system/b2fda71f-8dd0-4145-9e4c-637f6c241357/scratchpad/shots";
 mkdirSync(OUT, { recursive: true });
 
 const backendHits = [];

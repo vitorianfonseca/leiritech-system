@@ -17,7 +17,7 @@ import structlog
 
 from app.core.config import settings
 
-logger = structlog.get_logger("aurea.github")
+logger = structlog.get_logger("leiritech.github")
 
 _API_BASE = "https://api.github.com"
 _TIMEOUT = 15.0

@@ -35,7 +35,7 @@ from app.schemas.pipeline import (
 )
 from app.services import activity_service
 
-logger = structlog.get_logger("aurea.pipeline.opportunity")
+logger = structlog.get_logger("leiritech.pipeline.opportunity")
 
 ENTITY_TYPE = "opportunity"
 

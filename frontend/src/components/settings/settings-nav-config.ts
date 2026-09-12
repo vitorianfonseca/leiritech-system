@@ -38,15 +38,12 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     items: [
       { key: "leiritech", href: "/settings/leiritech", icon: Building2, adminOnly: true },
       { key: "members", href: "/settings/members", icon: Users, adminOnly: true },
-      { key: "roles", href: "/settings/roles", icon: ShieldCheck, adminOnly: true },
     ],
   },
   {
     labelKey: "commercial",
     items: [
       { key: "pipeline", href: "/settings/pipeline", icon: GitBranch, adminOnly: true },
-      { key: "states", href: "/settings/states", icon: Flag, adminOnly: true },
-      { key: "tags", href: "/settings/tags", icon: Tags, adminOnly: true },
       { key: "templates", href: "/settings/templates", icon: LayoutTemplate, adminOnly: false },
     ],
   },
@@ -61,7 +58,6 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     labelKey: "preferences",
     items: [
       { key: "notifications", href: "/settings/notifications", icon: Bell, adminOnly: false },
-      { key: "theme", href: "/settings/theme", icon: Palette, adminOnly: false },
     ],
   },
   {
@@ -74,7 +70,6 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     labelKey: "development",
     items: [
-      { key: "audit", href: "/settings/audit", icon: Bug, adminOnly: true },
     ],
   },
 ];

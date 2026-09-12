@@ -24,7 +24,7 @@ from app.automations._helpers import resolve_today
 from app.database.session import SessionLocal
 from app.services import proposal_service
 
-logger = structlog.get_logger("aurea.automation.proposal_expiry")
+logger = structlog.get_logger("leiritech.automation.proposal_expiry")
 
 CODE = "AUTO-04"
 

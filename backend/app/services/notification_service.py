@@ -29,7 +29,7 @@ from app.models.collaboration import Notification
 from app.models.user import User
 from app.repositories import notifications as notification_repo
 
-logger = structlog.get_logger("aurea.notification")
+logger = structlog.get_logger("leiritech.notification")
 
 
 # --------------------------------------------------------------------------- #

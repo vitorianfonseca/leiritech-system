@@ -3560,36 +3560,6 @@
         "invited": "Invitation sent to {email}."
       }
     },
-    "roles": {
-      "title": "Roles & permissions",
-      "subtitle": "What each role can see and do in LeiriTech.",
-      "notice": "These permissions are enforced consistently across the system.",
-      "summary": {
-        "admin": "Full access to configuration, the team and financial values.",
-        "gestor": "Manages commercial and delivery; financial values only with a grant.",
-        "membro": "Only accesses the projects and tasks they take part in."
-      },
-      "matrix": {
-        "capability": "Area"
-      },
-      "capabilities": {
-        "crm": "CRM (companies & contacts)",
-        "pipeline": "Pipeline & proposals",
-        "projects": "Projects",
-        "tasks": "Tasks",
-        "time": "Time tracking",
-        "financial": "Financial values",
-        "team": "Team & workload",
-        "reports": "Reports",
-        "settings": "Settings"
-      },
-      "levels": {
-        "full": "Full",
-        "scoped": "Own",
-        "grant": "With grant",
-        "none": "No access"
-      }
-    },
     "pipeline": {
       "title": "Pipeline stages",
       "subtitle": "Order the stages and set the colour and win probability of each one.",
@@ -3608,48 +3578,6 @@
         "loadTitle": "Couldn't load the stages",
         "loadDescription": "Something went wrong loading the stages. Please try again.",
         "retry": "Try again"
-      }
-    },
-    "states": {
-      "title": "States & priorities",
-      "subtitle": "The task workflow states and the priority colours.",
-      "taskStatesTitle": "Task states",
-      "taskStatesNotice": "States are defined by the workflow and can't be changed.",
-      "prioritiesTitle": "Priorities",
-      "prioritiesNotice": "Adjust the colour of each priority.",
-      "color": "Colour",
-      "changeColor": "Change the colour of {name}",
-      "prioritySaved": "{name} colour updated.",
-      "taskStates": {
-        "a_fazer": {
-          "title": "To do",
-          "description": "Not started yet."
-        },
-        "em_curso": {
-          "title": "In progress",
-          "description": "Being worked on by a member."
-        },
-        "em_revisao": {
-          "title": "In review",
-          "description": "Awaiting manager approval."
-        },
-        "concluida": {
-          "title": "Done",
-          "description": "Approved and closed."
-        },
-        "bloqueada": {
-          "title": "Blocked",
-          "description": "Held up by a dependency."
-        }
-      },
-      "priorities": {
-        "baixa": "Low",
-        "media": "Medium",
-        "alta": "High",
-        "urgente": "Urgent"
-      },
-      "errors": {
-        "saveFailed": "Couldn't save."
       }
     },
     "capacity": {
@@ -3700,53 +3628,6 @@
         "retry": "Try again"
       }
     },
-    "tags": {
-      "title": "Tags",
-      "subtitle": "Reusable tags to classify companies, deals and projects.",
-      "createAction": "New tag",
-      "createShort": "New",
-      "searchPlaceholder": "Search tags…",
-      "emptyTitle": "No tags yet",
-      "emptyDescription": "Create the first tag to start classifying.",
-      "columns": {
-        "label": "Tag",
-        "usage": "Usage"
-      },
-      "usageValue": "{count, plural, =0 {unused} one {# record} other {# records}}",
-      "created": "Tag “{label}” created.",
-      "updated": "Tag “{label}” updated.",
-      "deleted": "Tag “{label}” deleted.",
-      "restored": "Tag “{label}” restored.",
-      "createTitle": "New tag",
-      "editTitle": "Edit tag",
-      "formDescription": "Pick a clear name and a distinct colour.",
-      "preview": "Preview",
-      "previewPlaceholder": "Tag",
-      "fields": {
-        "label": "Name",
-        "color": "Colour"
-      },
-      "cancel": "Cancel",
-      "saving": "Saving…",
-      "save": "Save",
-      "actions": {
-        "edit": "Edit",
-        "delete": "Delete"
-      },
-      "deleteConfirm": {
-        "title": "Delete tag?",
-        "description": "The tag “{label}” will be permanently removed.",
-        "descriptionInUse": "The tag “{label}” is on {count, plural, one {# record} other {# records}}. Deleting it removes the association."
-      },
-      "errors": {
-        "saveFailed": "Couldn't save the tag.",
-        "loadTitle": "Couldn't load the tags",
-        "loadDescription": "Something went wrong loading the tags. Please try again.",
-        "retry": "Try again",
-        "labelRequired": "Enter a name for the tag.",
-        "labelDuplicate": "A tag with this name already exists."
-      }
-    },
     "notifications": {
       "title": "Notifications",
       "subtitle": "Choose what you receive in the app and by email.",
@@ -3789,29 +3670,6 @@
         "loadTitle": "Couldn't load the preferences",
         "loadDescription": "Something went wrong loading the notifications. Please try again.",
         "retry": "Try again"
-      }
-    },
-    "theme": {
-      "title": "Theme",
-      "subtitle": "Adjust the appearance and language of the interface.",
-      "appearanceTitle": "Appearance",
-      "languageTitle": "Language",
-      "languageLabel": "Interface language",
-      "languageDescription": "Applies only to you and doesn't change the URL.",
-      "profileNote": "Other personal preferences are available in your profile.",
-      "options": {
-        "light": {
-          "title": "Light",
-          "description": "LeiriTech's default theme."
-        },
-        "dark": {
-          "title": "Dark",
-          "description": "Great for low-light environments."
-        },
-        "system": {
-          "title": "System",
-          "description": "Follows your device preference."
-        }
       }
     },
     "archive": {
@@ -3868,12 +3726,6 @@
         "loadDescription": "Something went wrong loading the export. Please try again.",
         "retry": "Try again"
       }
-    },
-    "audit": {
-      "title": "Audit",
-      "subtitle": "Findings from the forge-audit review, with real GitHub issue tracking per finding.",
-      "openTitle": "Open ({count})",
-      "fixedTitle": "Fixed this session ({count})"
     }
   },
   "profile": {

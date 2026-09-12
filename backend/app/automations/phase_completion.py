@@ -20,7 +20,7 @@ from app.automations._helpers import LIVE_PROJECT_STATUSES, resolve_today
 from app.models.project import Project, ProjectPhase
 from app.services import phase_service
 
-logger = structlog.get_logger("aurea.automation.phase_completion")
+logger = structlog.get_logger("leiritech.automation.phase_completion")
 
 CODE = "AUTO-07"
 

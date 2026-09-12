@@ -19,7 +19,7 @@ from app.models.user import Invitation, User
 from app.schemas.auth import InvitationAccept, InvitationCreate
 from app.services.email_service import email_service
 
-logger = structlog.get_logger("aurea.invitations")
+logger = structlog.get_logger("leiritech.invitations")
 
 
 def _now() -> datetime:

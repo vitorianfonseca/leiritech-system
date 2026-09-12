@@ -112,30 +112,6 @@ class ActivityLog(AuditBase):
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
-class Tag(AuditBase):
-    __tablename__ = "tags"
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_tag_name"),
-    )
-
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
-    color: Mapped[str | None] = mapped_column(String(32), nullable=True)
-
-
-class EntityTag(AuditBase):
-    __tablename__ = "entity_tags"
-    __table_args__ = (
-        UniqueConstraint("tag_id", "entity_type", "entity_id", name="uq_entity_tag"),
-        Index("ix_entity_tags_entity", "entity_type", "entity_id"),
-    )
-
-    tag_id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False,
-    )
-    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
-    entity_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
-
-
 class GithubIssueLink(AuditBase):
     """A GitHub issue filed from within the app and linked back to whatever it
     was filed about — a Project (client delivery work) or an internal

@@ -8,11 +8,9 @@ from app.models.collaboration import (
     ActivityLog,
     Attachment,
     Comment,
-    EntityTag,
     GithubIssueLink,
     Mention,
     Notification,
-    Tag,
 )
 from app.models.crm import (
     Company,
@@ -56,11 +54,9 @@ __all__ = [
     "ActivityLog",
     "Attachment",
     "Comment",
-    "EntityTag",
     "GithubIssueLink",
     "Mention",
     "Notification",
-    "Tag",
     "Company",
     "Contact",
     "Interaction",

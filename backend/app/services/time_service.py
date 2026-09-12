@@ -36,7 +36,7 @@ from app.schemas.time import (
 )
 from app.services import activity_service, task_service
 
-logger = structlog.get_logger("aurea.time")
+logger = structlog.get_logger("leiritech.time")
 
 ENTITY_TYPE = "time_entry"
 

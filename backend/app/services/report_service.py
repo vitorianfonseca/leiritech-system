@@ -36,7 +36,7 @@ from app.schemas.reports import (
 )
 from app.services import finance_service, workload_service
 
-logger = structlog.get_logger("aurea.reports")
+logger = structlog.get_logger("leiritech.reports")
 
 
 def _now() -> datetime:

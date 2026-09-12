@@ -18,7 +18,7 @@ from app.models.time_entry import TimeEntry
 from app.models.user import User, UserPreference
 from app.services import auth_service, time_service
 
-logger = structlog.get_logger("aurea.users")
+logger = structlog.get_logger("leiritech.users")
 
 
 def _active_admin_count(db: Session, *, for_update: bool = False) -> int:

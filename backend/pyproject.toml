@@ -1,7 +1,7 @@
 [project]
-name = "aurea-backend"
+name = "leiritech-backend"
 version = "0.1.0"
-description = "Aurea System — FastAPI backend (CRM + project management for creative studios)"
+description = "LeiriTech — FastAPI backend (CRM + project management for creative studios)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

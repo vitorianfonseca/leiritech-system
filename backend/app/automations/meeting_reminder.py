@@ -19,7 +19,7 @@ from app.automations._helpers import group_key, resolve_now
 from app.models.crm import Meeting
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.meeting_reminder")
+logger = structlog.get_logger("leiritech.automation.meeting_reminder")
 
 CODE = "AUTO-10"
 WINDOW_HOURS = 24

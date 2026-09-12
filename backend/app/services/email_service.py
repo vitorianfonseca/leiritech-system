@@ -20,7 +20,7 @@ import structlog
 
 from app.core.config import settings
 
-logger = structlog.get_logger("aurea.email")
+logger = structlog.get_logger("leiritech.email")
 
 _PRODUCTION_LIKE_ENVIRONMENTS = {"production", "prod", "staging"}
 _RESEND_API_URL = "https://api.resend.com/emails"
@@ -92,7 +92,7 @@ class EmailService:
     def send_invitation(self, *, to: str, accept_link: str, role: str) -> None:
         self._send(
             to=to,
-            subject="Convite para o Aurea System",
+            subject="Convite para o LeiriTech",
             body=f"Foi convidado como {role}. Utilize o link para criar a sua conta.",
             link=accept_link,
         )
@@ -100,7 +100,7 @@ class EmailService:
     def send_password_reset(self, *, to: str, reset_link: str) -> None:
         self._send(
             to=to,
-            subject="Redefinição de palavra-passe — Aurea System",
+            subject="Redefinição de palavra-passe — LeiriTech",
             body="Recebemos um pedido para redefinir a sua palavra-passe.",
             link=reset_link,
         )

@@ -45,7 +45,7 @@ from app.schemas.tasks import (
 )
 from app.services import activity_service, notification_service, project_service
 
-logger = structlog.get_logger("aurea.task")
+logger = structlog.get_logger("leiritech.task")
 
 ENTITY_TYPE = "task"
 

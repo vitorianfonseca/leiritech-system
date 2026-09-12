@@ -17,7 +17,7 @@ from app.automations._helpers import group_key, resolve_now
 from app.models.time_entry import TimeEntry
 from app.services import notification_service
 
-logger = structlog.get_logger("aurea.automation.forgotten_timer")
+logger = structlog.get_logger("leiritech.automation.forgotten_timer")
 
 CODE = "AUTO-12"
 MAX_RUNNING_HOURS = 8

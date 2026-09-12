@@ -54,7 +54,7 @@ from app.schemas.workload import (
     WorkloadEntry,
 )
 
-logger = structlog.get_logger("aurea.workload")
+logger = structlog.get_logger("leiritech.workload")
 
 # BR-081 — role-dependent utilization targets (Admin-configurable via settings).
 _ROLE_TARGETS: dict[str, float] = {

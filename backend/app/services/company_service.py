@@ -23,7 +23,7 @@ from app.repositories import crm as crm_repo
 from app.schemas.crm import CompanyCreate, CompanyUpdate
 from app.services import activity_service
 
-logger = structlog.get_logger("aurea.crm.company")
+logger = structlog.get_logger("leiritech.crm.company")
 
 ENTITY_TYPE = "company"
 

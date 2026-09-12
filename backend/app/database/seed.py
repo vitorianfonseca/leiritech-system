@@ -8,7 +8,7 @@ Creates:
    variables. The password is Argon2-hashed via :mod:`app.core.security`; it is
    never persisted in plaintext and never hardcoded.
 
-2. Realistic Aurea (creative studio) demo data: team members, pipeline stages,
+2. Realistic LeiriTech (creative studio) demo data: team members, pipeline stages,
    companies, contacts, opportunities, proposals, projects (with health states),
    phases, tasks, payment milestones and a few interactions.
 
@@ -18,7 +18,7 @@ script is safe to run repeatedly — re-running it will not create duplicates.
 Usage::
 
     uv run python -m app.database.seed
-    uv run python -m app.database.seed --email founder@aurea.studio --password "s3cret-pass"
+    uv run python -m app.database.seed --email founder@leiritech.pt --password "s3cret-pass"
     SEED_ADMIN_PASSWORD="s3cret-pass" uv run python -m app.database.seed
 
 Money is stored as **integer EUR cents**. Enum/state fields store stable
@@ -55,8 +55,8 @@ from app.models.user import User, UserPreference
 # default and NO hardcoded fallback — outside development it must be supplied,
 # and in development an absent password is randomly generated and shown once, so
 # a known/weak credential is never baked into the repo or silently seeded.
-_DEFAULT_ADMIN_EMAIL = "admin@aurea.studio"
-_DEFAULT_ADMIN_NAME = "Aurea Admin"
+_DEFAULT_ADMIN_EMAIL = "admin@leiritech.pt"
+_DEFAULT_ADMIN_NAME = "LeiriTech Admin"
 
 
 def _is_development() -> bool:
@@ -120,11 +120,11 @@ def seed_admin(db: Session, *, name: str, email: str, password: str) -> User:
 # Team members (~5, in addition to the admin)
 # --------------------------------------------------------------------------- #
 _MEMBERS = [
-    ("Beatriz Lopes", "beatriz@aurea.studio", "gestor", 40, 3500, True, True),
-    ("Diogo Ferreira", "diogo@aurea.studio", "membro", 40, 2800, False, False),
-    ("Carla Nunes", "carla@aurea.studio", "membro", 32, 2600, False, False),
-    ("Rui Marques", "rui@aurea.studio", "membro", 40, 3000, False, False),
-    ("Sofia Antunes", "sofia@aurea.studio", "membro", 24, 2500, False, False),
+    ("Beatriz Lopes", "beatriz@leiritech.pt", "gestor", 40, 3500, True, True),
+    ("Diogo Ferreira", "diogo@leiritech.pt", "membro", 40, 2800, False, False),
+    ("Carla Nunes", "carla@leiritech.pt", "membro", 32, 2600, False, False),
+    ("Rui Marques", "rui@leiritech.pt", "membro", 40, 3000, False, False),
+    ("Sofia Antunes", "sofia@leiritech.pt", "membro", 24, 2500, False, False),
 ]
 
 
@@ -565,7 +565,7 @@ def run_seed(
     # the admin credential across accounts (one of them is a Gestor with grants).
     members_map = seed_members(db, default_password=demo_password)
     members = list(members_map.values())
-    manager = members_map["beatriz@aurea.studio"]  # the Gestor
+    manager = members_map["beatriz@leiritech.pt"]  # the Gestor
     owners = [admin, *members]
 
     stages = seed_stages(db, admin.id)
@@ -639,7 +639,7 @@ def _resolve_demo(args: argparse.Namespace) -> tuple[bool, str | None, bool]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="app.database.seed",
-        description="Idempotent seed: first admin + Aurea demo data (Issue #11).",
+        description="Idempotent seed: first admin + LeiriTech demo data (Issue #11).",
     )
     parser.add_argument("--name", default=None, help="admin display name")
     parser.add_argument("--email", default=None, help="admin email")
@@ -651,7 +651,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--demo",
         action="store_true",
-        help="also seed Aurea demo data (default in development; opt-in elsewhere)",
+        help="also seed LeiriTech demo data (default in development; opt-in elsewhere)",
     )
     parser.add_argument(
         "--rich",

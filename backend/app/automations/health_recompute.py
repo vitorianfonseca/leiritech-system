@@ -25,7 +25,7 @@ from app.automations._helpers import (
 from app.models.project import Project
 from app.services import notification_service, project_service
 
-logger = structlog.get_logger("aurea.automation.health_recompute")
+logger = structlog.get_logger("leiritech.automation.health_recompute")
 
 CODE = "AUTO-05"
 

@@ -1,4 +1,4 @@
-# Aurea System — Backend
+# LeiriTech — Backend
 
 FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL. Managed with `uv`.
 
@@ -7,7 +7,7 @@ FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL. Managed with `uv`.
 ```bash
 cd backend
 cp .env.example .env            # adjust if needed; defaults target docker-compose db
-docker compose up -d            # Postgres 16 on localhost:5433 (user/pass/db = aurea)
+docker compose up -d            # Postgres 16 on localhost:5433 (user/pass/db = leiritech)
 uv sync --extra dev             # install deps
 uv run alembic upgrade head     # create all tables + indexes + extensions
 uv run uvicorn app.main:app --reload
