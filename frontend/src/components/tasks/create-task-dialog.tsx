@@ -11,12 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useQuery } from "@tanstack/react-query";
 import { SearchableCombobox } from "@/components/shared";
-import {
-  TASK_DIRECTORY,
-  phaseOptions,
-  projectOptions,
-} from "@/lib/api/tasks";
+import { projectsApi } from "@/lib/api/projects";
+import { TASK_DIRECTORY, projectOptions } from "@/lib/api/tasks";
 import {
   TASK_PRIORITIES,
   type CreateTaskInput,
@@ -29,6 +27,14 @@ export interface CreateTaskDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Project ids the current user may create tasks on (H7). Empty = all. */
   allowedProjectIds: string[] | null;
+  /**
+   * Real projects to choose from. Without this the picker falls back to the
+   * tasks mock, which holds no backend ids — so the dialog offered projects
+   * that do not exist and could not offer the ones that do.
+   */
+  projects?: { value: string; label: string }[];
+  /** Preselect a project (and lock it) when creating from inside one. */
+  defaultProjectId?: string;
   onCreate: (input: CreateTaskInput) => Promise<void>;
 }
 
@@ -38,12 +44,14 @@ export function CreateTaskDialog({
   open,
   onOpenChange,
   allowedProjectIds,
+  projects: realProjects,
+  defaultProjectId,
   onCreate,
 }: CreateTaskDialogProps) {
   const t = useTranslations("tasks");
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [projectId, setProjectId] = React.useState<string | null>(null);
+  const [projectId, setProjectId] = React.useState<string | null>(defaultProjectId ?? null);
   const [phaseId, setPhaseId] = React.useState<string | null>(null);
   const [priority, setPriority] = React.useState<TaskPriority>("normal");
   const [dueDate, setDueDate] = React.useState("");
@@ -64,7 +72,7 @@ export function CreateTaskDialog({
     if (open) {
       setTitle("");
       setDescription("");
-      setProjectId(null);
+      setProjectId(defaultProjectId ?? null);
       setPhaseId(null);
       setPriority("normal");
       setDueDate("");
@@ -75,16 +83,31 @@ export function CreateTaskDialog({
   }
 
   const projects = React.useMemo(() => {
+    if (realProjects) {
+      return allowedProjectIds
+        ? realProjects.filter((p) => allowedProjectIds.includes(p.value))
+        : realProjects;
+    }
     const all = projectOptions();
     const scoped = allowedProjectIds
       ? all.filter((p) => allowedProjectIds.includes(p.id))
       : all;
     return scoped.map((p) => ({ value: p.id, label: p.name }));
-  }, [allowedProjectIds]);
+  }, [allowedProjectIds, realProjects]);
 
+  // Real phases for the chosen project. `phaseOptions` reads the tasks mock,
+  // which holds nothing for a backend project id — so the phase picker was
+  // always empty and every task landed outside a phase. That is why phases
+  // reported "0/0 tasks" no matter how much work a project had.
+  const { data: phaseRows } = useQuery({
+    queryKey: ["project-phases", projectId],
+    queryFn: () => projectsApi.listPhases(projectId as string),
+    enabled: projectId !== null,
+    staleTime: 60_000,
+  });
   const phases = React.useMemo(
-    () => (projectId ? phaseOptions(projectId).map((p) => ({ value: p.id, label: p.name })) : []),
-    [projectId]
+    () => (phaseRows ?? []).map((p) => ({ value: p.id, label: p.name })),
+    [phaseRows]
   );
 
   async function handleSubmit(e: React.FormEvent) {

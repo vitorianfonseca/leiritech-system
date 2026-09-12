@@ -39,10 +39,12 @@ export interface TasksViewProps {
    * one answer.
    */
   projectId?: string;
+  /** Name for `projectId`, so the scoped project is offered even with no tasks. */
+  projectName?: string;
 }
 
 /** Tasks workspace (F10): List / Kanban / Calendar + detail side panel. */
-export function TasksView({ user, projectId }: TasksViewProps) {
+export function TasksView({ user, projectId, projectName }: TasksViewProps) {
   const t = useTranslations("tasks");
   const qc = useQueryClient();
   const { id: userId, role } = user;
@@ -89,10 +91,13 @@ export function TasksView({ user, projectId }: TasksViewProps) {
     for (const task of tasks) {
       if (task.projectId && task.projectName) map.set(task.projectId, task.projectName);
     }
+    // A project with no tasks yet has nothing to derive from, and that is
+    // exactly when someone needs to create the first one.
+    if (projectId && projectName && !map.has(projectId)) map.set(projectId, projectName);
     return [...map.entries()]
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) => a.label.localeCompare(b.label, "pt-PT"));
-  }, [tasks]);
+  }, [tasks, projectId, projectName]);
 
   const assignees = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -362,6 +367,8 @@ export function TasksView({ user, projectId }: TasksViewProps) {
         open={createOpen}
         onOpenChange={setCreateOpen}
         allowedProjectIds={allowedProjectIds}
+        projects={projects}
+        defaultProjectId={projectId}
         onCreate={handleCreate}
       />
 

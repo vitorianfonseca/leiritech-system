@@ -300,6 +300,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               project={project}
               canManage={canManage && !isArchived}
               onEdit={() => setEditOpen(true)}
+              onChanged={refresh}
             />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
@@ -315,6 +316,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
                 avatarUrl: user.avatarUrl,
               }}
               projectId={project.id}
+              projectName={project.name}
             />
           </Tabs.Panel>
           <Tabs.Panel value="phases">

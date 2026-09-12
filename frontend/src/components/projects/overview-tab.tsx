@@ -4,8 +4,6 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   CalendarClock,
-  Users,
-  ListChecks,
   ShieldAlert,
   Lightbulb,
   CircleCheck,
@@ -16,21 +14,23 @@ import {
   Plus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EmptyState, ProgressBar } from "@/components/shared";
+import { EmptyState } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/api/projects-types";
-import { PhaseStateBadge, DeliveryMilestoneBadge, TaskFlagBadge } from "./status-badges";
+import { DeliveryMilestoneBadge, TaskFlagBadge } from "./status-badges";
 import { startReadiness } from "./lifecycle-actions";
-import { formatDate, initials } from "./project-format";
+import { formatDate } from "./project-format";
+import { TeamCard } from "./team-card";
 
 export interface OverviewTabProps {
   project: Project;
   canManage: boolean;
   /** Opens the project editor — the one place these fields are written. */
   onEdit: () => void;
+  /** Refetch after a write made from inside a card. */
+  onChanged: () => Promise<void> | void;
 }
 
 /**
@@ -86,7 +86,7 @@ function pack(blocks: Block[]): Block[][] {
  *
  * And what does render reaches both edges. See `pack` above.
  */
-export function OverviewTab({ project, canManage, onEdit }: OverviewTabProps) {
+export function OverviewTab({ project, canManage, onEdit, onChanged }: OverviewTabProps) {
   const t = useTranslations("projects.overview");
   const tEdit = useTranslations("projects.editDialog");
 
@@ -169,42 +169,17 @@ export function OverviewTab({ project, canManage, onEdit }: OverviewTabProps) {
   }
 
   // Team stays even when empty: nobody assigned is a fact someone has to act
-  // on, not the absence of one.
+  // on, not the absence of one. The card owns its own assign/unassign.
   blocks.push({
     key: "team",
     width: "narrow",
-    render: (full) => (
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-            {t("teamTitle")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {project.team.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("noTeam")}</p>
-          ) : (
-            // Across the full measure the roster runs as a row; a stacked list
-            // at that width is a column of names against a long empty stripe.
-            <ul className={cn("space-y-2.5", full && "flex flex-wrap gap-x-8 gap-y-3 space-y-0")}>
-              {project.team.map((m) => (
-                <li key={m.userId} className="flex items-center gap-2.5">
-                  <Avatar className="size-8">
-                    <AvatarFallback className="text-xs">{initials(m.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-foreground">{m.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {m.userId === project.managerId ? t("managerLabel") : m.roleLabel}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+    render: () => (
+      <TeamCard
+        project={project}
+        canManage={canManage}
+        onChanged={onChanged}
+        className="h-full"
+      />
     ),
   });
 
@@ -232,60 +207,6 @@ export function OverviewTab({ project, canManage, onEdit }: OverviewTabProps) {
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
-      ),
-    });
-  }
-
-  if (project.phases.length > 0) {
-    blocks.push({
-      key: "phases",
-      width: "wide",
-      render: () => (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ListChecks className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-              {t("phaseProgressTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
-            {project.phases.map((ph) => {
-              // A phase marked completed is at 100%, whatever its task count
-              // says. Deriving the bar purely from tasksDone/tasksTotal
-              // rendered "Completed — 0%" on any phase tracked outside the
-              // task list, which reads as a broken number rather than an
-              // empty one.
-              const pct =
-                ph.state === "completed"
-                  ? 100
-                  : ph.tasksTotal > 0
-                    ? Math.round((ph.tasksDone / ph.tasksTotal) * 100)
-                    : 0;
-              return (
-                <div key={ph.id} className="space-y-1">
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate text-foreground">{ph.name}</span>
-                    <PhaseStateBadge state={ph.state} />
-                  </div>
-                  <ProgressBar
-                    value={pct}
-                    tone={ph.state === "completed" ? "success" : "primary"}
-                    size="sm"
-                    showValue
-                    aria-label={ph.name}
-                  />
-                  {/* Names the denominator, so a 0% bar is legibly "nothing
-                      started" rather than something broken. */}
-                  <p className="pt-0.5 text-xs text-muted-foreground">
-                    {ph.tasksTotal > 0
-                      ? t("phaseTasks", { done: ph.tasksDone, total: ph.tasksTotal })
-                      : t("phaseNoTasks")}
-                  </p>
-                </div>
-              );
-            })}
           </CardContent>
         </Card>
       ),

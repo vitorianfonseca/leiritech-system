@@ -60,6 +60,10 @@ class PhaseResponse(BaseModel):
     deadline: date | None
     order_index: int
     progress: int
+    # Counts, not just a percentage. The UI showed "0/0 tasks" on every phase
+    # because it had no per-phase totals to show and defaulted them to zero.
+    tasks_total: int = 0
+    tasks_done: int = 0
     final_milestone_id: uuid.UUID | None
     status: str
     created_at: datetime

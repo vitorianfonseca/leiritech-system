@@ -12,7 +12,7 @@ import uuid
 from collections.abc import Iterable
 from datetime import UTC, datetime
 
-from sqlalchemy import ColumnElement, Select, and_, func, or_, select
+from sqlalchemy import ColumnElement, Select, and_, case, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.finance import PaymentMilestone
@@ -154,6 +154,26 @@ def phase_names_for(db: Session, phase_ids: Iterable[uuid.UUID]) -> dict[uuid.UU
         select(ProjectPhase.id, ProjectPhase.name).where(ProjectPhase.id.in_(ids))
     ).all()
     return {row[0]: row[1] for row in rows}
+
+
+def phase_task_counts(
+    db: Session, project_id: uuid.UUID
+) -> dict[uuid.UUID, tuple[int, int]]:
+    """Per-phase (total, done) task counts for a project, in one query.
+
+    Archived tasks are excluded: a phase's progress is about the work that
+    still counts, and leaving them in makes a tidied phase look unfinished.
+    """
+    rows = db.execute(
+        select(
+            Task.phase_id,
+            func.count(Task.id),
+            func.count(case((Task.status == "done", 1))),
+        )
+        .where(Task.project_id == project_id, Task.archived_at.is_(None))
+        .group_by(Task.phase_id)
+    ).all()
+    return {row[0]: (int(row[1]), int(row[2])) for row in rows if row[0] is not None}
 
 
 def get_member(

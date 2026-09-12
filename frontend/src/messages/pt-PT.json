@@ -2531,6 +2531,25 @@
       "failed": "Não foi possível guardar as alterações.",
       "edit": "Editar projeto",
       "addDescription": "Adicionar descrição"
+    },
+    "team": {
+      "add": "Adicionar membro",
+      "addTitle": "Adicionar à equipa",
+      "person": "Pessoa",
+      "roleLabel": "Função no projeto",
+      "rolePlaceholder": "ex.: design, engenharia",
+      "cancel": "Cancelar",
+      "confirm": "Adicionar",
+      "adding": "A adicionar…",
+      "added": "{name} adicionado à equipa.",
+      "addFailed": "Não foi possível adicionar o membro.",
+      "remove": "Remover da equipa",
+      "removeConfirm": "Remover {name} da equipa?",
+      "removeBody": "As tarefas e o tempo registado ficam no projeto.",
+      "removed": "{name} removido da equipa.",
+      "removeFailed": "Não foi possível remover o membro.",
+      "alreadyIn": "Já está na equipa.",
+      "noneLeft": "Toda a gente já está na equipa."
     }
   },
   "notifications": {

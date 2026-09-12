@@ -2531,6 +2531,25 @@
       "failed": "Could not save the changes.",
       "edit": "Edit project",
       "addDescription": "Add a description"
+    },
+    "team": {
+      "add": "Add member",
+      "addTitle": "Add to the team",
+      "person": "Person",
+      "roleLabel": "Role on the project",
+      "rolePlaceholder": "e.g. design, engineering",
+      "cancel": "Cancel",
+      "confirm": "Add",
+      "adding": "Adding…",
+      "added": "{name} added to the team.",
+      "addFailed": "Could not add the member.",
+      "remove": "Remove from the team",
+      "removeConfirm": "Remove {name} from the team?",
+      "removeBody": "Their tasks and logged time stay with the project.",
+      "removed": "{name} removed from the team.",
+      "removeFailed": "Could not remove the member.",
+      "alreadyIn": "Already on the team.",
+      "noneLeft": "Everyone is already on the team."
     }
   },
   "notifications": {

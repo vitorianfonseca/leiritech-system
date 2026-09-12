@@ -592,6 +592,8 @@ interface ApiPhase {
   deadline: string | null;
   orderIndex: number;
   progress: number;
+  tasksTotal: number | null;
+  tasksDone: number | null;
   finalMilestoneId: string | null;
   status: string;
   createdAt: string;
@@ -645,10 +647,8 @@ function mapPhase(ph: ApiPhase): ProjectPhase {
     name: ph.name,
     order: ph.orderIndex + 1,
     state: ph.status as PhaseState,
-    // INTEGRATION-GAP: tasksTotal/tasksDone — backend exposes a phase progress
-    // percentage (mapped into project.progress) but no per-task counts (#34).
-    tasksTotal: 0,
-    tasksDone: 0,
+    tasksTotal: ph.tasksTotal ?? 0,
+    tasksDone: ph.tasksDone ?? 0,
     dueDate: ph.deadline,
     // INTEGRATION-GAP: blockerReason — not returned by the phase endpoint.
     blockerReason: null,
@@ -801,6 +801,13 @@ export interface ProjectsApi {
   /** Undo-only: revert a project to a prior lifecycle state (bypasses guards). */
   restoreState(id: string, state: ProjectState, actorId: string): Promise<Project>;
   publishHealth(id: string, input: PublishHealthInput, actorId: string): Promise<Project>;
+  /** Assign someone to the project. `roleLabel` is free text (e.g. "design"). */
+  /** Phases of a project, for a picker. Real rows — `phaseOptions` in the
+   *  tasks mock returns nothing for a backend project id. */
+  listPhases(projectId: string): Promise<{ id: string; name: string }[]>;
+  addMember(id: string, userId: string, roleLabel: string): Promise<Project>;
+  /** Unassign someone. Their tasks and logged time stay with the project. */
+  removeMember(id: string, userId: string): Promise<Project>;
   addPhase(id: string, input: PhaseInput, actorId: string): Promise<Project>;
   updatePhase(id: string, phaseId: string, input: PhaseInput, actorId: string): Promise<Project>;
   removePhase(id: string, phaseId: string, actorId: string): Promise<Project>;
@@ -981,6 +988,40 @@ export const projectsApi: ProjectsApi = {
       // The dominant 422 on this route is a missing override reason (BR-031).
       if (err instanceof HttpError && err.status === 422)
         throw new ProjectError("reason_required");
+      throw mapProjectError(err);
+    }
+  },
+
+  async listPhases(projectId) {
+    try {
+      const rows = await http.get<ApiPhase[]>(`/phases`, {
+        query: { project_id: projectId },
+      });
+      return rows.map((p) => ({ id: p.id, name: p.name }));
+    } catch {
+      // A picker with no options is better than a failed dialog: the task can
+      // still be created without a phase and moved later.
+      return [];
+    }
+  },
+
+  async addMember(id, userId, roleLabel) {
+    try {
+      await http.post(`/projects/${id}/members`, {
+        user_id: userId,
+        role_in_project: roleLabel || null,
+      });
+      return await fetchFullProject(id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
+  },
+
+  async removeMember(id, userId) {
+    try {
+      await http.delete(`/projects/${id}/members/${userId}`);
+      return await fetchFullProject(id);
+    } catch (err) {
       throw mapProjectError(err);
     }
   },

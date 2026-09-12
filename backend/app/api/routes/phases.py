@@ -28,6 +28,7 @@ from app.schemas.phases import (
     PhaseTransition,
     PhaseUpdate,
 )
+from app.repositories import projects as project_repo
 from app.services import phase_service
 
 router = APIRouter()
@@ -39,6 +40,16 @@ DbSession = Annotated[Session, Depends(get_db)]
 # --------------------------------------------------------------------------- #
 # Phases
 # --------------------------------------------------------------------------- #
+def _phase_response(phase, counts: dict) -> PhaseResponse:
+    """Attach the phase's task counts. `counts` is fetched once per request by
+    the caller, so a project's phases cost one query rather than one each."""
+    resp = PhaseResponse.model_validate(phase)
+    total, done = counts.get(phase.id, (0, 0))
+    resp.tasks_total = total
+    resp.tasks_done = done
+    return resp
+
+
 @router.get("", response_model=list[PhaseResponse])
 def list_phases(
     project_id: uuid.UUID,
@@ -46,7 +57,8 @@ def list_phases(
     db: DbSession,
 ) -> list[PhaseResponse]:
     phases = phase_service.list_phases(db, user, project_id)
-    return [PhaseResponse.model_validate(p) for p in phases]
+    counts = project_repo.phase_task_counts(db, project_id)
+    return [_phase_response(p, counts) for p in phases]
 
 
 @router.post("", response_model=PhaseResponse, status_code=status.HTTP_201_CREATED)
@@ -56,13 +68,13 @@ def create_phase(
     db: DbSession,
 ) -> PhaseResponse:
     phase = phase_service.create_phase(db, user, payload)
-    return PhaseResponse.model_validate(phase)
+    return _phase_response(phase, project_repo.phase_task_counts(db, phase.project_id))
 
 
 @router.get("/{phase_id}", response_model=PhaseResponse)
 def get_phase(phase_id: uuid.UUID, user: CurrentUser, db: DbSession) -> PhaseResponse:
     phase = phase_service.get_phase_or_404(db, user, phase_id)
-    return PhaseResponse.model_validate(phase)
+    return _phase_response(phase, project_repo.phase_task_counts(db, phase.project_id))
 
 
 @router.patch("/{phase_id}", response_model=PhaseResponse)
@@ -73,7 +85,7 @@ def update_phase(
     db: DbSession,
 ) -> PhaseResponse:
     phase = phase_service.update_phase(db, user, phase_id, payload)
-    return PhaseResponse.model_validate(phase)
+    return _phase_response(phase, project_repo.phase_task_counts(db, phase.project_id))
 
 
 @router.post("/{phase_id}/transition", response_model=PhaseResponse)
@@ -84,7 +96,7 @@ def transition_phase(
     db: DbSession,
 ) -> PhaseResponse:
     phase = phase_service.transition_phase(db, user, phase_id, payload.status)
-    return PhaseResponse.model_validate(phase)
+    return _phase_response(phase, project_repo.phase_task_counts(db, phase.project_id))
 
 
 @router.post("/{phase_id}/complete", response_model=PhaseResponse)
@@ -94,7 +106,7 @@ def complete_phase(
     db: DbSession,
 ) -> PhaseResponse:
     phase = phase_service.complete_phase(db, user, phase_id)
-    return PhaseResponse.model_validate(phase)
+    return _phase_response(phase, project_repo.phase_task_counts(db, phase.project_id))
 
 
 # --------------------------------------------------------------------------- #
