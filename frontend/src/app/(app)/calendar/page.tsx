@@ -19,7 +19,10 @@ export default async function CalendarPage() {
   }
 
   return (
-    <div className="space-y-6">
+    // The month should be readable without scrolling for it, so the page
+    // claims the viewport minus the shell's chrome and hands the rest to the
+    // calendar. The footer sits below the fold, which is where it belongs.
+    <div className="flex h-[calc(100dvh-7.5rem)] flex-col gap-5">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <CalendarView user={{ id: session.id, role: session.role }} />
     </div>

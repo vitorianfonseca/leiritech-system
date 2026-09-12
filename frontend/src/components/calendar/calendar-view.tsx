@@ -123,7 +123,9 @@ export function CalendarView({
   const isEmpty = !isLoading && !isError && events.length === 0;
 
   return (
-    <div className="space-y-4">
+    // A column that fills its parent, so a page can hand the calendar the rest
+    // of the viewport and have the month fit rather than run past the fold.
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
@@ -175,7 +177,7 @@ export function CalendarView({
       ) : null}
 
       {/* Body */}
-      <div className="rounded-xl border border-border bg-card p-2 sm:p-3">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card p-2 sm:p-3">
         {isLoading ? (
           <div className="p-2">
             <SkeletonList rows={6} media={false} />

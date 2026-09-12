@@ -35,12 +35,14 @@ export function MonthView({
 
   // The seven weekday headers, derived from the first grid row (Monday-first).
   const weekdayLabels = days.slice(0, 7).map((d) => weekdayFmt.format(d));
+  // Five or six, depending on how the month falls.
+  const weeks = days.length / 7;
 
   return (
     // The grid keeps a comfortable min width and scrolls inside its own
     // container on narrow screens — the page never scrolls horizontally.
-    <div className="overflow-x-auto">
-      <div className="min-w-[720px]">
+    <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+      <div className="flex min-h-0 min-w-[720px] flex-1 flex-col">
         <div className="grid grid-cols-7 border-b border-border">
           {weekdayLabels.map((label, i) => (
             <div
@@ -51,7 +53,14 @@ export function MonthView({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        {/* Rows share the space instead of each claiming a fixed 104px, which is
+            what pushed a six-week month past the fold. `minmax(0,1fr)` lets a
+            row shrink; the cell clips its own overflow and the "+N more" chip
+            already covers what does not fit. */}
+        <div
+          className="grid min-h-0 flex-1 grid-cols-7"
+          style={{ gridTemplateRows: `repeat(${weeks}, minmax(0, 1fr))` }}
+        >
           {days.map((day) => {
             const dayEvents = eventsOnDay(events, day);
             const inMonth = isSameMonth(day, anchor);
@@ -61,7 +70,7 @@ export function MonthView({
               <div
                 key={day.toISOString()}
                 className={cn(
-                  "min-h-[104px] border-b border-r border-border p-1.5 [&:nth-child(7n)]:border-r-0",
+                  "flex min-h-[72px] flex-col overflow-hidden border-b border-r border-border p-1.5 [&:nth-child(7n)]:border-r-0",
                   !inMonth && "bg-muted"
                 )}
               >
@@ -80,7 +89,7 @@ export function MonthView({
                     {day.getDate()}
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="min-h-0 flex-1 space-y-1 overflow-hidden">
                   {dayEvents.slice(0, MAX_CHIPS_PER_CELL).map((event) => (
                     <EventChip
                       key={event.id}
