@@ -90,7 +90,7 @@ export function TaskBoard({ tasks, canDrag, onOpen, onRequestMove }: TaskBoardPr
             count={byState.get(state)?.length ?? 0}
           >
             {(byState.get(state) ?? []).length === 0 ? (
-              <p className="px-1 py-6 text-center text-xs text-muted-foreground/70">
+              <p className="px-1 py-6 text-center text-xs text-muted-foreground">
                 {t("board.columnEmpty")}
               </p>
             ) : (

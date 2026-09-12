@@ -147,7 +147,7 @@ export function WelcomeBanner({
         width={1000}
         height={568}
         priority
-        className="pointer-events-none absolute right-6 bottom-0 hidden h-[88%] w-auto select-none md:block lg:right-10 dark:invert dark:hue-rotate-180"
+        className="brand-illustration pointer-events-none absolute right-6 bottom-0 hidden h-[88%] w-auto select-none md:block lg:right-10 dark:invert dark:hue-rotate-180"
       />
     </motion.section>
   );

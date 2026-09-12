@@ -62,6 +62,14 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${satoshi.variable} ${plexMono.variable} h-full antialiased`}
     >
+      {/* Applied before first paint. next-themes does the same for light/dark;
+          without it the page renders one frame in the default accent and then
+          swaps, which is the flash a theming system exists to avoid. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{var a=localStorage.getItem("leiritech-accent");if(a&&a!=="rose")document.documentElement.dataset.accent=a}catch(e){}`,
+        }}
+      />
       <body className="min-h-full">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AppProviders textSize={textSize}>{children}</AppProviders>

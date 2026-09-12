@@ -246,7 +246,15 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "toggle": "Toggle theme"
+    "toggle": "Toggle theme",
+    "accent": {
+      "label": "Colour",
+      "rose": "Rose",
+      "blue": "Blue",
+      "violet": "Violet",
+      "green": "Green",
+      "amber": "Amber"
+    }
   },
   "locale": {
     "label": "Language",

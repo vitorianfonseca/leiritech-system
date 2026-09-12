@@ -246,7 +246,15 @@
     "light": "Claro",
     "dark": "Escuro",
     "system": "Sistema",
-    "toggle": "Alternar tema"
+    "toggle": "Alternar tema",
+    "accent": {
+      "label": "Cor",
+      "rose": "Rosa",
+      "blue": "Azul",
+      "violet": "Violeta",
+      "green": "Verde",
+      "amber": "Âmbar"
+    }
   },
   "locale": {
     "label": "Idioma",
