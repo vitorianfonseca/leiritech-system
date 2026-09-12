@@ -74,7 +74,7 @@ export function TaskSidePanel(props: TaskSidePanelProps) {
     <DetailSidePanel
       open={open}
       onOpenChange={onOpenChange}
-      widthClassName="w-full sm:max-w-lg md:max-w-xl"
+      widthClassName="sm:max-w-2xl md:max-w-3xl"
       header={
         task ? (
           <div className="min-w-0">

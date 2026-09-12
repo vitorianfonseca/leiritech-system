@@ -26,15 +26,23 @@ export interface DetailSidePanelProps {
   footer?: React.ReactNode;
   /** Scrollable body content. */
   children?: React.ReactNode;
-  side?: "left" | "right";
-  /** Panel width (Tailwind class), defaults to a comfortable detail width. */
+  /** Dialog width (Tailwind class), defaults to a comfortable detail width. */
   widthClassName?: string;
 }
 
 /**
- * Slide-over detail panel. Motion 150–300ms via framer-motion, collapsing to an
- * instant fade for `prefers-reduced-motion`. Provides its own focus trap,
- * Escape-to-close, scroll lock and focus restore, with header/tabs/footer slots.
+ * Centred detail dialog.
+ *
+ * This used to slide in from the right edge. A slide-over puts the record it
+ * opens hard against the window frame and leaves the page it came from
+ * half-visible beside it, so the eye keeps being pulled back to a board it can
+ * no longer use. Centring it gives the record the middle of the screen and
+ * lets the backdrop do the work of saying the rest is inactive.
+ *
+ * Opens with a short rise and scale rather than a lateral sweep, collapsing to
+ * an instant fade for `prefers-reduced-motion`. Provides its own focus trap,
+ * Escape-to-close, scroll lock and focus restore, with header/tabs/footer
+ * slots.
  */
 export function DetailSidePanel({
   open,
@@ -45,8 +53,7 @@ export function DetailSidePanel({
   tabs,
   footer,
   children,
-  side = "right",
-  widthClassName = "w-full sm:max-w-md md:max-w-lg",
+  widthClassName = "sm:max-w-xl md:max-w-2xl",
 }: DetailSidePanelProps) {
   const t = useTranslations("shared.sidePanel");
   const reduceMotion = useReducedMotion();
@@ -106,12 +113,10 @@ export function DetailSidePanel({
 
   if (!mounted) return null;
 
-  const offset = side === "right" ? "100%" : "-100%";
-
   return createPortal(
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           <motion.div
             className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
             initial={{ opacity: 0 }}
@@ -129,15 +134,13 @@ export function DetailSidePanel({
             tabIndex={-1}
             onKeyDown={onKeyDown}
             className={cn(
-              "absolute inset-y-0 flex flex-col bg-card text-card-foreground shadow-lg outline-none",
-              side === "right" ? "right-0 border-l" : "left-0 border-r",
-              "border-border",
+              "relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-[0_8px_24px_-8px_oklch(0.28_0.06_285/0.18),0_32px_64px_-24px_oklch(0.28_0.06_285/0.28)] outline-none",
               widthClassName
             )}
-            initial={reduceMotion ? { opacity: 0 } : { x: offset }}
-            animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
-            exit={reduceMotion ? { opacity: 0 } : { x: offset }}
-            transition={{ duration: reduceMotion ? 0 : 0.25, ease: "easeOut" }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.985 }}
+            transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-start gap-3 border-b border-border px-5 py-4">
               <div className="min-w-0 flex-1">

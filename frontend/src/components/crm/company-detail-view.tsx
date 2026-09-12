@@ -244,7 +244,7 @@ export function CompanyDetailView({ companyId, user }: CompanyDetailViewProps) {
                   className={cn(
                     "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-muted-foreground outline-none transition-colors",
                     "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    "data-[selected]:border-signal data-[selected]:text-foreground"
+                    "aria-selected:border-signal aria-selected:font-semibold aria-selected:text-signal"
                   )}
                 >
                   <Icon className="size-4" strokeWidth={1.8} aria-hidden />
