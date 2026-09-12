@@ -11,6 +11,7 @@ import { Notifications } from "./notifications";
 import { UserMenu } from "./user-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
+import { SoundToggle } from "@/components/shared/sound-toggle";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -64,6 +65,7 @@ export function Topbar({ user }: { user: SessionUser }) {
           </TooltipTrigger>
           <TooltipContent side="bottom">{t("help.label")}</TooltipContent>
         </Tooltip>
+        <SoundToggle />
         <ThemeToggle />
         <LocaleSwitcher />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />

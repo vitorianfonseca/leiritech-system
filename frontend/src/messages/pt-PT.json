@@ -232,6 +232,10 @@
       "expand": "Expandir menu",
       "open": "Abrir menu",
       "close": "Fechar menu"
+    },
+    "sound": {
+      "enable": "Ativar som",
+      "disable": "Desativar som"
     }
   },
   "roles": {

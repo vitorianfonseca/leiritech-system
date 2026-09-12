@@ -18,7 +18,23 @@ import { cn } from "@/lib/utils";
  * Types + global manager
  * ------------------------------------------------------------------ */
 
+import { playSound, type SoundCue } from "@/lib/sound";
+
 export type ToastTone = "default" | "success" | "warning" | "destructive" | "info";
+
+/**
+ * Every toast in the app funnels through here, which makes it the one honest
+ * place to put audio feedback: a cue fires because something actually
+ * happened — saved, failed, refused — never because a screen rendered.
+ * `playSound` is a no-op while sound is off, so this costs nothing by default.
+ */
+const TONE_CUE: Record<ToastTone, SoundCue | null> = {
+  default: null, // a neutral note is not an event; staying silent is the point
+  success: "success",
+  warning: "warning",
+  destructive: "error",
+  info: "notification",
+};
 
 /** Custom payload carried on each toast. */
 export interface LeiritechToastData {
@@ -50,6 +66,8 @@ export const leiritechToastManager = Toast.createToastManager<LeiritechToastData
 /** Fire a basic toast. Returns the toast id. */
 export function toast(options: ToastOptions): string {
   const { title, description, tone = "default", duration } = options;
+  const cue = TONE_CUE[tone];
+  if (cue) playSound(cue);
   return leiritechToastManager.add({
     title,
     description,
@@ -65,6 +83,8 @@ export function toast(options: ToastOptions): string {
  */
 export function toastWithUndo(options: UndoToastOptions): string {
   const { title, description, onUndo, tone = "default", duration = 6000 } = options;
+  const cue = TONE_CUE[tone];
+  if (cue) playSound(cue);
   return leiritechToastManager.add({
     title,
     description,

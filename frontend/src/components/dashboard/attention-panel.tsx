@@ -15,8 +15,15 @@ import {
   ChevronRight,
   CheckCircle2,
 } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState, SkeletonList } from "@/components/shared";
-import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
@@ -37,18 +44,25 @@ const GROUP_ICON: Record<AttentionGroupKey, LucideIcon> = {
   overduePayments: Wallet,
 };
 
-/**
- * Severity reads as a dot plus its word, not a filled pill. Eight pills in a
- * column compete with the titles they are meant to qualify; a dot and a word
- * sit quietly beside them. Colour is never the only carrier — the word is
- * always there, so this survives greyscale and colour blindness alike.
- */
-const SEVERITY: Record<AttentionSeverity, { dot: string; statusKey: string }> = {
-  overdue: { dot: "bg-status-overdue", statusKey: "overdue" },
-  atRisk: { dot: "bg-health-at-risk", statusKey: "atRisk" },
-  due: { dot: "bg-status-due", statusKey: "due" },
-  blocked: { dot: "bg-status-blocked", statusKey: "blocked" },
-  attention: { dot: "bg-health-attention", statusKey: "attention" },
+/** Badge variant + `status.*` label key per urgency zone (DESIGN.md). */
+const SEVERITY: Record<
+  AttentionSeverity,
+  { variant: React.ComponentProps<typeof Badge>["variant"]; statusKey: string }
+> = {
+  overdue: { variant: "overdue", statusKey: "overdue" },
+  atRisk: { variant: "atRisk", statusKey: "atRisk" },
+  due: { variant: "due", statusKey: "due" },
+  blocked: { variant: "blocked", statusKey: "blocked" },
+  attention: { variant: "attention", statusKey: "attention" },
+};
+
+/** Icon chip tint per severity — icon + colour, never colour alone. */
+const SEVERITY_CHIP: Record<AttentionSeverity, string> = {
+  overdue: "bg-status-overdue-bg text-status-overdue",
+  atRisk: "bg-health-at-risk-bg text-health-at-risk",
+  due: "bg-status-due-bg text-status-due",
+  blocked: "bg-status-blocked-bg text-status-blocked",
+  attention: "bg-health-attention-bg text-health-attention",
 };
 
 function hrefFor(entityType: AttentionEntityType, entityId: string): string {
@@ -56,17 +70,11 @@ function hrefFor(entityType: AttentionEntityType, entityId: string): string {
 }
 
 /**
- * "Atenção necessária" (F2) — the first thing on the dashboard, because it is
- * the only part that asks something of a person.
- *
- * Set as a ledger: hairline rules between rows, no card inside a card, no
- * chips. Every row names what it is, how bad it is, and — the point of the
- * whole panel — **what to do next**, in signal blue. A list that tells you
- * six opportunities have no next action while offering no way to set one is
- * a report, not a tool.
- *
- * Groups are prioritized (most urgent first) and financial groups are
- * stripped upstream for unauthorized users (BR-008).
+ * "Atenção necessária" (F2) — the actionable, grouped needs-attention panel.
+ * Groups are prioritized (most urgent first), each row links directly to its
+ * source record, and the empty state reads "tudo em dia". Fed by the fixed
+ * automations (WORKFLOW_SPEC §6.1). Financial groups are stripped upstream for
+ * unauthorized users (BR-008).
  */
 export function AttentionPanel({
   groups,
@@ -83,36 +91,39 @@ export function AttentionPanel({
   const totalItems = nonEmpty.reduce((sum, g) => sum + g.items.length, 0);
 
   return (
-    <section className={cn("min-w-0", className)} aria-label={t("title")}>
-      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">
-          {t("title")}
-        </h2>
-        {!loading && totalItems > 0 ? (
-          <span className="text-sm tabular-nums text-muted-foreground">
-            {totalItems}
-          </span>
-        ) : null}
-      </div>
+    <Card className={className}>
+      <CardHeader>
+        <div className="flex items-center justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
+          </div>
+          {!loading && totalItems > 0 ? (
+            <Badge variant="signal" aria-hidden>
+              {totalItems}
+            </Badge>
+          ) : null}
+        </div>
+      </CardHeader>
 
-      {loading ? (
-        <div className="pt-4">
+      <CardContent className="min-h-0 flex-1 overflow-y-auto">
+        {loading ? (
           <SkeletonList rows={5} />
-        </div>
-      ) : totalItems === 0 ? (
-        <EmptyState
-          icon={CheckCircle2}
-          title={t("empty.title")}
-          description={t("empty.description")}
-        />
-      ) : (
-        <div className="divide-y divide-border">
-          {nonEmpty.map((group) => (
-            <AttentionSection key={group.key} group={group} />
-          ))}
-        </div>
-      )}
-    </section>
+        ) : totalItems === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title={t("empty.title")}
+            description={t("empty.description")}
+          />
+        ) : (
+          <div className="space-y-6">
+            {nonEmpty.map((group) => (
+              <AttentionSection key={group.key} group={group} />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -134,72 +145,53 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
   const visible = expanded ? group.items : group.items.slice(0, GROUP_PREVIEW);
 
   return (
-    <section aria-label={t(`groups.${group.key}`)} className="py-5 first:pt-4">
-      <h3 className="mb-1 flex items-center gap-2 text-sm font-medium text-foreground">
-        <GroupIcon
-          className="size-4 shrink-0 text-muted-foreground/70"
-          strokeWidth={1.9}
-          aria-hidden
-        />
+    <section aria-label={t(`groups.${group.key}`)}>
+      <h3 className="mb-2 flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <GroupIcon className="size-3.5" strokeWidth={1.8} aria-hidden />
         {t(`groups.${group.key}`)}
-        <span className="tabular-nums text-muted-foreground/60">
-          {group.items.length}
-        </span>
+        <span className="text-muted-foreground/60">({group.items.length})</span>
       </h3>
-
-      <ul>
+      <ul className="overflow-hidden rounded-lg border border-border divide-y divide-border">
         {visible.map((item) => {
           const sev = SEVERITY[item.severity];
           return (
             <li key={`${group.key}-${item.id}`}>
               <Link
                 href={hrefFor(item.entityType, item.entityId)}
-                className="group/row -mx-2 flex items-center gap-4 rounded-md px-2 py-2.5 transition-colors duration-[var(--duration-fast)] hover:bg-card focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+                className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               >
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">
+                <span
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${SEVERITY_CHIP[item.severity]}`}
+                >
+                  <GroupIcon className="size-4" strokeWidth={1.8} aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {item.title}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
                     {t(`meta.${item.metaKey}`, item.metaParams)}
-                  </span>
-                </span>
-
-                <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-                  <span
-                    aria-hidden
-                    className={cn("size-1.5 rounded-full", sev.dot)}
-                  />
-                  {ts(sev.statusKey)}
-                </span>
-
-                {/* The next action. The only blue on the row, and the reason
-                    the row is here at all. */}
-                <span className="hidden shrink-0 items-center gap-1 text-xs font-medium text-signal sm:flex">
-                  {t(`actions.${group.key}`)}
-                  <ChevronRight
-                    className="size-3.5 transition-transform duration-[var(--duration-fast)] group-hover/row:translate-x-0.5 motion-reduce:transition-none"
-                    aria-hidden
-                  />
-                </span>
+                  </p>
+                </div>
+                <Badge variant={sev.variant}>{ts(sev.statusKey)}</Badge>
+                <ChevronRight
+                  className="size-4 shrink-0 text-muted-foreground/40"
+                  aria-hidden
+                />
               </Link>
             </li>
           );
         })}
       </ul>
-
       {overflow > 0 ? (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-1 flex items-center gap-1 rounded text-xs font-medium text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none motion-reduce:transition-none"
+          className="mt-2 flex items-center gap-1 px-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
           <ChevronRight
-            className={cn(
-              "size-3.5 transition-transform duration-[var(--duration-fast)] motion-reduce:transition-none",
-              expanded && "rotate-90"
-            )}
+            className={`size-3.5 transition-transform ${expanded ? "rotate-90" : ""}`}
             aria-hidden
           />
           {expanded ? t("showLess") : t("showMore", { count: overflow })}

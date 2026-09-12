@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/use-sound";
 
@@ -59,9 +60,14 @@ function NavLink({
           : "font-medium text-muted-foreground hover:bg-card/60 hover:text-foreground"
       )}
     >
+      {/* One indicator for the whole nav, not one per item: `layoutId` makes
+          it TRAVEL from the previous entry to this one. You see where you came
+          from, which a cut cannot tell you. */}
       {active && !collapsed && (
-        <span
+        <motion.span
           aria-hidden
+          layoutId="nav-indicator"
+          transition={{ type: "spring", stiffness: 520, damping: 42, mass: 0.7 }}
           className="absolute top-1/2 left-0 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-foreground"
         />
       )}

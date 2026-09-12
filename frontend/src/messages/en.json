@@ -232,6 +232,10 @@
       "expand": "Expand menu",
       "open": "Open menu",
       "close": "Close menu"
+    },
+    "sound": {
+      "enable": "Turn sound on",
+      "disable": "Turn sound off"
     }
   },
   "roles": {
