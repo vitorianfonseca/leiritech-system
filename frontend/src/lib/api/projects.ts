@@ -44,6 +44,7 @@ import {
   ProjectError,
   type ConvertToProjectInput,
   type CreateProjectInput,
+  type UpdateProjectInput,
   type DeliveryMilestone,
   type DeliveryMilestoneStatus,
   type PhaseInput,
@@ -794,6 +795,8 @@ export interface ProjectsApi {
     actorId: string,
     canFinance: boolean
   ): Promise<Project>;
+  /** Partial edit of the project's own fields (not lifecycle, not health). */
+  updateProject(id: string, input: UpdateProjectInput, actorId: string): Promise<Project>;
   transition(id: string, input: TransitionInput, actorId: string): Promise<Project>;
   /** Undo-only: revert a project to a prior lifecycle state (bypasses guards). */
   restoreState(id: string, state: ProjectState, actorId: string): Promise<Project>;
@@ -905,6 +908,29 @@ export const projectsApi: ProjectsApi = {
       // INTEGRATION-GAP: proposalId / paymentMilestonesConfirmed (BR-037) — the
       // from-opportunity endpoint does not accept or persist these.
       return await fetchFullProject(created.id);
+    } catch (err) {
+      throw mapProjectError(err);
+    }
+  },
+
+  async updateProject(id, input, actorId) {
+    void actorId; // the backend takes the actor from the session
+    try {
+      // Only the keys actually present are sent: PATCH semantics mean an
+      // omitted field is left alone, while an explicit null clears it.
+      const body: Record<string, unknown> = {};
+      if (input.name !== undefined) body.name = input.name;
+      if (input.clientId !== undefined) body.company_id = input.clientId || null;
+      if (input.managerId !== undefined) body.manager_id = input.managerId || null;
+      if (input.description !== undefined) body.description = input.description;
+      if (input.startDate !== undefined) body.start_date = input.startDate || null;
+      if (input.dueDate !== undefined) body.deadline = input.dueDate || null;
+      if (input.contractedValueCents !== undefined)
+        body.contracted_value = input.contractedValueCents;
+      if (input.hoursBudget !== undefined) body.hours_budget = input.hoursBudget;
+
+      await http.patch<ApiProject>(`/projects/${id}`, body);
+      return await fetchFullProject(id);
     } catch (err) {
       throw mapProjectError(err);
     }

@@ -47,7 +47,9 @@ import { HealthDialog } from "./health-dialog";
 import { OverviewTab } from "./overview-tab";
 import { PhasesTab } from "./phases-tab";
 import { FinanceiroTab } from "./financeiro-tab";
-import { CalendarTab, ActivityTab } from "./simple-tabs";
+import { ActivityTab } from "./simple-tabs";
+import { CalendarTab } from "./calendar-tab";
+import { ProjectEditDialog } from "./project-edit-dialog";
 import { FilesTab } from "./files-tab";
 import { TasksView } from "@/components/tasks";
 import { formatDate, formatEUR, initials } from "./project-format";
@@ -66,6 +68,8 @@ export interface ProjectDetailViewProps {
 export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   const t = useTranslations("projects.detail");
   const tTabs = useTranslations("projects.tabs");
+  const tEdit = useTranslations("projects.editDialog");
+  const [editOpen, setEditOpen] = React.useState(false);
   const tHealth = useTranslations("projects.health");
   const locale = useLocale();
   const qc = useQueryClient();
@@ -205,6 +209,12 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               {project.publishedHealth === null ? t("publishHealth") : t("updateHealth")}
             </Button>
           ) : null}
+          {canManage && !isArchived ? (
+            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+              <Pencil aria-hidden />
+              {tEdit("edit")}
+            </Button>
+          ) : null}
           <LifecycleActions project={project} user={user} onChanged={refresh} />
         </div>
       </div>
@@ -286,7 +296,11 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
         <div className="pt-6">
           <Tabs.Panel value="overview">
-            <OverviewTab project={project} />
+            <OverviewTab
+              project={project}
+              canManage={canManage && !isArchived}
+              onEdit={() => setEditOpen(true)}
+            />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
             {/* The full task workspace, scoped to this project — list, board,
@@ -307,7 +321,12 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
             <PhasesTab project={project} user={user} canManage={canManage && !isArchived} onChanged={refresh} />
           </Tabs.Panel>
           <Tabs.Panel value="calendar">
-            <CalendarTab project={project} />
+            <CalendarTab
+              project={project}
+              actorId={user.userId}
+              canManage={canManage}
+              onChanged={refresh}
+            />
           </Tabs.Panel>
           <Tabs.Panel value="files">
             <FilesTab project={project} />
@@ -337,6 +356,20 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
           ) : null}
         </div>
       </Tabs.Root>
+
+      {canManage && !isArchived ? (
+        <ProjectEditDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          project={project}
+          canFinance={canFinance}
+          onSubmit={async (input) => {
+            await projectsApi.updateProject(project.id, input, user.userId);
+            await refresh();
+            toast({ tone: "success", title: tEdit("saved") });
+          }}
+        />
+      ) : null}
 
       {canManage && live ? (
         <HealthDialog

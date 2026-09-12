@@ -12,10 +12,13 @@ import {
   Circle,
   Rocket,
   CheckCheck,
+  Pencil,
+  Plus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { EmptyState, ProgressBar } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/api/projects-types";
@@ -25,6 +28,9 @@ import { formatDate, initials } from "./project-format";
 
 export interface OverviewTabProps {
   project: Project;
+  canManage: boolean;
+  /** Opens the project editor — the one place these fields are written. */
+  onEdit: () => void;
 }
 
 /**
@@ -80,8 +86,9 @@ function pack(blocks: Block[]): Block[][] {
  *
  * And what does render reaches both edges. See `pack` above.
  */
-export function OverviewTab({ project }: OverviewTabProps) {
+export function OverviewTab({ project, canManage, onEdit }: OverviewTabProps) {
   const t = useTranslations("projects.overview");
+  const tEdit = useTranslations("projects.editDialog");
 
   const readiness = startReadiness(project);
   const hasDescription = Boolean(project.description?.trim());
@@ -89,19 +96,36 @@ export function OverviewTab({ project }: OverviewTabProps) {
 
   const blocks: Block[] = [];
 
-  if (hasDescription) {
+  if (hasDescription || canManage) {
     blocks.push({
       key: "description",
       width: "wide",
       render: () => (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("descriptionTitle")}</CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base">{t("descriptionTitle")}</CardTitle>
+              {canManage ? (
+                <Button variant="ghost" size="sm" onClick={onEdit}>
+                  <Pencil aria-hidden />
+                  {tEdit("edit")}
+                </Button>
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {project.description}
-            </p>
+            {hasDescription ? (
+              <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
+                {project.description}
+              </p>
+            ) : (
+              // An empty description on a project someone can edit is a
+              // prompt, not a dead end.
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Plus aria-hidden />
+                {tEdit("addDescription")}
+              </Button>
+            )}
           </CardContent>
         </Card>
       ),
@@ -338,7 +362,7 @@ export function OverviewTab({ project }: OverviewTabProps) {
 
   // Only the team card survives when a project has no phases, no tasks in
   // trouble and nothing written down — say so once instead of tiling frames.
-  const quiet = blocks.length === 1;
+  const quiet = blocks.filter((b) => b.key !== "description").length === 1;
 
   return (
     <div className="space-y-6">

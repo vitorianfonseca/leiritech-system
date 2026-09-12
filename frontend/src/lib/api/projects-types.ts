@@ -182,6 +182,30 @@ export interface ProjectFinance {
  * Mutation inputs
  * ------------------------------------------------------------------ */
 
+/**
+ * Partial edit of a project's own fields.
+ *
+ * Lifecycle (start/pause/complete/cancel/archive) and health have dedicated
+ * endpoints and are deliberately not settable here — the backend refuses them
+ * on this route, and routing them through one "update everything" call is how
+ * a state machine stops being one.
+ *
+ * The financial fields are optional separately: BR-008 means a Gestor without
+ * the payments grant may edit a project's name and dates while being unable
+ * to touch its value, and the server enforces that regardless of what the UI
+ * sends.
+ */
+export interface UpdateProjectInput {
+  name?: string;
+  clientId?: string | null;
+  managerId?: string | null;
+  description?: string;
+  startDate?: string | null;
+  dueDate?: string | null;
+  contractedValueCents?: number | null;
+  hoursBudget?: number | null;
+}
+
 export interface CreateProjectInput {
   name: string;
   clientId: string;

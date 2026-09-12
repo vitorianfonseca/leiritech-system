@@ -2478,14 +2478,14 @@
       "attention": "Em atenção"
     },
     "calendarTab": {
-      "summaryNote": "Agenda do projeto (só de leitura).",
       "openCalendar": "Abrir calendário",
       "agenda": "Agenda",
       "empty": "Sem datas agendadas.",
       "kind": {
         "milestone": "Marco",
         "phase": "Fase"
-      }
+      },
+      "editEntry": "Editar {name}"
     },
     "filesTab": {
       "title": "Ficheiros",
@@ -2511,6 +2511,26 @@
     "activityTab": {
       "notesTitle": "Notas",
       "timelineTitle": "Cronologia"
+    },
+    "editDialog": {
+      "title": "Editar projeto",
+      "subtitle": "Nome, responsável, datas e orçamento. O estado e a saúde têm controlos próprios.",
+      "name": "Nome",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Âmbito, contexto, o que é preciso saber…",
+      "manager": "Gestor",
+      "noManager": "Sem gestor",
+      "startDate": "Início",
+      "dueDate": "Prazo",
+      "contractedValue": "Valor contratado (€)",
+      "hoursBudget": "Orçamento de horas",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Projeto atualizado.",
+      "failed": "Não foi possível guardar as alterações.",
+      "edit": "Editar projeto",
+      "addDescription": "Adicionar descrição"
     }
   },
   "notifications": {

@@ -2478,14 +2478,14 @@
       "attention": "Needs attention"
     },
     "calendarTab": {
-      "summaryNote": "Project agenda (read-only).",
       "openCalendar": "Open calendar",
       "agenda": "Agenda",
       "empty": "No dates scheduled.",
       "kind": {
         "milestone": "Milestone",
         "phase": "Phase"
-      }
+      },
+      "editEntry": "Edit {name}"
     },
     "filesTab": {
       "title": "Files",
@@ -2511,6 +2511,26 @@
     "activityTab": {
       "notesTitle": "Notes",
       "timelineTitle": "Timeline"
+    },
+    "editDialog": {
+      "title": "Edit project",
+      "subtitle": "Name, manager, dates and budget. State and health have their own controls.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Scope, context, what someone needs to know…",
+      "manager": "Manager",
+      "noManager": "No manager",
+      "startDate": "Start",
+      "dueDate": "Deadline",
+      "contractedValue": "Contracted value (€)",
+      "hoursBudget": "Hours budget",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Project updated.",
+      "failed": "Could not save the changes.",
+      "edit": "Edit project",
+      "addDescription": "Add a description"
     }
   },
   "notifications": {
