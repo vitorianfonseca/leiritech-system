@@ -13,18 +13,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete
 
-from app.api.routes.auth import (
-    forgot_password_ip_rate_limiter,
-    forgot_password_rate_limiter,
-    login_ip_rate_limiter,
-    login_rate_limiter,
-    reset_password_rate_limiter,
-)
-from app.api.routes.invitations import (
-    accept_invitation_rate_limiter,
-    get_invitation_rate_limiter,
-)
-from app.core import security
+from app.core import rate_limit, security
 from app.core.config import settings
 from app.database.session import SessionLocal
 from app.main import app
@@ -51,17 +40,17 @@ def client() -> Iterator[TestClient]:
 @pytest.fixture(autouse=True)
 def _reset_rate_limiter() -> None:
     # Reset every process-local rate limiter between tests — each is keyed
-    # (partly or wholly) on the constant TestClient IP, so without this their
-    # budgets accumulate across the whole suite and later tests spuriously get
-    # 429. This resets test state only and does not change the production
+    # (partly or wholly) on the constant TestClient IP/user, so without this
+    # their budgets accumulate across the whole suite and later tests spuriously
+    # get 429. This resets test state only and does not change the production
     # limits (config is untouched).
-    login_rate_limiter.reset()
-    login_ip_rate_limiter.reset()
-    forgot_password_rate_limiter.reset()
-    forgot_password_ip_rate_limiter.reset()
-    reset_password_rate_limiter.reset()
-    accept_invitation_rate_limiter.reset()
-    get_invitation_rate_limiter.reset()
+    #
+    # issue #48: this used to be a hand-maintained import list, which silently
+    # went stale every time an endpoint gained a limiter — the omission only
+    # shows up later as an order-dependent 429 in an unrelated test. Limiters
+    # now self-register, so reset_all() covers any limiter added in future
+    # without touching this fixture.
+    rate_limit.reset_all()
 
 
 @pytest.fixture

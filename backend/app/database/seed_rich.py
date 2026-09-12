@@ -7,9 +7,9 @@ near-future deadlines.
 
 What it KEEPS (never deleted):
 
-* ``users`` — the login accounts. The Admin **intglogin@aurea.pt** is ensured
+* ``users`` — the login accounts. The Admin **intglogin@leiritech.pt** is ensured
   (created with the requested dev password if missing, password left untouched
-  if already present) and the existing ``@aurea.studio`` members are kept; a few
+  if already present) and the existing ``@leiritech.pt`` members are kept; a few
   extra members are added for a fuller team.
 * ``pipeline_stages`` — the canonical 6 buyer-progress stages (seeded by
   :mod:`app.database.seed`; created here only if absent).
@@ -33,12 +33,17 @@ Usage::
 
     ENVIRONMENT=development uv run python -m app.database.seed_rich
     ENVIRONMENT=development uv run python -m app.database.seed --rich
+
+The dev admin password comes from ``SEED_RICH_ADMIN_PASSWORD`` (or
+``SEED_DEMO_PASSWORD``); if neither is set a random one is generated and printed
+once. It is never hardcoded.
 """
 
 from __future__ import annotations
 
 import os
 import random
+import secrets
 import sys
 from datetime import UTC, date, datetime, time, timedelta
 
@@ -80,9 +85,32 @@ def _role_target(role: str) -> float:
     return _ROLE_TARGET.get(role, settings.WORKLOAD_TARGET_MEMBRO)
 
 
-LOGIN_ADMIN_EMAIL = "intglogin@aurea.pt"
-LOGIN_ADMIN_NAME = "Aurea Interno"
-LOGIN_ADMIN_PASSWORD = "aurea-dev-2026"
+LOGIN_ADMIN_EMAIL = "intglogin@leiritech.pt"
+LOGIN_ADMIN_NAME = "LeiriTech Interno"
+
+# issue #48 (secrets audit): this was a hardcoded literal admin password
+# committed to the repo. Even though the generator is dev-only, a real
+# credential in source is a standing invitation to reuse it somewhere that
+# matters — and it was also the fallback for every seeded member account.
+# Resolved from the environment instead, mirroring app.database.seed: explicit
+# env var wins, otherwise a random secret is generated and printed ONCE.
+_login_password: str | None = None
+_login_password_generated = False
+
+
+def login_admin_password() -> str:
+    """The dev admin password for this run: env-provided, else generated once."""
+    global _login_password, _login_password_generated
+    if _login_password is None:
+        from_env = os.getenv("SEED_RICH_ADMIN_PASSWORD") or os.getenv(
+            "SEED_DEMO_PASSWORD"
+        )
+        if from_env:
+            _login_password = from_env
+        else:
+            _login_password = secrets.token_urlsafe(16)
+            _login_password_generated = True
+    return _login_password
 
 NOW = datetime.now(UTC)
 TODAY = NOW.date()
@@ -91,14 +119,14 @@ YEAR_AGO = NOW - timedelta(days=365)
 # --------------------------------------------------------------------------- #
 # Reference data
 # --------------------------------------------------------------------------- #
-# Extra team members added on top of the existing @aurea.studio crew so the
+# Extra team members added on top of the existing @leiritech.pt crew so the
 # roster is ~10 people. (name, email, role, weekly_capacity, monthly_cost_eur,
 # payments_grant, invites_grant)
 _EXTRA_MEMBERS = [
-    ("Miguel Tavares", "miguel@aurea.studio", "membro", 40, 3200, False, False),
-    ("Joana Pires", "joana@aurea.studio", "gestor", 40, 3600, True, True),
-    ("Pedro Almeida", "pedro@aurea.studio", "membro", 36, 2900, False, False),
-    ("Ana Rocha", "ana@aurea.studio", "membro", 32, 2700, False, False),
+    ("Miguel Tavares", "miguel@leiritech.pt", "membro", 40, 3200, False, False),
+    ("Joana Pires", "joana@leiritech.pt", "gestor", 40, 3600, True, True),
+    ("Pedro Almeida", "pedro@leiritech.pt", "membro", 36, 2900, False, False),
+    ("Ana Rocha", "ana@leiritech.pt", "membro", 32, 2700, False, False),
 ]
 
 _SECTORS = [
@@ -284,7 +312,7 @@ def ensure_users(db: Session) -> tuple[User, list[User]]:
         db,
         name=LOGIN_ADMIN_NAME,
         email=LOGIN_ADMIN_EMAIL,
-        password=LOGIN_ADMIN_PASSWORD,
+        password=login_admin_password(),
     )
     admin.role = "admin"
     admin.status = "active"
@@ -292,7 +320,7 @@ def ensure_users(db: Session) -> tuple[User, list[User]]:
         admin.internal_cost_rate = _euros(4200) // 160
     admin.weekly_capacity_hours = 40
 
-    member_pw = os.getenv("SEED_DEMO_PASSWORD", LOGIN_ADMIN_PASSWORD)
+    member_pw = os.getenv("SEED_DEMO_PASSWORD") or login_admin_password()
     pw_hash = security.hash_password(member_pw)
     for name, email, role, cap, cost_eur, pay, inv in _EXTRA_MEMBERS:
         email = email.lower()
@@ -1519,7 +1547,21 @@ def rebalance_workload(db: Session, admin: User) -> None:
 # --------------------------------------------------------------------------- #
 # Orchestration
 # --------------------------------------------------------------------------- #
+def _require_development() -> None:
+    """Hard gate: this generator WIPES business data and creates accounts.
+
+    Lived in main() only, so any caller importing run_rich_seed() bypassed it.
+    Enforced at the entry point of the work itself instead.
+    """
+    if os.getenv("ENVIRONMENT", "").strip().lower() != "development":
+        raise RuntimeError(
+            "seed_rich is a DEV-ONLY generator (it wipes business data and "
+            "seeds accounts); set ENVIRONMENT=development to run it."
+        )
+
+
 def run_rich_seed(db: Session) -> dict:
+    _require_development()
     random.seed(SEED)
     admin, users = ensure_users(db)
     wipe_business_data(db)
@@ -1561,11 +1603,10 @@ def run_rich_seed(db: Session) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    if os.getenv("ENVIRONMENT", "").strip().lower() != "development":
-        print(
-            "error: seed_rich is a DEV-ONLY generator; set ENVIRONMENT=development.",
-            file=sys.stderr,
-        )
+    try:
+        _require_development()
+    except RuntimeError as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 2
     db = SessionLocal()
     try:
@@ -1581,7 +1622,14 @@ def main(argv: list[str] | None = None) -> int:
     print("rich seed complete (wiped + regenerated):")
     for key, value in summary.items():
         print(f"  {key}: {value}")
-    print(f"  login: {LOGIN_ADMIN_EMAIL} / {LOGIN_ADMIN_PASSWORD} (dev)")
+    print(f"  login: {LOGIN_ADMIN_EMAIL} (dev)")
+    if _login_password_generated:
+        # Shown once, never persisted or logged. A pre-existing admin keeps its
+        # current password (seed_admin is idempotent), so this value applies
+        # only when the account was created by this run.
+        print(f"  generated admin password (shown once): {login_admin_password()}")
+    else:
+        print("  password: from SEED_RICH_ADMIN_PASSWORD/SEED_DEMO_PASSWORD")
     return 0
 
 

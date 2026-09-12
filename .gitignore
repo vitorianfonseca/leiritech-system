@@ -3,3 +3,13 @@ forge-history.jsonl
 forge-history-*.jsonl
 .forge-cache/
 .forge-context/
+
+# Secrets — defense in depth (backend/ and frontend/ have their own rules too).
+# Root-level catch-all so a stray env/key file anywhere can never be staged by
+# an accidental `git add -A`.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*credentials*

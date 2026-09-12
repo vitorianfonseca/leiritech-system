@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies.auth import CurrentUser
 from app.core import errors
 from app.core.config import settings
-from app.core.rate_limit import SlidingWindowRateLimiter
+from app.core.rate_limit import SlidingWindowRateLimiter, client_ip
 from app.database.session import get_db
 from app.schemas.auth import (
     ChangePasswordRequest,
@@ -53,11 +53,29 @@ reset_password_rate_limiter = SlidingWindowRateLimiter(
     settings.PUBLIC_TOKEN_RATE_LIMIT_PER_MINUTE
 )
 
+# issue #48: /refresh and /logout are PUBLIC — the refresh token is the only
+# credential, so both are token-guessing surfaces (a hit on /logout revokes
+# someone's session). Throttled per-ip; the budget is generous because a normal
+# client legitimately refreshes on every access-token expiry across tabs.
+refresh_rate_limiter = SlidingWindowRateLimiter(
+    settings.REFRESH_RATE_LIMIT_PER_MINUTE
+)
+logout_rate_limiter = SlidingWindowRateLimiter(settings.REFRESH_RATE_LIMIT_PER_MINUTE)
+
+# issue #48: /me/password is authenticated but verifies current_password, so a
+# stolen access token could brute-force it. Keyed on the USER id (not the IP) —
+# the attacker holds the token, so the account is the thing to protect, and
+# per-user keying also avoids punishing colleagues behind a shared office NAT.
+change_password_rate_limiter = SlidingWindowRateLimiter(
+    settings.CHANGE_PASSWORD_RATE_LIMIT_PER_MINUTE
+)
+
 DbSession = Annotated[Session, Depends(get_db)]
 
 
 def _client_ip(request: Request) -> str:
-    return request.client.host if request.client else "unknown"
+    """Proxy-aware client address (see core.rate_limit.client_ip)."""
+    return client_ip(request)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -85,6 +103,8 @@ def login(request: Request, payload: LoginRequest, db: DbSession) -> TokenRespon
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(request: Request, payload: RefreshRequest, db: DbSession) -> TokenResponse:
+    if not refresh_rate_limiter.check(_client_ip(request)):
+        raise errors.too_many_requests()
     access, new_refresh = auth_service.rotate_refresh(
         db,
         payload.refresh_token,
@@ -99,7 +119,11 @@ def refresh(request: Request, payload: RefreshRequest, db: DbSession) -> TokenRe
 
 
 @router.post("/logout", response_model=MessageResponse)
-def logout(payload: LogoutRequest, db: DbSession) -> MessageResponse:
+def logout(
+    request: Request, payload: LogoutRequest, db: DbSession
+) -> MessageResponse:
+    if not logout_rate_limiter.check(_client_ip(request)):
+        raise errors.too_many_requests()
     auth_service.revoke_session(db, payload.refresh_token)
     return MessageResponse(message="Sessão terminada.")
 
@@ -156,6 +180,8 @@ def update_me(
 def change_my_password(
     payload: ChangePasswordRequest, current_user: CurrentUser, db: DbSession
 ) -> MessageResponse:
+    if not change_password_rate_limiter.check(str(current_user.id)):
+        raise errors.too_many_requests()
     auth_service.change_password(
         db, current_user, payload.current_password, payload.new_password
     )

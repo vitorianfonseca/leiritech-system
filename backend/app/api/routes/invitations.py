@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies.auth import RequireInviteCapability
 from app.core import errors
 from app.core.config import settings
-from app.core.rate_limit import SlidingWindowRateLimiter
+from app.core.rate_limit import SlidingWindowRateLimiter, client_ip
 from app.database.session import get_db
 from app.schemas.auth import (
     InvitationAccept,
@@ -34,9 +34,18 @@ get_invitation_rate_limiter = SlidingWindowRateLimiter(
     settings.PUBLIC_TOKEN_RATE_LIMIT_PER_MINUTE
 )
 
+# issue #48: creating an invitation sends an email. The endpoint is admin/grant
+# gated, but a compromised (or careless) grant-holder could still drive outbound
+# mail at will and burn the sending domain's reputation. Keyed on the INVITING
+# user so one account's burst cannot spend everyone else's budget.
+create_invitation_rate_limiter = SlidingWindowRateLimiter(
+    settings.INVITE_SEND_RATE_LIMIT_PER_MINUTE
+)
+
 
 def _client_ip(request: Request) -> str:
-    return request.client.host if request.client else "unknown"
+    """Proxy-aware client address (see core.rate_limit.client_ip)."""
+    return client_ip(request)
 
 
 @router.post(
@@ -49,6 +58,8 @@ def create_invitation(
     current_user: RequireInviteCapability,
     db: DbSession,
 ) -> InvitationResponse:
+    if not create_invitation_rate_limiter.check(str(current_user.id)):
+        raise errors.too_many_requests()
     invite, _raw_token = invitation_service.create_invitation(
         db, payload, invited_by=current_user
     )
