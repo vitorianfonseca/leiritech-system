@@ -2,18 +2,13 @@ import type { LucideIcon } from "lucide-react";
 import {
   Building2,
   Users,
-  ShieldCheck,
   GitBranch,
-  Flag,
-  Tags,
   LayoutTemplate,
   Gauge,
   Coins,
   Bell,
-  Palette,
   Archive,
   Download,
-  Bug,
 } from "lucide-react";
 import type { Role } from "@/lib/session";
 

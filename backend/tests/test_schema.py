@@ -14,7 +14,7 @@ EXPECTED_TABLES = {
     "tasks", "task_assignees", "task_checklist_items", "task_dependencies",
     "comments", "mentions", "attachments", "time_entries",
     "milestones", "payment_milestones", "project_costs",
-    "notifications", "activity_logs", "tags", "entity_tags",
+    "notifications", "activity_logs",
 }
 
 

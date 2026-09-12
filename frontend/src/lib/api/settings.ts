@@ -48,11 +48,6 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let counter = 0;
-function uid(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${Date.now().toString(36)}-${counter}`;
-}
 
 function isoDaysAgo(days: number): string {
   const d = new Date();

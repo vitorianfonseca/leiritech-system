@@ -35,7 +35,13 @@ from sqlalchemy.orm import Session
 
 from app.core import errors
 from app.core.clock import today as app_today
-from app.core.permissions import Role, can_cancel_project, can_manage_project, role_at_least
+from app.core.permissions import (
+    Role,
+    can_access_financials,
+    can_cancel_project,
+    can_manage_project,
+    role_at_least,
+)
 from app.models.crm import Company
 from app.models.project import (
     Project,
@@ -210,7 +216,26 @@ def _require_manage(project: Project, user: User, *, code: str) -> None:
 # --------------------------------------------------------------------------- #
 # Writes — create / update
 # --------------------------------------------------------------------------- #
+# BR-008: financial data is invisible AND non-writable without the grant.
+# Reads were already redacted in the response layer, but writes were not gated:
+# a Gestor without ``payments_grant`` could PATCH a project's contracted value,
+# internal cost rate or hours budget — setting numbers they are not allowed to
+# see. These are the fields that gate covers.
+_FINANCIAL_FIELDS = ("contracted_value", "hours_budget", "internal_cost_rate")
+
+
+def _assert_may_write_financials(user: User, changes: dict) -> None:
+    """Reject an attempt to write financial fields without the grant."""
+    touched = [f for f in _FINANCIAL_FIELDS if f in changes and changes[f] is not None]
+    if touched and not can_access_financials(user.role, user.payments_grant):
+        raise errors.forbidden(
+            "Não tem permissão para definir dados financeiros do projeto.",
+            code="PROJECT_FINANCIALS_FORBIDDEN",
+        )
+
+
 def create_project(db: Session, user: User, payload: ProjectCreate) -> Project:
+    _assert_may_write_financials(user, payload.model_dump(exclude_unset=True))
     _validate_company(db, payload.company_id)
     _validate_manager(db, payload.manager_id)
     project = Project(
@@ -251,6 +276,7 @@ def update_project(
         )
     before = _snapshot(project)
     changes = payload.model_dump(exclude_unset=True)
+    _assert_may_write_financials(user, changes)
     if "company_id" in changes:
         _validate_company(db, changes["company_id"])
     if "manager_id" in changes:

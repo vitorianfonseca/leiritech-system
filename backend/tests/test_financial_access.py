@@ -51,6 +51,7 @@ from sqlalchemy import delete
 
 from app.database.session import SessionLocal
 from app.models.collaboration import ActivityLog
+from app.models.crm import Company
 from app.models.project import Project, ProjectMember
 
 API = "/api/v1"
@@ -828,3 +829,109 @@ def test_membro_cannot_create_project_costs(client, make_user, track) -> None:
     )
     assert listing.status_code == 200, listing.text
     assert listing.json()["total"] == 0, "the refused cost must not have been written"
+
+
+# --------------------------------------------------------------------------- #
+# (c) Write-side enforcement — BR-008 says financial data is invisible AND
+# non-writable. Reads were redacted in the response layer from the start, but
+# PATCH/POST /projects sat behind RequireGestor with no financial gate, so a
+# Gestor without the grant could SET a contracted value, an internal cost rate
+# or an hours budget — numbers they are not permitted to read back.
+# --------------------------------------------------------------------------- #
+_FINANCIAL_WRITES = [
+    ("contracted_value", 4_242_00),
+    ("internal_cost_rate", 77_00),
+    ("hours_budget", 321.0),
+]
+
+
+def test_gestor_without_grant_cannot_write_project_financials(
+    client, make_user, track
+) -> None:
+    """Each financial field is refused individually, so one field silently
+    slipping through cannot hide behind another being blocked."""
+    admin = make_user(role="admin")
+    gestor = make_user(role="gestor", payments_grant=False)
+    project = _make_project(track)
+    gestor_token = _token(client, gestor.email)
+
+    failures = []
+    for field, value in _FINANCIAL_WRITES:
+        resp = client.patch(
+            f"{API}/projects/{project.id}",
+            json={field: value},
+            headers=_auth(gestor_token),
+        )
+        if resp.status_code != 403:
+            failures.append(f"PATCH {field} -> {resp.status_code} (expected 403)")
+
+    assert not failures, "Ungranted Gestor was allowed to write: " + "; ".join(failures)
+
+    # The stored values must be untouched — a 403 that still wrote would be worse
+    # than no gate at all.
+    db = SessionLocal()
+    try:
+        fresh = db.get(Project, project.id)
+        assert fresh.contracted_value == SENTINEL_CONTRACTED
+        assert fresh.internal_cost_rate == SENTINEL_COST_RATE
+    finally:
+        db.close()
+
+    # Positive control: an Admin performs the same writes successfully.
+    admin_token = _token(client, admin.email)
+    for field, value in _FINANCIAL_WRITES:
+        resp = client.patch(
+            f"{API}/projects/{project.id}",
+            json={field: value},
+            headers=_auth(admin_token),
+        )
+        assert resp.status_code == 200, f"admin PATCH {field}: {resp.text}"
+
+
+def test_gestor_without_grant_cannot_create_project_with_financials(
+    client, make_user, track
+) -> None:
+    gestor = make_user(role="gestor", payments_grant=False)
+    gestor_token = _token(client, gestor.email)
+
+    db = SessionLocal()
+    try:
+        company = Company(name=f"FinAccess Co {uuid.uuid4().hex[:8]}")
+        db.add(company)
+        db.commit()
+        db.refresh(company)
+        company_id = company.id
+    finally:
+        db.close()
+
+    try:
+        resp = client.post(
+            f"{API}/projects",
+            json={
+                "name": "Projeto com valor contratado",
+                "company_id": str(company_id),
+                "contracted_value": 9_999_00,
+            },
+            headers=_auth(gestor_token),
+        )
+        assert resp.status_code == 403, resp.text
+
+        # Without the financial field the same Gestor may still create a project,
+        # so the gate is proven to be about the field and not about the role.
+        ok = client.post(
+            f"{API}/projects",
+            json={
+                "name": "Projeto sem valor contratado",
+                "company_id": str(company_id),
+            },
+            headers=_auth(gestor_token),
+        )
+        assert ok.status_code in (200, 201), ok.text
+        track["project"].append(uuid.UUID(ok.json()["id"]))
+    finally:
+        db = SessionLocal()
+        try:
+            db.execute(delete(Company).where(Company.id == company_id))
+            db.commit()
+        finally:
+            db.close()

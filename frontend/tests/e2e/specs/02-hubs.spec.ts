@@ -29,8 +29,10 @@ test.describe("dashboard — Gestor", () => {
     await expect(panels.first()).toBeVisible();
     const headings = await page.getByRole("heading", { level: 3 }).allTextContents();
     expect(headings.length, "the attention board must render at least one panel").toBeGreaterThan(0);
-    // Panels are titled "<name> (<n>)" — proof they are counting real rows.
-    expect(headings.some((h) => /\(\d+\)/.test(h))).toBe(true);
+    // Panels are titled "<name> <n>" — proof they are counting real rows.
+    // (The count lost its parentheses in the ledger redesign; what matters is
+    // that a heading still carries a number, not how it is punctuated.)
+    expect(headings.some((h) => /\d+\s*$/.test(h.trim()))).toBe(true);
 
     // "Nothing escapes" means every surfaced item is actionable. Which panels
     // appear depends on the day's data, so the assertion is that each item links

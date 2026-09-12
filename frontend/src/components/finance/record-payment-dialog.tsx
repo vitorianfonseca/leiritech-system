@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@/lib/form/zod-resolver";
 import {
   recordPaymentSchema,
+  centsToEurosInput,
   eurosToCents,
   type RecordPaymentFormValues,
 } from "@/lib/validation/finance-schemas";
@@ -63,7 +64,7 @@ export function RecordPaymentDialog({
     if (!open) return;
     const today = new Date().toISOString().slice(0, 10);
     reset({
-      amount: (remainingCents / 100).toFixed(2),
+      amount: centsToEurosInput(remainingCents),
       paidDate: today,
       externalInvoiceRef: milestone?.externalInvoiceRef ?? "",
     });
