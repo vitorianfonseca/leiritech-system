@@ -46,7 +46,7 @@ export function WorkTab({
   return (
     <div className="space-y-5">
       {/* Phase rail */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div data-control-row className="flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <Layers className="size-4" strokeWidth={1.8} aria-hidden />
           <span className="hidden sm:inline">{t("phasesTitle")}</span>

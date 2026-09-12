@@ -70,6 +70,9 @@ class ProjectResponse(BaseModel):
     id: uuid.UUID
     name: str
     company_id: uuid.UUID | None
+    # The client's name, not just its id: the project header showed a building
+    # icon with nothing beside it, and every list had to guess.
+    company_name: str | None = None
     opportunity_id: uuid.UUID | None
     accepted_proposal_id: uuid.UUID | None
     manager_id: uuid.UUID | None

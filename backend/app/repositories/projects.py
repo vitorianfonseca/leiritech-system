@@ -24,6 +24,7 @@ from app.models.project import (
     TemplatePhase,
     TemplateTask,
 )
+from app.models.crm import Company
 from app.models.task import Task
 from app.models.user import User
 from app.models.time_entry import TimeEntry
@@ -174,6 +175,15 @@ def phase_task_counts(
         .group_by(Task.phase_id)
     ).all()
     return {row[0]: (int(row[1]), int(row[2])) for row in rows if row[0] is not None}
+
+
+def company_names_for(db: Session, company_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Map company ids to names in one query."""
+    ids = {i for i in company_ids if i is not None}
+    if not ids:
+        return {}
+    rows = db.execute(select(Company.id, Company.name).where(Company.id.in_(ids))).all()
+    return {row[0]: row[1] for row in rows}
 
 
 def get_member(

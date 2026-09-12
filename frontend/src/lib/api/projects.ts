@@ -561,6 +561,7 @@ interface ApiProject {
   id: string;
   name: string;
   companyId: string | null;
+  companyName: string | null;
   opportunityId: string | null;
   acceptedProposalId: string | null;
   managerId: string | null;
@@ -690,10 +691,8 @@ function mapMember(m: ApiMember): ProjectMember {
 function mapListItem(p: ApiProject, teamCount: number, progress: number): ProjectListItem {
   return {
     id: p.id,
-    // INTEGRATION-GAP: clientId/clientName — backend returns company_id only; the
-    // company display name is not joined into the project payload.
     clientId: p.companyId ?? "",
-    clientName: "",
+    clientName: p.companyName ?? "",
     name: p.name,
     managerId: p.managerId ?? "",
     managerName: p.managerName ?? "",

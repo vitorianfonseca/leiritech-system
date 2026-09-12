@@ -17,6 +17,12 @@ import {
   Sparkles,
   Pencil,
   LayoutGrid,
+  TrendingUp,
+  CalendarRange,
+  UserRound,
+  Clock,
+  Users,
+  type LucideIcon,
   ListTodo,
   CalendarDays,
   Paperclip,
@@ -194,23 +200,26 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-3">
-          <h1 className="page-title">
-            {project.name}
-          </h1>
+        <div className="min-w-0 space-y-2.5">
+          {/* The client above the project: a bare name has nothing to be
+              bigger than, and the building icon beside the badges was the
+              only place this appeared at all. */}
+          {project.clientName ? (
+            <Link
+              href={crmRoutes.company(project.clientId)}
+              className="page-eyebrow inline-flex items-center gap-1.5 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Building2 className="size-3.5" strokeWidth={2} aria-hidden />
+              {project.clientName}
+            </Link>
+          ) : null}
+          <h1 className="page-title">{project.name}</h1>
           <div className="flex flex-wrap items-center gap-2">
             <ProjectStateBadge state={project.state} />
             <HealthBadge
               health={effectiveHealth(project)}
               suggested={live && project.publishedHealth === null}
             />
-            <Link
-              href={crmRoutes.company(project.clientId)}
-              className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Building2 className="size-3.5" strokeWidth={1.8} aria-hidden />
-              {project.clientName}
-            </Link>
           </div>
           {suggestedHint ? (
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -249,41 +258,53 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
 
       {/* Facts strip */}
       <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-3 lg:grid-cols-5">
-        <Fact label={t("progress")}>
+        <Fact label={t("progress")} icon={TrendingUp} tone="signal">
           <ProgressBar value={project.progress} tone="signal" size="sm" showValue label={t("progress")} />
         </Fact>
-        <Fact label={t("dates")}>
-          <span className="text-sm tabular-nums text-foreground">
-            {formatDate(project.startDate)} – {formatDate(project.dueDate)}
+        <Fact label={t("dates")} icon={CalendarRange} tone="neutral">
+          {/* Wraps rather than truncates: a date range cut off mid-year
+              ("08/11/…") is worse than one on two lines. */}
+          <span className="block text-sm font-medium tabular-nums text-foreground">
+            {formatDate(project.startDate)}
+            <span className="text-muted-foreground"> – </span>
+            <wbr />
+            {formatDate(project.dueDate)}
           </span>
         </Fact>
-        <Fact label={t("manager")}>
-          <span className="flex items-center gap-1.5 text-sm text-foreground">
+        <Fact label={t("manager")} icon={UserRound} tone="neutral">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
             <Avatar className="size-5">
               <AvatarFallback className="text-[0.625rem]">{initials(project.managerName)}</AvatarFallback>
             </Avatar>
             <span className="truncate">{project.managerName}</span>
           </span>
         </Fact>
-        <Fact label={t("hours")}>
-          <span className="text-sm tabular-nums text-foreground">
-            {t("hoursValue", { used: project.hoursUsed, budget: project.hoursBudget })}
+        <Fact
+          label={t("hours")}
+          icon={Clock}
+          tone={project.hoursBudget > 0 && project.hoursUsed > project.hoursBudget ? "warning" : "neutral"}
+        >
+          <span className="font-heading block text-lg font-semibold tabular-nums text-foreground">
+            {project.hoursUsed}h
+            <span className="ml-1 text-sm font-normal text-muted-foreground">
+              / {project.hoursBudget}h
+            </span>
           </span>
         </Fact>
         {canFinance ? (
-          <Fact label={t("value")}>
+          <Fact label={t("value")} icon={Wallet} tone="success">
             {project.contractedValueCents != null ? (
-              <span className="font-heading text-sm font-semibold tabular-nums text-foreground">
+              <span className="font-heading block text-lg font-semibold tabular-nums text-foreground">
                 {formatEUR(project.contractedValueCents, locale)}
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">—</span>
+              <span className="text-sm text-muted-foreground">—</span>
             )}
           </Fact>
         ) : (
-          <Fact label={t("team")}>
-            <span className="text-sm tabular-nums text-foreground">
-              {t("teamValue", { count: project.team.length })}
+          <Fact label={t("team")} icon={Users} tone="neutral">
+            <span className="font-heading block text-lg font-semibold tabular-nums text-foreground">
+              {project.team.length}
             </span>
           </Fact>
         )}
@@ -395,11 +416,48 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   );
 }
 
-function Fact({ label, children }: { label: string; children: React.ReactNode }) {
+/**
+ * One figure in the summary strip.
+ *
+ * The strip was five identical grey labels over five identical grey values,
+ * which is a table pretending to be a dashboard: nothing led, so nothing was
+ * read. Each fact now carries a tinted mark, and the value is set at display
+ * size so the eye lands on the number before the word that names it.
+ */
+function Fact({
+  label,
+  icon: Icon,
+  tone,
+  children,
+}: {
+  label: string;
+  icon: LucideIcon;
+  tone: "signal" | "neutral" | "success" | "warning";
+  children: React.ReactNode;
+}) {
+  const marks = {
+    signal: "[--chip:var(--signal)] text-signal",
+    neutral: "text-muted-foreground",
+    success: "[--chip:var(--success)] text-success",
+    warning: "[--chip:var(--health-attention)] text-health-attention",
+  } as const;
   return (
-    <div className="min-w-0 space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-      <div>{children}</div>
+    <div className="flex min-w-0 gap-3">
+      <span
+        className={cn(
+          "glass-chip mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg",
+          marks[tone]
+        )}
+        aria-hidden
+      >
+        <Icon className="size-4" strokeWidth={1.8} />
+      </span>
+      <div className="min-w-0 space-y-0.5">
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
+        <div className="min-w-0">{children}</div>
+      </div>
     </div>
   );
 }

@@ -48,7 +48,10 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 
 def _project_response(
-    project: Project, user: User, names: dict[uuid.UUID, str] | None = None
+    project: Project,
+    user: User,
+    names: dict[uuid.UUID, str] | None = None,
+    companies: dict[uuid.UUID, str] | None = None,
 ) -> ProjectResponse:
     """Build the response, redacting financial fields for a caller without
     financial visibility (BR-008/audit C1). ``GET /projects`` and
@@ -62,6 +65,8 @@ def _project_response(
     # costs one lookup rather than one per row.
     if project.manager_id is not None and names is not None:
         resp.manager_name = names.get(project.manager_id)
+    if project.company_id is not None and companies is not None:
+        resp.company_name = companies.get(project.company_id)
     if not can_manage_financials(user):
         resp.contracted_value = None
         resp.hours_budget = None
@@ -151,8 +156,9 @@ def list_projects(
         page_size=page_size,
     )
     manager_names = project_repo.names_for(db, [p.manager_id for p in projects])
+    company_names = project_repo.company_names_for(db, [p.company_id for p in projects])
     return Page(
-        items=[_project_response(p, user, manager_names) for p in projects],
+        items=[_project_response(p, user, manager_names, company_names) for p in projects],
         total=total,
         page=page,
         page_size=page_size,
@@ -166,7 +172,12 @@ def create_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_project(db, user, payload)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 @router.post(
@@ -180,7 +191,12 @@ def create_from_template(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_from_template(db, user, payload)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 @router.post(
@@ -194,7 +210,12 @@ def create_from_opportunity(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.create_from_opportunity(db, user, payload)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -207,7 +228,12 @@ def get_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.get_project_or_404(db, user, project_id)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 @router.patch("/{project_id}", response_model=ProjectResponse)
@@ -218,7 +244,12 @@ def update_project(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.update_project(db, user, project_id, payload)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -234,7 +265,12 @@ def _state_endpoint(target: str):
         project = project_service.change_state(
             db, user, project_id, target, payload or ProjectStateChange()
         )
-        return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+        return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
     return _handler
 
@@ -304,7 +340,12 @@ def publish_health(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.publish_health(db, user, project_id, payload)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 @router.post("/{project_id}/health/suggest", response_model=ProjectResponse)
@@ -314,7 +355,12 @@ def refresh_suggested_health(
     db: DbSession,
 ) -> ProjectResponse:
     project = project_service.refresh_suggested_health(db, user, project_id)
-    return _project_response(project, user, project_repo.names_for(db, [project.manager_id]))
+    return _project_response(
+        project,
+        user,
+        project_repo.names_for(db, [project.manager_id]),
+        project_repo.company_names_for(db, [project.company_id]),
+    )
 
 
 # --------------------------------------------------------------------------- #

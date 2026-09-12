@@ -367,6 +367,22 @@
 /* Pointer on anything clickable, and on whatever sits inside it — the
    pointer rests on a child <span> or <svg> far more often than on the
    control itself. Unlayered, so it outranks Tailwind's utility layer. */
+/* Strips of controls: the gaps between them are not dead zones.
+ *
+ * A row of tabs with `gap-1` puts a 4px sliver of container between every
+ * pair, and the container's cursor is the default arrow. Sweeping along the
+ * row therefore flips pointer → arrow → pointer at every gap, which reads as
+ * the cursor flickering rather than as crossing a boundary. Measured on the
+ * project tab bar: pointer×19, auto×1, pointer×35, auto×1, pointer×34.
+ *
+ * The strip as a whole is a control surface, so it carries the pointer. Scoped
+ * with `:has()` so it only applies to a strip that actually holds controls —
+ * an empty tablist or a toolbar of plain text keeps the default. */
+[role="tablist"]:has(> [role="tab"]),
+[data-control-row]:has(> a[href], > button:not(:disabled)) {
+  cursor: pointer;
+}
+
 a[href], a[href] *,
 button:not(:disabled), button:not(:disabled) *,
 summary, summary *,
@@ -768,6 +784,44 @@ textarea:not(:disabled),
       inset 0 1px 0 rgb(255 255 255 / 0.06);
   }
 
+  /* Cards.
+   *
+   * The same material as the controls, but painted directly on the element
+   * rather than through `::before`. The pseudo-element version needs
+   * `overflow: hidden` to keep the refraction inside the radius, and a card
+   * holds content — a sticky table header, a focus ring, an avatar that
+   * overlaps its edge — that clipping would cut. The gradients are layered in
+   * the background shorthand instead, so nothing is clipped and the card still
+   * reads as glass.
+   *
+   * Alpha sits high (0.86): a card carries text and tables, and translucency
+   * that makes a table's rows show the page through them is a legibility
+   * problem, not a material.
+   */
+  .glass-card {
+    background-color: rgb(255 255 255 / 0.86);
+    background-image:
+      radial-gradient(80% 120% at 0% 0%, rgb(var(--refract-cyan) / 0.13), transparent 60%),
+      radial-gradient(70% 110% at 100% 0%, rgb(var(--refract-lavender) / 0.11), transparent 62%),
+      radial-gradient(90% 80% at 50% 100%, rgb(var(--refract-peach) / 0.07), transparent 65%);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--glass-ring) / 0.13),
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 1px 2px rgb(122 132 173 / 0.05),
+      0 12px 32px -14px rgb(122 132 173 / 0.20);
+  }
+
+  .dark .glass-card {
+    background-color: rgb(255 255 255 / 0.055);
+    background-image:
+      radial-gradient(80% 120% at 0% 0%, rgb(var(--refract-cyan) / 0.06), transparent 60%),
+      radial-gradient(70% 110% at 100% 0%, rgb(var(--refract-lavender) / 0.05), transparent 62%);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.09),
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      0 12px 32px -14px rgb(0 0 0 / 0.5);
+  }
+
   /* Danger keeps the material and swaps which light comes through it —
      a red button would break the system, an invisible one would break the
      user. */
@@ -794,12 +848,27 @@ textarea:not(:disabled),
    */
   .page-title {
     font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-    font-size: clamp(1.75rem, 2.6vw, 2.25rem);
-    font-weight: 500;
-    letter-spacing: -0.032em;
-    line-height: 1.08;
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    /* Satoshi ships 400/500/700/900; 600 was being synthesised. Black is the
+       face's own voice and the only weight here with any character — at this
+       size with tight optical tracking it reads as a masthead rather than as
+       the default heading of a dashboard. */
+    font-weight: 900;
+    letter-spacing: -0.042em;
+    line-height: 1.02;
     text-wrap: balance;
     color: var(--foreground);
+  }
+
+  /* The small label above a title: what this record belongs to. A bare name
+     with nothing above it has no hierarchy to establish — this gives the
+     title something to be bigger than. */
+  .page-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
   }
 }
 
