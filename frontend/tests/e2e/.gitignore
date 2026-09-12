@@ -1,0 +1,3 @@
+# Signed-in storage states minted by auth.setup.ts — real session cookies for the
+# three role fixtures, regenerated on every run. Never commit them.
+.auth/
