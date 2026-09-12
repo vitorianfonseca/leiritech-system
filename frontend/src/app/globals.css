@@ -613,14 +613,23 @@ textarea:not(:disabled),
   /* No pane until you reach for it. The rest state zeroes the material out;
      `.glass:hover` is more specific than these, so the pane returns on hover
      without a single duplicated value. */
-  .glass-ghost {
+  .glass-ghost,
+  .dark .glass-ghost {
     --glass-alpha: 0;
     --glass-ring-alpha: 0;
     --glass-highlight-alpha: 0;
     --refract-strength: 0;
     box-shadow: none;
   }
-  .glass-ghost:hover { --refract-strength: 0.7; }
+  /* The `.dark` selector above is not redundant: `.dark .glass-quiet` outranks
+     a bare `.glass-ghost`, so without it a ghost control keeps a visible pane
+     at rest in dark mode while looking correct in light. */
+  .glass-ghost:hover,
+  .dark .glass-ghost:hover {
+    --glass-alpha: 0.5;
+    --refract-strength: 0.7;
+  }
+  .dark .glass-ghost:hover { --glass-alpha: 0.07; }
 
   /* Pills: badges, chips, filters, counts.
      Same pane as everything else, but a status pill has one job the pane

@@ -69,9 +69,9 @@ export function WelcomeBanner({
       initial={reduced ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: duration.slow, ease: easeOut }}
-      className="relative isolate mt-10 rounded-3xl bg-card px-7 py-6 text-foreground shadow-[0_2px_8px_oklch(0.28_0.06_285/0.05),0_12px_32px_-12px_oklch(0.28_0.06_285/0.10)] sm:px-10 sm:py-7"
+      className="relative isolate mt-10 min-h-[13.5rem] overflow-hidden rounded-3xl bg-card px-7 py-6 text-foreground shadow-[0_2px_8px_oklch(0.28_0.06_285/0.05),0_12px_32px_-12px_oklch(0.28_0.06_285/0.10)] sm:px-10 sm:py-7"
     >
-      <div className="relative z-10 max-w-[min(42rem,calc(100%-11rem))]">
+      <div className="relative z-10 max-w-[min(42rem,calc(100%-20rem))]">
         <h1 className="font-heading text-[clamp(1.5rem,2.6vw,2rem)] leading-[1.1] font-semibold tracking-[-0.02em] text-balance">
           {greeting}
         </h1>
@@ -131,21 +131,23 @@ export function WelcomeBanner({
         ) : null}
       </div>
 
-      {/* The source PNG carries roughly 12% of empty space below the feet, so
-          anchoring it to `bottom-0` left them floating well above the card's
-          floor. Pushing it past the edge by that much lands the feet on the
-          line while the head still clears the top — which is what stops the
-          banner reading as a flat rectangle. The panel therefore cannot clip
-          (no `overflow-hidden`) and carries a top margin for the head to rise
-          into. `priority` — first thing on the first screen. */}
+      {/* Unlike the robot this replaced, the scene has a ground line and a
+          horizon, so it sits inside the panel rather than breaking its top
+          edge — bottom-aligned, feet on the card's floor. The panel carries a
+          min-height so the line work stays legible at this width.
+
+          Dark mode: the artwork is black ink on nothing, which disappears on
+          a dark ground. Inverting flips the ink to white and takes the blue
+          with it; the hue rotation puts the blue back where it started.
+          `priority` — first thing on the first screen. */}
       <Image
-        src="/illustrations/assistant.png"
+        src="/illustrations/planning.png"
         alt=""
         aria-hidden
-        width={500}
-        height={500}
+        width={1000}
+        height={568}
         priority
-        className="pointer-events-none absolute right-5 -bottom-[16%] hidden h-[142%] w-auto select-none drop-shadow-[0_16px_26px_oklch(0.28_0.06_285/0.16)] md:block lg:right-10"
+        className="pointer-events-none absolute right-6 bottom-0 hidden h-[88%] w-auto select-none md:block lg:right-10 dark:invert dark:hue-rotate-180"
       />
     </motion.section>
   );
