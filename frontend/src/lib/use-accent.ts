@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { accentFromHex } from "./color";
+import { accentFromHex, neutralTokens } from "./color";
 
 export const ACCENTS = [
   "rose",
@@ -53,11 +53,17 @@ export function applyCustomAccent(hex: string): void {
   );
   // The illustration is a flat PNG whose accent sits near hue 340.
   root.style.setProperty("--brand-rotate", `${hue - 340}deg`);
+
+  // The neutrals too. Without these only the details move and the page keeps
+  // the default theme's tinted paper, which reads as the colour not applying.
+  for (const [token, value] of Object.entries(neutralTokens(hue, isDark))) {
+    root.style.setProperty(token, value);
+  }
 }
 
 function clearCustomAccent(): void {
   const root = document.documentElement;
-  for (const token of [
+  const tokens = [
     "--accent-hue",
     "--primary",
     "--ring",
@@ -66,9 +72,10 @@ function clearCustomAccent(): void {
     "--sidebar-primary",
     "--signal-muted",
     "--brand-rotate",
-  ]) {
-    root.style.removeProperty(token);
-  }
+    ...Object.keys(neutralTokens(0, false)),
+    ...Object.keys(neutralTokens(0, true)),
+  ];
+  for (const token of tokens) root.style.removeProperty(token);
 }
 
 export function useAccent(): {

@@ -115,3 +115,72 @@ export function accentFromHex(hex: string): { light: string; dark: string; hue: 
     hue: Math.round(h),
   };
 }
+
+
+/**
+ * A soft pastel at a given hue, as an "r g b" triple.
+ *
+ * The glass refraction is written as raw channels (`--refract-cyan: 255 223
+ * 238`) because the CSS composes them with an alpha, so a custom accent has
+ * to produce the same shape rather than a colour function.
+ */
+export function pastel(hue: number, l = 0.9, c = 0.055): string {
+  const [r, g, b] = oklchToRgbPublic(l, c, hue);
+  return `${r} ${g} ${b}`;
+}
+
+export function oklchToRgbPublic(L: number, C: number, h: number): [number, number, number] {
+  return oklchToRgb(L, C, h);
+}
+
+/**
+ * Every token a named accent theme overrides, expressed for one hue.
+ *
+ * A custom accent has no CSS block of its own, so it has to write the same
+ * set the named themes declare — otherwise only the accent moves and the page
+ * keeps the default theme's tinted paper, which reads as the colour not
+ * applying at all.
+ */
+export function neutralTokens(hue: number, dark: boolean): Record<string, string> {
+  const n = hue.toFixed(1);
+  if (dark) {
+    return {
+      "--background": `oklch(0.170 0.010 ${n})`,
+      "--card": `oklch(0.224 0.012 ${n})`,
+      "--popover": `oklch(0.224 0.012 ${n})`,
+      "--secondary": `oklch(0.260 0.013 ${n})`,
+      "--muted": `oklch(0.250 0.013 ${n})`,
+      "--muted-foreground": `oklch(0.670 0.016 ${n})`,
+      "--accent": `oklch(0.284 0.014 ${n})`,
+      "--border": `oklch(0.332 0.016 ${n})`,
+      "--input": `oklch(0.350 0.016 ${n})`,
+      "--sidebar": `oklch(0.192 0.011 ${n})`,
+      "--sidebar-accent": `oklch(0.280 0.014 ${n})`,
+      "--sidebar-border": `oklch(0.332 0.016 ${n})`,
+      "--refract-cyan": pastel(hue, 0.4, 0.05),
+      "--refract-blue": pastel(hue + 30, 0.4, 0.045),
+      "--refract-lavender": pastel(hue - 30, 0.4, 0.045),
+      "--refract-violet": pastel(hue + 60, 0.4, 0.04),
+    };
+  }
+  return {
+    "--background": `oklch(0.972 0.012 ${n})`,
+    "--foreground": `oklch(0.285 0.030 ${n})`,
+    "--card": `oklch(0.995 0.004 ${n})`,
+    "--card-foreground": `oklch(0.285 0.030 ${n})`,
+    "--popover": `oklch(0.995 0.004 ${n})`,
+    "--popover-foreground": `oklch(0.285 0.030 ${n})`,
+    "--secondary": `oklch(0.948 0.016 ${n})`,
+    "--muted": `oklch(0.955 0.014 ${n})`,
+    "--muted-foreground": `oklch(0.500 0.024 ${n})`,
+    "--accent": `oklch(0.940 0.020 ${n})`,
+    "--border": `oklch(0.915 0.016 ${n})`,
+    "--input": `oklch(0.915 0.016 ${n})`,
+    "--sidebar": `oklch(0.988 0.008 ${n})`,
+    "--sidebar-foreground": `oklch(0.400 0.026 ${n})`,
+    "--refract-cyan": pastel(hue),
+    "--refract-blue": pastel(hue + 30),
+    "--refract-lavender": pastel(hue - 30),
+    "--refract-violet": pastel(hue + 60),
+  };
+}
