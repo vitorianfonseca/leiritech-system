@@ -37,7 +37,7 @@ const TYPE_ICON: Record<CalendarEventType, LucideIcon> = {
 const URGENCY_DOT: Record<string, string> = {
   overdue: "bg-status-overdue",
   due: "bg-status-due",
-  upcoming: "bg-status-done",
+  upcoming: "bg-muted-foreground/50",
   done: "bg-status-done",
 };
 
@@ -92,43 +92,15 @@ export function AgendaCard({
       </CardHeader>
       <CardContent className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          // Day headings and rows of unequal width, so the skeleton is shaped
-          // like an agenda rather than a stack of identical grey bars.
-          <div className="space-y-4" aria-hidden>
-            {[0, 1].map((g) => (
-              <div key={g} className="space-y-2">
-                <div className="h-2.5 w-20 animate-pulse rounded bg-muted/70" />
-                {[0, 1].map((r) => (
-                  <div key={r} className="flex items-center gap-2.5">
-                    <div className="h-3 w-10 shrink-0 animate-pulse rounded bg-muted/60" />
-                    <div
-                      className="h-3 animate-pulse rounded bg-muted"
-                      style={{ width: `${68 - r * 14 - g * 8}%` }}
-                    />
-                  </div>
-                ))}
-              </div>
+          <ul className="space-y-3" aria-hidden>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li key={i} className="h-10 animate-pulse rounded-lg bg-muted" />
             ))}
-          </div>
+          </ul>
         ) : groups.length === 0 ? (
-          // An empty week is good news, so it reads as good news and offers
-          // the one thing worth doing from here — not "no data".
-          <div className="flex h-full flex-col items-start justify-center gap-3 py-8">
-            <span className="flex size-9 items-center justify-center rounded-full bg-muted">
-              <CalendarClock className="size-4 text-muted-foreground" aria-hidden />
-            </span>
-            <div>
-              <p className="text-sm font-medium text-foreground">{t("emptyTitle")}</p>
-              <p className="mt-0.5 max-w-[30ch] text-sm text-pretty text-muted-foreground">
-                {t("empty")}
-              </p>
-            </div>
-            <Link
-              href="/calendar"
-              className="text-sm font-medium text-signal transition-opacity duration-[var(--duration-fast)] hover:opacity-80 motion-reduce:transition-none"
-            >
-              {t("emptyAction")}
-            </Link>
+          <div className="flex h-full flex-col items-center justify-center gap-2 py-8 text-center">
+            <CalendarClock className="size-6 text-muted-foreground/60" aria-hidden />
+            <p className="text-sm text-muted-foreground">{t("empty")}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -144,7 +116,7 @@ export function AgendaCard({
                       <li key={ev.id}>
                         <Link
                           href={ev.sourceHref}
-                          className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <span
                             className={cn(
