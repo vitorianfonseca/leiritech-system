@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AnimatedCounter } from "@/components/shared";
 import { formatEURWhole } from "@/components/finance/finance-format";
@@ -99,23 +100,32 @@ export function Momentum({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="space-y-3">
             <div className="h-3 w-24 animate-pulse rounded bg-muted" />
             <div className="h-9 w-28 animate-pulse rounded bg-muted" />
             <div className="h-3 w-20 animate-pulse rounded bg-muted/70" />
           </div>
-        ))}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <section aria-label={t("title")}>
-      <h2 className="text-sm font-medium text-muted-foreground">{t("title")}</h2>
-
-      <div className="relative mt-5 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+    <Card aria-label={t("title")}>
+      <CardHeader>
+        <CardTitle>{t("title")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+      <div className="relative grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         {links.map((link, i) => {
           const isLast = i === links.length - 1;
           const money = link.financial && link.value !== null;
@@ -219,6 +229,7 @@ export function Momentum({
           );
         })}
       </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

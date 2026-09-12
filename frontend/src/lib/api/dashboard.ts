@@ -20,7 +20,7 @@ export const recordRoutes = {
   project: (id: string) => `/projects/${id}`,
   opportunity: (id: string) => `/crm/pipeline?opportunity=${id}`,
   proposal: (id: string) => `/crm/proposals?proposal=${id}`,
-  member: (id: string) => `/team?member=${id}`,
+  member: () => "/settings/members",
   payment: (id: string) => `/finance?milestone=${id}`,
 } as const;
 

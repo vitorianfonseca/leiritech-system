@@ -729,6 +729,8 @@ export const opportunityCollaborationApi: CollaborationApi = {
   updateComment: (input: UpdateCommentInput) => collaborationApi.updateComment(input),
   deleteComment: (id, requesterId) => collaborationApi.deleteComment(id, requesterId),
   restoreComment: (comment: Comment) => collaborationApi.restoreComment(comment),
+  // Global feed — no per-entity wrapping to do.
+  listRecentActivity: (limit?: number) => collaborationApi.listRecentActivity(limit),
   async listActivity(entityType, entityId) {
     const live = await collaborationApi.listActivity(entityType, entityId);
     if (entityType !== "opportunity") return live;

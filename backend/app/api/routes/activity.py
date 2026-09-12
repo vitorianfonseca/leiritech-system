@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import CurrentUser
-from app.core.permissions import can_manage_financials
+from app.core.permissions import Role, can_manage_financials, role_at_least
 from app.database.session import get_db
 from app.repositories import comments as comment_repo
 from app.schemas.activity import ActivityActor, ActivityFeed, ActivityLogEntry
@@ -83,14 +83,82 @@ def list_activity(
     actors = comment_repo.users_by_ids(db, [r.actor_id for r in rows if r.actor_id])
 
     def _actor(actor_id: uuid.UUID | None) -> ActivityActor:
-        actor = actors.get(actor_id) if actor_id else None
-        if actor is None:
-            # Actor deleted (actor_id SET NULL) — stable placeholder, never null.
+        # Two different absences, and conflating them lied about the data: a
+        # NULL actor_id means nobody did it (an automation, or the seed),
+        # while a set id with no matching row means the person was deleted.
+        # 94% of this table's rows are the former, all of which were being
+        # attributed to a "removed user" who never existed.
+        if actor_id is None:
             return ActivityActor(
-                id=actor_id or uuid.UUID(int=0),
-                name="Utilizador removido",
-                email="",
-                avatar_url=None,
+                id=uuid.UUID(int=0), name="Sistema", email="", avatar_url=None
+            )
+        actor = actors.get(actor_id)
+        if actor is None:
+            return ActivityActor(
+                id=actor_id, name="Utilizador removido", email="", avatar_url=None
+            )
+        return ActivityActor(
+            id=actor.id, name=actor.name, email=actor.email, avatar_url=actor.avatar_url
+        )
+
+    return ActivityFeed(
+        items=[
+            ActivityLogEntry(
+                id=row.id,
+                entity_type=row.entity_type,
+                entity_id=row.entity_id,
+                actor=_actor(row.actor_id),
+                action=row.action,
+                before=_redact_snapshot(row.before, can_finance=can_finance),
+                after=_redact_snapshot(row.after, can_finance=can_finance),
+                created_at=row.occurred_at,
+            )
+            for row in rows
+        ]
+    )
+
+
+@router.get("/recent", response_model=ActivityFeed)
+def list_recent_activity(
+    user: CurrentUser,
+    db: DbSession,
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> ActivityFeed:
+    """What changed lately, across every record.
+
+    Scope follows BR-002 the only way a cross-entity feed safely can: a caller
+    who can already see every record (Gestor and above) gets the whole trail;
+    anyone else gets their own actions. The alternative — filtering a mixed
+    feed down to one person's visible entities — would need a join per entity
+    type on every read, and any gap in it leaks the existence of records they
+    may not see.
+
+    Financial keys are stripped per-caller by the same redaction the
+    per-entity feed uses (BR-008).
+    """
+    sees_everything = role_at_least(user.role, Role.GESTOR)
+    rows = activity_service.list_recent(
+        db, actor_id=None if sees_everything else user.id, limit=limit
+    )
+
+    actor_ids = {r.actor_id for r in rows if r.actor_id}
+    actors = comment_repo.users_by_ids(db, actor_ids) if actor_ids else {}
+    can_finance = can_manage_financials(user)
+
+    def _actor(actor_id: uuid.UUID | None) -> ActivityActor:
+        # Two different absences, and conflating them lied about the data: a
+        # NULL actor_id means nobody did it (an automation, or the seed),
+        # while a set id with no matching row means the person was deleted.
+        # 94% of this table's rows are the former, all of which were being
+        # attributed to a "removed user" who never existed.
+        if actor_id is None:
+            return ActivityActor(
+                id=uuid.UUID(int=0), name="Sistema", email="", avatar_url=None
+            )
+        actor = actors.get(actor_id)
+        if actor is None:
+            return ActivityActor(
+                id=actor_id, name="Utilizador removido", email="", avatar_url=None
             )
         return ActivityActor(
             id=actor.id, name=actor.name, email=actor.email, avatar_url=actor.avatar_url

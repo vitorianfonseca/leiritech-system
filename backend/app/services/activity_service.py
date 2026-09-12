@@ -52,6 +52,24 @@ def record(
     return entry
 
 
+def list_recent(
+    db: Session, *, actor_id: uuid.UUID | None = None, limit: int = 20
+) -> list[ActivityLog]:
+    """The newest audit entries across every entity, most recent first.
+
+    ``actor_id`` narrows the feed to one person's own actions. That is how
+    BR-002 is honoured without a join per entity type: the log records what
+    was touched, not who may see it, so there is no cheap way to filter a
+    cross-entity feed down to a Membro's visible scope. Rather than leak, the
+    route hands a Membro their own trail — which answers "what did I do" —
+    and the full feed only to callers who can already see every record.
+    """
+    stmt = select(ActivityLog).order_by(ActivityLog.occurred_at.desc()).limit(limit)
+    if actor_id is not None:
+        stmt = stmt.where(ActivityLog.actor_id == actor_id)
+    return list(db.execute(stmt).scalars())
+
+
 def list_for_entity(
     db: Session, *, entity_type: str, entity_id: uuid.UUID, limit: int = 100
 ) -> list[ActivityLog]:

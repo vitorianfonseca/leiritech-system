@@ -23,10 +23,9 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState, SkeletonList } from "@/components/shared";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
-import { listStage, listItem } from "@/lib/motion";
+import { listStage, listItem, spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
@@ -107,13 +106,58 @@ export function AttentionPanel({
 
       <CardContent className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (
-          <SkeletonList rows={5} />
+          // Shaped like the queue it replaces: a group heading, then rows with
+          // a severity tick and titles of differing length.
+          <div className="space-y-6" aria-hidden>
+            {[0, 1].map((g) => (
+              <div key={g} className="space-y-2">
+                <div className="h-2.5 w-28 animate-pulse rounded bg-muted/70" />
+                {[0, 1].map((r) => (
+                  <div key={r} className="flex items-center gap-3.5">
+                    <div className="h-8 w-0.5 shrink-0 animate-pulse rounded-full bg-muted" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div
+                        className="h-3 animate-pulse rounded bg-muted"
+                        style={{ width: `${58 - r * 12 - g * 6}%` }}
+                      />
+                      <div
+                        className="h-2.5 animate-pulse rounded bg-muted/60"
+                        style={{ width: `${40 - r * 8}%` }}
+                      />
+                    </div>
+                    <div className="h-7 w-24 shrink-0 animate-pulse rounded-lg bg-muted/70" />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         ) : totalItems === 0 ? (
-          <EmptyState
-            icon={CheckCircle2}
-            title={t("empty.title")}
-            description={t("empty.description")}
-          />
+          // The best state this panel can be in. It should read as an
+          // achievement and point somewhere useful, not as missing data.
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={spring.pop}
+            className="flex h-full flex-col items-start justify-center gap-3 py-10"
+          >
+            <span className="flex size-10 items-center justify-center rounded-full bg-health-healthy-bg">
+              <CheckCircle2 className="size-5 text-health-healthy" aria-hidden />
+            </span>
+            <div>
+              <p className="font-heading text-base font-semibold text-foreground">
+                {t("empty.title")}
+              </p>
+              <p className="mt-0.5 max-w-[38ch] text-sm text-pretty text-muted-foreground">
+                {t("empty.description")}
+              </p>
+            </div>
+            <Link
+              href="/my-work"
+              className="text-sm font-medium text-signal transition-opacity duration-[var(--duration-fast)] hover:opacity-80 motion-reduce:transition-none"
+            >
+              {t("empty.action")}
+            </Link>
+          </motion.div>
         ) : (
           <div className="space-y-6">
             {nonEmpty.map((group) => (

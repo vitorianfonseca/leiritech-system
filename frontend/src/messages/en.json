@@ -1158,7 +1158,8 @@
       "showLess": "Show less",
       "empty": {
         "title": "You're all caught up",
-        "description": "Nothing needs your attention right now."
+        "description": "Nothing needs your attention right now.",
+        "action": "View my work"
       },
       "groups": {
         "overdueTasks": "Overdue tasks",
@@ -1195,7 +1196,9 @@
     "weekAgenda": {
       "title": "This week's agenda",
       "subtitle": "Everything due in the next 7 days",
-      "empty": "Nothing scheduled for the coming days."
+      "empty": "Nothing due in the next 7 days.",
+      "emptyTitle": "Clear week.",
+      "emptyAction": "Open the calendar"
     },
     "charts": {
       "pipeline": {
@@ -1264,6 +1267,53 @@
         "proposals": "{count, plural, =0 {Nothing awaiting reply} =1 {One awaiting reply} other {# awaiting reply}}",
         "projects": "{atRisk, plural, =0 {All healthy} =1 {One at risk} other {# at risk}}",
         "received": "Payments landed this month"
+      }
+    },
+    "changed": {
+      "title": "What changed",
+      "empty": "Nothing recorded yet. As soon as someone creates or changes something, it shows up here.",
+      "entities": {
+        "task": "a task",
+        "project": "a project",
+        "opportunity": "an opportunity",
+        "proposal": "a proposal",
+        "company": "a company",
+        "contact": "a contact",
+        "payment": "a payment",
+        "milestone": "a milestone",
+        "phase": "a phase",
+        "comment": "a comment",
+        "attachment": "an attachment",
+        "time_entry": "a time entry",
+        "member": "a member",
+        "interaction": "an interaction",
+        "meeting": "a meeting",
+        "payment_milestone": "a payment milestone",
+        "record": "a record"
+      },
+      "verbs": {
+        "created": "created {entity}",
+        "updated": "updated {entity}",
+        "deleted": "deleted {entity}",
+        "archived": "archived {entity}",
+        "assigned": "assigned {entity}",
+        "blocked": "blocked {entity}",
+        "unblocked": "unblocked {entity}",
+        "cancelled": "cancelled {entity}",
+        "expired": "let {entity} expire",
+        "health_published": "published health for {entity}",
+        "held": "held {entity}",
+        "invoiced": "invoiced {entity}",
+        "logged": "logged {entity}",
+        "moved": "moved {entity}",
+        "overdue": "let {entity} fall overdue",
+        "paid": "received {entity}",
+        "partially_paid": "partly received {entity}",
+        "rescheduled": "rescheduled {entity}",
+        "scheduled": "scheduled {entity}",
+        "timer_started": "started the timer on {entity}",
+        "transition": "changed the status of {entity}",
+        "won": "won {entity}"
       }
     }
   },

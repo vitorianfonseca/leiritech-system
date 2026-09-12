@@ -76,6 +76,7 @@ function toActivityLog(e: RawActivityEntry): ActivityLog {
     entityId: e.entityId,
     actor: e.actor,
     action: toActivityAction(e.action),
+    rawAction: e.action,
     // INTEGRATION-GAP: field/before/after — the backend records raw JSONB
     // snapshots (dicts), not the frontend's flattened single-value strings and
     // has no per-field key column, so the diff line is omitted (never rendered
@@ -103,6 +104,8 @@ export interface CollaborationApi {
     entityType: CollaborationEntityType,
     entityId: string
   ): Promise<ActivityLog[]>;
+  /** The newest entries across every record — powers "what changed". */
+  listRecentActivity(limit?: number): Promise<ActivityLog[]>;
 }
 
 export const collaborationApi: CollaborationApi = {
@@ -155,6 +158,15 @@ export const collaborationApi: CollaborationApi = {
       body: comment.body,
       mentions: comment.mentions,
     });
+  },
+
+  async listRecentActivity(limit = 12) {
+    // Scope is decided server-side: a caller who can already see every record
+    // gets the whole trail, anyone else gets their own actions (BR-002).
+    const data = await http.get<{ items: RawActivityEntry[] }>("/activity/recent", {
+      query: { limit },
+    });
+    return data.items.map(toActivityLog);
   },
 
   async listActivity(entityType, entityId) {

@@ -1158,7 +1158,8 @@
       "showLess": "Ver menos",
       "empty": {
         "title": "Está tudo em dia",
-        "description": "Nada requer a sua atenção neste momento."
+        "description": "Nada requer a sua atenção neste momento.",
+        "action": "Ver o meu trabalho"
       },
       "groups": {
         "overdueTasks": "Tarefas atrasadas",
@@ -1195,7 +1196,9 @@
     "weekAgenda": {
       "title": "Agenda da semana",
       "subtitle": "Tudo com prazo nos próximos 7 dias",
-      "empty": "Nada agendado para os próximos dias."
+      "empty": "Nada com prazo nos próximos 7 dias.",
+      "emptyTitle": "Semana livre.",
+      "emptyAction": "Abrir o calendário"
     },
     "charts": {
       "pipeline": {
@@ -1264,6 +1267,53 @@
         "proposals": "{count, plural, =0 {Nada por responder} =1 {Uma à espera de resposta} other {# à espera de resposta}}",
         "projects": "{atRisk, plural, =0 {Todos saudáveis} =1 {Um em risco} other {# em risco}}",
         "received": "Pagamentos entrados no mês"
+      }
+    },
+    "changed": {
+      "title": "O que mudou",
+      "empty": "Ainda nada registado. Assim que alguém criar ou alterar algo, aparece aqui.",
+      "entities": {
+        "task": "uma tarefa",
+        "project": "um projeto",
+        "opportunity": "uma oportunidade",
+        "proposal": "uma proposta",
+        "company": "uma empresa",
+        "contact": "um contacto",
+        "payment": "um pagamento",
+        "milestone": "um marco",
+        "phase": "uma fase",
+        "comment": "um comentário",
+        "attachment": "um anexo",
+        "time_entry": "um registo de tempo",
+        "member": "um membro",
+        "interaction": "uma interação",
+        "meeting": "uma reunião",
+        "payment_milestone": "um marco de pagamento",
+        "record": "um registo"
+      },
+      "verbs": {
+        "created": "criou {entity}",
+        "updated": "alterou {entity}",
+        "deleted": "eliminou {entity}",
+        "archived": "arquivou {entity}",
+        "assigned": "atribuiu {entity}",
+        "blocked": "bloqueou {entity}",
+        "unblocked": "desbloqueou {entity}",
+        "cancelled": "cancelou {entity}",
+        "expired": "deixou expirar {entity}",
+        "health_published": "publicou a saúde de {entity}",
+        "held": "realizou {entity}",
+        "invoiced": "faturou {entity}",
+        "logged": "registou {entity}",
+        "moved": "moveu {entity}",
+        "overdue": "deixou {entity} em atraso",
+        "paid": "recebeu {entity}",
+        "partially_paid": "recebeu parte de {entity}",
+        "rescheduled": "reagendou {entity}",
+        "scheduled": "agendou {entity}",
+        "timer_started": "iniciou o cronómetro em {entity}",
+        "transition": "mudou o estado de {entity}",
+        "won": "ganhou {entity}"
       }
     }
   },

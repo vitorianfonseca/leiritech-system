@@ -89,7 +89,17 @@ export interface ActivityLog {
   entityType: CollaborationEntityType;
   entityId: string;
   actor: DirectoryUser;
+  /** Collapsed onto the fixed set, for icons and the per-entity timeline. */
   action: ActivityAction;
+  /**
+   * The backend's own verb, verbatim — "opportunity.won", "payment.paid",
+   * "task.blocked". `action` above flattens all of those to `status_changed`,
+   * which is fine for choosing an icon and useless for writing a sentence.
+   * Kept alongside so a feed can say what actually happened. Optional
+   * because the seeded client-side fixtures predate it; consumers fall back
+   * to `action`, which is always present.
+   */
+  rawAction?: string;
   /** i18n key suffix for the field affected (e.g. "status", "owner"). */
   field?: string;
   before?: string | null;

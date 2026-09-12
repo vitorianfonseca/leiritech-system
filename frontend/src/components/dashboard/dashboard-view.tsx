@@ -13,6 +13,7 @@ import { stage, stageItem } from "@/lib/motion";
 import { Momentum } from "./momentum";
 import { AttentionPanel } from "./attention-panel";
 import { AgendaCard } from "./agenda-card";
+import { RecentActivity } from "./recent-activity";
 
 export interface DashboardViewProps {
   user: { id: string; firstName: string; role: Role; paymentsGrant: boolean };
@@ -119,7 +120,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <motion.div variants={stage} initial="hidden" animate="visible" className="space-y-12">
+    <motion.div variants={stage} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={stageItem}>{header}</motion.div>
 
       <motion.div variants={stageItem}>
@@ -128,10 +129,13 @@ export function DashboardView({ user }: DashboardViewProps) {
 
       <motion.div
         variants={stageItem}
-        className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]"
       >
         <AttentionPanel groups={data?.attention ?? []} loading={isLoading} />
-        <AgendaCard user={{ id: user.id, role: user.role }} />
+        <div className="space-y-6">
+          <AgendaCard user={{ id: user.id, role: user.role }} />
+          <RecentActivity />
+        </div>
       </motion.div>
     </motion.div>
   );
