@@ -15,10 +15,38 @@ from sqlalchemy.orm import Session
 
 from app.core import errors
 from app.core.config import settings
+from app.core.permissions import Role, role_at_least
 from app.models.collaboration import GithubIssueLink
 from app.models.user import User
 from app.schemas.github import GithubIssueCreate, GithubIssueUpdate
-from app.services import github_service
+from app.services import attachment_service, github_service
+
+
+def assert_entity_visible(
+    db: Session, user: User, entity_type: str, entity_id: str
+) -> None:
+    """BR-002: a link inherits the visibility of the record it was filed about.
+
+    A link's title/URL/labels describe the parent record, so listing or reading
+    links for a project a Membro is not a member of leaks that project's
+    existence and content. Out of scope → 404 (never 403 — enumeration-safe),
+    reusing the same per-entity gate the comments/attachments/activity APIs use.
+
+    Gestor+/Admin see every record already (BR-002 is the *Membro* boundary), so
+    they short-circuit. ``entity_type`` values with no DB row behind them (today
+    ``audit_finding``, whose ``entity_id`` is a free string like "H1") carry no
+    per-record visibility and are left alone — they are internal, not client data.
+    """
+    if role_at_least(user.role, Role.GESTOR):
+        return
+    if not attachment_service.is_scoped_entity_type(entity_type):
+        return
+    try:
+        parsed = uuid.UUID(entity_id)
+    except (ValueError, AttributeError, TypeError):
+        # Not a record id at all; nothing to scope against.
+        return
+    attachment_service.authorize_entity_access(db, user, entity_type, parsed)
 
 
 def _not_configured() -> errors.ApiError:
@@ -97,12 +125,15 @@ def create_and_link_issue(
 
 def list_issue_links(
     db: Session,
+    user: User,
     *,
     entity_type: str,
     entity_id: str,
     state: str | None = None,
     label: str | None = None,
 ) -> list[GithubIssueLink]:
+    # BR-002: never list links for a parent record the caller may not see.
+    assert_entity_visible(db, user, entity_type, entity_id)
     stmt = select(GithubIssueLink).where(
         GithubIssueLink.entity_type == entity_type, GithubIssueLink.entity_id == entity_id
     )
@@ -117,10 +148,13 @@ def list_issue_links(
     return links
 
 
-def get_link_or_404(db: Session, link_id: uuid.UUID) -> GithubIssueLink:
+def get_link_or_404(db: Session, user: User, link_id: uuid.UUID) -> GithubIssueLink:
     link = db.get(GithubIssueLink, link_id)
     if link is None:
         raise errors.not_found("Ligação não encontrada.", code="GITHUB_LINK_NOT_FOUND")
+    # BR-002: a link the caller's role cannot reach must 404 like a missing one,
+    # otherwise 404-vs-anything-else is an existence oracle for the parent record.
+    assert_entity_visible(db, user, link.entity_type, link.entity_id)
     return link
 
 

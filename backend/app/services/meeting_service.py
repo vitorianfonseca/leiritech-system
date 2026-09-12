@@ -29,7 +29,7 @@ from app.repositories import pipeline as pipeline_repo
 from app.schemas.meetings import MeetingCreate, MeetingHeld, MeetingReschedule
 from app.services import activity_service
 
-logger = structlog.get_logger("aurea.crm.meeting")
+logger = structlog.get_logger("leiritech.crm.meeting")
 
 ENTITY_TYPE = "meeting"
 
@@ -40,15 +40,37 @@ def _is_membro(user: User) -> bool:
     return not role_at_least(user.role, Role.GESTOR)
 
 
-def _validate_links(db: Session, payload: MeetingCreate) -> None:
-    if payload.company_id and db.get(Company, payload.company_id) is None:
-        raise errors.not_found("Empresa não encontrada.", code="COMPANY_NOT_FOUND")
-    if payload.opportunity_id and db.get(Opportunity, payload.opportunity_id) is None:
-        raise errors.not_found(
-            "Oportunidade não encontrada.", code="OPPORTUNITY_NOT_FOUND"
-        )
-    if payload.project_id and db.get(Project, payload.project_id) is None:
-        raise errors.not_found("Projeto não encontrado.", code="PROJECT_NOT_FOUND")
+def _validate_links(db: Session, user: User, payload: MeetingCreate) -> None:
+    """Referenced entities must exist AND be visible to the caller.
+
+    Same enumeration-safety rule as interaction_service (issue #49, BR-002): an
+    out-of-scope id is reported as 404, exactly like a non-existent one, so the
+    response cannot be used to probe which projects/companies exist.
+    """
+    membro = _is_membro(user)
+
+    if payload.company_id:
+        company = db.get(Company, payload.company_id)
+        if company is None or (
+            membro and not crm_repo.membro_can_see_company(db, user.id, company)
+        ):
+            raise errors.not_found("Empresa não encontrada.", code="COMPANY_NOT_FOUND")
+    if payload.opportunity_id:
+        opp = db.get(Opportunity, payload.opportunity_id)
+        if opp is None or (
+            membro and not pipeline_repo.membro_can_see_opportunity(db, user.id, opp)
+        ):
+            raise errors.not_found(
+                "Oportunidade não encontrada.", code="OPPORTUNITY_NOT_FOUND"
+            )
+    if payload.project_id:
+        project = db.get(Project, payload.project_id)
+        if project is None or (
+            membro
+            and project.manager_id != user.id
+            and not crm_repo.membro_is_project_member(db, user.id, project.id)
+        ):
+            raise errors.not_found("Projeto não encontrado.", code="PROJECT_NOT_FOUND")
 
 
 def _assert_membro_may_log(db: Session, user: User, payload: MeetingCreate) -> None:
@@ -121,7 +143,7 @@ def list_meetings(
 
 
 def create_meeting(db: Session, user: User, payload: MeetingCreate) -> Meeting:
-    _validate_links(db, payload)
+    _validate_links(db, user, payload)
     if _is_membro(user):
         _assert_membro_may_log(db, user, payload)
 

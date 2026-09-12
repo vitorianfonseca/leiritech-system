@@ -21,10 +21,11 @@ from app.models.crm import Company, Contact, Interaction, Opportunity
 from app.models.project import Project
 from app.models.user import User
 from app.repositories import crm as crm_repo
+from app.repositories import pipeline as pipeline_repo
 from app.schemas.crm import InteractionCreate
 from app.services import activity_service
 
-logger = structlog.get_logger("aurea.crm.interaction")
+logger = structlog.get_logger("leiritech.crm.interaction")
 
 ENTITY_TYPE = "interaction"
 
@@ -33,18 +34,44 @@ def _is_membro(user: User) -> bool:
     return not role_at_least(user.role, Role.GESTOR)
 
 
-def _validate_links(db: Session, payload: InteractionCreate) -> None:
-    """Every referenced entity must exist (404 otherwise)."""
-    if payload.company_id and db.get(Company, payload.company_id) is None:
-        raise errors.not_found("Empresa não encontrada.", code="COMPANY_NOT_FOUND")
-    if payload.contact_id and db.get(Contact, payload.contact_id) is None:
-        raise errors.not_found("Contacto não encontrado.", code="CONTACT_NOT_FOUND")
-    if payload.opportunity_id and db.get(Opportunity, payload.opportunity_id) is None:
-        raise errors.not_found(
-            "Oportunidade não encontrada.", code="OPPORTUNITY_NOT_FOUND"
-        )
-    if payload.project_id and db.get(Project, payload.project_id) is None:
-        raise errors.not_found("Projeto não encontrado.", code="PROJECT_NOT_FOUND")
+def _validate_links(db: Session, user: User, payload: InteractionCreate) -> None:
+    """Every referenced entity must exist AND be visible to the caller.
+
+    Out of scope is reported as 404, identically to "does not exist" (issue #49,
+    BR-002 "404 for non-owned"). Answering 403 for a real-but-invisible id while
+    answering 404 for a made-up one turns this endpoint into an existence oracle
+    for every company/contact/opportunity/project in the database.
+    """
+    membro = _is_membro(user)
+
+    if payload.company_id:
+        company = db.get(Company, payload.company_id)
+        if company is None or (
+            membro and not crm_repo.membro_can_see_company(db, user.id, company)
+        ):
+            raise errors.not_found("Empresa não encontrada.", code="COMPANY_NOT_FOUND")
+    if payload.contact_id:
+        contact = db.get(Contact, payload.contact_id)
+        if contact is None or (
+            membro and not crm_repo.membro_can_see_contact(db, user.id, contact)
+        ):
+            raise errors.not_found("Contacto não encontrado.", code="CONTACT_NOT_FOUND")
+    if payload.opportunity_id:
+        opp = db.get(Opportunity, payload.opportunity_id)
+        if opp is None or (
+            membro and not pipeline_repo.membro_can_see_opportunity(db, user.id, opp)
+        ):
+            raise errors.not_found(
+                "Oportunidade não encontrada.", code="OPPORTUNITY_NOT_FOUND"
+            )
+    if payload.project_id:
+        project = db.get(Project, payload.project_id)
+        if project is None or (
+            membro
+            and project.manager_id != user.id
+            and not crm_repo.membro_is_project_member(db, user.id, project.id)
+        ):
+            raise errors.not_found("Projeto não encontrado.", code="PROJECT_NOT_FOUND")
 
 
 def _assert_membro_may_log(db: Session, user: User, payload: InteractionCreate) -> None:
@@ -70,7 +97,7 @@ def _assert_membro_may_log(db: Session, user: User, payload: InteractionCreate) 
 def create_interaction(
     db: Session, user: User, payload: InteractionCreate
 ) -> Interaction:
-    _validate_links(db, payload)
+    _validate_links(db, user, payload)
     if _is_membro(user):
         _assert_membro_may_log(db, user, payload)
 

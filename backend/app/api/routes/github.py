@@ -56,14 +56,14 @@ def list_issues(
     label: Annotated[str | None, Query(max_length=64)] = None,
 ) -> list[GithubIssueLinkResponse]:
     links = github_issue_service.list_issue_links(
-        db, entity_type=entity_type, entity_id=entity_id, state=state, label=label
+        db, user, entity_type=entity_type, entity_id=entity_id, state=state, label=label
     )
     return [GithubIssueLinkResponse.model_validate(link) for link in links]
 
 
 @router.post("/issues/{link_id}/refresh", response_model=GithubIssueLinkResponse)
 def refresh_issue(link_id: uuid.UUID, user: CurrentUser, db: DbSession) -> GithubIssueLinkResponse:
-    link = github_issue_service.get_link_or_404(db, link_id)
+    link = github_issue_service.get_link_or_404(db, user, link_id)
     link = github_issue_service.refresh_issue_state(db, link)
     return GithubIssueLinkResponse.model_validate(link)
 
@@ -76,7 +76,7 @@ def update_issue(
     db: DbSession,
 ) -> GithubIssueLinkResponse:
     """Close/reopen and/or replace the labels/assignees set."""
-    link = github_issue_service.get_link_or_404(db, link_id)
+    link = github_issue_service.get_link_or_404(db, user, link_id)
     link = github_issue_service.update_issue(db, link, payload)
     return GithubIssueLinkResponse.model_validate(link)
 
@@ -104,7 +104,7 @@ def list_collaborators(
 def list_comments(
     link_id: uuid.UUID, user: CurrentUser, db: DbSession
 ) -> list[GithubCommentResponse]:
-    link = github_issue_service.get_link_or_404(db, link_id)
+    link = github_issue_service.get_link_or_404(db, user, link_id)
     raw = github_issue_service.list_issue_comments(link)
     return [GithubCommentResponse(**c) for c in raw]
 
@@ -120,6 +120,6 @@ def add_comment(
     user: RequireGestor,
     db: DbSession,
 ) -> GithubCommentResponse:
-    link = github_issue_service.get_link_or_404(db, link_id)
+    link = github_issue_service.get_link_or_404(db, user, link_id)
     comment = github_issue_service.add_issue_comment(link, payload.body)
     return GithubCommentResponse(**comment)

@@ -20,6 +20,7 @@ import structlog
 from sqlalchemy.orm import Session
 
 from app.core import errors
+from app.core.clock import today as app_today
 from app.core.permissions import Role, can_manage_project, role_at_least
 from app.models.project import Milestone, Project, ProjectPhase
 from app.models.user import User
@@ -32,7 +33,7 @@ from app.schemas.phases import (
 )
 from app.services import activity_service, notification_service, project_service
 
-logger = structlog.get_logger("aurea.phase")
+logger = structlog.get_logger("leiritech.phase")
 
 PHASE_ENTITY = "phase"
 MILESTONE_ENTITY = "milestone"
@@ -99,8 +100,18 @@ def get_phase_or_404(db: Session, user: User, phase_id: uuid.UUID) -> ProjectPha
     phase = db.get(ProjectPhase, phase_id)
     if phase is None:
         raise errors.not_found("Fase não encontrada.", code="PHASE_NOT_FOUND")
-    # Enforce project visibility; a Membro outside the project gets 404.
-    _get_project_scoped(db, user, phase.project_id)
+    # Enforce project visibility; a Membro outside the project gets 404. The
+    # parent's error code is rewritten to this resource's own (issue #49): both
+    # are 404, but PROJECT_NOT_FOUND vs PHASE_NOT_FOUND would still tell a
+    # Membro "that phase id is real, just not yours" — an enumeration oracle.
+    try:
+        _get_project_scoped(db, user, phase.project_id)
+    except errors.ApiError as exc:
+        if exc.status_code == 404:
+            raise errors.not_found(
+                "Fase não encontrada.", code="PHASE_NOT_FOUND"
+            ) from exc
+        raise
     return phase
 
 
@@ -272,8 +283,6 @@ def suggest_completion_if_ready(
     Called both as an EVENT (from the task service when a task reaches ``done``)
     and as a daily reconciliation sweep. Does NOT commit.
     """
-    from datetime import UTC, datetime
-
     if phase.status == "completed":
         return False
     project = db.get(Project, phase.project_id)
@@ -285,7 +294,7 @@ def suggest_completion_if_ready(
     recipient = phase.owner_id or project.manager_id
     if recipient is None:
         return False
-    today = run_date or datetime.now(tz=UTC).date()
+    today = run_date or app_today()
     return (
         notification_service.create_notification(
             db,
@@ -310,7 +319,15 @@ def get_milestone_or_404(db: Session, user: User, milestone_id: uuid.UUID) -> Mi
     milestone = db.get(Milestone, milestone_id)
     if milestone is None:
         raise errors.not_found("Marco não encontrado.", code="MILESTONE_NOT_FOUND")
-    _get_project_scoped(db, user, milestone.project_id)
+    # Same enumeration-safe code rewrite as get_phase_or_404 (issue #49).
+    try:
+        _get_project_scoped(db, user, milestone.project_id)
+    except errors.ApiError as exc:
+        if exc.status_code == 404:
+            raise errors.not_found(
+                "Marco não encontrado.", code="MILESTONE_NOT_FOUND"
+            ) from exc
+        raise
     return milestone
 
 

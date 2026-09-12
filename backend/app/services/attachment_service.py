@@ -45,6 +45,17 @@ _VISIBILITY_GETTERS: dict[str, Callable[[Session, User, uuid.UUID], object]] = {
 }
 
 
+def is_scoped_entity_type(entity_type: str) -> bool:
+    """True when ``entity_type`` names a real, visibility-scoped DB record.
+
+    Callers that accept a wider set of entity types than the attachments API
+    does (the GitHub issue links, which may also point at an ``audit_finding``
+    with no DB row at all) use this to decide whether a per-record visibility
+    check is even meaningful before calling ``authorize_entity_access``.
+    """
+    return entity_type in _VISIBILITY_GETTERS
+
+
 def authorize_entity_access(
     db: Session, user: User, entity_type: str, entity_id: uuid.UUID
 ) -> None:
