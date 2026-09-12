@@ -582,6 +582,9 @@ interface ApiProject {
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  teamCount: number;
+  progress: number;
+  hoursUsed: number;
 }
 
 interface ApiPhase {
@@ -688,7 +691,11 @@ function mapMember(m: ApiMember): ProjectMember {
 }
 
 /** Base list projection — the shared fields available from a bare project row. */
-function mapListItem(p: ApiProject, teamCount: number, progress: number): ProjectListItem {
+function mapListItem(
+  p: ApiProject,
+  teamCount = p.teamCount ?? 0,
+  progress = p.progress ?? 0
+): ProjectListItem {
   return {
     id: p.id,
     clientId: p.companyId ?? "",
@@ -706,8 +713,7 @@ function mapListItem(p: ApiProject, teamCount: number, progress: number): Projec
     // Backend may already null contracted_value for a non-finance caller (BR-008).
     contractedValueCents: p.contractedValue,
     hoursBudget: p.hoursBudget ?? 0,
-    // INTEGRATION-GAP: hoursUsed — time tracking (#34) not aggregated by backend.
-    hoursUsed: 0,
+    hoursUsed: p.hoursUsed ?? 0,
     nextDeliveryAt: null,
   };
 }
@@ -883,10 +889,10 @@ export const projectsApi: ProjectsApi = {
       const page = await http.get<ApiPage<ApiProject>>("/projects", {
         query: { page_size: 100, include_archived: true },
       });
-      // INTEGRATION-GAP: teamCount/progress — the list endpoint returns bare
-      // project rows; members + phase rollups would cost one call per project,
-      // so both default to 0 here (enriched on the detail fetch).
-      return page.items.map((p) => mapListItem(p, 0, 0));
+      // The list endpoint rolls up team, progress and logged hours per row
+      // (three grouped queries for the whole page), so the columns that show
+      // them carry real numbers rather than a placeholder zero.
+      return page.items.map((p) => mapListItem(p));
     } catch (err) {
       throw mapProjectError(err);
     }

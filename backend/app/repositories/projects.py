@@ -177,6 +177,84 @@ def phase_task_counts(
     return {row[0]: (int(row[1]), int(row[2])) for row in rows if row[0] is not None}
 
 
+def rollups_for(
+    db: Session, project_ids: Iterable[uuid.UUID]
+) -> dict[uuid.UUID, tuple[int, int, float]]:
+    """Per-project ``(team_count, progress_percent, hours_used)`` for a page of
+    rows, in three grouped queries rather than three per project.
+
+    The projects table shows a team column, a progress bar and hours-used on
+    every row; without these the list endpoint returns bare project rows and
+    all three render zero for every project, which reads as broken data rather
+    than as an absent rollup.
+
+    ``team_count`` counts assigned members plus the manager, because the
+    manager is on the project whether or not anyone added a member row.
+    ``progress`` is the share of non-archived tasks that are done (BR-050) —
+    archived tasks are excluded so a tidied project does not look unfinished.
+    ``hours_used`` counts only closed time entries, matching the labour figure
+    finance reports (BR-065); a running timer has no settled duration yet.
+    """
+    ids = {i for i in project_ids if i is not None}
+    if not ids:
+        return {}
+
+    members: dict[uuid.UUID, int] = {
+        row[0]: int(row[1])
+        for row in db.execute(
+            select(ProjectMember.project_id, func.count(ProjectMember.user_id))
+            .where(ProjectMember.project_id.in_(ids))
+            .group_by(ProjectMember.project_id)
+        ).all()
+    }
+    managed: set[uuid.UUID] = {
+        row[0]
+        for row in db.execute(
+            select(Project.id).where(Project.id.in_(ids), Project.manager_id.is_not(None))
+        ).all()
+    }
+    tasks: dict[uuid.UUID, tuple[int, int]] = {
+        row[0]: (int(row[1]), int(row[2]))
+        for row in db.execute(
+            select(
+                Task.project_id,
+                func.count(Task.id),
+                func.count(case((Task.status == "done", 1))),
+            )
+            .where(Task.project_id.in_(ids), Task.archived_at.is_(None))
+            .group_by(Task.project_id)
+        ).all()
+    }
+    seconds: dict[uuid.UUID, float] = {
+        row[0]: float(row[1] or 0.0)
+        for row in db.execute(
+            select(
+                Task.project_id,
+                func.coalesce(
+                    func.sum(
+                        func.extract("epoch", TimeEntry.ended_at - TimeEntry.started_at)
+                    ),
+                    0,
+                ),
+            )
+            .select_from(TimeEntry)
+            .join(Task, Task.id == TimeEntry.task_id)
+            .where(Task.project_id.in_(ids), TimeEntry.ended_at.is_not(None))
+            .group_by(Task.project_id)
+        ).all()
+    }
+
+    out: dict[uuid.UUID, tuple[int, int, float]] = {}
+    for pid in ids:
+        total, done = tasks.get(pid, (0, 0))
+        out[pid] = (
+            members.get(pid, 0) + (1 if pid in managed else 0),
+            round(done * 100 / total) if total else 0,
+            round(seconds.get(pid, 0.0) / 3600, 1),
+        )
+    return out
+
+
 def company_names_for(db: Session, company_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
     """Map company ids to names in one query."""
     ids = {i for i in company_ids if i is not None}

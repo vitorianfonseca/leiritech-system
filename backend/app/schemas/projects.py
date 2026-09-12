@@ -93,6 +93,12 @@ class ProjectResponse(BaseModel):
     archived_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    # Rollups the list view renders as columns. Computed in bulk by the list
+    # route; left at their defaults elsewhere, where the caller already has
+    # the members and phases to hand.
+    team_count: int = 0
+    progress: int = 0
+    hours_used: float = 0.0
 
 
 # --------------------------------------------------------------------------- #

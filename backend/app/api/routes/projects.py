@@ -52,6 +52,7 @@ def _project_response(
     user: User,
     names: dict[uuid.UUID, str] | None = None,
     companies: dict[uuid.UUID, str] | None = None,
+    rollups: dict[uuid.UUID, tuple[int, int, float]] | None = None,
 ) -> ProjectResponse:
     """Build the response, redacting financial fields for a caller without
     financial visibility (BR-008/audit C1). ``GET /projects`` and
@@ -67,6 +68,8 @@ def _project_response(
         resp.manager_name = names.get(project.manager_id)
     if project.company_id is not None and companies is not None:
         resp.company_name = companies.get(project.company_id)
+    if rollups is not None and project.id in rollups:
+        resp.team_count, resp.progress, resp.hours_used = rollups[project.id]
     if not can_manage_financials(user):
         resp.contracted_value = None
         resp.hours_budget = None
@@ -157,8 +160,12 @@ def list_projects(
     )
     manager_names = project_repo.names_for(db, [p.manager_id for p in projects])
     company_names = project_repo.company_names_for(db, [p.company_id for p in projects])
+    rollups = project_repo.rollups_for(db, [p.id for p in projects])
     return Page(
-        items=[_project_response(p, user, manager_names, company_names) for p in projects],
+        items=[
+            _project_response(p, user, manager_names, company_names, rollups)
+            for p in projects
+        ],
         total=total,
         page=page,
         page_size=page_size,

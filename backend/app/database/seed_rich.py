@@ -937,9 +937,17 @@ def gen_time_entries(
                     minute=random.choice([0, 15, 30, 45]), second=0, microsecond=0
                 )
                 hours = random.choice([1, 1.5, 2, 3, 4])
+                # Tasks can be dated into the future (planned work), which put
+                # `started` after now. Clamping only the end then produced an
+                # entry that finished before it began, and every hours rollup
+                # that sums (ended - started) went negative. Slide the whole
+                # window back instead, and drop it if it will not fit behind
+                # now at all.
+                if started + timedelta(hours=hours) > NOW:
+                    started = NOW - timedelta(hours=hours)
+                if started < base:
+                    continue
                 ended = started + timedelta(hours=hours)
-                if ended > NOW:
-                    ended = NOW
                 db.add(
                     TimeEntry(
                         user_id=user_id,
