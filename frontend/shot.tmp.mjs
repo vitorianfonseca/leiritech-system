@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+const OUT = process.env.OUT_DIR;
+const b = await chromium.launch();
+const p = await b.newPage({ viewport:{width:1440,height:900}, deviceScaleFactor:4 });
+await p.goto('http://localhost:3000/login',{waitUntil:'networkidle'}); await p.waitForTimeout(2000);
+await p.locator('#field-email').fill('admin@leiritech.pt');
+await p.locator('#field-password').fill('redesign-preview-2026');
+await Promise.all([p.waitForURL(u=>!u.pathname.includes('login'),{timeout:25000}).catch(()=>{}), p.getByRole('button',{name:'Entrar'}).click()]);
+await p.waitForTimeout(3000);
+console.log('rect fill:', await p.evaluate(() => getComputedStyle(document.querySelector('aside svg rect')).fill));
+await p.screenshot({ path: `${OUT}/mark.png`, clip:{x:8,y:14,width:200,height:44} });
+await b.close();

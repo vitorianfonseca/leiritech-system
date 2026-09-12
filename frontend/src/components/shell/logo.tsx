@@ -2,9 +2,20 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * LeiriTech mark — an "L" traced as a circuit path between two connection
- * nodes, evoking signal and structure. Uses the cobalt brand token so it
- * adapts to light and dark. Decorative when paired with the wordmark.
+ * The LeiriTech mark.
+ *
+ * An "L" drawn as a set square — a vertical meeting a horizontal at a hard
+ * corner. That is the shape of the tool a thing gets built against: structure
+ * and squaring-up, which is what an operations system does for a studio.
+ *
+ * Detached at the end of the horizontal arm sits a single block in the signal
+ * colour: the next step, not yet joined. It carries the idea the whole product
+ * is organised around — what happens next — and it keeps the app's colour rule
+ * intact, because the accent still marks an action and never decoration. The L
+ * itself is ink, so the mark reads on paper and on charcoal alike.
+ *
+ * Built on a 32-unit grid with 5.5-unit strokes so it survives 16px: at
+ * favicon size the corner and the gap are still legible.
  */
 export function LeiritechMark({
   className,
@@ -19,14 +30,14 @@ export function LeiritechMark({
       {...props}
     >
       <path
-        d="M10 6v16h14"
-        stroke="var(--signal)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M7.6 5h4.6a.6.6 0 0 1 .6.6v15.3h6.6a.6.6 0 0 1 .6.6v4.6a.6.6 0 0 1-.6.6H7.6a.6.6 0 0 1-.6-.6V5.6a.6.6 0 0 1 .6-.6Z"
+        fill="currentColor"
       />
-      <circle cx="10" cy="6" r="2.5" fill="var(--signal)" />
-      <circle cx="24" cy="22" r="2.5" fill="var(--signal)" />
+      {/* `fill-signal`, not fill="var(--signal)": Tailwind v4's `@theme inline`
+          substitutes token values straight into utilities and then drops the
+          raw custom property from :root, so a var() in an SVG presentation
+          attribute resolves to nothing. The utility class is what survives. */}
+      <rect x="23" y="20.9" width="5.8" height="5.8" rx="0.8" className="fill-signal" />
     </svg>
   );
 }
@@ -40,7 +51,7 @@ export function LeiritechWordmark({
 }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <LeiritechMark className="size-7 shrink-0" />
+      <LeiritechMark className="size-7 shrink-0 text-foreground" />
       {!collapsed && (
         <span className="font-heading text-[1.05rem] font-semibold tracking-tight text-foreground">
           LeiriTech
