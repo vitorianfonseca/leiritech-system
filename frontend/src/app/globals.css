@@ -360,68 +360,37 @@
   }
 }
 
-/* ------------------------------------------------------------------ *
- * The pointer.
- *
- * One rule, outside every layer, with `!important`, covering interactive
- * elements AND their descendants.
- *
- * Each of those three is deliberate, and each fixes a way the earlier
- * attempts leaked:
- *
- *  - **Descendants** (`a *`, `button *`): the rules used to name only the
- *    element itself. The pointer usually rests over a child — a <span>, an
- *    <svg>, a wrapper div — and anything that gave that child its own cursor
- *    won, mid-control.
- *  - **Outside `@layer`**: in Tailwind v4 an unlayered rule outranks every
- *    layer, so this cannot be undercut by a utility. `cursor-default` on a
- *    menu item is exactly how that happened before.
- *  - **`!important`**: the last resort against component styles and third-
- *    party CSS. Used here because "anything clickable shows a pointer" is a
- *    product rule, not a per-component preference, and it must not be
- *    negotiable from inside a component.
- *
- * The exclusions below re-establish the cursors that carry real meaning:
- * text entry, refusal, and drag handles.
- * ------------------------------------------------------------------ */
+/* Pointer on anything clickable, and on whatever sits inside it — the
+   pointer rests on a child <span> or <svg> far more often than on the
+   control itself. Unlayered, so it outranks Tailwind's utility layer. */
 a[href], a[href] *,
 button:not(:disabled), button:not(:disabled) *,
 summary, summary *,
 label[for], label[for] *,
 select:not(:disabled),
-[role="button"]:not([aria-disabled="true"]), [role="button"]:not([aria-disabled="true"]) *,
-[role="tab"]:not([aria-disabled="true"]), [role="tab"]:not([aria-disabled="true"]) *,
-[role="option"]:not([aria-disabled="true"]), [role="option"]:not([aria-disabled="true"]) *,
-[role="menuitem"]:not([aria-disabled="true"]), [role="menuitem"]:not([aria-disabled="true"]) *,
-[role="menuitemcheckbox"], [role="menuitemcheckbox"] *,
-[role="menuitemradio"], [role="menuitemradio"] *,
-[role="switch"]:not([aria-disabled="true"]), [role="switch"]:not([aria-disabled="true"]) *,
-[role="checkbox"]:not([aria-disabled="true"]), [role="checkbox"]:not([aria-disabled="true"]) *,
-[role="radio"]:not([aria-disabled="true"]), [role="radio"]:not([aria-disabled="true"]) *,
+[role="button"], [role="button"] *,
+[role="tab"], [role="tab"] *,
+[role="option"], [role="option"] *,
+[role="menuitem"], [role="menuitem"] *,
+[role="switch"], [role="switch"] *,
+[role="checkbox"], [role="checkbox"] *,
+[role="radio"], [role="radio"] *,
 input[type="checkbox"]:not(:disabled),
 input[type="radio"]:not(:disabled),
-input[type="range"]:not(:disabled),
 input[type="file"]:not(:disabled) {
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
-/* Typing, refusing and dragging keep the cursors that mean something. */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(:disabled),
+/* Typing and refusal keep their own cursors. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(:disabled),
 textarea:not(:disabled),
 [contenteditable="true"] {
-  cursor: text !important;
+  cursor: text;
 }
 
 :disabled, :disabled *,
 [aria-disabled="true"], [aria-disabled="true"] * {
-  cursor: not-allowed !important;
-}
-
-[draggable="true"], [data-dnd-handle], .cursor-grab {
-  cursor: grab !important;
-}
-[draggable="true"]:active, [data-dnd-handle]:active, .cursor-grab:active {
-  cursor: grabbing !important;
+  cursor: not-allowed;
 }
 
 /* ------------------------------------------------------------------ *
