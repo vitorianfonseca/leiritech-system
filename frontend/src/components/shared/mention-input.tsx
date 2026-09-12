@@ -268,7 +268,7 @@ export function MentionInput({
               }}
               onMouseEnter={() => setActiveIndex(i)}
               className={cn(
-                "flex cursor-default select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none",
+                "flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none",
                 i === activeIndex
                   ? "bg-accent text-accent-foreground"
                   : "text-foreground"
