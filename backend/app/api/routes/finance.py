@@ -132,7 +132,10 @@ def change_payment_milestone_status(
 def list_project_costs(
     user: RequireFinance,
     db: DbSession,
-    project_id: uuid.UUID,
+    # Optional: the finance overview needs every project's costs at once. With
+    # this required, the client had to issue one request per project — four
+    # projects meant four round trips, forty would mean forty.
+    project_id: uuid.UUID | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> Page[ProjectCostResponse]:

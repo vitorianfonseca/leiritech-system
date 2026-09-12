@@ -154,12 +154,15 @@ export function TaskFilters({
         <Filter className="size-4" strokeWidth={1.8} aria-hidden />
         <span className="hidden sm:inline">{t("filters.label")}</span>
       </span>
+      {projects.length > 0 ? (
       <FilterSelect
         label={t("filters.project")}
         value={filters.projectId}
         options={projects}
         onChange={(v) => onChange({ ...filters, projectId: v })}
       />
+      ) : null}
+
       <FilterSelect
         label={t("filters.assignee")}
         value={filters.assigneeId}

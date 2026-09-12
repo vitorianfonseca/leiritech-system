@@ -113,7 +113,7 @@ export function CommandPalette({ user }: { user: SessionUser }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="top-[10%] max-w-xl overflow-hidden p-0">
+      <DialogContent className="top-[10%] max-w-xl overflow-hidden bg-popover p-0 [backdrop-filter:none]">
         <div className="flex items-center gap-3 border-b border-border px-4">
           <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <input
@@ -126,7 +126,7 @@ export function CommandPalette({ user }: { user: SessionUser }) {
             onKeyDown={onListKeyDown}
             placeholder={t("shell.commandPalette.placeholder")}
             aria-label={t("shell.commandPalette.title")}
-            className="h-14 w-full bg-popover text-sm outline-none placeholder:text-muted-foreground"
+            className="h-14 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
 

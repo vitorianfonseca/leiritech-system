@@ -78,8 +78,11 @@ export function FinanceiroTab({ projectId, user }: FinanceiroTabProps) {
       <FinancialStatTiles summary={data.summary} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* h-full on both: the grid row stretches its wrapper, but the card
+            inside stopped at its content and left a hole under the shorter
+            one. */}
         <div className="xl:col-span-2">
-          <Card className="gap-4">
+          <Card className="h-full gap-4">
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -105,7 +108,7 @@ export function FinanceiroTab({ projectId, user }: FinanceiroTabProps) {
           </Card>
         </div>
         <div className="xl:col-span-1">
-          <MarginCard summary={data.summary} />
+          <MarginCard summary={data.summary} className="h-full" />
         </div>
       </div>
 

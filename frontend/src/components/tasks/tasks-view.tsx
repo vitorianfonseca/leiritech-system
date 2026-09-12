@@ -31,10 +31,18 @@ import { BlockReasonDialog } from "./block-reason-dialog";
 
 export interface TasksViewProps {
   user: { id: string; name: string; role: Role; avatarUrl: string | null };
+  /**
+   * Scope every view to one project. Set by the project's Tasks tab, which
+   * wants the whole workspace — list, board, calendar, filters and the detail
+   * dialog — rather than a second, thinner list that drifts from this one.
+   * The project filter is hidden while scoped, since it can only ever have
+   * one answer.
+   */
+  projectId?: string;
 }
 
 /** Tasks workspace (F10): List / Kanban / Calendar + detail side panel. */
-export function TasksView({ user }: TasksViewProps) {
+export function TasksView({ user, projectId }: TasksViewProps) {
   const t = useTranslations("tasks");
   const qc = useQueryClient();
   const { id: userId, role } = user;
@@ -46,7 +54,10 @@ export function TasksView({ user }: TasksViewProps) {
   });
   const refresh = React.useCallback(() => qc.invalidateQueries({ queryKey }), [qc, queryKey]);
 
-  const tasks = React.useMemo(() => data ?? [], [data]);
+  const tasks = React.useMemo(
+    () => (projectId ? (data ?? []).filter((t) => t.projectId === projectId) : (data ?? [])),
+    [data, projectId]
+  );
 
   /* ---------------- view + filters ---------------- */
   const [view, setView] = React.useState<TasksViewMode>("kanban");
@@ -282,7 +293,7 @@ export function TasksView({ user }: TasksViewProps) {
         <TaskFilters
           filters={filters}
           onChange={setFilters}
-          projects={projects}
+          projects={projectId ? [] : projects}
           assignees={assignees}
           labels={labels}
         />

@@ -73,12 +73,13 @@ def get_cost(db: Session, cost_id: uuid.UUID) -> ProjectCost | None:
 
 
 def list_costs(
-    db: Session, *, project_id: uuid.UUID, page: int, page_size: int
+    db: Session, *, project_id: uuid.UUID | None, page: int, page_size: int
 ) -> tuple[list[ProjectCost], int]:
-    stmt = (
-        select(ProjectCost)
-        .where(ProjectCost.project_id == project_id)
-        .order_by(ProjectCost.date.desc().nulls_last(), ProjectCost.created_at.desc())
+    stmt = select(ProjectCost)
+    if project_id is not None:
+        stmt = stmt.where(ProjectCost.project_id == project_id)
+    stmt = stmt.order_by(
+        ProjectCost.date.desc().nulls_last(), ProjectCost.created_at.desc()
     )
     return _paginate(db, stmt, page=page, page_size=page_size)
 

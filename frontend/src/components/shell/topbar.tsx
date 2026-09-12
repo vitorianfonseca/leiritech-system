@@ -12,7 +12,6 @@ import { UserMenu } from "./user-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { SoundToggle } from "@/components/shared/sound-toggle";
-import { PrivacyToggle } from "@/components/shared/privacy-toggle";
 import { Kbd } from "@/components/ui/kbd";
 
 function openCommand() {
@@ -30,7 +29,7 @@ export function Topbar({ user }: { user: SessionUser }) {
       <button
         type="button"
         onClick={openCommand}
-        className="glass group flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl px-3.5 text-sm text-muted-foreground hover:text-foreground"
+        className="glass glass-blur group flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl px-3.5 text-sm text-muted-foreground hover:text-foreground"
         aria-label={t("commandPalette.openLabel")}
       >
         <Search className="size-4 shrink-0" aria-hidden />
@@ -49,7 +48,6 @@ export function Topbar({ user }: { user: SessionUser }) {
         <QuickCreate user={user} />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <Notifications user={user} />
-        <PrivacyToggle />
         <SoundToggle />
         <ThemeToggle />
         <LocaleSwitcher />

@@ -47,7 +47,8 @@ import { HealthDialog } from "./health-dialog";
 import { OverviewTab } from "./overview-tab";
 import { PhasesTab } from "./phases-tab";
 import { FinanceiroTab } from "./financeiro-tab";
-import { TasksTab, CalendarTab, FilesTab, ActivityTab } from "./simple-tabs";
+import { CalendarTab, FilesTab, ActivityTab } from "./simple-tabs";
+import { TasksView } from "@/components/tasks";
 import { formatDate, formatEUR, initials } from "./project-format";
 
 export interface ProjectDetailViewProps {
@@ -287,7 +288,19 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
             <OverviewTab project={project} />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
-            <TasksTab project={project} />
+            {/* The full task workspace, scoped to this project — list, board,
+                calendar, filters and the detail dialog. The tab used to show
+                phase counts over a "coming soon" note, which answered none of
+                the questions someone opens it with. */}
+            <TasksView
+              user={{
+                id: user.userId,
+                name: user.name,
+                role: user.role,
+                avatarUrl: user.avatarUrl,
+              }}
+              projectId={project.id}
+            />
           </Tabs.Panel>
           <Tabs.Panel value="phases">
             <PhasesTab project={project} user={user} canManage={canManage && !isArchived} onChanged={refresh} />

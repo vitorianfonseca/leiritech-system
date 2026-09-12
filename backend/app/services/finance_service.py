@@ -390,9 +390,10 @@ def _apply_cancelled(
 # Project costs (BR-069 / H8)
 # --------------------------------------------------------------------------- #
 def list_costs(
-    db: Session, *, project_id: uuid.UUID, page: int, page_size: int
+    db: Session, *, project_id: uuid.UUID | None, page: int, page_size: int
 ) -> tuple[list[ProjectCost], int]:
-    _get_project_or_404(db, project_id)
+    if project_id is not None:
+        _get_project_or_404(db, project_id)
     return finance_repo.list_costs(
         db, project_id=project_id, page=page, page_size=page_size
     )

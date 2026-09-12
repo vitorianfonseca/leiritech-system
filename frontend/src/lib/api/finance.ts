@@ -264,33 +264,31 @@ export const financeApi: FinanceApi = {
       const names = await loadNameMaps();
       const milestones = rawMilestones.map((m) => mapMilestone(m, names));
 
-      // 3. Per-project costs + live summary. The backend exposes NO global costs
-      //    or global summary endpoint, so this fans out per distinct project.
-      //    MULTI-CALL: N distinct projects → 2N reads. Bounded by active projects.
+      // 3. Costs in one read. `project_id` is an optional filter now, so the
+      //    whole set arrives at once instead of one request per project — this
+      //    used to grow with the portfolio (N projects → N requests) and was
+      //    the page's dominant cost.
       const projectIds = [...new Set(rawMilestones.map((m) => m.projectId))];
-      const perProject = await Promise.all(
-        projectIds.map(async (pid) => {
-          const [costsPage, summary] = await Promise.all([
-            http.get<Page<CostWire>>(COSTS_PATH, {
-              query: { project_id: pid, page_size: 100 },
-            }),
-            http.get<SummaryWire>(`/finance/projects/${pid}/summary`),
-          ]);
-          return { costs: costsPage.items, summary };
-        })
+      const allCostsPage = await http.get<Page<CostWire>>(COSTS_PATH, {
+        query: { page_size: 100 },
+      });
+
+      // The live margin (BR-065) nets out labour, which only the backend knows,
+      // so the summary still fans out. One read per project rather than two.
+      const summaries = await Promise.all(
+        projectIds.map((pid) =>
+          http.get<SummaryWire>(`/finance/projects/${pid}/summary`)
+        )
       );
 
-      const costs = perProject
-        .flatMap((p) => p.costs)
-        .map((c) => mapCost(c, names));
-      const summary = aggregateSummary(perProject.map((p) => p.summary));
+      const costs = allCostsPage.items.map((c) => mapCost(c, names));
+      const summary = aggregateSummary(summaries);
 
       // Backend-authoritative per-project margin (BR-065): the /finance/projects/{id}/summary
       // read above already nets out labour cost; preserve it here instead of letting
       // a caller (e.g. /reports) recompute margin from raw milestones+costs and
       // silently drop the labour term.
-      const projectSummaries: FinancialProjectSummary[] = perProject
-        .map((p) => p.summary)
+      const projectSummaries: FinancialProjectSummary[] = summaries
         .map((s) => ({
           projectId: s.projectId,
           projectName: names.projects.get(s.projectId) ?? "",
