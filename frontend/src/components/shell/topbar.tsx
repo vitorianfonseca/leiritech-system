@@ -47,7 +47,11 @@ export function Topbar({ user }: { user: SessionUser }) {
         </span>
       </button>
 
-      <div className="ml-auto flex items-center gap-1">
+      {/* No gap: a 4px strip between two icon buttons is a dead zone the
+          pointer crosses constantly, flicking the cursor back to an arrow on
+          every pass. The buttons sit flush and their hover surface separates
+          them, the way a native toolbar does. */}
+      <div className="ml-auto flex items-center">
         <QuickCreate user={user} />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <Notifications user={user} />
