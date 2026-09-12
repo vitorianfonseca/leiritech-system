@@ -10,7 +10,6 @@ import { EmptyState } from "@/components/shared";
 import { dashboardApi } from "@/lib/api/dashboard";
 import type { Role } from "@/lib/session";
 import { stage, stageItem } from "@/lib/motion";
-import { Momentum } from "./momentum";
 import { AttentionPanel } from "./attention-panel";
 import { AgendaCard } from "./agenda-card";
 import { RecentActivity } from "./recent-activity";
@@ -123,9 +122,6 @@ export function DashboardView({ user }: DashboardViewProps) {
     <motion.div variants={stage} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={stageItem}>{header}</motion.div>
 
-      <motion.div variants={stageItem}>
-        <Momentum data={data} loading={isLoading} />
-      </motion.div>
 
       <motion.div
         variants={stageItem}

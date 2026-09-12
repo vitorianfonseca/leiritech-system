@@ -1254,21 +1254,6 @@
       "w5": "S5",
       "w6": "S6"
     },
-    "momentum": {
-      "title": "Onde está o negócio agora",
-      "links": {
-        "pipeline": "Em pipeline",
-        "proposals": "Propostas a aguardar",
-        "projects": "Projetos ativos",
-        "received": "Recebido este mês"
-      },
-      "captions": {
-        "pipeline": "{count, plural, =0 {Nenhuma oportunidade aberta} =1 {Uma oportunidade aberta} other {# oportunidades abertas}}",
-        "proposals": "{count, plural, =0 {Nada por responder} =1 {Uma à espera de resposta} other {# à espera de resposta}}",
-        "projects": "{atRisk, plural, =0 {Todos saudáveis} =1 {Um em risco} other {# em risco}}",
-        "received": "Pagamentos entrados no mês"
-      }
-    },
     "changed": {
       "title": "O que mudou",
       "empty": "Ainda nada registado. Assim que alguém criar ou alterar algo, aparece aqui.",
