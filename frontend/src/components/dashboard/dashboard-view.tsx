@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { blockVariants, stageVariants } from "@/lib/motion";
+import { stageItem, stage } from "@/lib/motion";
 import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState } from "@/components/shared";
 import { dashboardApi } from "@/lib/api/dashboard";
@@ -89,20 +89,20 @@ export function DashboardView({ user }: DashboardViewProps) {
     // The screen opens as one composed sequence: header, then the strip of
     // figures, then the queue and its rail — reading order, not all at once.
     <motion.div
-      variants={stageVariants}
+      variants={stage}
       initial="hidden"
       animate="visible"
       className="space-y-8"
     >
-      <motion.div variants={blockVariants}>{header}</motion.div>
+      <motion.div variants={stageItem}>{header}</motion.div>
 
-      <motion.div variants={blockVariants}>
+      <motion.div variants={stageItem}>
         <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
       </motion.div>
 
       {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
       <motion.div
-        variants={blockVariants}
+        variants={stageItem}
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
       >
         <AttentionPanel

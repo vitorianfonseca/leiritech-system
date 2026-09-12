@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
@@ -14,7 +14,6 @@ import {
   RotateCcw,
   RefreshCw,
   TriangleAlert,
-  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -33,7 +32,7 @@ import { CompanyStatusBadge, ClienteAtivoBadge } from "./status-badges";
 import { CompanyFormDialog } from "./company-form-dialog";
 import { ArchiveCompanyDialog } from "./archive-company-dialog";
 import { QuickActions } from "./quick-actions";
-import { formatEUR, formatDate, initials } from "./crm-format";
+import { initials } from "./crm-format";
 
 export interface CompaniesViewProps {
   user: { role: Role; userId: string; paymentsGrant: boolean };
@@ -43,12 +42,10 @@ export function CompaniesView({ user }: CompaniesViewProps) {
   const t = useTranslations("crm.companies");
   const tStatus = useTranslations("crm.status.company");
   const tSource = useTranslations("crm.source");
-  const locale = useLocale();
   const router = useRouter();
   const qc = useQueryClient();
 
   const canManage = user.role !== "membro";
-  const canFinance = user.paymentsGrant || user.role === "admin";
   const [includeArchived, setIncludeArchived] = React.useState(false);
 
   const queryKey = React.useMemo(
@@ -122,14 +119,20 @@ export function CompaniesView({ user }: CompaniesViewProps) {
           </div>
         ),
       },
-      {
-        id: "owner",
-        header: t("columns.owner"),
-        accessor: (c) => c.ownerName,
-        sortable: true,
-        cardPriority: 4,
-        cell: (c) => <span className="text-sm">{c.ownerName}</span>,
-      },
+      /*
+       * Columns the backend does not serve are deliberately absent, not
+       * rendered empty.
+       *
+       * `CompanyResponse` carries no owner display name, no per-company
+       * opportunity or project counts, no contracted total, no next action
+       * and no last-interaction date — `lib/api/crm.ts` defaults every one of
+       * them (see the INTEGRATION-GAP comments there). Rendering them meant a
+       * confident "0" on every row and a blank owner on every company, which
+       * is worse than an absent column: a wrong number is read as data.
+       *
+       * They come back the moment the API returns them; nothing else here
+       * needs to change.
+       */
       {
         id: "source",
         header: t("columns.source"),
@@ -141,43 +144,6 @@ export function CompaniesView({ user }: CompaniesViewProps) {
         cell: (c) => <span className="text-sm text-muted-foreground">{tSource(c.source)}</span>,
       },
       {
-        id: "opportunities",
-        header: t("columns.opportunities"),
-        accessor: (c) => c.openOpportunities,
-        sortable: true,
-        align: "right",
-        cardPriority: 3,
-        cell: (c) => <span className="tabular-nums">{c.openOpportunities}</span>,
-      },
-      {
-        id: "projects",
-        header: t("columns.projects"),
-        accessor: (c) => c.activeProjects,
-        sortable: true,
-        align: "right",
-        defaultHidden: true,
-        cell: (c) => <span className="tabular-nums">{c.activeProjects}</span>,
-      },
-      {
-        id: "nextAction",
-        header: t("columns.nextAction"),
-        accessor: (c) => c.nextAction ?? "",
-        cardPriority: 2,
-        cell: (c) => <NextActionCell company={c} />,
-      },
-      {
-        id: "lastInteraction",
-        header: t("columns.lastInteraction"),
-        accessor: (c) => c.lastInteractionAt ?? "",
-        sortable: true,
-        defaultHidden: true,
-        cell: (c) => (
-          <span className="text-sm text-muted-foreground">
-            {c.lastInteractionAt ? formatDate(c.lastInteractionAt) : "—"}
-          </span>
-        ),
-      },
-      {
         id: "contact",
         header: t("columns.contact"),
         cell: (c) => <QuickActions email={c.email} phone={c.phone} website={c.website} />,
@@ -185,23 +151,8 @@ export function CompaniesView({ user }: CompaniesViewProps) {
       },
     ];
 
-    if (canFinance) {
-      cols.splice(6, 0, {
-        id: "contracted",
-        header: t("columns.contracted"),
-        accessor: (c) => c.totalContractedCents ?? 0,
-        sortable: true,
-        align: "right",
-        cell: (c) => (
-          <span className="tabular-nums font-medium">
-            {c.totalContractedCents != null ? formatEUR(c.totalContractedCents, locale) : "—"}
-          </span>
-        ),
-      });
-    }
-
     return cols;
-  }, [t, tStatus, tSource, canFinance, locale]);
+  }, [t, tStatus, tSource]);
 
   const rowActions = React.useCallback(
     (c: CompanySummary): RowAction<CompanySummary>[] => {
@@ -312,33 +263,6 @@ export function CompaniesView({ user }: CompaniesViewProps) {
             onChanged={refresh}
           />
         </>
-      ) : null}
-    </div>
-  );
-}
-
-function NextActionCell({ company }: { company: CompanySummary }) {
-  const locale = useLocale();
-  if (!company.nextAction) return <span className="text-sm text-muted-foreground">—</span>;
-  const overdue =
-    company.nextActionAt != null &&
-    new Date(company.nextActionAt) < new Date(new Date().toDateString());
-  return (
-    <div className="min-w-0">
-      <p className="truncate text-sm text-foreground">{company.nextAction}</p>
-      {company.nextActionAt ? (
-        <p
-          className={
-            overdue
-              ? "flex items-center gap-1 text-xs font-medium text-status-overdue"
-              : "text-xs text-muted-foreground"
-          }
-        >
-          {overdue ? <Clock className="size-3" strokeWidth={1.8} aria-hidden /> : null}
-          {new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(
-            new Date(company.nextActionAt)
-          )}
-        </p>
       ) : null}
     </div>
   );

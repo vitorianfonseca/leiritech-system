@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState, SkeletonList } from "@/components/shared";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
-import { listVariants, rowVariants } from "@/lib/motion";
+import { listStage, listItem } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { recordRoutes } from "@/lib/api/dashboard";
 import type {
@@ -152,10 +152,10 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
         </span>
       </h3>
 
-      <motion.ul variants={listVariants} initial="hidden" animate="visible">
+      <motion.ul variants={listStage} initial="hidden" animate="visible">
         {visible.map((item) => (
           <motion.li
-            variants={rowVariants}
+            variants={listItem}
             key={`${group.key}-${item.id}`}
             className="group/row relative grid grid-cols-[2px_1fr_auto] items-center gap-3.5 border-b border-border pr-3 transition-colors duration-[var(--duration-fast)] hover:bg-accent motion-reduce:transition-none"
           >

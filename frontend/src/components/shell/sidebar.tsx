@@ -17,6 +17,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/use-sound";
 
@@ -50,31 +51,31 @@ function NavLink({
       }}
       aria-current={active ? "page" : undefined}
       className={cn(
-        // The active state is a lifted white surface on warm paper, not a
-        // tinted pill — and deliberately carries no signal blue. Navigating
-        // is orientation, not action; blue is reserved for what to do next.
-        "group/nav relative flex h-8 items-center gap-2.5 rounded-sm px-2.5 text-[0.8125rem] transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+        // Nearly invisible at rest. The active item is not a filled pill —
+        // it is simply the only ink-weight label in the column, with a short
+        // rule at the leading edge. Chrome that announces itself competes
+        // with the content it is supposed to be a frame for.
+        "group/nav relative flex h-8 items-center gap-2.5 rounded-md pr-2.5 pl-3 text-[0.8125rem] transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
         collapsed && "justify-center px-0",
         active
-          ? "bg-card font-semibold text-foreground"
-          : "font-medium text-muted-foreground hover:bg-card hover:text-foreground"
+          ? "font-semibold text-foreground"
+          : "font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
-      {/* One indicator for the whole nav, not one per item: `layoutId` makes
-          it TRAVEL from the previous entry to this one. You see where you came
-          from, which a cut cannot tell you. */}
       {active && !collapsed && (
+        // One indicator for the whole nav: `layoutId` makes it travel from
+        // the previous entry to this one, so you can see where you came from.
         <motion.span
           aria-hidden
           layoutId="nav-indicator"
-          transition={{ type: "spring", stiffness: 520, damping: 42, mass: 0.7 }}
-          className="absolute top-1/2 left-0 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-foreground"
+          transition={spring.layout}
+          className="absolute top-1/2 left-0 h-3.5 w-[2px] -translate-y-1/2 rounded-full bg-foreground"
         />
       )}
       <Icon
         className={cn(
           "size-4 shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
-          active ? "text-foreground" : "text-muted-foreground/80"
+          active ? "text-foreground" : "text-muted-foreground/70"
         )}
         strokeWidth={active ? 2 : 1.75}
         aria-hidden
@@ -110,7 +111,7 @@ function NavList({
       {sections.map((section) => (
         <div key={section.labelKey} className="flex flex-col gap-px">
           {!collapsed && (
-            <p className="label-micro px-2.5 pb-1.5 text-muted-foreground/60">
+            <p className="px-3 pb-1.5 text-[0.6875rem] font-medium text-muted-foreground/55">
               {t(section.labelKey)}
             </p>
           )}
@@ -140,13 +141,13 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "hidden md:flex md:flex-col shrink-0 border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-out",
+        "hidden shrink-0 border-r border-border bg-card transition-[width] duration-200 ease-out md:flex md:flex-col",
         collapsed ? "w-16" : "w-64"
       )}
     >
       <div
         className={cn(
-          "flex h-12 items-center border-b border-sidebar-border px-3",
+          "flex h-14 items-center px-3",
           collapsed && "justify-center px-0"
         )}
       >
@@ -161,7 +162,7 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
 
       <div
         className={cn(
-          "border-t border-sidebar-border p-2",
+          "border-t border-border p-2",
           collapsed ? "flex justify-center" : ""
         )}
       >

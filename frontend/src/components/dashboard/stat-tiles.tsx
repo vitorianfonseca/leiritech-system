@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimatedCounter } from "@/components/shared";
-import { cellVariants, cellsVariants } from "@/lib/motion";
+import { listItem, listStage } from "@/lib/motion";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { MASK, useHideAmounts } from "@/lib/use-privacy";
@@ -111,7 +111,7 @@ export function StatTiles({
     // A strip of cells sharing hairline gutters — one instrument, six
     // readouts. Not six cards, each with its own border, radius and shadow.
     <motion.div
-      variants={cellsVariants}
+      variants={listStage}
       initial="hidden"
       animate="visible"
       className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3 lg:grid-cols-6"
@@ -119,7 +119,7 @@ export function StatTiles({
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (
-          <motion.div key={m.key} variants={cellVariants}>
+          <motion.div key={m.key} variants={listItem}>
           <Link
             href={m.href}
             aria-label={t(`${m.key}.label`)}
