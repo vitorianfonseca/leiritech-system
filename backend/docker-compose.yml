@@ -7,7 +7,9 @@ services:
       POSTGRES_PASSWORD: leiritech
       POSTGRES_DB: leiritech
     ports:
-      - "5433:5432"
+      # 5433 is taken by another project's Postgres on this machine, and the
+      # two cannot share it. 5434 keeps both running side by side.
+      - "5434:5432"
     volumes:
       - leiritech_pgdata:/var/lib/postgresql/data
     healthcheck:

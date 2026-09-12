@@ -13,7 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Insecure development placeholders that must NEVER be used in production.
 _INSECURE_JWT_SECRETS = {"", "change-me-in-production", "secret", "changeme"}
-_DEV_DATABASE_URL = "postgresql+psycopg://leiritech:leiritech@localhost:5433/leiritech"
+_DEV_DATABASE_URL = "postgresql+psycopg://leiritech:leiritech@localhost:5434/leiritech"
 _MIN_JWT_SECRET_LEN = 32
 
 
@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     # --- Database ---
-    # e.g. postgresql://leiritech:leiritech@localhost:5433/leiritech
-    DATABASE_URL: str = "postgresql+psycopg://leiritech:leiritech@localhost:5433/leiritech"
+    # e.g. postgresql://leiritech:leiritech@localhost:5434/leiritech
+    DATABASE_URL: str = "postgresql+psycopg://leiritech:leiritech@localhost:5434/leiritech"
     DB_ECHO: bool = False
 
     # --- JWT / Auth ---
