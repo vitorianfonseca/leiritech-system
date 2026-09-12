@@ -328,41 +328,6 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Anything you can click says so.
- *
- * The UA stylesheet gives <button> `cursor: default`, which is correct for a
- * native form and wrong for an application — half the interface then looks
- * inert. Disabled controls keep the default on purpose: the cursor is the
- * cheapest way to tell "not now" from "not a control".
- * ------------------------------------------------------------------ */
-@layer base {
-  button:not(:disabled),
-  [role="button"]:not([aria-disabled="true"]),
-  [role="tab"]:not([aria-disabled="true"]),
-  [role="option"]:not([aria-disabled="true"]),
-  [role="menuitem"]:not([aria-disabled="true"]),
-  [role="menuitemcheckbox"],
-  [role="menuitemradio"],
-  [role="switch"]:not([aria-disabled="true"]),
-  [role="checkbox"]:not([aria-disabled="true"]),
-  [role="radio"]:not([aria-disabled="true"]),
-  a[href],
-  summary,
-  label[for],
-  select:not(:disabled),
-  input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled),
-  input[type="range"]:not(:disabled),
-  input[type="file"]:not(:disabled) {
-    cursor: pointer;
-  }
-  :disabled,
-  [aria-disabled="true"] {
-    cursor: not-allowed;
-  }
-}
-
-/* ------------------------------------------------------------------ *
  * Content arriving.
  *
  * A page's frame animates in, but its data lands later — the query resolves,
