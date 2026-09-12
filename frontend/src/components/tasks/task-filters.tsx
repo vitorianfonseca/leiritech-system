@@ -15,6 +15,8 @@ import {
 
 export interface TaskFilterState {
   projectId: string | null;
+  /** Set from the phase rail on a project's Work tab. */
+  phaseId: string | null;
   assigneeId: string | null;
   state: TaskState | null;
   priority: TaskPriority | null;
@@ -23,6 +25,7 @@ export interface TaskFilterState {
 
 export const EMPTY_FILTERS: TaskFilterState = {
   projectId: null,
+  phaseId: null,
   assigneeId: null,
   state: null,
   priority: null,
@@ -32,6 +35,7 @@ export const EMPTY_FILTERS: TaskFilterState = {
 export function hasActiveFilters(f: TaskFilterState): boolean {
   return (
     f.projectId !== null ||
+    f.phaseId !== null ||
     f.assigneeId !== null ||
     f.state !== null ||
     f.priority !== null ||

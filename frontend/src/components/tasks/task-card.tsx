@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Task } from "@/lib/api/tasks-types";
 import { PriorityBadge, describeDue, initials } from "./task-meta";
+import { useTaskScope } from "./task-scope";
 
 interface CardViewProps {
   task: Task;
@@ -38,6 +39,8 @@ export function TaskCardView({
 }: CardViewProps) {
   const t = useTranslations("tasks");
   const due = describeDue(task.dueDate);
+  const scopedProjectId = useTaskScope();
+  const inScope = scopedProjectId !== null && scopedProjectId === task.projectId;
   const checklistTotal = task.checklist.length;
   const checklistDone = task.checklist.filter((c) => c.done).length;
 
@@ -66,8 +69,14 @@ export function TaskCardView({
       </div>
 
       <p className="mt-1 truncate text-xs text-muted-foreground">
-        {task.projectName}
-        {task.phaseName ? <span aria-hidden> · {task.phaseName}</span> : null}
+        {inScope ? (
+          (task.phaseName ?? t("card.noPhase"))
+        ) : (
+          <>
+            {task.projectName}
+            {task.phaseName ? <span aria-hidden> · {task.phaseName}</span> : null}
+          </>
+        )}
       </p>
 
       {task.state === "blocked" && task.blockedReason ? (

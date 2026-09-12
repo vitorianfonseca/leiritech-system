@@ -27,6 +27,7 @@ import { TaskBoard } from "./task-board";
 import { TaskList } from "./task-list";
 import { TaskSidePanel } from "./task-side-panel";
 import { CreateTaskDialog } from "./create-task-dialog";
+import { TaskScopeContext } from "./task-scope";
 import { BlockReasonDialog } from "./block-reason-dialog";
 
 export interface TasksViewProps {
@@ -41,10 +42,12 @@ export interface TasksViewProps {
   projectId?: string;
   /** Name for `projectId`, so the scoped project is offered even with no tasks. */
   projectName?: string;
+  /** Restrict to one phase. Driven by the phase rail on the project Work tab. */
+  phaseId?: string | null;
 }
 
 /** Tasks workspace (F10): List / Kanban / Calendar + detail side panel. */
-export function TasksView({ user, projectId, projectName }: TasksViewProps) {
+export function TasksView({ user, projectId, projectName, phaseId }: TasksViewProps) {
   const t = useTranslations("tasks");
   const qc = useQueryClient();
   const { id: userId, role } = user;
@@ -65,18 +68,26 @@ export function TasksView({ user, projectId, projectName }: TasksViewProps) {
   const [view, setView] = React.useState<TasksViewMode>("kanban");
   const [filters, setFilters] = React.useState<TaskFilterState>(EMPTY_FILTERS);
 
+  // The rail owns the phase selection, so mirror it into the filter state the
+  // views already read rather than adding a second filtering path.
+  const effectiveFilters = React.useMemo(
+    () => (phaseId === undefined ? filters : { ...filters, phaseId }),
+    [filters, phaseId]
+  );
+
   const filtered = React.useMemo(
     () =>
       tasks.filter((task) => {
-        if (filters.projectId && task.projectId !== filters.projectId) return false;
-        if (filters.assigneeId && !task.assignees.some((a) => a.userId === filters.assigneeId))
-          return false;
-        if (filters.state && task.state !== filters.state) return false;
-        if (filters.priority && task.priority !== filters.priority) return false;
-        if (filters.labelId && !task.labels.some((l) => l.id === filters.labelId)) return false;
+        const f = effectiveFilters;
+        if (f.projectId && task.projectId !== f.projectId) return false;
+        if (f.phaseId && task.phaseId !== f.phaseId) return false;
+        if (f.assigneeId && !task.assignees.some((a) => a.userId === f.assigneeId)) return false;
+        if (f.state && task.state !== f.state) return false;
+        if (f.priority && task.priority !== f.priority) return false;
+        if (f.labelId && !task.labels.some((l) => l.id === f.labelId)) return false;
         return true;
       }),
-    [tasks, filters]
+    [tasks, effectiveFilters]
   );
 
   // Filter options come from the tasks on screen, not from a roster held
@@ -270,29 +281,42 @@ export function TasksView({ user, projectId, projectName }: TasksViewProps) {
     [user.id, user.name, user.avatarUrl]
   );
 
+  const scoped = projectId !== undefined;
+
+  const headerActions = (
+    <>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t("refresh")}
+        onClick={() => refetch()}
+        disabled={isFetching}
+      >
+        <RefreshCw
+          className={isFetching ? "animate-spin motion-reduce:animate-none" : undefined}
+          aria-hidden
+        />
+      </Button>
+      <Button onClick={() => setCreateOpen(true)}>
+        <Plus aria-hidden />
+        {t("newTask")}
+      </Button>
+    </>
+  );
+
   return (
+    <TaskScopeContext.Provider value={projectId ?? null}>
     <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("refresh")}
-              onClick={() => refetch()}
-              disabled={isFetching}
-            >
-              <RefreshCw className={isFetching ? "animate-spin motion-reduce:animate-none" : undefined} aria-hidden />
-            </Button>
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus aria-hidden />
-              {t("newTask")}
-            </Button>
-          </>
-        }
-      />
+      {/* Inside a project the page already has a heading; a second "Tasks"
+          title under the tab of the same name is noise. The actions still
+          belong here, so they move up beside the filters instead. */}
+      {scoped ? null : (
+        <PageHeader
+          title={t("title")}
+          subtitle={t("subtitle")}
+          actions={headerActions}
+        />
+      )}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <TaskFilters
@@ -302,7 +326,10 @@ export function TasksView({ user, projectId, projectName }: TasksViewProps) {
           assignees={assignees}
           labels={labels}
         />
-        <ViewSwitcher value={view} onChange={setView} className="shrink-0" />
+        <div className="flex shrink-0 items-center gap-2">
+          <ViewSwitcher value={view} onChange={setView} />
+          {scoped ? headerActions : null}
+        </div>
       </div>
 
       {isError ? (
@@ -393,5 +420,6 @@ export function TasksView({ user, projectId, projectName }: TasksViewProps) {
         onConfirm={confirmArchive}
       />
     </div>
+    </TaskScopeContext.Provider>
   );
 }

@@ -2550,6 +2550,13 @@
       "removeFailed": "Could not remove the member.",
       "alreadyIn": "Already on the team.",
       "noneLeft": "Everyone is already on the team."
+    },
+    "work": {
+      "allPhases": "All phases",
+      "managePhases": "Manage phases",
+      "hidePhases": "Hide phases",
+      "phasesTitle": "Phases",
+      "noPhases": "No phases yet. Create the first to organise the work."
     }
   },
   "notifications": {
@@ -2670,7 +2677,8 @@
       "unassigned": "Unassigned",
       "hasDependencies": "Has unresolved dependencies",
       "checklist": "{done} of {total} done",
-      "dragHandle": "Drag task: {title}"
+      "dragHandle": "Drag task: {title}",
+      "noPhase": "No phase"
     },
     "list": {
       "searchPlaceholder": "Search tasks…",

@@ -18,7 +18,6 @@ import {
   Pencil,
   LayoutGrid,
   ListTodo,
-  Layers,
   CalendarDays,
   Paperclip,
   History,
@@ -45,13 +44,12 @@ import { HealthBadge, ProjectStateBadge } from "./status-badges";
 import { LifecycleActions } from "./lifecycle-actions";
 import { HealthDialog } from "./health-dialog";
 import { OverviewTab } from "./overview-tab";
-import { PhasesTab } from "./phases-tab";
+import { WorkTab } from "./work-tab";
 import { FinanceiroTab } from "./financeiro-tab";
 import { ActivityTab } from "./simple-tabs";
 import { CalendarTab } from "./calendar-tab";
 import { ProjectEditDialog } from "./project-edit-dialog";
 import { FilesTab } from "./files-tab";
-import { TasksView } from "@/components/tasks";
 import { formatDate, formatEUR, initials } from "./project-format";
 
 export interface ProjectDetailViewProps {
@@ -161,7 +159,6 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   const tabItems: Array<{ value: string; label: string; icon: typeof LayoutGrid }> = [
     { value: "overview", label: tTabs("overview"), icon: LayoutGrid },
     { value: "tasks", label: tTabs("tasks"), icon: ListTodo },
-    { value: "phases", label: tTabs("phases"), icon: Layers },
     { value: "calendar", label: tTabs("calendar"), icon: CalendarDays },
     { value: "files", label: tTabs("files"), icon: Paperclip },
     { value: "activity", label: tTabs("activity"), icon: History },
@@ -304,23 +301,17 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
             />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
-            {/* The full task workspace, scoped to this project — list, board,
-                calendar, filters and the detail dialog. The tab used to show
-                phase counts over a "coming soon" note, which answered none of
-                the questions someone opens it with. */}
-            <TasksView
+            <WorkTab
+              project={project}
               user={{
-                id: user.userId,
-                name: user.name,
                 role: user.role,
+                userId: user.userId,
+                name: user.name,
                 avatarUrl: user.avatarUrl,
               }}
-              projectId={project.id}
-              projectName={project.name}
+              canManage={canManage && !isArchived}
+              onChanged={refresh}
             />
-          </Tabs.Panel>
-          <Tabs.Panel value="phases">
-            <PhasesTab project={project} user={user} canManage={canManage && !isArchived} onChanged={refresh} />
           </Tabs.Panel>
           <Tabs.Panel value="calendar">
             <CalendarTab

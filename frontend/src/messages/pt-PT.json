@@ -2550,6 +2550,13 @@
       "removeFailed": "Não foi possível remover o membro.",
       "alreadyIn": "Já está na equipa.",
       "noneLeft": "Toda a gente já está na equipa."
+    },
+    "work": {
+      "allPhases": "Todas as fases",
+      "managePhases": "Gerir fases",
+      "hidePhases": "Ocultar fases",
+      "phasesTitle": "Fases",
+      "noPhases": "Sem fases. Crie a primeira para organizar o trabalho."
     }
   },
   "notifications": {
@@ -2670,7 +2677,8 @@
       "unassigned": "Sem responsável",
       "hasDependencies": "Tem dependências por concluir",
       "checklist": "{done} de {total} concluídos",
-      "dragHandle": "Arrastar tarefa: {title}"
+      "dragHandle": "Arrastar tarefa: {title}",
+      "noPhase": "Sem fase"
     },
     "list": {
       "searchPlaceholder": "Procurar tarefas…",
