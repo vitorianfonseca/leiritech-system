@@ -246,22 +246,7 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "toggle": "Toggle theme",
-    "accent": {
-      "label": "Colour",
-      "rose": "Rose",
-      "blue": "Blue",
-      "violet": "Violet",
-      "green": "Green",
-      "amber": "Amber",
-      "vivid": "Colour",
-      "muted": "Muted",
-      "slate": "Slate",
-      "sand": "Sand",
-      "olive": "Olive",
-      "plum": "Plum",
-      "custom": "Exact colour…"
-    }
+    "toggle": "Toggle theme"
   },
   "locale": {
     "label": "Language",

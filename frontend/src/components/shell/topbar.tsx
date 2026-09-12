@@ -10,7 +10,6 @@ import { QuickCreate } from "./quick-create";
 import { Notifications } from "./notifications";
 import { UserMenu } from "./user-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { AccentPicker } from "@/components/shared/accent-picker";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { SoundToggle } from "@/components/shared/sound-toggle";
 import { Kbd } from "@/components/ui/kbd";
@@ -50,7 +49,6 @@ export function Topbar({ user }: { user: SessionUser }) {
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <Notifications user={user} />
         <SoundToggle />
-        <AccentPicker />
         <ThemeToggle />
         <LocaleSwitcher />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />

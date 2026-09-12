@@ -246,22 +246,7 @@
     "light": "Claro",
     "dark": "Escuro",
     "system": "Sistema",
-    "toggle": "Alternar tema",
-    "accent": {
-      "label": "Cor",
-      "rose": "Rosa",
-      "blue": "Azul",
-      "violet": "Violeta",
-      "green": "Verde",
-      "amber": "Âmbar",
-      "vivid": "Com cor",
-      "muted": "Tons neutros",
-      "slate": "Ardósia",
-      "sand": "Areia",
-      "olive": "Azeitona",
-      "plum": "Ameixa",
-      "custom": "Cor exata…"
-    }
+    "toggle": "Alternar tema"
   },
   "locale": {
     "label": "Idioma",
