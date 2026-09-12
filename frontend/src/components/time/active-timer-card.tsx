@@ -127,8 +127,8 @@ export function ActiveTimerCard({ userId, onLogged }: ActiveTimerCardProps) {
       aria-label={t("regionLabel")}
     >
       <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-full bg-gold-muted">
-          <TimerReset className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+        <span className="flex size-8 items-center justify-center rounded-full bg-signal-muted">
+          <TimerReset className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
         </span>
         <h2 className="font-heading text-base font-semibold text-foreground">
           {t("title")}
@@ -142,8 +142,8 @@ export function ActiveTimerCard({ userId, onLogged }: ActiveTimerCardProps) {
               className="relative flex size-2.5 shrink-0 items-center justify-center"
               aria-hidden
             >
-              <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-gold/60 motion-reduce:hidden" />
-              <span className="relative inline-flex size-2.5 rounded-full bg-gold" />
+              <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-signal/60 motion-reduce:hidden" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-signal" />
             </span>
             <span
               className="font-mono text-2xl font-semibold tabular-nums text-foreground"

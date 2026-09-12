@@ -49,7 +49,7 @@ export function TaskCardView({
           ? "border-status-blocked/40"
           : "border-border",
         dragging && "opacity-40",
-        overlay && "rotate-2 shadow-lg ring-1 ring-gold/40"
+        overlay && "rotate-2 shadow-lg ring-1 ring-signal/40"
       )}
     >
       <div className="flex items-start gap-1.5">
@@ -58,7 +58,7 @@ export function TaskCardView({
           type="button"
           onClick={onOpen ? () => onOpen(task) : undefined}
           disabled={!onOpen}
-          className="min-w-0 flex-1 rounded text-left text-sm font-medium leading-snug text-foreground outline-none hover:text-gold focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default"
+          className="min-w-0 flex-1 rounded text-left text-sm font-medium leading-snug text-foreground outline-none hover:text-signal focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default"
         >
           {task.title}
         </button>

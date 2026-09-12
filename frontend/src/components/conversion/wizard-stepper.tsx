@@ -23,7 +23,7 @@ export interface WizardStepperProps {
  * Accessible progress stepper for the conversion wizard (WCAG AA). Rendered as
  * an ordered list; completed/active steps are keyboard-navigable buttons that
  * jump back, future steps are inert. Colour is reinforced with a check icon and
- * `aria-current`, never colour alone. Uses DESIGN.md tokens (gold = active).
+ * `aria-current`, never colour alone. Uses DESIGN.md tokens (signal = active).
  */
 export function WizardStepper({
   steps,
@@ -50,7 +50,7 @@ export function WizardStepper({
                   "flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                   reachable ? "cursor-pointer" : "cursor-default",
                   isCurrent
-                    ? "bg-gold-muted text-gold"
+                    ? "bg-signal-muted text-signal"
                     : isDone
                       ? "text-foreground hover:bg-accent"
                       : "text-muted-foreground"
@@ -60,7 +60,7 @@ export function WizardStepper({
                   className={cn(
                     "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
                     isCurrent
-                      ? "bg-gold text-gold-foreground"
+                      ? "bg-signal text-signal-foreground"
                       : isDone
                         ? "bg-success text-success-foreground"
                         : "border border-border bg-muted text-muted-foreground"

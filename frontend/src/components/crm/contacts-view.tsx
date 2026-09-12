@@ -108,7 +108,7 @@ export function ContactsView({ user }: ContactsViewProps) {
           <Link
             href={crmRoutes.company(c.companyId)}
             onClick={(e) => e.stopPropagation()}
-            className="text-sm text-gold hover:underline"
+            className="text-sm text-signal hover:underline"
           >
             {c.companyName}
           </Link>

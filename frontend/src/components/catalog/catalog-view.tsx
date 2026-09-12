@@ -24,7 +24,7 @@ import { CatalogFormDialog } from "./catalog-form-dialog";
 const BILLING_VARIANT: Record<BillingType, React.ComponentProps<typeof Badge>["variant"]> = {
   one_time: "default",
   monthly: "info",
-  annual: "gold",
+  annual: "signal",
 };
 
 /**

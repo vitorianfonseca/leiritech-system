@@ -8,9 +8,10 @@ import { NextResponse } from "next/server";
  * rather than a 200. This route is deliberately unauthenticated, does no I/O
  * and touches neither the database nor the API, so it reports "this Next.js
  * server is up and serving" and nothing more.
+ *
+ * No `dynamic` export needed: Next 16 does not cache Route Handlers by
+ * default — caching is opt-in via `force-static`.
  */
-export const dynamic = "force-dynamic";
-
 export function GET() {
   return NextResponse.json(
     { status: "ok", service: "leiritech-frontend" },

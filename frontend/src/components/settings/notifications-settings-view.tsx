@@ -151,7 +151,7 @@ function Toggle({
       className={cn(
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full outline-none transition-colors",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
-        checked ? "bg-gold" : "bg-muted"
+        checked ? "bg-signal" : "bg-muted"
       )}
     >
       <span

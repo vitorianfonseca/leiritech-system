@@ -70,7 +70,7 @@ export function MonthView({
                     className={cn(
                       "inline-flex size-6 items-center justify-center rounded-full text-xs tabular-nums",
                       today
-                        ? "bg-gold text-gold-foreground font-semibold"
+                        ? "bg-signal text-signal-foreground font-semibold"
                         : inMonth
                           ? "text-foreground"
                           : "text-muted-foreground"

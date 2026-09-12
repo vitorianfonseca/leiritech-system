@@ -88,7 +88,7 @@ export function Notifications({ user }: { user: Pick<SessionUser, "id" | "role">
           {unread > 0 && (
             <span
               aria-hidden
-              className="absolute right-1.5 top-1.5 size-2 rounded-full bg-gold ring-2 ring-background"
+              className="absolute right-1.5 top-1.5 size-2 rounded-full bg-signal ring-2 ring-background"
             />
           )}
         </TooltipTrigger>
@@ -171,7 +171,7 @@ export function Notifications({ user }: { user: Pick<SessionUser, "id" | "role">
                       >
                         {isUnread ? (
                           <span
-                            className="mt-1 size-1.5 shrink-0 rounded-full bg-gold"
+                            className="mt-1 size-1.5 shrink-0 rounded-full bg-signal"
                             aria-label={t("unreadCount", { count: 1 })}
                           />
                         ) : null}

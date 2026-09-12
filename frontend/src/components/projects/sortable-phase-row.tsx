@@ -181,9 +181,9 @@ export function SortablePhaseRow({
           ) : null}
 
           {completable && canManage ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gold/40 bg-gold-muted px-3 py-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-signal/40 bg-signal-muted px-3 py-2">
               <span className="flex items-center gap-1.5 text-xs text-foreground">
-                <Sparkles className="size-3.5 shrink-0 text-gold" strokeWidth={1.8} aria-hidden />
+                <Sparkles className="size-3.5 shrink-0 text-signal" strokeWidth={1.8} aria-hidden />
                 {t("completeSuggestion")}
               </span>
               <Button size="xs" onClick={() => onComplete(phase)}>

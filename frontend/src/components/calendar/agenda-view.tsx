@@ -41,7 +41,7 @@ export function AgendaView({ events, onOpenEvent }: AgendaViewProps) {
               <p
                 className={cn(
                   "text-sm font-medium capitalize",
-                  today ? "text-gold" : "text-foreground"
+                  today ? "text-signal" : "text-foreground"
                 )}
                 aria-current={today ? "date" : undefined}
               >

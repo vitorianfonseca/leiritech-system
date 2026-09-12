@@ -69,14 +69,14 @@ export function OpportunityCardView({
         "group/card rounded-xl border border-border bg-card p-3 shadow-sm transition-shadow",
         "focus-within:ring-2 focus-within:ring-ring/50",
         dragging && "opacity-40",
-        overlay && "rotate-2 shadow-lg ring-1 ring-gold/40"
+        overlay && "rotate-2 shadow-lg ring-1 ring-signal/40"
       )}
     >
       <div className="flex items-start justify-between gap-1.5">
         {handle}
         <Link
           href={pipelineRoutes.opportunity(o.id)}
-          className="min-w-0 flex-1 rounded text-sm font-medium leading-snug text-foreground outline-none hover:text-gold focus-visible:ring-2 focus-visible:ring-ring"
+          className="min-w-0 flex-1 rounded text-sm font-medium leading-snug text-foreground outline-none hover:text-signal focus-visible:ring-2 focus-visible:ring-ring"
         >
           {o.title}
         </Link>
@@ -132,7 +132,7 @@ export function OpportunityCardView({
         ) : (
           <span className="text-xs text-muted-foreground">{t("valueRestricted")}</span>
         )}
-        <Badge variant="gold" className="tabular-nums">
+        <Badge variant="signal" className="tabular-nums">
           {t("probability", { value: o.probability })}
         </Badge>
       </div>

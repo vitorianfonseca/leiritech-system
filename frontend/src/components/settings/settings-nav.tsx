@@ -45,9 +45,9 @@ export function SettingsNav({ role }: SettingsNavProps) {
               <Button variant="outline" className="w-full justify-between" size="lg">
                 <span className="inline-flex items-center gap-2">
                   {activeItem ? (
-                    <activeItem.icon className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+                    <activeItem.icon className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
                   ) : (
-                    <Settings2 className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+                    <Settings2 className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
                   )}
                   {activeItem ? t(`areas.${activeItem.key}.title`) : t("index.title")}
                 </span>
@@ -62,7 +62,7 @@ export function SettingsNav({ role }: SettingsNavProps) {
                 <DropdownMenuItem
                   key={item.href}
                   render={<Link href={item.href} />}
-                  className={cn(active && "bg-gold-muted text-gold")}
+                  className={cn(active && "bg-signal-muted text-signal")}
                 >
                   <item.icon aria-hidden />
                   {t(`areas.${item.key}.title`)}
@@ -95,14 +95,14 @@ export function SettingsNav({ role }: SettingsNavProps) {
                           "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors",
                           "focus-visible:ring-2 focus-visible:ring-ring",
                           active
-                            ? "bg-gold-muted text-gold"
+                            ? "bg-signal-muted text-signal"
                             : "text-muted-foreground hover:bg-accent hover:text-foreground"
                         )}
                       >
                         <Icon
                           className={cn(
                             "size-4 shrink-0",
-                            active ? "text-gold" : "text-muted-foreground group-hover:text-foreground"
+                            active ? "text-signal" : "text-muted-foreground group-hover:text-foreground"
                           )}
                           strokeWidth={1.8}
                           aria-hidden

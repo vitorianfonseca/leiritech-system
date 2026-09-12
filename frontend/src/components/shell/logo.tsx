@@ -20,13 +20,13 @@ export function LeiritechMark({
     >
       <path
         d="M10 6v16h14"
-        stroke="var(--gold)"
+        stroke="var(--signal)"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="10" cy="6" r="2.5" fill="var(--gold)" />
-      <circle cx="24" cy="22" r="2.5" fill="var(--gold)" />
+      <circle cx="10" cy="6" r="2.5" fill="var(--signal)" />
+      <circle cx="24" cy="22" r="2.5" fill="var(--signal)" />
     </svg>
   );
 }

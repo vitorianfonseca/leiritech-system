@@ -54,7 +54,7 @@ function Section({
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3 border-b border-border pb-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold-muted/50 text-gold">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-signal-muted/50 text-signal">
           <Icon className="size-5" strokeWidth={1.8} aria-hidden />
         </span>
         <div className="min-w-0">

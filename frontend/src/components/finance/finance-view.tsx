@@ -263,7 +263,7 @@ export function FinanceView({ user }: FinanceViewProps) {
           <Card className="gap-4">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <MilestoneIcon className="size-5 text-gold" strokeWidth={1.8} aria-hidden />
+                <MilestoneIcon className="size-5 text-signal" strokeWidth={1.8} aria-hidden />
                 <div>
                   <CardTitle>{t("milestones.title")}</CardTitle>
                   <CardDescription>{t("milestones.subtitle")}</CardDescription>
@@ -425,7 +425,7 @@ function MilestoneDetail({ milestone }: { milestone: PaymentMilestone }) {
       <div className="space-y-1.5 border-t border-border pt-4">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("detail.completionCriteria")}
-          <Badge variant="gold">{t("detail.required")}</Badge>
+          <Badge variant="signal">{t("detail.required")}</Badge>
         </p>
         <p className="text-sm text-foreground">{milestone.completionCriteria}</p>
       </div>

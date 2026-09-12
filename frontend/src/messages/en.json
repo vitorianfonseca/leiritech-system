@@ -1097,6 +1097,10 @@
     },
     "subtitle": "Here's the state of the operation today.",
     "subtitleScoped": "Here's your work for today.",
+    "standfirst": {
+      "needsAttention": "<strong>{count, plural, =1 {One thing} other {# things}}</strong> {count, plural, =1 {needs} other {need}} your attention.",
+      "allClear": "Nothing pending. All clear."
+    },
     "actions": {
       "refresh": "Refresh"
     },
@@ -3421,7 +3425,7 @@
     },
     "colors": {
       "label": "Colour",
-      "gold": "Blue",
+      "signal": "Blue",
       "teal": "Teal",
       "green": "Green",
       "indigo": "Indigo",
@@ -3910,6 +3914,13 @@
         "title": "Language",
         "description": "Sets the interface language. It does not change the page URL.",
         "label": "Interface language"
+      },
+      "sound": {
+        "title": "Sound",
+        "description": "Discreet audio cues when something completes, saves, or fails. Off by default.",
+        "label": "Sound effects",
+        "volume": "Volume",
+        "preview": "Play a sample"
       },
       "notifications": {
         "title": "Notifications",

@@ -43,19 +43,19 @@ export function WeekView({ anchor, events, onOpenEvent }: WeekViewProps) {
               key={day.toISOString()}
               className={cn(
                 "flex flex-col rounded-lg border border-border bg-card/40",
-                today && "border-gold/60"
+                today && "border-signal/60"
               )}
             >
               <div
                 className={cn(
                   "flex items-center justify-between gap-1 rounded-t-lg border-b border-border px-2.5 py-2",
-                  today && "bg-gold-muted"
+                  today && "bg-signal-muted"
                 )}
               >
                 <span
                   className={cn(
                     "text-xs font-medium capitalize",
-                    today ? "text-gold" : "text-foreground"
+                    today ? "text-signal" : "text-foreground"
                   )}
                   aria-current={today ? "date" : undefined}
                 >

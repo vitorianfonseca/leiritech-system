@@ -17,6 +17,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/use-sound";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -34,6 +35,7 @@ function NavLink({
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const { play } = useSound();
   const active = isActive(pathname, item.href);
   const Icon = item.icon;
   const label = t(item.key);
@@ -41,25 +43,34 @@ function NavLink({
   const link = (
     <Link
       href={item.href}
-      onClick={onNavigate}
+      onClick={() => {
+        play("navigate");
+        onNavigate?.();
+      }}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group/nav relative flex h-9 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+        // The active state is a lifted white surface on warm paper, not a
+        // tinted pill — and deliberately carries no signal blue. Navigating
+        // is orientation, not action; blue is reserved for what to do next.
+        "group/nav relative flex h-9 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
         collapsed && "justify-center px-0",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+          ? "bg-card font-semibold text-foreground shadow-[0_1px_2px_oklch(0.28_0.012_95/0.05)]"
+          : "font-medium text-muted-foreground hover:bg-card/60 hover:text-foreground"
       )}
     >
-      {active && (
+      {active && !collapsed && (
         <span
           aria-hidden
-          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-gold"
+          className="absolute top-1/2 left-0 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-foreground"
         />
       )}
       <Icon
-        className={cn("size-[18px] shrink-0", active && "text-gold")}
-        strokeWidth={1.8}
+        className={cn(
+          "size-[18px] shrink-0 transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none",
+          active ? "text-foreground" : "text-muted-foreground/80"
+        )}
+        strokeWidth={active ? 2 : 1.75}
         aria-hidden
       />
       {!collapsed && <span className="truncate">{label}</span>}
@@ -89,11 +100,11 @@ function NavList({
   const sections = visibleSections(user);
 
   return (
-    <nav className="flex flex-col gap-5 px-3 py-4" aria-label={t("home")}>
+    <nav className="flex flex-col gap-6 px-3 py-5" aria-label={t("home")}>
       {sections.map((section) => (
-        <div key={section.labelKey} className="flex flex-col gap-1">
+        <div key={section.labelKey} className="flex flex-col gap-0.5">
           {!collapsed && (
-            <p className="px-3 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            <p className="px-3 pb-1.5 text-xs font-medium text-muted-foreground/70">
               {t(section.labelKey)}
             </p>
           )}

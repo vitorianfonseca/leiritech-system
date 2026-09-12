@@ -115,7 +115,7 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
     [
       t("email"),
       contact.email ? (
-        <a href={`mailto:${contact.email}`} className="text-gold hover:underline">
+        <a href={`mailto:${contact.email}`} className="text-signal hover:underline">
           {contact.email}
         </a>
       ) : (
@@ -145,7 +145,7 @@ export function ContactDetailView({ contactId, user }: ContactDetailViewProps) {
               <ContactStatusBadge status={contact.status} />
               <Link
                 href={crmRoutes.company(contact.companyId)}
-                className="inline-flex items-center gap-1 text-sm text-gold hover:underline"
+                className="inline-flex items-center gap-1 text-sm text-signal hover:underline"
               >
                 <Building2 className="size-3.5" strokeWidth={1.8} aria-hidden />
                 {contact.companyName}

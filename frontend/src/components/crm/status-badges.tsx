@@ -40,7 +40,7 @@ const COMPANY_META: Record<CompanyStatus, { variant: BadgeVariant; icon: LucideI
   potencial: { variant: "info", icon: CircleDot },
   ativo: { variant: "success", icon: CheckCircle2 },
   inativo: { variant: "done", icon: PauseCircle },
-  parceiro: { variant: "gold", icon: Handshake },
+  parceiro: { variant: "signal", icon: Handshake },
   arquivada: { variant: "done", icon: Archive },
 };
 
@@ -60,7 +60,7 @@ export function CompanyStatusBadge({ status }: { status: CompanyStatus }) {
 export function ClienteAtivoBadge() {
   const t = useTranslations("crm");
   return (
-    <Badge variant="gold">
+    <Badge variant="signal">
       <Star aria-hidden />
       {t("clienteAtivo")}
     </Badge>

@@ -99,7 +99,7 @@ export function AttentionPanel({
             <CardDescription>{t("subtitle")}</CardDescription>
           </div>
           {!loading && totalItems > 0 ? (
-            <Badge variant="gold" aria-hidden>
+            <Badge variant="signal" aria-hidden>
               {totalItems}
             </Badge>
           ) : null}

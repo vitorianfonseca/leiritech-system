@@ -192,7 +192,7 @@ function InteractionRow({
           {interaction.opportunityId && interaction.opportunityTitle ? (
             <Link
               href={recordRoutes.opportunity(interaction.opportunityId)}
-              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-gold hover:underline"
+              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-signal hover:underline"
             >
               <GitBranch className="size-3" strokeWidth={1.8} aria-hidden />
               {interaction.opportunityTitle}
@@ -201,7 +201,7 @@ function InteractionRow({
           {interaction.projectId && interaction.projectName ? (
             <Link
               href={recordRoutes.project(interaction.projectId)}
-              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-gold hover:underline"
+              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-signal hover:underline"
             >
               <FolderKanban className="size-3" strokeWidth={1.8} aria-hidden />
               {interaction.projectName}

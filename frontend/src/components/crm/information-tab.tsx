@@ -21,7 +21,7 @@ export function InformationTab({ company }: { company: CompanyDetail }) {
           href={company.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gold hover:underline"
+          className="text-signal hover:underline"
         >
           {company.website}
         </a>
@@ -32,7 +32,7 @@ export function InformationTab({ company }: { company: CompanyDetail }) {
     [
       t("email"),
       company.email ? (
-        <a href={`mailto:${company.email}`} className="text-gold hover:underline">
+        <a href={`mailto:${company.email}`} className="text-signal hover:underline">
           {company.email}
         </a>
       ) : (
@@ -116,7 +116,7 @@ export function InformationTab({ company }: { company: CompanyDetail }) {
             return (
               <Card key={m.label}>
                 <CardContent className="space-y-1 pt-6">
-                  <Icon className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+                  <Icon className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
                   <p className="font-heading text-xl font-semibold tabular-nums text-foreground">
                     {m.value}
                   </p>

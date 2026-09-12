@@ -21,8 +21,8 @@ export function initials(name: string): string {
 }
 
 /** Progress-bar tone by completion (visual reinforcement, never colour-only). */
-export function progressTone(progress: number): "gold" | "success" | "primary" {
+export function progressTone(progress: number): "signal" | "success" | "primary" {
   if (progress >= 100) return "success";
-  if (progress >= 60) return "gold";
+  if (progress >= 60) return "signal";
   return "primary";
 }

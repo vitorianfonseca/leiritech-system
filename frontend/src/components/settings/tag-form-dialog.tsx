@@ -43,7 +43,7 @@ export function TagFormDialog({
   const labelId = React.useId();
 
   const [label, setLabel] = React.useState(tag?.label ?? "");
-  const [color, setColor] = React.useState<LeiritechColorToken>(tag?.color ?? "gold");
+  const [color, setColor] = React.useState<LeiritechColorToken>(tag?.color ?? "signal");
   const [pending, setPending] = React.useState(false);
   const [showErrors, setShowErrors] = React.useState(false);
 
@@ -53,7 +53,7 @@ export function TagFormDialog({
     setWasOpen(open);
     if (open) {
       setLabel(tag?.label ?? "");
-      setColor(tag?.color ?? "gold");
+      setColor(tag?.color ?? "signal");
       setShowErrors(false);
     }
   }

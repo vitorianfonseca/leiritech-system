@@ -189,7 +189,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
           </div>
           {suggestedHint ? (
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Sparkles className="size-3.5 shrink-0 text-gold" strokeWidth={1.8} aria-hidden />
+              <Sparkles className="size-3.5 shrink-0 text-signal" strokeWidth={1.8} aria-hidden />
               {t("suggestionHint", { health: tHealth(project.suggestedHealth) })}
               {project.healthReason ? ` · ${project.healthReason}` : ""}
             </p>
@@ -219,7 +219,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
       {/* Facts strip */}
       <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-3 lg:grid-cols-5">
         <Fact label={t("progress")}>
-          <ProgressBar value={project.progress} tone="gold" size="sm" showValue label={t("progress")} />
+          <ProgressBar value={project.progress} tone="signal" size="sm" showValue label={t("progress")} />
         </Fact>
         <Fact label={t("dates")}>
           <span className="text-sm tabular-nums text-foreground">
@@ -271,7 +271,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
                   className={cn(
                     "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-muted-foreground outline-none transition-colors",
                     "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    "data-[selected]:border-gold data-[selected]:text-foreground"
+                    "data-[selected]:border-signal data-[selected]:text-foreground"
                   )}
                 >
                   <Icon className="size-4" strokeWidth={1.8} aria-hidden />

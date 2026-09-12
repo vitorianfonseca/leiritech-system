@@ -113,7 +113,7 @@ export function PhaseFormDialog({ open, onOpenChange, phase, onSubmit }: PhaseFo
             <input
               type="checkbox"
               {...register("isMilestone")}
-              className="size-4 rounded border-input text-gold accent-gold focus-visible:ring-2 focus-visible:ring-ring"
+              className="size-4 rounded border-input text-signal accent-signal focus-visible:ring-2 focus-visible:ring-ring"
             />
             <span>
               {t("phaseForm.isMilestone")}

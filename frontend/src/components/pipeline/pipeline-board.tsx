@@ -214,7 +214,7 @@ export function PipelineBoard({ user }: PipelineBoardProps) {
 
       {/* Summary */}
       <div className="flex flex-wrap gap-2">
-        <SummaryPill icon={GitBranch} label={t("summary.open")} value={openCount} tone="gold" />
+        <SummaryPill icon={GitBranch} label={t("summary.open")} value={openCount} tone="signal" />
         <SummaryPill icon={Trophy} label={t("summary.won")} value={wonCount} tone="success" />
         <SummaryPill icon={XCircle} label={t("summary.lost")} value={lostCount} tone="muted" />
       </div>
@@ -336,11 +336,11 @@ function SummaryPill({
   icon: typeof GitBranch;
   label: string;
   value: number;
-  tone: "gold" | "success" | "muted";
+  tone: "signal" | "success" | "muted";
 }) {
   const toneClass =
-    tone === "gold"
-      ? "text-gold"
+    tone === "signal"
+      ? "text-signal"
       : tone === "success"
         ? "text-success"
         : "text-muted-foreground";

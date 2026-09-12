@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 /**
  * Accessible labelled field used across the profile forms. Associates the label
  * with the control, renders an inline `role="alert"` error, and marks required
- * fields with the signature gold asterisk.
+ * fields with the signature signal asterisk.
  */
 export function ProfileField({
   label,
@@ -31,7 +31,7 @@ export function ProfileField({
     <div className={cn("space-y-1.5", className)}>
       <Label htmlFor={id}>
         {label}
-        {required ? <span className="text-gold"> *</span> : null}
+        {required ? <span className="text-signal"> *</span> : null}
       </Label>
       {React.isValidElement(children)
         ? React.cloneElement(

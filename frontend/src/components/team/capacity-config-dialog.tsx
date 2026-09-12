@@ -159,7 +159,7 @@ export function CapacityConfigDialog({
                 className={cn(
                   "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   active
-                    ? "border-gold bg-gold-muted text-gold"
+                    ? "border-signal bg-signal-muted text-signal"
                     : "border-border text-muted-foreground hover:text-foreground"
                 )}
               >

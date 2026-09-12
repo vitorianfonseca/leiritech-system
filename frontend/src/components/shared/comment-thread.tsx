@@ -130,7 +130,7 @@ function MentionText({
         part.startsWith("@") && names.includes(part.slice(1)) ? (
           <span
             key={i}
-            className="rounded bg-gold-muted px-1 font-medium text-gold"
+            className="rounded bg-signal-muted px-1 font-medium text-signal"
           >
             {part}
           </span>

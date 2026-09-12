@@ -154,7 +154,7 @@ export function CreateTaskDialog({
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder={t("create.fields.descriptionPlaceholder")}
-              className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 

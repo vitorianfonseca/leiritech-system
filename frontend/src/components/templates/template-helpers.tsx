@@ -13,13 +13,13 @@ const TYPE_ICON: Record<TemplateType, LucideIcon> = {
   maintenance: LifeBuoy,
 };
 
-/** Type pill — icon + localized label. Uses stone/gold chrome, never a new hue. */
+/** Type pill — icon + localized label. Uses stone/signal chrome, never a new hue. */
 export function TemplateTypeBadge({ type }: { type: TemplateType }) {
   const t = useTranslations("templates.types");
   const Icon = TYPE_ICON[type];
   return (
     <Badge variant="outline" className="gap-1.5">
-      <Icon className="size-3.5 text-gold" strokeWidth={1.8} aria-hidden />
+      <Icon className="size-3.5 text-signal" strokeWidth={1.8} aria-hidden />
       {t(type)}
     </Badge>
   );

@@ -111,7 +111,7 @@ function FilterOption({
       <span
         className={cn(
           "flex size-4 shrink-0 items-center justify-center rounded-full border",
-          checked ? "border-gold bg-gold text-gold-foreground" : "border-input"
+          checked ? "border-signal bg-signal text-signal-foreground" : "border-input"
         )}
       >
         {checked ? <Check className="size-3" strokeWidth={2.5} aria-hidden /> : null}

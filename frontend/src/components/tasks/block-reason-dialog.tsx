@@ -98,7 +98,7 @@ export function BlockReasonDialog({
             aria-invalid={error}
             aria-describedby={error ? `${fieldId}-error` : undefined}
             placeholder={t("block.reasonPlaceholder")}
-            className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
+            className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
           />
           {error ? (
             <p id={`${fieldId}-error`} role="alert" className="text-xs text-destructive">

@@ -120,7 +120,7 @@ export function ProposalsView({ user }: ProposalsViewProps) {
             <Link
               href={crmRoutes.company(p.companyId)}
               onClick={(e) => e.stopPropagation()}
-              className="truncate text-xs text-gold hover:underline"
+              className="truncate text-xs text-signal hover:underline"
             >
               {p.companyName}
             </Link>

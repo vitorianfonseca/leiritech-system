@@ -118,9 +118,9 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
             <div className="flex items-center gap-3">
               <span
                 aria-hidden
-                className="grid size-9 place-items-center rounded-full bg-gold/15 ring-1 ring-gold/40"
+                className="grid size-9 place-items-center rounded-full bg-signal/15 ring-1 ring-signal/40"
               >
-                <span className="size-3 rounded-full bg-gold" />
+                <span className="size-3 rounded-full bg-signal" />
               </span>
               <div className="leading-tight">
                 <p className="font-heading text-xl font-semibold tracking-tight text-foreground">
@@ -131,7 +131,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
             </div>
 
             <div className="text-right">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-signal">
                 {t("documentLabel")}
               </p>
               <p className="mt-1 font-mono text-sm font-medium text-foreground">{p.reference}</p>
@@ -150,7 +150,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
             </div>
           </div>
 
-          <div className="mt-8 h-px w-full bg-gradient-to-r from-gold/70 via-border to-transparent" />
+          <div className="mt-8 h-px w-full bg-gradient-to-r from-signal/70 via-border to-transparent" />
         </header>
 
         {/* Title + prepared for */}
@@ -173,7 +173,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
           {content.sections.map((s, i) => (
             <section key={s.id} className="grid grid-cols-[2.5rem_1fr] gap-x-4 sm:grid-cols-[3.5rem_1fr]">
               <div aria-hidden className="pt-1">
-                <span className="font-mono text-sm text-gold">
+                <span className="font-mono text-sm text-signal">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="mt-2 block h-8 w-px bg-border" />
@@ -193,7 +193,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
           {groups.length > 0 ? (
             <section className="grid grid-cols-[2.5rem_1fr] gap-x-4 sm:grid-cols-[3.5rem_1fr]">
               <div aria-hidden className="pt-1">
-                <span className="font-mono text-sm text-gold">
+                <span className="font-mono text-sm text-signal">
                   {String(content.sections.length + 1).padStart(2, "0")}
                 </span>
                 <span className="mt-2 block h-8 w-px bg-border" />
@@ -284,7 +284,7 @@ export function ProposalPreview({ proposalId, user, brandName }: ProposalPreview
                     <p className="mt-1 font-heading text-3xl font-semibold tabular-nums tracking-tight text-foreground">
                       {f(content.totals.oneTime.gross)}
                     </p>
-                    <span aria-hidden className="mt-2 h-0.5 w-24 rounded-full bg-gold" />
+                    <span aria-hidden className="mt-2 h-0.5 w-24 rounded-full bg-signal" />
                     <p className="mt-2 text-xs text-muted-foreground">{t("vatIncluded")}</p>
                   </div>
                 </div>

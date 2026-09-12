@@ -36,10 +36,10 @@ export function SettingsLanding({ role }: SettingsLandingProps) {
                   href={item.href}
                   className={cn(
                     "group flex items-start gap-3 rounded-xl border border-border bg-card p-4 outline-none transition-colors",
-                    "hover:border-gold/40 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                    "hover:border-signal/40 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
                   )}
                 >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold-muted text-gold">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-signal-muted text-signal">
                     <Icon className="size-5" strokeWidth={1.8} aria-hidden />
                   </span>
                   <span className="min-w-0 flex-1">

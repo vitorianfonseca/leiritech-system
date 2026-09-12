@@ -20,6 +20,7 @@ import {
 import type { SessionUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { LocaleSwitcher, TextSizeSwitcher, EmptyState, SkeletonList, toast } from "@/components/shared";
+import { SoundPreference } from "./sound-preference";
 import { cn } from "@/lib/utils";
 import { profileApi } from "@/lib/api/profile";
 import {
@@ -75,6 +76,9 @@ export function PreferencesSection({ user }: { user: SessionUser }) {
         </div>
       </div>
 
+      {/* Sound */}
+      <SoundPreference />
+
       {/* Notifications */}
       <div className="space-y-3">
         <div>
@@ -122,7 +126,7 @@ function ThemePicker() {
               "group flex flex-col items-start gap-3 rounded-xl border p-4 text-left outline-none transition-colors",
               "focus-visible:ring-2 focus-visible:ring-ring",
               selected
-                ? "border-gold bg-gold-muted/40"
+                ? "border-signal bg-signal-muted/40"
                 : "border-border bg-card hover:bg-accent"
             )}
           >
@@ -131,14 +135,14 @@ function ThemePicker() {
                 className={cn(
                   "flex size-9 items-center justify-center rounded-lg",
                   selected
-                    ? "bg-gold text-gold-foreground"
+                    ? "bg-signal text-signal-foreground"
                     : "bg-muted text-muted-foreground"
                 )}
               >
                 <Icon className="size-5" strokeWidth={1.8} aria-hidden />
               </span>
               {selected ? (
-                <Check className="size-4 text-gold" strokeWidth={2.4} aria-hidden />
+                <Check className="size-4 text-signal" strokeWidth={2.4} aria-hidden />
               ) : null}
             </div>
             <div>

@@ -60,12 +60,12 @@ export const AVAILABILITY_STATES: AvailabilityState[] = [
 /** Badge variant per availability state (DESIGN.md status zones; never colour alone). */
 export function availabilityBadgeVariant(
   state: AvailabilityState
-): "success" | "gold" | "overdue" | "done" {
+): "success" | "signal" | "overdue" | "done" {
   switch (state) {
     case "disponivel":
       return "success";
     case "equilibrado":
-      return "gold";
+      return "signal";
     case "sobrecarregado":
       return "overdue";
     case "ausente":

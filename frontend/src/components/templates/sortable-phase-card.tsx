@@ -48,7 +48,7 @@ export interface SortablePhaseCardProps {
 
 /**
  * A draggable phase card (F9 editor). Contains its own nested DnD context for
- * reordering the phase's tasks. Milestone phases carry a gold flag badge.
+ * reordering the phase's tasks. Milestone phases carry a signal flag badge.
  */
 export function SortablePhaseCard({
   phase,
@@ -124,7 +124,7 @@ export function SortablePhaseCard({
             </span>
             <h3 className="font-heading text-base font-semibold text-foreground">{phase.name}</h3>
             {phase.isMilestone ? (
-              <Badge variant="gold" className="gap-1">
+              <Badge variant="signal" className="gap-1">
                 <Flag className="size-3" strokeWidth={2} aria-hidden />
                 {phase.milestoneName || t("phaseForm.milestone")}
               </Badge>

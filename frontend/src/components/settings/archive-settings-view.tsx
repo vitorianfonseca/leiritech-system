@@ -24,8 +24,8 @@ export interface ArchiveSettingsViewProps {
 
 const ARCHIVE_KEY = ["settings-archive"] as const;
 
-function kindVariant(kind: ArchivedKind): "info" | "gold" | "outline" {
-  return kind === "project" ? "info" : kind === "opportunity" ? "gold" : "outline";
+function kindVariant(kind: ArchivedKind): "info" | "signal" | "outline" {
+  return kind === "project" ? "info" : kind === "opportunity" ? "signal" : "outline";
 }
 
 export function ArchiveSettingsView({ role }: ArchiveSettingsViewProps) {

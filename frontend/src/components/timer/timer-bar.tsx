@@ -54,8 +54,8 @@ export function TimerBar() {
               className="relative flex size-2.5 shrink-0 items-center justify-center"
               aria-hidden
             >
-              <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-gold/60 motion-reduce:hidden" />
-              <span className="relative inline-flex size-2.5 rounded-full bg-gold" />
+              <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-signal/60 motion-reduce:hidden" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-signal" />
             </span>
 
             <span className="font-mono text-sm font-semibold tabular-nums text-foreground">

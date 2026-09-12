@@ -12,12 +12,12 @@ interface Tile {
   key: string;
   icon: LucideIcon;
   minutes: number;
-  tone: "gold" | "success" | "muted" | "info";
+  tone: "signal" | "success" | "muted" | "info";
   isCount?: boolean;
 }
 
 const toneClasses: Record<Tile["tone"], { ring: string; icon: string }> = {
-  gold: { ring: "bg-gold-muted", icon: "text-gold" },
+  signal: { ring: "bg-signal-muted", icon: "text-signal" },
   success: { ring: "bg-success-muted", icon: "text-success" },
   muted: { ring: "bg-muted", icon: "text-muted-foreground" },
   info: { ring: "bg-info-muted", icon: "text-info" },
@@ -40,7 +40,7 @@ export function SummaryCards({
       : 0;
 
   const tiles: Tile[] = [
-    { key: "total", icon: Clock, minutes: totals.totalMinutes, tone: "gold" },
+    { key: "total", icon: Clock, minutes: totals.totalMinutes, tone: "signal" },
     { key: "billable", icon: CircleDollarSign, minutes: totals.billableMinutes, tone: "success" },
     { key: "nonBillable", icon: CircleSlash, minutes: totals.nonBillableMinutes, tone: "muted" },
     { key: "entries", icon: ListChecks, minutes: totals.entryCount, tone: "info", isCount: true },

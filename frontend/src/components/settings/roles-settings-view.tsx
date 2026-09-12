@@ -44,7 +44,7 @@ export function RolesSettingsView() {
           return (
             <div key={role} className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-gold-muted text-gold">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-signal-muted text-signal">
                   <Icon className="size-4" strokeWidth={1.8} aria-hidden />
                 </span>
                 <h2 className="font-heading text-base font-semibold text-foreground">{tRole(role)}</h2>
@@ -56,7 +56,7 @@ export function RolesSettingsView() {
       </div>
 
       <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
+        <Info className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
         <p>{t("notice")}</p>
       </div>
 

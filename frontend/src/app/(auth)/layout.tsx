@@ -21,7 +21,7 @@ export default async function AuthLayout({
       {/* Signature cobalt aura — the single flash of brand color on the canvas. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-signal/10 blur-3xl"
       />
 
       <header className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6">

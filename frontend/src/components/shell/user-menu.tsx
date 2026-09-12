@@ -54,7 +54,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           </div>
         </div>
         <div className="px-2 pb-2">
-          <Badge variant="gold">{tr(user.role)}</Badge>
+          <Badge variant="signal">{tr(user.role)}</Badge>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/profile" />}>

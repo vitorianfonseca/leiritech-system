@@ -256,9 +256,9 @@ export function ConvertWizard({ opportunityId, user, canFinance }: ConvertWizard
       <PageHeader title={t("title")} subtitle={t("subtitle", { title: ctx.opportunity.title })} />
 
       {/* Source banner — BR-036 links preserved, read-only */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-gold/25 bg-gold-muted/50 px-4 py-3 text-sm">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-signal/25 bg-signal-muted/50 px-4 py-3 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-          <Trophy className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+          <Trophy className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
           {t("source.won")}
         </span>
         <span className="inline-flex items-center gap-1.5 text-muted-foreground">
@@ -506,12 +506,12 @@ function StepTemplate({
                 onClick={() => update({ templateId: tpl.id })}
                 className={cn(
                   "flex flex-col gap-1.5 rounded-lg border p-4 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  selected ? "border-gold bg-gold-muted/40 ring-1 ring-gold" : "border-border hover:bg-accent"
+                  selected ? "border-signal bg-signal-muted/40 ring-1 ring-signal" : "border-border hover:bg-accent"
                 )}
               >
                 <span className="flex items-center justify-between">
                   <span className="font-medium text-foreground">{tpl.name}</span>
-                  {selected ? <Check className="size-4 text-gold" strokeWidth={2.2} aria-hidden /> : null}
+                  {selected ? <Check className="size-4 text-signal" strokeWidth={2.2} aria-hidden /> : null}
                 </span>
                 <span className="text-xs text-muted-foreground">{tpl.description}</span>
                 <span className="mt-1 flex flex-wrap gap-1.5">
@@ -708,7 +708,7 @@ function StepMilestones({
           type="checkbox"
           checked={draft.milestonesConfirmed}
           onChange={(e) => update({ milestonesConfirmed: e.target.checked })}
-          className="mt-0.5 size-4 accent-gold"
+          className="mt-0.5 size-4 accent-signal"
           aria-describedby="ms-confirm-hint"
         />
         <span>
@@ -787,14 +787,14 @@ function StepTeam({
                 key={m.id}
                 className={cn(
                   "flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors",
-                  checked ? "border-gold bg-gold-muted/30" : "border-border hover:bg-accent"
+                  checked ? "border-signal bg-signal-muted/30" : "border-border hover:bg-accent"
                 )}
               >
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggleMember(m.id)}
-                  className="size-4 accent-gold"
+                  className="size-4 accent-signal"
                 />
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
                   {initials(m.name)}
@@ -927,7 +927,7 @@ function StepReview({
         <p className="mb-1.5 font-medium text-foreground">{t("linksTitle")}</p>
         <ul className="flex flex-col gap-1 text-muted-foreground">
           <li className="inline-flex items-center gap-1.5">
-            <Trophy className="size-3.5 text-gold" strokeWidth={1.8} aria-hidden />
+            <Trophy className="size-3.5 text-signal" strokeWidth={1.8} aria-hidden />
             {t("linkOpportunity", { title: ctx.opportunity.title })}
           </li>
           {ctx.acceptedProposal ? (
@@ -972,7 +972,7 @@ function SectionTitle({
 }) {
   return (
     <div className="mb-1 flex items-start gap-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold-muted text-gold">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-signal-muted text-signal">
         <Icon className="size-5" strokeWidth={1.8} aria-hidden />
       </span>
       <div>

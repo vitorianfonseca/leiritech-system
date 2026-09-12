@@ -376,15 +376,15 @@ export function TemplateEditorView({ templateId, role }: TemplateEditorViewProps
       {/* Summary strip */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
-          <Layers className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+          <Layers className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
           {t("editor.phaseSummary", { count: phases.length })}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <ListChecks className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+          <ListChecks className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
           {t("editor.taskSummary", { count: taskCount })}
         </span>
         <span className="inline-flex items-center gap-1.5 tabular-nums">
-          <Clock className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+          <Clock className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
           {t("editor.hoursSummary", { count: totalHours })}
         </span>
         <span className="inline-flex items-center gap-1.5 tabular-nums">

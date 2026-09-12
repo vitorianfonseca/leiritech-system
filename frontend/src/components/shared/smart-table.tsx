@@ -282,7 +282,7 @@ export function SmartTable<T>({
                     <Filter aria-hidden />
                     {col.header}
                     {selected.length ? (
-                      <span className="ml-1 rounded-full bg-gold-muted px-1.5 text-[0.6875rem] font-semibold text-gold">
+                      <span className="ml-1 rounded-full bg-signal-muted px-1.5 text-[0.6875rem] font-semibold text-signal">
                         {selected.length}
                       </span>
                     ) : null}
@@ -309,7 +309,7 @@ export function SmartTable<T>({
                           className={cn(
                             "flex size-4 shrink-0 items-center justify-center rounded border",
                             checked
-                              ? "border-gold bg-gold text-gold-foreground"
+                              ? "border-signal bg-signal text-signal-foreground"
                               : "border-input"
                           )}
                         >
@@ -362,7 +362,7 @@ export function SmartTable<T>({
                     <span
                       className={cn(
                         "flex size-4 shrink-0 items-center justify-center rounded border",
-                        visible ? "border-gold bg-gold text-gold-foreground" : "border-input"
+                        visible ? "border-signal bg-signal text-signal-foreground" : "border-input"
                       )}
                     >
                       {visible ? <Check className="size-3" strokeWidth={2.5} aria-hidden /> : null}

@@ -255,7 +255,7 @@ function Field({
       <div className="space-y-1.5">
         <Label htmlFor={id}>
           {label}
-          {required ? <span className="text-gold">*</span> : null}
+          {required ? <span className="text-signal">*</span> : null}
         </Label>
         {React.isValidElement(children)
           ? React.cloneElement(children as React.ReactElement<{ id?: string }>, { id })

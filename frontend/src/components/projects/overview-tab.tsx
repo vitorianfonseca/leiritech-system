@@ -56,7 +56,7 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Rocket className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+                <Rocket className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
                 {t("readiness.title")}
               </CardTitle>
             </CardHeader>
@@ -153,7 +153,7 @@ export function OverviewTab({ project, canFinance }: OverviewTabProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Lightbulb className="size-4 text-gold" strokeWidth={1.8} aria-hidden />
+              <Lightbulb className="size-4 text-signal" strokeWidth={1.8} aria-hidden />
               {t("risksTitle")}
             </CardTitle>
           </CardHeader>

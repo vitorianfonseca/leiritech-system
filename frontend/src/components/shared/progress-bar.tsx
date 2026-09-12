@@ -4,11 +4,11 @@ import * as React from "react";
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 import { cn } from "@/lib/utils";
 
-type Tone = "primary" | "gold" | "success" | "warning" | "destructive" | "info";
+type Tone = "primary" | "signal" | "success" | "warning" | "destructive" | "info";
 
 const toneClass: Record<Tone, string> = {
   primary: "bg-primary",
-  gold: "bg-gold",
+  signal: "bg-signal",
   success: "bg-success",
   warning: "bg-warning",
   destructive: "bg-destructive",

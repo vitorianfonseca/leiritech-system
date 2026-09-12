@@ -56,7 +56,7 @@ export function StatesSettingsView({ role }: StatesSettingsViewProps) {
           <h2 className="font-heading text-base font-semibold text-foreground">{t("taskStatesTitle")}</h2>
         </div>
         <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
+          <Info className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
           <p>{t("taskStatesNotice")}</p>
         </div>
         <ul className="grid gap-2 sm:grid-cols-2">

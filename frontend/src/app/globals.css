@@ -48,10 +48,10 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  /* Brand accent */
-  --color-gold: var(--gold);
-  --color-gold-foreground: var(--gold-foreground);
-  --color-gold-muted: var(--gold-muted);
+  /* Signal — reserved for the next action */
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-signal-muted: var(--signal-muted);
 
   /* Semantic */
   --color-success: var(--success);
@@ -88,160 +88,179 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --shadow-sm: 0 1px 2px oklch(0.3 0.02 258 / 0.06), 0 1px 3px oklch(0.3 0.02 258 / 0.05);
-  --shadow-md: 0 2px 6px oklch(0.3 0.02 258 / 0.07), 0 6px 16px oklch(0.3 0.02 258 / 0.06);
-  --shadow-lg: 0 8px 24px oklch(0.3 0.02 258 / 0.10), 0 2px 6px oklch(0.3 0.02 258 / 0.06);
+  --shadow-sm: 0 1px 2px oklch(0.28 0.012 95 / 0.06), 0 1px 3px oklch(0.28 0.012 95 / 0.05);
+  --shadow-md: 0 2px 6px oklch(0.28 0.012 95 / 0.07), 0 6px 16px oklch(0.28 0.012 95 / 0.06);
+  --shadow-lg: 0 8px 24px oklch(0.28 0.012 95 / 0.10), 0 2px 6px oklch(0.28 0.012 95 / 0.06);
+
+  /* Motion — one vocabulary, used everywhere. Durations are deliberately
+     short: this is software people use for hours, not a landing page. */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-instant: 100ms;   /* state flips: checkbox, toggle */
+  --duration-fast: 160ms;      /* hover, focus, press */
+  --duration-base: 240ms;      /* dropdowns, popovers, toasts */
+  --duration-slow: 360ms;      /* modals, drawers, page transitions */
 }
 
+/* ------------------------------------------------------------------ *
+ * LeiriTech palette — warm paper, ink, and one electric signal.
+ *
+ * The accent (#315CFF) is reserved for the NEXT ACTION: the single thing
+ * the app wants you to do on a given screen. It is deliberately NOT the
+ * colour of every link, active row, or hover state — if everything is
+ * signal, nothing is. Ink and slate carry the rest of the interface.
+ * ------------------------------------------------------------------ */
 :root {
   --radius: 0.625rem;
 
-  /* Cool-neutral surfaces */
-  --background: oklch(0.983 0.004 248);
-  --foreground: oklch(0.225 0.028 258);
-  --card: oklch(0.997 0.002 248);
-  --card-foreground: oklch(0.225 0.028 258);
-  --popover: oklch(0.997 0.002 248);
-  --popover-foreground: oklch(0.225 0.028 258);
+  /* Warm paper surfaces */
+  --background: oklch(0.973 0.005 95);        /* #F7F6F2 */
+  --foreground: oklch(0.217 0.011 261);       /* #171A1F */
+  --card: oklch(1 0 0);                       /* #FFFFFF */
+  --card-foreground: oklch(0.217 0.011 261);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.217 0.011 261);
 
-  /* Functional primary — deep indigo ink */
-  --primary: oklch(0.32 0.075 258);
-  --primary-foreground: oklch(0.985 0.006 248);
+  /* Signal — the next action */
+  --primary: oklch(0.554 0.245 266);          /* #315CFF */
+  --primary-foreground: oklch(0.995 0 0);
 
-  --secondary: oklch(0.945 0.012 250);
-  --secondary-foreground: oklch(0.32 0.075 258);
-  --muted: oklch(0.955 0.010 250);
-  --muted-foreground: oklch(0.50 0.020 255);
-  --accent: oklch(0.95 0.014 250);
-  --accent-foreground: oklch(0.32 0.075 258);
+  --secondary: oklch(0.948 0.004 95);
+  --secondary-foreground: oklch(0.217 0.011 261);
+  --muted: oklch(0.958 0.004 95);
+  --muted-foreground: oklch(0.551 0.013 264);  /* #6E727A */
+  --accent: oklch(0.953 0.004 95);
+  --accent-foreground: oklch(0.217 0.011 261);
 
-  --border: oklch(0.90 0.012 250);
-  --input: oklch(0.90 0.012 250);
-  --ring: oklch(0.62 0.16 255);
+  --border: oklch(0.902 0.004 95);
+  --input: oklch(0.902 0.004 95);
+  --ring: oklch(0.554 0.245 266);
 
-  /* Signature cobalt */
-  --gold: oklch(0.60 0.17 255);
-  --gold-foreground: oklch(0.985 0.006 248);
-  --gold-muted: oklch(0.94 0.05 255);
+  /* Signal scale */
+  --signal: oklch(0.554 0.245 266);
+  --signal-foreground: oklch(0.995 0 0);
+  --signal-muted: oklch(0.945 0.045 266);
 
-  /* Semantic */
-  --destructive: oklch(0.577 0.205 27);
-  --destructive-foreground: oklch(0.985 0.006 85);
-  --destructive-muted: oklch(0.955 0.035 27);
-  --success: oklch(0.60 0.13 150);
-  --success-foreground: oklch(0.985 0.006 85);
-  --success-muted: oklch(0.955 0.03 150);
-  --warning: oklch(0.75 0.135 75);
-  --warning-foreground: oklch(0.28 0.03 60);
-  --warning-muted: oklch(0.955 0.04 80);
-  --info: oklch(0.60 0.115 245);
-  --info-foreground: oklch(0.985 0.006 85);
-  --info-muted: oklch(0.955 0.03 245);
+  /* Semantic — discreet, never shouty */
+  --destructive: oklch(0.552 0.190 27);
+  --destructive-foreground: oklch(0.995 0 0);
+  --destructive-muted: oklch(0.955 0.030 27);
+  --success: oklch(0.565 0.115 152);
+  --success-foreground: oklch(0.995 0 0);
+  --success-muted: oklch(0.955 0.028 152);
+  --warning: oklch(0.705 0.125 72);
+  --warning-foreground: oklch(0.255 0.025 60);
+  --warning-muted: oklch(0.958 0.035 78);
+  --info: oklch(0.554 0.245 266);
+  --info-foreground: oklch(0.995 0 0);
+  --info-muted: oklch(0.945 0.045 266);
 
   /* PSA status zones */
-  --health-healthy: oklch(0.55 0.12 150);
-  --health-healthy-bg: oklch(0.955 0.03 150);
-  --health-attention: oklch(0.62 0.13 70);
-  --health-attention-bg: oklch(0.955 0.04 80);
-  --health-at-risk: oklch(0.55 0.20 27);
-  --health-at-risk-bg: oklch(0.955 0.035 27);
-  --status-overdue: oklch(0.55 0.20 27);
-  --status-overdue-bg: oklch(0.955 0.035 27);
-  --status-blocked: oklch(0.52 0.13 305);
-  --status-blocked-bg: oklch(0.955 0.03 305);
-  --status-due: oklch(0.62 0.13 70);
-  --status-due-bg: oklch(0.955 0.04 80);
-  --status-done: oklch(0.62 0.006 70);
-  --status-done-bg: oklch(0.955 0.006 75);
+  --health-healthy: oklch(0.545 0.115 152);
+  --health-healthy-bg: oklch(0.957 0.028 152);
+  --health-attention: oklch(0.625 0.125 72);
+  --health-attention-bg: oklch(0.958 0.035 78);
+  --health-at-risk: oklch(0.545 0.190 27);
+  --health-at-risk-bg: oklch(0.957 0.030 27);
+  --status-overdue: oklch(0.545 0.190 27);
+  --status-overdue-bg: oklch(0.957 0.030 27);
+  --status-blocked: oklch(0.515 0.125 305);
+  --status-blocked-bg: oklch(0.957 0.028 305);
+  --status-due: oklch(0.625 0.125 72);
+  --status-due-bg: oklch(0.958 0.035 78);
+  --status-done: oklch(0.620 0.005 95);
+  --status-done-bg: oklch(0.957 0.004 95);
 
-  /* Charts */
-  --chart-1: oklch(0.60 0.17 255);
-  --chart-2: oklch(0.60 0.10 205);
-  --chart-3: oklch(0.60 0.125 150);
-  --chart-4: oklch(0.66 0.15 40);
-  --chart-5: oklch(0.58 0.15 320);
+  /* Charts — signal first, then a warm-to-cool spread that stays legible
+     side by side and in greyscale. */
+  --chart-1: oklch(0.554 0.245 266);
+  --chart-2: oklch(0.620 0.095 215);
+  --chart-3: oklch(0.600 0.110 152);
+  --chart-4: oklch(0.680 0.130 55);
+  --chart-5: oklch(0.575 0.140 320);
 
-  /* Sidebar — cool, slightly deeper than canvas */
-  --sidebar: oklch(0.968 0.008 250);
-  --sidebar-foreground: oklch(0.28 0.020 258);
-  --sidebar-primary: oklch(0.32 0.075 258);
-  --sidebar-primary-foreground: oklch(0.985 0.006 248);
-  --sidebar-accent: oklch(0.93 0.016 250);
-  --sidebar-accent-foreground: oklch(0.32 0.075 258);
-  --sidebar-border: oklch(0.90 0.012 250);
-  --sidebar-ring: oklch(0.62 0.16 255);
+  /* Sidebar — a shade deeper than the page, same warmth */
+  --sidebar: oklch(0.958 0.005 95);
+  --sidebar-foreground: oklch(0.300 0.009 261);
+  --sidebar-primary: oklch(0.554 0.245 266);
+  --sidebar-primary-foreground: oklch(0.995 0 0);
+  --sidebar-accent: oklch(0.930 0.005 95);
+  --sidebar-accent-foreground: oklch(0.217 0.011 261);
+  --sidebar-border: oklch(0.902 0.004 95);
+  --sidebar-ring: oklch(0.554 0.245 266);
 }
 
 .dark {
-  /* Deep navy charcoal — never pure black */
-  --background: oklch(0.195 0.020 258);
-  --foreground: oklch(0.95 0.006 248);
-  --card: oklch(0.235 0.022 258);
-  --card-foreground: oklch(0.95 0.006 248);
-  --popover: oklch(0.235 0.022 258);
-  --popover-foreground: oklch(0.95 0.006 248);
+  /* Warm charcoal — never pure black, keeps the paper's temperature */
+  --background: oklch(0.196 0.006 95);
+  --foreground: oklch(0.950 0.003 95);
+  --card: oklch(0.236 0.006 95);
+  --card-foreground: oklch(0.950 0.003 95);
+  --popover: oklch(0.236 0.006 95);
+  --popover-foreground: oklch(0.950 0.003 95);
 
-  /* In dark, cobalt becomes the primary CTA colour */
-  --primary: oklch(0.72 0.15 255);
-  --primary-foreground: oklch(0.16 0.02 258);
+  --primary: oklch(0.700 0.185 266);
+  --primary-foreground: oklch(0.165 0.006 95);
 
-  --secondary: oklch(0.275 0.018 258);
-  --secondary-foreground: oklch(0.95 0.006 248);
-  --muted: oklch(0.255 0.016 258);
-  --muted-foreground: oklch(0.68 0.020 255);
-  --accent: oklch(0.29 0.020 258);
-  --accent-foreground: oklch(0.95 0.006 248);
+  --secondary: oklch(0.276 0.006 95);
+  --secondary-foreground: oklch(0.950 0.003 95);
+  --muted: oklch(0.256 0.005 95);
+  --muted-foreground: oklch(0.700 0.008 264);
+  --accent: oklch(0.292 0.006 95);
+  --accent-foreground: oklch(0.950 0.003 95);
 
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.15 255);
+  --ring: oklch(0.700 0.185 266);
 
-  --gold: oklch(0.74 0.15 255);
-  --gold-foreground: oklch(0.16 0.02 258);
-  --gold-muted: oklch(0.30 0.06 255);
+  --signal: oklch(0.700 0.185 266);
+  --signal-foreground: oklch(0.165 0.006 95);
+  --signal-muted: oklch(0.320 0.075 266);
 
-  --destructive: oklch(0.70 0.185 25);
-  --destructive-foreground: oklch(0.985 0.006 85);
-  --destructive-muted: oklch(0.32 0.06 25);
-  --success: oklch(0.70 0.12 150);
-  --success-foreground: oklch(0.18 0.02 150);
-  --success-muted: oklch(0.30 0.05 150);
-  --warning: oklch(0.80 0.13 78);
-  --warning-foreground: oklch(0.22 0.02 60);
-  --warning-muted: oklch(0.32 0.05 78);
-  --info: oklch(0.70 0.11 240);
-  --info-foreground: oklch(0.18 0.02 240);
-  --info-muted: oklch(0.30 0.05 240);
+  --destructive: oklch(0.700 0.175 25);
+  --destructive-foreground: oklch(0.995 0 0);
+  --destructive-muted: oklch(0.320 0.055 25);
+  --success: oklch(0.700 0.110 152);
+  --success-foreground: oklch(0.180 0.018 152);
+  --success-muted: oklch(0.300 0.045 152);
+  --warning: oklch(0.790 0.120 78);
+  --warning-foreground: oklch(0.220 0.018 60);
+  --warning-muted: oklch(0.320 0.045 78);
+  --info: oklch(0.700 0.185 266);
+  --info-foreground: oklch(0.165 0.006 95);
+  --info-muted: oklch(0.320 0.075 266);
 
-  --health-healthy: oklch(0.72 0.12 150);
-  --health-healthy-bg: oklch(0.30 0.05 150);
-  --health-attention: oklch(0.80 0.13 78);
-  --health-attention-bg: oklch(0.32 0.05 78);
-  --health-at-risk: oklch(0.70 0.185 25);
-  --health-at-risk-bg: oklch(0.32 0.06 25);
-  --status-overdue: oklch(0.70 0.185 25);
-  --status-overdue-bg: oklch(0.32 0.06 25);
-  --status-blocked: oklch(0.70 0.13 305);
-  --status-blocked-bg: oklch(0.30 0.05 305);
-  --status-due: oklch(0.80 0.13 78);
-  --status-due-bg: oklch(0.32 0.05 78);
-  --status-done: oklch(0.62 0.008 72);
-  --status-done-bg: oklch(0.28 0.006 72);
+  --health-healthy: oklch(0.715 0.110 152);
+  --health-healthy-bg: oklch(0.300 0.045 152);
+  --health-attention: oklch(0.790 0.120 78);
+  --health-attention-bg: oklch(0.320 0.045 78);
+  --health-at-risk: oklch(0.700 0.175 25);
+  --health-at-risk-bg: oklch(0.320 0.055 25);
+  --status-overdue: oklch(0.700 0.175 25);
+  --status-overdue-bg: oklch(0.320 0.055 25);
+  --status-blocked: oklch(0.700 0.120 305);
+  --status-blocked-bg: oklch(0.300 0.045 305);
+  --status-due: oklch(0.790 0.120 78);
+  --status-due-bg: oklch(0.320 0.045 78);
+  --status-done: oklch(0.620 0.006 95);
+  --status-done-bg: oklch(0.280 0.005 95);
 
-  --chart-1: oklch(0.72 0.15 255);
-  --chart-2: oklch(0.68 0.10 205);
-  --chart-3: oklch(0.68 0.12 150);
-  --chart-4: oklch(0.72 0.14 40);
-  --chart-5: oklch(0.68 0.14 320);
+  --chart-1: oklch(0.700 0.185 266);
+  --chart-2: oklch(0.690 0.095 215);
+  --chart-3: oklch(0.700 0.110 152);
+  --chart-4: oklch(0.750 0.130 55);
+  --chart-5: oklch(0.690 0.130 320);
 
-  --sidebar: oklch(0.215 0.020 258);
-  --sidebar-foreground: oklch(0.92 0.006 248);
-  --sidebar-primary: oklch(0.72 0.15 255);
-  --sidebar-primary-foreground: oklch(0.16 0.02 258);
-  --sidebar-accent: oklch(0.30 0.020 258);
-  --sidebar-accent-foreground: oklch(0.95 0.006 248);
+  --sidebar: oklch(0.216 0.006 95);
+  --sidebar-foreground: oklch(0.920 0.003 95);
+  --sidebar-primary: oklch(0.700 0.185 266);
+  --sidebar-primary-foreground: oklch(0.165 0.006 95);
+  --sidebar-accent: oklch(0.300 0.006 95);
+  --sidebar-accent-foreground: oklch(0.950 0.003 95);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.72 0.15 255);
+  --sidebar-ring: oklch(0.700 0.185 266);
 }
 
 @layer base {

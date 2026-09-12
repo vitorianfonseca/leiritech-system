@@ -53,7 +53,7 @@ function IconBadge({ children }: { children: React.ReactNode }) {
 export function MeetingRow({ meeting }: { meeting: MyMeeting }) {
   return (
     <div className={rowBase(false)}>
-      <span className="flex flex-col items-center rounded-lg bg-gold-muted px-2.5 py-1 text-gold">
+      <span className="flex flex-col items-center rounded-lg bg-signal-muted px-2.5 py-1 text-signal">
         <span className="font-heading text-sm font-semibold tabular-nums leading-none">
           {format(parseISO(meeting.startsAt), "HH:mm")}
         </span>
@@ -120,7 +120,7 @@ export function ReviewRow({
         onClick={() => onOpen(review)}
         className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:underline"
       >
-        <p className="truncate text-sm font-medium hover:text-gold">{review.taskTitle}</p>
+        <p className="truncate text-sm font-medium hover:text-signal">{review.taskTitle}</p>
         <p className="truncate text-xs text-muted-foreground">
           {review.projectName} · {review.requestedByName}
         </p>

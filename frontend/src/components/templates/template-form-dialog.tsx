@@ -153,7 +153,7 @@ export function TemplateFormDialog({
             <input
               type="checkbox"
               {...register("active")}
-              className="size-4 rounded border-input text-gold accent-gold focus-visible:ring-2 focus-visible:ring-ring"
+              className="size-4 rounded border-input text-signal accent-signal focus-visible:ring-2 focus-visible:ring-ring"
             />
             <span>
               {t("form.active")}

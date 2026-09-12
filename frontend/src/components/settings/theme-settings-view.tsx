@@ -54,20 +54,20 @@ export function ThemeSettingsView() {
                 className={cn(
                   "group flex flex-col items-start gap-3 rounded-xl border p-4 text-left outline-none transition-colors",
                   "focus-visible:ring-2 focus-visible:ring-ring",
-                  selected ? "border-gold bg-gold-muted/40" : "border-border bg-card hover:bg-accent"
+                  selected ? "border-signal bg-signal-muted/40" : "border-border bg-card hover:bg-accent"
                 )}
               >
                 <div className="flex w-full items-center justify-between">
                   <span
                     className={cn(
                       "flex size-9 items-center justify-center rounded-lg",
-                      selected ? "bg-gold text-gold-foreground" : "bg-muted text-muted-foreground"
+                      selected ? "bg-signal text-signal-foreground" : "bg-muted text-muted-foreground"
                     )}
                   >
                     <Icon className="size-5" strokeWidth={1.8} aria-hidden />
                   </span>
                   {selected ? (
-                    <Check className="size-4 text-gold" strokeWidth={2.4} aria-hidden />
+                    <Check className="size-4 text-signal" strokeWidth={2.4} aria-hidden />
                   ) : null}
                 </div>
                 <div>

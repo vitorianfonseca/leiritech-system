@@ -125,7 +125,7 @@ export function WonDialog({
                 initial={reduce ? false : { scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 18, delay: 0.05 }}
-                className="flex size-16 items-center justify-center rounded-full bg-gold-muted text-gold"
+                className="flex size-16 items-center justify-center rounded-full bg-signal-muted text-signal"
               >
                 <Trophy className="size-8" strokeWidth={1.8} aria-hidden />
               </motion.span>

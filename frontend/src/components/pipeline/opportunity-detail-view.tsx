@@ -178,7 +178,7 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
                 {t("statusLost")}
               </Badge>
             ) : (
-              <Badge variant="gold">{tStages(o.stageId)}</Badge>
+              <Badge variant="signal">{tStages(o.stageId)}</Badge>
             )}
             <Link
               href={crmRoutes.company(o.companyId)}

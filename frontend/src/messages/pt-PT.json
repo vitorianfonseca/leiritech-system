@@ -1097,6 +1097,10 @@
     },
     "subtitle": "Aqui está o estado da operação hoje.",
     "subtitleScoped": "Aqui está o seu trabalho de hoje.",
+    "standfirst": {
+      "needsAttention": "<strong>{count, plural, =1 {Uma coisa} other {# coisas}}</strong> {count, plural, =1 {merece} other {merecem}} a sua atenção.",
+      "allClear": "Nada pendente. Tudo em dia."
+    },
     "actions": {
       "refresh": "Atualizar"
     },
@@ -3421,7 +3425,7 @@
     },
     "colors": {
       "label": "Cor",
-      "gold": "Azul",
+      "signal": "Azul",
       "teal": "Azul-petróleo",
       "green": "Verde",
       "indigo": "Índigo",
@@ -3910,6 +3914,13 @@
         "title": "Idioma",
         "description": "Define o idioma da interface. Não altera o endereço da página.",
         "label": "Idioma da interface"
+      },
+      "sound": {
+        "title": "Som",
+        "description": "Sinais sonoros discretos ao concluir, guardar ou falhar uma ação. Desligado por omissão.",
+        "label": "Efeitos sonoros",
+        "volume": "Volume",
+        "preview": "Ouvir exemplo"
       },
       "notifications": {
         "title": "Notificações",

@@ -4,9 +4,11 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState } from "@/components/shared";
+import { Masthead } from "./masthead";
+import { listVariants, rowVariants } from "@/lib/motion";
 import { dashboardApi } from "@/lib/api/dashboard";
 import type { Role } from "@/lib/session";
 import { StatTiles } from "./stat-tiles";
@@ -47,20 +49,12 @@ export function DashboardView({ user }: DashboardViewProps) {
   const greeting = t(`greeting.${greetingKey()}`, { name: user.firstName });
 
   const header = (
-    <PageHeader
-      title={greeting}
-      subtitle={data?.scoped ? t("subtitleScoped") : t("subtitle")}
-      actions={
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("actions.refresh")}
-          onClick={() => refetch()}
-          disabled={isFetching}
-        >
-          <RefreshCw className={isFetching ? "animate-spin" : undefined} aria-hidden />
-        </Button>
-      }
+    <Masthead
+      greeting={greeting}
+      attention={data?.attention ?? []}
+      loading={isLoading}
+      onRefresh={() => refetch()}
+      refreshing={isFetching}
     />
   );
 
@@ -91,38 +85,50 @@ export function DashboardView({ user }: DashboardViewProps) {
   const showContractedReceived = !!charts && !!charts.contractedReceived;
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      variants={listVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-12"
+    >
       {header}
 
-      <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
+      {/* 1 — Attention. What needs a person, before anything else. */}
+      <motion.section variants={rowVariants}>
+        <AttentionPanel groups={data?.attention ?? []} loading={isLoading} />
+      </motion.section>
 
-      {/* Attention (2/3) + right rail: task flow over the week's agenda (1/3) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <AttentionPanel
-          groups={data?.attention ?? []}
-          loading={isLoading}
-          className="lg:col-span-2 lg:h-[38rem]"
+      {/* 2 — Today. What is actually on the calendar, and how the week flows. */}
+      <motion.section variants={rowVariants} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <AgendaCard
+          user={{ id: user.id, role: user.role }}
+          className="lg:col-span-2"
         />
-        <div className="flex flex-col gap-6 lg:h-[38rem]">
-          {isLoading || showTaskFlow ? (
-            <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
-          ) : null}
-          <AgendaCard user={{ id: user.id, role: user.role }} className="min-h-0 flex-1" />
-        </div>
-      </div>
+        {isLoading || showTaskFlow ? (
+          <TaskFlowChart data={charts?.taskFlow ?? []} loading={isLoading} />
+        ) : null}
+      </motion.section>
 
-      {/* Pipeline evolution */}
+      {/* 3 — The state of the business. Figures read as a line, not a card grid. */}
+      <motion.section variants={rowVariants}>
+        <StatTiles metrics={data?.metrics ?? []} loading={isLoading} />
+      </motion.section>
+
+      {/* 4 — Trends last: context for the numbers above, not the headline. */}
       {(isLoading && managementView) || showPipeline ? (
-        <PipelineEvolutionChart data={charts?.pipeline ?? []} loading={isLoading} />
+        <motion.section variants={rowVariants}>
+          <PipelineEvolutionChart data={charts?.pipeline ?? []} loading={isLoading} />
+        </motion.section>
       ) : null}
 
-      {/* Contracted vs received — GATED (BR-008) */}
       {showContractedReceived ? (
-        <ContractedReceivedChart
-          data={charts?.contractedReceived ?? []}
-          loading={isLoading}
-        />
+        <motion.section variants={rowVariants}>
+          <ContractedReceivedChart
+            data={charts?.contractedReceived ?? []}
+            loading={isLoading}
+          />
+        </motion.section>
       ) : null}
-    </div>
+    </motion.div>
   );
 }

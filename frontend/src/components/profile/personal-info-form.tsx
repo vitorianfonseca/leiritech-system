@@ -205,7 +205,7 @@ export function PersonalInfoForm({ user }: { user: SessionUser }) {
             {t("fields.role")}
           </span>
           <div className="flex h-10 items-center gap-2">
-            <Badge variant="gold">{tRoles(query.data!.role)}</Badge>
+            <Badge variant="signal">{tRoles(query.data!.role)}</Badge>
             <span className="text-xs text-muted-foreground">{t("fields.roleNote")}</span>
           </div>
         </div>

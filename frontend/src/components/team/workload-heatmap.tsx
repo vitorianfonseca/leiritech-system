@@ -17,7 +17,7 @@ const WORKDAYS = 5;
 const LEVEL_CELL: Record<HeatLevel, string> = {
   empty: "bg-muted/30 text-muted-foreground/50",
   light: "bg-success-muted text-success",
-  moderate: "bg-gold-muted text-gold",
+  moderate: "bg-signal-muted text-signal",
   full: "bg-status-due-bg text-status-due",
   over: "bg-status-overdue-bg text-status-overdue ring-2 ring-inset ring-status-overdue/45",
 };

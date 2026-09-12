@@ -92,7 +92,7 @@ export function MoveOpportunityDialog({
               {tStages(opportunity.stageId)}
             </span>
             <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
-            <span className="rounded-md bg-gold-muted px-1.5 py-0.5 text-xs font-medium text-gold">
+            <span className="rounded-md bg-signal-muted px-1.5 py-0.5 text-xs font-medium text-signal">
               {tStages(toStageId)}
             </span>
           </DialogDescription>

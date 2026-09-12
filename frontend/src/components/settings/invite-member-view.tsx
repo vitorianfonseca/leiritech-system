@@ -48,7 +48,7 @@ export function InviteMemberView({ role, invitesGrant }: InviteMemberViewProps) 
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-sm">
-        <span className="flex size-14 items-center justify-center rounded-full bg-gold-muted text-gold">
+        <span className="flex size-14 items-center justify-center rounded-full bg-signal-muted text-signal">
           <MailPlus className="size-7" strokeWidth={1.6} aria-hidden />
         </span>
         <div className="max-w-md space-y-1.5">

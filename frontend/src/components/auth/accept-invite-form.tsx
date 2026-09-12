@@ -25,8 +25,8 @@ import { PasswordInput } from "./password-input";
 import { SubmitButton } from "./submit-button";
 import { FormAlert } from "./form-alert";
 
-const ROLE_BADGE: Record<InviteInfo["role"], "primary" | "gold" | "default"> = {
-  admin: "gold",
+const ROLE_BADGE: Record<InviteInfo["role"], "primary" | "signal" | "default"> = {
+  admin: "signal",
   gestor: "primary",
   membro: "default",
 };

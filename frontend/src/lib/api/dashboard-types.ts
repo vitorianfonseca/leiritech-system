@@ -27,7 +27,7 @@ import { canAccessFinance } from "@/lib/api/finance-types";
 
 export type MetricTone =
   | "neutral"
-  | "gold"
+  | "signal"
   | "success"
   | "warning"
   | "destructive"

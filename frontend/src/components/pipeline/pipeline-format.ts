@@ -5,10 +5,10 @@ export { formatEUR, formatDate } from "@/components/finance/finance-format";
 export { parseEuroToCents } from "@/lib/currency";
 
 /**
- * Column accent (F5). On brand (DESIGN.md "paper + ink + one flash of gold"),
- * buyer progress is expressed as an increasingly golden top rule: early stages
- * are a faint gold, the final active stage (Negociação) reads full gold — the
- * deal literally warming toward the win. Uses ONLY the gold token (alpha ramp),
+ * Column accent (F5). On brand (DESIGN.md "paper + ink + one flash of signal"),
+ * buyer progress is expressed as an increasingly saturated signal top rule: early stages
+ * are a faint signal, the final active stage (Negociação) reads full signal — the
+ * deal literally warming toward the win. Uses ONLY the signal token (alpha ramp),
  * never a per-stage rainbow.
  */
 export function stageAccentStyle(
@@ -18,7 +18,7 @@ export function stageAccentStyle(
   const ratio = total > 1 ? order / (total - 1) : 1;
   const alpha = 0.25 + ratio * 0.75; // 0.25 → 1.0
   return {
-    backgroundColor: `color-mix(in oklch, var(--gold) ${Math.round(
+    backgroundColor: `color-mix(in oklch, var(--signal) ${Math.round(
       alpha * 100
     )}%, transparent)`,
   };

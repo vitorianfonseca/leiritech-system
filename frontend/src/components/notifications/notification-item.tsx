@@ -64,7 +64,7 @@ export function NotificationItem({
       {/* Unread dot (cue 1) */}
       <span className="mt-2 flex w-2 shrink-0 justify-center" aria-hidden>
         {unread ? (
-          <span className="size-2 rounded-full bg-gold" />
+          <span className="size-2 rounded-full bg-signal" />
         ) : (
           <span className="size-2 rounded-full bg-transparent" />
         )}

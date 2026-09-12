@@ -328,7 +328,7 @@ export function MyWorkView({ user }: MyWorkViewProps) {
           title={t("groups.today")}
           icon={CalendarClock}
           count={data.today.length}
-          badgeVariant="gold"
+          badgeVariant="signal"
           emptyTitle={t("empty.today")}
         >
           {data.today.map(renderTask)}

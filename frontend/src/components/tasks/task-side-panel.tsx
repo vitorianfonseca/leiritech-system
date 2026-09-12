@@ -361,7 +361,7 @@ function PanelBody({
             className={cn(
               "inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               tab === key
-                ? "border-gold text-foreground"
+                ? "border-signal text-foreground"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
@@ -406,7 +406,7 @@ function PanelBody({
                   rows={3}
                   autoFocus
                   aria-label={t("panel.descriptionLabel")}
-                  className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <div className="flex justify-end gap-2">
                   <Button
@@ -547,7 +547,7 @@ function PanelBody({
                       "flex size-4 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       item.done
                         ? "border-status-done bg-status-done text-status-done-bg"
-                        : "border-input hover:border-gold"
+                        : "border-input hover:border-signal"
                     )}
                   >
                     {item.done ? <Check className="size-3" strokeWidth={2.5} aria-hidden /> : null}

@@ -53,7 +53,7 @@ export function ExportSettingsView() {
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
+        <Info className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
         <p>{t("notice")}</p>
       </div>
 
@@ -79,7 +79,7 @@ export function ExportSettingsView() {
               className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
             >
               <div className="flex min-w-0 items-start gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold-muted text-gold">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-signal-muted text-signal">
                   <FileSpreadsheet className="size-5" strokeWidth={1.8} aria-hidden />
                 </span>
                 <div className="min-w-0">

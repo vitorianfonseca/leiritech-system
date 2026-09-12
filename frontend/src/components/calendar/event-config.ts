@@ -35,7 +35,7 @@ export interface EventTypeConfig {
 export const EVENT_TYPE_CONFIG: Record<CalendarEventType, EventTypeConfig> = {
   task: { icon: ListChecks, accentVar: "var(--info)", labelKey: "task", financial: false },
   meeting: { icon: Users, accentVar: "var(--chart-4)", labelKey: "meeting", financial: false },
-  milestone: { icon: Flag, accentVar: "var(--gold)", labelKey: "milestone", financial: false },
+  milestone: { icon: Flag, accentVar: "var(--signal)", labelKey: "milestone", financial: false },
   delivery: {
     icon: PackageCheck,
     accentVar: "var(--chart-2)",

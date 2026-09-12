@@ -69,7 +69,7 @@ export function HealthBadge({
 
 const STATE_META: Record<ProjectState, { variant: BadgeVariant; icon: LucideIcon }> = {
   planning: { variant: "outline", icon: Compass },
-  active: { variant: "gold", icon: PlayCircle },
+  active: { variant: "signal", icon: PlayCircle },
   on_hold: { variant: "warning", icon: PauseCircle },
   completed: { variant: "success", icon: CheckCircle2 },
   cancelled: { variant: "destructive", icon: XCircle },

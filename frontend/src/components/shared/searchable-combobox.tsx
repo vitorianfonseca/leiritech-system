@@ -144,7 +144,7 @@ export function SearchableCombobox({
                     "data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                   )}
                 >
-                  <span className="flex size-4 shrink-0 items-center justify-center text-gold">
+                  <span className="flex size-4 shrink-0 items-center justify-center text-signal">
                     <Combobox.ItemIndicator>
                       <Check className="size-4" strokeWidth={2} aria-hidden />
                     </Combobox.ItemIndicator>

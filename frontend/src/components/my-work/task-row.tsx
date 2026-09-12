@@ -124,7 +124,7 @@ export function TaskRow({
         <button
           type="button"
           onClick={() => onOpen(task, "details")}
-          className="block max-w-full truncate text-left text-sm font-medium text-foreground hover:text-gold focus-visible:outline-none focus-visible:underline"
+          className="block max-w-full truncate text-left text-sm font-medium text-foreground hover:text-signal focus-visible:outline-none focus-visible:underline"
         >
           {task.title}
         </button>
@@ -259,7 +259,7 @@ export function TaskRow({
           aria-label={isTimerRunning ? t("actions.stopTimer") : t("actions.startTimer")}
           title={isTimerRunning ? t("actions.stopTimer") : t("actions.startTimer")}
           onClick={() => (isTimerRunning ? onStopTimer() : onStartTimer(task))}
-          className={cn(!isTimerRunning && "text-gold hover:text-gold")}
+          className={cn(!isTimerRunning && "text-signal hover:text-signal")}
         >
           {isTimerRunning ? (
             <Square className="fill-current" strokeWidth={0} aria-hidden />

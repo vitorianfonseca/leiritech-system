@@ -10,14 +10,14 @@ type BadgeVariant = NonNullable<ComponentProps<typeof Badge>["variant"]>;
 /**
  * Proposal state → Badge variant (DESIGN.md status zones; never invented
  * colours). The lifecycle reads as: draft is neutral, sent is informational,
- * viewed is the gold "engaged" moment, accepted is success, rejected is the
+ * viewed is the signal "engaged" moment, accepted is success, rejected is the
  * alarm/destructive zone, expired is the faded "done"/receded treatment.
  * Colour is always paired with an icon + label (WCAG AA — never colour alone).
  */
 export const PROPOSAL_STATE_VARIANT: Record<ProposalState, BadgeVariant> = {
   draft: "default",
   sent: "info",
-  viewed: "gold",
+  viewed: "signal",
   accepted: "success",
   rejected: "destructive",
   expired: "done",

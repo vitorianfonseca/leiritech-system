@@ -158,7 +158,7 @@ function ToastList() {
             <div className="flex shrink-0 items-center gap-1">
               {onUndo ? (
                 <Toast.Action
-                  className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-gold transition-colors hover:bg-gold-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-signal transition-colors hover:bg-signal-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => onUndo()}
                 >
                   <Undo2 className="size-3.5" strokeWidth={1.8} aria-hidden />

@@ -59,7 +59,7 @@ export function canAccessSettings(role: Role): boolean {
  * introduces new hues.
  */
 export type LeiritechColorToken =
-  | "gold"
+  | "signal"
   | "teal"
   | "green"
   | "indigo"
@@ -68,7 +68,7 @@ export type LeiritechColorToken =
   | "info";
 
 export const LEIRITECH_COLOR_TOKENS: LeiritechColorToken[] = [
-  "gold",
+  "signal",
   "teal",
   "green",
   "indigo",
@@ -79,7 +79,7 @@ export const LEIRITECH_COLOR_TOKENS: LeiritechColorToken[] = [
 
 /** Maps a colour token to the CSS variable defined in globals.css. */
 export const LEIRITECH_COLOR_VAR: Record<LeiritechColorToken, string> = {
-  gold: "var(--gold)",
+  signal: "var(--signal)",
   teal: "var(--chart-2)",
   green: "var(--success)",
   indigo: "var(--chart-4)",
@@ -215,14 +215,14 @@ export const TASK_STATE_IDS: TaskStateId[] = [
 /** Badge variant per task state (DESIGN.md status zones). */
 export function taskStateBadgeVariant(
   id: TaskStateId
-): "outline" | "info" | "gold" | "success" | "blocked" {
+): "outline" | "info" | "signal" | "success" | "blocked" {
   switch (id) {
     case "a_fazer":
       return "outline";
     case "em_curso":
       return "info";
     case "em_revisao":
-      return "gold";
+      return "signal";
     case "concluida":
       return "success";
     case "bloqueada":

@@ -20,13 +20,13 @@ export default async function NotFound() {
 
         <div className="flex flex-col items-center gap-5">
           <span
-            className="flex size-16 items-center justify-center rounded-full bg-gold-muted text-gold"
+            className="flex size-16 items-center justify-center rounded-full bg-signal-muted text-signal"
             aria-hidden
           >
             <Compass className="size-8" strokeWidth={1.5} />
           </span>
 
-          <p className="font-heading text-6xl font-semibold tracking-tight text-gold tabular-nums">
+          <p className="font-heading text-6xl font-semibold tracking-tight text-signal tabular-nums">
             404
           </p>
 

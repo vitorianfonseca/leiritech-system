@@ -109,7 +109,7 @@ const tagStore = new Map<string, Tag>();
 function seedTags(): void {
   if (tagStore.size > 0) return;
   const seed: Tag[] = [
-    { id: "t-1", label: "Prioritário", color: "gold", usageCount: 12 },
+    { id: "t-1", label: "Prioritário", color: "signal", usageCount: 12 },
     { id: "t-2", label: "Novo cliente", color: "green", usageCount: 8 },
     { id: "t-3", label: "Recorrente", color: "teal", usageCount: 21 },
     { id: "t-4", label: "Em risco", color: "terracotta", usageCount: 3 },
@@ -172,7 +172,7 @@ let notifications: NotificationPreferences = {
 const priorityColors: Record<string, LeiritechColorToken> = {
   baixa: "teal",
   media: "info",
-  alta: "gold",
+  alta: "signal",
   urgente: "terracotta",
 };
 
@@ -180,7 +180,7 @@ const DEFAULT_STAGE_COLORS: LeiritechColorToken[] = [
   "teal",
   "info",
   "indigo",
-  "gold",
+  "signal",
   "violet",
   "green",
 ];

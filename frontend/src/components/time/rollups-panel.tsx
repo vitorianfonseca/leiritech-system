@@ -161,7 +161,7 @@ function BudgetCell({ row, locale }: { row: RollupRow; locale: string }) {
   const ratio = usedHours / row.budgetHours;
   const pct = Math.min(100, Math.round(ratio * 100));
   const over = ratio > 1;
-  const tone = over ? "destructive" : ratio >= 0.85 ? "warning" : "gold";
+  const tone = over ? "destructive" : ratio >= 0.85 ? "warning" : "signal";
 
   return (
     <div className="space-y-1">

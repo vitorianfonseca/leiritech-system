@@ -83,7 +83,7 @@ export function FinanceiroTab({ projectId, user }: FinanceiroTabProps) {
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <MilestoneIcon className="size-5 text-gold" strokeWidth={1.8} aria-hidden />
+                  <MilestoneIcon className="size-5 text-signal" strokeWidth={1.8} aria-hidden />
                   <div>
                     <CardTitle>{t("milestonesTitle")}</CardTitle>
                     <CardDescription>{t("milestonesSubtitle")}</CardDescription>

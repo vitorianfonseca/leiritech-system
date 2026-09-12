@@ -512,7 +512,7 @@ export function TeamLoadChart({
               {/* Capacity threshold — the reference every bar is read against */}
               <ReferenceLine
                 x={100}
-                stroke="var(--gold)"
+                stroke="var(--signal)"
                 strokeDasharray="4 4"
                 strokeWidth={1.5}
                 label={{

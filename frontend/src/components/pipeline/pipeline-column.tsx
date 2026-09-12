@@ -62,7 +62,7 @@ export function PipelineColumn({
         ref={setNodeRef}
         className={cn(
           "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card/30 p-2 transition-colors",
-          isOver && "bg-gold-muted/60 ring-2 ring-inset ring-gold/40"
+          isOver && "bg-signal-muted/60 ring-2 ring-inset ring-signal/40"
         )}
       >
         {children}

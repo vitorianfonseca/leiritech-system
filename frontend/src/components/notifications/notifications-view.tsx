@@ -255,7 +255,7 @@ export function NotificationsView({ user }: NotificationsViewProps) {
               >
                 {t(`filters.${value}`)}
                 {value === "unread" && unreadCount > 0 ? (
-                  <Badge variant="gold" className="px-1.5">
+                  <Badge variant="signal" className="px-1.5">
                     {unreadCount}
                   </Badge>
                 ) : null}

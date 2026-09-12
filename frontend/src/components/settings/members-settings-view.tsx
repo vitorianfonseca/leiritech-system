@@ -47,8 +47,8 @@ export interface MembersSettingsViewProps {
 const MEMBERS_KEY = ["settings-members"] as const;
 const ROLE_OPTIONS: Role[] = ["admin", "gestor", "membro"];
 
-function roleBadgeVariant(role: Role): "gold" | "info" | "outline" {
-  return role === "admin" ? "gold" : role === "gestor" ? "info" : "outline";
+function roleBadgeVariant(role: Role): "signal" | "info" | "outline" {
+  return role === "admin" ? "signal" : role === "gestor" ? "info" : "outline";
 }
 function statusBadgeVariant(status: MemberStatus): "success" | "warning" | "done" {
   return status === "active" ? "success" : status === "invited" ? "warning" : "done";
@@ -253,7 +253,7 @@ export function MembersSettingsView({ role, invitesGrant }: MembersSettingsViewP
       />
 
       <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
+        <Info className="mt-0.5 size-4 shrink-0 text-signal" aria-hidden />
         <p>{t("lastAdminNotice")}</p>
       </div>
 
