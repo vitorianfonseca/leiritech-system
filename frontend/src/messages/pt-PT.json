@@ -2464,10 +2464,11 @@
       "errorDescription": "Ocorreu um erro. Tente novamente.",
       "retry": "Tentar novamente",
       "milestonesTitle": "Marcos de pagamento",
-      "milestonesSubtitle": "Marcos deste projeto (só de leitura).",
+      "milestonesSubtitle": "Marcos deste projeto. Crie, edite e registe pagamentos aqui.",
       "manage": "Gerir em Financeiro",
       "costsTitle": "Custos do projeto",
-      "costsSubtitle": "Custos que entram na margem (BR-069)."
+      "costsSubtitle": "Custos que entram na margem (BR-069).",
+      "writeFailed": "Não foi possível guardar a alteração."
     },
     "tasksTab": {
       "summaryNote": "Resumo só de leitura. A gestão de tarefas chega em breve.",

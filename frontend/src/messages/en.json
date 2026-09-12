@@ -2464,10 +2464,11 @@
       "errorDescription": "Something went wrong. Please try again.",
       "retry": "Try again",
       "milestonesTitle": "Payment milestones",
-      "milestonesSubtitle": "Milestones for this project (read-only).",
+      "milestonesSubtitle": "Milestones on this project. Create, edit and record payments here.",
       "manage": "Manage in Financials",
       "costsTitle": "Project costs",
-      "costsSubtitle": "Costs that feed the margin (BR-069)."
+      "costsSubtitle": "Costs that feed the margin (BR-069).",
+      "writeFailed": "Could not save the change."
     },
     "tasksTab": {
       "summaryNote": "Read-only summary. Task management is coming soon.",
