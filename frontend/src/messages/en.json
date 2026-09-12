@@ -484,7 +484,8 @@
       "assignees": "Assignees",
       "unassigned": "Unassigned",
       "assignFailed": "Could not change assignees.",
-      "assigned": "Assignees updated."
+      "assigned": "Assignees updated.",
+      "language": "Language"
     }
   },
   "foundation": {

@@ -484,7 +484,8 @@
       "assignees": "Responsáveis",
       "unassigned": "Sem responsável",
       "assignFailed": "Não foi possível alterar os responsáveis.",
-      "assigned": "Responsáveis atualizados."
+      "assigned": "Responsáveis atualizados.",
+      "language": "Linguagem"
     }
   },
   "foundation": {

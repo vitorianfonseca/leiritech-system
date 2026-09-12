@@ -20,7 +20,7 @@ export function PageHeader({
       )}
     >
       <div className="space-y-1.5">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        <h1 className="page-title">
           {title}
         </h1>
         {subtitle && (

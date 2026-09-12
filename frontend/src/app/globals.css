@@ -780,6 +780,29 @@ textarea:not(:disabled),
   .glass-danger:hover { --glass-ring-alpha: 0.32; }
 }
 
+@layer components {
+  /* The page title.
+   *
+   * It was 30px semibold with tight tracking — Satoshi's geometry at that
+   * weight reads as a blunt slab, the default heading of any dashboard. Size
+   * carries the hierarchy better than weight does: bigger and lighter is more
+   * confident than smaller and heavier, and it lets the letterforms show.
+   *
+   * The tracking is negative and the line-height tight because both are
+   * optical — at display sizes the default spacing looks loose, and a title
+   * that wraps to two lines should read as one block rather than two rows.
+   */
+  .page-title {
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: -0.032em;
+    line-height: 1.08;
+    text-wrap: balance;
+    color: var(--foreground);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glass::before { animation: none !important; }
   .glass:hover,

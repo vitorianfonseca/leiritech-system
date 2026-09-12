@@ -195,7 +195,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-3">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+          <h1 className="page-title">
             {project.name}
           </h1>
           <div className="flex flex-wrap items-center gap-2">

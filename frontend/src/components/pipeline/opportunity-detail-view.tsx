@@ -163,7 +163,7 @@ export function OpportunityDetailView({ opportunityId, user }: OpportunityDetail
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-2">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+          <h1 className="page-title">
             {o.title}
           </h1>
           <div className="flex flex-wrap items-center gap-1.5">

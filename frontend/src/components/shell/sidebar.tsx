@@ -142,7 +142,7 @@ export function DesktopSidebar({ user }: { user: SessionUser }) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "hidden shrink-0 border-r border-border bg-sidebar transition-[width] duration-200 ease-out md:flex md:flex-col",
+        "sticky top-0 hidden h-dvh shrink-0 border-r border-border bg-sidebar transition-[width] duration-200 ease-out md:flex md:flex-col",
         collapsed ? "w-[4.5rem]" : "w-[16.5rem]"
       )}
     >

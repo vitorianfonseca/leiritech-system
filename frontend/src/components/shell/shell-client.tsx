@@ -21,12 +21,22 @@ export function ShellClient({
 }) {
   return (
     <SidebarProvider defaultCollapsed={defaultCollapsed}>
-      <div className="flex h-dvh w-full overflow-hidden">
+      {/* The document scrolls, not a div inside it.
+          The shell used to be a fixed-height flexbox with the content in an
+          inner `overflow-y-auto`, which costs more than it looks: the
+          scrollbar sits against the content instead of the window edge, the
+          browser's own overscroll and momentum behaviour does not apply, and
+          any code that locks `document.body` — the detail panel's scroll lock,
+          for one — locks an element that never scrolled.
+
+          The sidebar stays put with `sticky` instead, which keeps it in the
+          normal flow and lets the page scroll natively behind it. */}
+      <div className="flex min-h-dvh w-full">
         <DesktopSidebar user={user} />
         <MobileNav user={user} />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar user={user} />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div className="mx-auto flex min-h-full max-w-[1400px] flex-col px-4 pt-4 pb-6 md:px-8 md:pt-5">
               <div className="flex-1 pb-8">{children}</div>
               <Footer />
