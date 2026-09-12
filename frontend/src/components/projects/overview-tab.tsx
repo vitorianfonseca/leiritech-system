@@ -31,6 +31,8 @@ export interface OverviewTabProps {
   onEdit: () => void;
   /** Refetch after a write made from inside a card. */
   onChanged: () => Promise<void> | void;
+  /** Jump to a task on the Work tab. */
+  onOpenTask: (taskId: string) => void;
 }
 
 /**
@@ -86,7 +88,7 @@ function pack(blocks: Block[]): Block[][] {
  *
  * And what does render reaches both edges. See `pack` above.
  */
-export function OverviewTab({ project, canManage, onEdit, onChanged }: OverviewTabProps) {
+export function OverviewTab({ project, canManage, onEdit, onChanged, onOpenTask }: OverviewTabProps) {
   const t = useTranslations("projects.overview");
   const tEdit = useTranslations("projects.editDialog");
 
@@ -228,18 +230,24 @@ export function OverviewTab({ project, canManage, onEdit, onChanged }: OverviewT
           <CardContent>
             <ul className="space-y-2">
               {project.attentionTasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-foreground">{task.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {task.phaseName} · {task.assigneeName}
-                      {task.dueDate ? ` · ${formatDate(task.dueDate)}` : ""}
-                    </p>
-                  </div>
-                  <TaskFlagBadge flag={task.flag} />
+                <li key={task.id}>
+                  {/* The row is the way in. A list of what is wrong that you
+                      cannot act on from here sends you to hunt for the same
+                      task on another tab. */}
+                  <button
+                    type="button"
+                    onClick={() => onOpenTask(task.id)}
+                    className="glass glass-quiet flex w-full flex-wrap items-center justify-between gap-2 rounded-xl px-3 py-2 text-left"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-foreground">{task.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {[task.phaseName, task.assigneeName].filter(Boolean).join(" · ")}
+                        {task.dueDate ? ` · ${formatDate(task.dueDate)}` : ""}
+                      </p>
+                    </div>
+                    <TaskFlagBadge flag={task.flag} />
+                  </button>
                 </li>
               ))}
             </ul>

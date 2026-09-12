@@ -68,6 +68,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   const tTabs = useTranslations("projects.tabs");
   const tEdit = useTranslations("projects.editDialog");
   const [editOpen, setEditOpen] = React.useState(false);
+  const [openTask, setOpenTask] = React.useState<{ id: string; at: number } | null>(null);
   const tHealth = useTranslations("projects.health");
   const locale = useLocale();
   const qc = useQueryClient();
@@ -298,6 +299,10 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               canManage={canManage && !isArchived}
               onEdit={() => setEditOpen(true)}
               onChanged={refresh}
+              onOpenTask={(taskId) => {
+                setOpenTask({ id: taskId, at: Date.now() });
+                setTab("tasks");
+              }}
             />
           </Tabs.Panel>
           <Tabs.Panel value="tasks">
@@ -311,6 +316,7 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
               }}
               canManage={canManage && !isArchived}
               onChanged={refresh}
+              focusTask={openTask}
             />
           </Tabs.Panel>
           <Tabs.Panel value="calendar">

@@ -44,6 +44,7 @@ import {
   ProjectError,
   type ConvertToProjectInput,
   type CreateProjectInput,
+  type ProjectTaskSummary,
   type UpdateProjectInput,
   type DeliveryMilestone,
   type DeliveryMilestoneStatus,
@@ -763,17 +764,67 @@ function mapProject(
   };
 }
 
+/** A task as the project payload needs it, for the attention list. */
+interface AttentionTaskWire {
+  id: string;
+  title: string;
+  phaseId: string | null;
+  phaseName: string | null;
+  primaryAssigneeName: string | null;
+  dueDate: string | null;
+  status: string;
+}
+
+/**
+ * Tasks on a project that need a person: past their due date, or blocked.
+ *
+ * This used to be hardcoded to an empty array behind an INTEGRATION-GAP, so
+ * the overview's attention card never rendered however much was overdue —
+ * the one thing that page exists to surface.
+ *
+ * "Overdue" is measured against the local date rather than a timestamp: a
+ * task due today is not late until today is over, and comparing instants
+ * makes it late from the first minute.
+ */
+function attentionFrom(tasks: AttentionTaskWire[]): ProjectTaskSummary[] {
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  return tasks
+    .filter((t) => {
+      if (t.status === "done") return false;
+      if (t.status === "blocked") return true;
+      return t.dueDate !== null && t.dueDate < todayIso;
+    })
+    .map((t) => ({
+      id: t.id,
+      title: t.title,
+      phaseName: t.phaseName ?? "",
+      assigneeName: t.primaryAssigneeName ?? "",
+      dueDate: t.dueDate,
+      flag: t.status === "blocked" ? ("blocked" as const) : ("overdue" as const),
+    }))
+    // Blocked first: it is waiting on someone, while overdue is only late.
+    .sort((a, b) => (a.flag === b.flag ? 0 : a.flag === "blocked" ? -1 : 1));
+}
+
 /** Fetch a project plus its members / phases / milestones and project it. */
 async function fetchFullProject(id: string): Promise<Project> {
-  const [p, members, phases, milestones] = await Promise.all([
+  const [p, members, phases, milestones, tasks] = await Promise.all([
     http.get<ApiProject>(`/projects/${id}`),
     http.get<ApiMember[]>(`/projects/${id}/members`).catch(() => [] as ApiMember[]),
     http.get<ApiPhase[]>(`/phases`, { query: { project_id: id } }).catch(() => [] as ApiPhase[]),
     http
       .get<ApiMilestone[]>(`/milestones`, { query: { project_id: id } })
       .catch(() => [] as ApiMilestone[]),
+    http
+      .get<ApiPage<AttentionTaskWire>>(`/tasks`, {
+        query: { project_id: id, page_size: 100 },
+      })
+      .catch(() => ({ items: [], total: 0, page: 1, pageSize: 0 })),
   ]);
-  return mapProject(p, members, phases, milestones);
+  const project = mapProject(p, members, phases, milestones);
+  project.attentionTasks = attentionFrom(tasks.items);
+  return project;
 }
 
 /* ------------------------------------------------------------------ *

@@ -44,10 +44,22 @@ export interface TasksViewProps {
   projectName?: string;
   /** Restrict to one phase. Driven by the phase rail on the project Work tab. */
   phaseId?: string | null;
+  /**
+   * Open a task's panel on arrival from another tab. A fresh object each time
+   * (not a bare id) so asking for the same task twice still opens it — the
+   * second request is a new object even when the id matches.
+   */
+  focusTask?: { id: string; at: number } | null;
 }
 
 /** Tasks workspace (F10): List / Kanban / Calendar + detail side panel. */
-export function TasksView({ user, projectId, projectName, phaseId }: TasksViewProps) {
+export function TasksView({
+  user,
+  projectId,
+  projectName,
+  phaseId,
+  focusTask,
+}: TasksViewProps) {
   const t = useTranslations("tasks");
   const qc = useQueryClient();
   const { id: userId, role } = user;
@@ -133,6 +145,16 @@ export function TasksView({ user, projectId, projectName, phaseId }: TasksViewPr
   /* ---------------- side panel ---------------- */
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
+
+  // Arriving from the overview's attention list. Adjusted during render rather
+  // than in an effect — the React compiler rejects setState in an effect, and
+  // this is the documented pattern for reacting to a changed prop.
+  const [handledAt, setHandledAt] = React.useState<number | null>(null);
+  if (focusTask && focusTask.at !== handledAt) {
+    setHandledAt(focusTask.at);
+    setSelectedId(focusTask.id);
+    setPanelOpen(true);
+  }
   const selected = React.useMemo(
     () => tasks.find((task) => task.id === selectedId) ?? null,
     [tasks, selectedId]

@@ -28,11 +28,13 @@ export function WorkTab({
   user,
   canManage,
   onChanged,
+  focusTask,
 }: {
   project: Project;
   user: { role: Role; userId: string; name: string; avatarUrl: string | null };
   canManage: boolean;
   onChanged: () => Promise<void> | void;
+  focusTask?: { id: string; at: number } | null;
 }) {
   const t = useTranslations("projects.work");
   const [phaseId, setPhaseId] = React.useState<string | null>(null);
@@ -119,6 +121,7 @@ export function WorkTab({
         projectId={project.id}
         projectName={project.name}
         phaseId={phaseId}
+        focusTask={focusTask}
       />
     </div>
   );
