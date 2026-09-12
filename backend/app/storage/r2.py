@@ -68,27 +68,70 @@ def _client():
     )
 
 
+def _header_safe(value: str) -> str:
+    """Strip anything that could break out of a quoted HTTP header value."""
+    return "".join(
+        ch
+        for ch in value
+        if ch not in '"\\\r\n' and 32 <= ord(ch) and ord(ch) != 127
+    )[:200]
+
+
 def build_key(entity_type: str, entity_id: uuid.UUID, filename: str) -> str:
-    """Deterministic-ish, collision-resistant object key for an attachment."""
+    """Deterministic-ish, collision-resistant object key for an attachment.
+
+    The random component means the caller's filename can never determine the
+    key, so one upload cannot overwrite another's object even if the service
+    layer's filename sanitisation were bypassed.
+    """
     safe = filename.replace("/", "_").replace("\\", "_")
     return f"{entity_type}/{entity_id}/{uuid.uuid4().hex}-{safe}"
 
 
-def presign_upload(key: str, content_type: str | None) -> str:
-    """A presigned PUT URL the client uploads the file bytes to directly."""
-    params: dict[str, str] = {"Bucket": settings.R2_BUCKET, "Key": key}
-    if content_type:
-        params["ContentType"] = content_type
+def presign_upload(key: str, *, content_type: str, content_length: int) -> str:
+    """A presigned PUT URL valid ONLY for exactly this type and byte count.
+
+    Passing ``ContentType``/``ContentLength`` as request params puts both into
+    the request headers at signing time, and botocore's SigV4 query signer signs
+    every non-blacklisted header present (it drops Content-Type only when it is
+    the auto-set form-encoded default, which an explicit value never is). Both
+    therefore land in ``X-Amz-SignedHeaders``, and R2 rejects the PUT with
+    ``SignatureDoesNotMatch`` if the client sends different ones.
+
+    That is what makes the #47 policy server-authoritative rather than advisory:
+    a client that declares a 1 KB PDF gets a URL that can only ever store a 1 KB
+    ``application/pdf``, no matter what it actually tries to send.
+    """
+    params: dict[str, object] = {
+        "Bucket": settings.R2_BUCKET,
+        "Key": key,
+        "ContentType": content_type,
+        "ContentLength": content_length,
+    }
     return _client().generate_presigned_url(
         "put_object", Params=params, ExpiresIn=UPLOAD_URL_TTL
     )
 
 
-def presign_download(key: str, filename: str | None = None) -> str:
-    """A presigned GET URL for direct download (optionally forcing a filename)."""
-    params: dict[str, str] = {"Bucket": settings.R2_BUCKET, "Key": key}
+def presign_download(
+    key: str, *, filename: str | None = None, content_type: str | None = None
+) -> str:
+    """A presigned GET URL for direct download.
+
+    Always forces ``Content-Disposition: attachment`` and overrides the response
+    content type, so an object stored before the upload policy tightened (or one
+    whose stored type is untrusted) is saved by the browser rather than rendered
+    in the bucket's origin — closing the stored-XSS path on download.
+    """
+    disposition = "attachment"
     if filename:
-        params["ResponseContentDisposition"] = f'attachment; filename="{filename}"'
+        disposition = f'attachment; filename="{_header_safe(filename)}"'
+    params: dict[str, object] = {
+        "Bucket": settings.R2_BUCKET,
+        "Key": key,
+        "ResponseContentDisposition": disposition,
+        "ResponseContentType": content_type or "application/octet-stream",
+    }
     return _client().generate_presigned_url(
         "get_object", Params=params, ExpiresIn=DOWNLOAD_URL_TTL
     )

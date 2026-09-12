@@ -12,6 +12,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
+import structlog
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -22,15 +23,15 @@ from app.core.errors import ApiError
 from app.database.session import get_db
 from app.models.collaboration import Attachment
 from app.schemas.attachments import (
-    ALLOWED_CONTENT_TYPES,
     AttachmentDownloadResponse,
     AttachmentResponse,
     AttachmentUploadRequest,
     AttachmentUploadResponse,
 )
-from app.services import attachment_service
+from app.services import attachment_policy, attachment_service
 
 router = APIRouter()
+logger = structlog.get_logger("leiritech.attachment")
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -57,25 +58,22 @@ def create_upload_url(
     attachment_service.authorize_entity_access(
         db, user, payload.entity_type, payload.entity_id
     )
-    # audit C2: reject a disallowed content-type before minting a presigned URL
-    # for it — content_type is baked into the signed PUT, so an allowlist here
-    # is the last line of defense against uploading executables/scripts.
-    if payload.content_type is not None and payload.content_type not in ALLOWED_CONTENT_TYPES:
-        raise ApiError(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "ATTACHMENT_TYPE_NOT_ALLOWED",
-            "Este tipo de ficheiro não é permitido.",
-        )
+    # #47: every field in the payload is attacker-controlled, so the service
+    # layer — not the payload — decides the filename, content type and size that
+    # get signed and persisted. Raises 422 for dangerous or oversized files.
+    policy = attachment_policy.validate_upload(
+        payload.filename, payload.content_type, payload.size_bytes
+    )
     if not storage.is_configured():
         raise _storage_unavailable()
 
-    key = storage.build_key(payload.entity_type, payload.entity_id, payload.filename)
+    key = storage.build_key(payload.entity_type, payload.entity_id, policy.filename)
     attachment = Attachment(
         entity_type=payload.entity_type,
         entity_id=payload.entity_id,
-        filename=payload.filename,
-        mime_type=payload.content_type,
-        size_bytes=payload.size_bytes,
+        filename=policy.filename,
+        mime_type=policy.content_type,
+        size_bytes=policy.size_bytes,
         r2_key=key,
         uploaded_by=user.id,
         created_by=user.id,
@@ -84,16 +82,33 @@ def create_upload_url(
     db.flush()
 
     try:
-        url = storage.presign_upload(key, payload.content_type)
+        # Binds type + byte count into the signature: the URL handed back can
+        # only ever store exactly what was validated above.
+        url = storage.presign_upload(
+            key,
+            content_type=policy.content_type,
+            content_length=policy.size_bytes,
+        )
     except storage.StorageNotConfigured as exc:
         raise _storage_unavailable() from exc
 
     db.commit()
+    logger.info(
+        "attachment.upload_url_issued",
+        attachment_id=str(attachment.id),
+        entity_type=payload.entity_type,
+        entity_id=str(payload.entity_id),
+        content_type=policy.content_type,
+        size_bytes=policy.size_bytes,
+        actor_id=str(user.id),
+    )
     return AttachmentUploadResponse(
         attachment_id=attachment.id,
         key=key,
         upload_url=url,
         expires_in=storage.UPLOAD_URL_TTL,
+        content_type=policy.content_type,
+        content_length=policy.size_bytes,
     )
 
 
@@ -115,7 +130,16 @@ def create_download_url(
     if not storage.is_configured():
         raise _storage_unavailable()
     try:
-        url = storage.presign_download(attachment.r2_key, attachment.filename)
+        # #47: force an attachment disposition and a vetted response type, so a
+        # row stored before the upload policy tightened cannot be rendered
+        # (stored XSS) from the bucket origin.
+        url = storage.presign_download(
+            attachment.r2_key,
+            filename=attachment.filename,
+            content_type=attachment_policy.safe_download_content_type(
+                attachment.mime_type
+            ),
+        )
     except storage.StorageNotConfigured as exc:
         raise _storage_unavailable() from exc
     return AttachmentDownloadResponse(

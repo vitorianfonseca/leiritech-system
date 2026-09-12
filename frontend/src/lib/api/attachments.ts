@@ -32,6 +32,14 @@ interface UploadTicket {
   uploadUrl: string;
   method: string;
   expiresIn: number;
+  /**
+   * The content type the backend baked into the signature (issue #47). The
+   * server derives it from the file extension, so it is not necessarily
+   * `file.type` — the PUT must send exactly this or R2 rejects the upload.
+   */
+  contentType: string;
+  /** Byte count bound into the signature; the browser sets Content-Length. */
+  contentLength: number;
 }
 
 interface DownloadTicket {
@@ -75,7 +83,10 @@ export const attachmentsApi: AttachmentsApi = {
         entityType,
         entityId,
         filename: file.name,
-        contentType: file.type || null,
+        // Deliberately not sending contentType: the backend derives it from the
+        // (allowlisted) extension and signs that. Browsers disagree on types
+        // for common formats — Windows reports .csv as application/vnd.ms-excel
+        // — and a declared type that contradicts the extension is rejected.
         sizeBytes: file.size,
       });
     } catch (err) {
@@ -83,9 +94,13 @@ export const attachmentsApi: AttachmentsApi = {
     }
 
     // Direct-to-R2 transfer (not through the API, not through the http client).
+    // Content-Type must be the server's value, not the browser's: it is part of
+    // X-Amz-SignedHeaders. Content-Length is set by the browser from the File
+    // and is signed too, so a file that changed size since the ticket was
+    // issued is refused by storage rather than silently stored.
     const putRes = await fetch(ticket.uploadUrl, {
       method: ticket.method,
-      headers: file.type ? { "Content-Type": file.type } : undefined,
+      headers: { "Content-Type": ticket.contentType },
       body: file,
     });
     if (!putRes.ok) {
@@ -97,8 +112,8 @@ export const attachmentsApi: AttachmentsApi = {
       entityType,
       entityId,
       filename: file.name,
-      mimeType: file.type || null,
-      sizeBytes: file.size,
+      mimeType: ticket.contentType,
+      sizeBytes: ticket.contentLength,
       uploadedBy: null,
       createdAt: new Date().toISOString(),
     };
