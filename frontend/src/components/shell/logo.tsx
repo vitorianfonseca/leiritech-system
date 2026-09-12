@@ -33,11 +33,12 @@ export function LeiritechMark({
         d="M7.6 5h4.6a.6.6 0 0 1 .6.6v15.3h6.6a.6.6 0 0 1 .6.6v4.6a.6.6 0 0 1-.6.6H7.6a.6.6 0 0 1-.6-.6V5.6a.6.6 0 0 1 .6-.6Z"
         fill="currentColor"
       />
-      {/* `fill-signal`, not fill="var(--signal)": Tailwind v4's `@theme inline`
-          substitutes token values straight into utilities and then drops the
-          raw custom property from :root, so a var() in an SVG presentation
-          attribute resolves to nothing. The utility class is what survives. */}
-      <rect x="23" y="20.9" width="5.8" height="5.8" rx="0.8" className="fill-signal" />
+      {/* Ink, not the accent. The mark is the company's, so it stays the same
+          whichever theme someone picks — a logo that changes colour with a
+          preference is not a logo. `currentColor` rather than a literal black
+          so the whole mark still flips on a dark ground; on light it renders
+          as the near-black the L uses. */}
+      <rect x="23" y="20.9" width="5.8" height="5.8" rx="0.8" fill="currentColor" />
     </svg>
   );
 }
