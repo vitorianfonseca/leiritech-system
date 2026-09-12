@@ -363,43 +363,65 @@
 /* ------------------------------------------------------------------ *
  * The pointer.
  *
- * Native, deliberately. A custom SVG cursor was built and removed: the
- * browser re-decodes the image every time the pointer crosses between two
- * cursor rules, which reads as a flicker and never settles. In a tool
- * someone drives for hours, an unstable pointer costs far more than a
- * branded one gains.
+ * One rule, outside every layer, with `!important`, covering interactive
+ * elements AND their descendants.
  *
- * What the request was actually about survives: everything interactive
- * declares itself. The UA stylesheet gives <button> `cursor: default`, which
- * is right for a form and wrong for an application — half the interface
- * looked inert. Disabled controls keep their own cursor, because telling
- * "not now" from "not a control" is worth a distinct shape.
+ * Each of those three is deliberate, and each fixes a way the earlier
+ * attempts leaked:
+ *
+ *  - **Descendants** (`a *`, `button *`): the rules used to name only the
+ *    element itself. The pointer usually rests over a child — a <span>, an
+ *    <svg>, a wrapper div — and anything that gave that child its own cursor
+ *    won, mid-control.
+ *  - **Outside `@layer`**: in Tailwind v4 an unlayered rule outranks every
+ *    layer, so this cannot be undercut by a utility. `cursor-default` on a
+ *    menu item is exactly how that happened before.
+ *  - **`!important`**: the last resort against component styles and third-
+ *    party CSS. Used here because "anything clickable shows a pointer" is a
+ *    product rule, not a per-component preference, and it must not be
+ *    negotiable from inside a component.
+ *
+ * The exclusions below re-establish the cursors that carry real meaning:
+ * text entry, refusal, and drag handles.
  * ------------------------------------------------------------------ */
-@layer base {
-  button:not(:disabled),
-  [role="button"]:not([aria-disabled="true"]),
-  [role="tab"]:not([aria-disabled="true"]),
-  [role="option"]:not([aria-disabled="true"]),
-  [role="menuitem"]:not([aria-disabled="true"]),
-  [role="menuitemcheckbox"],
-  [role="menuitemradio"],
-  [role="switch"]:not([aria-disabled="true"]),
-  [role="checkbox"]:not([aria-disabled="true"]),
-  [role="radio"]:not([aria-disabled="true"]),
-  a[href],
-  summary,
-  label[for],
-  select:not(:disabled),
-  input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled),
-  input[type="range"]:not(:disabled),
-  input[type="file"]:not(:disabled) {
-    cursor: pointer;
-  }
-  :disabled,
-  [aria-disabled="true"] {
-    cursor: not-allowed;
-  }
+a[href], a[href] *,
+button:not(:disabled), button:not(:disabled) *,
+summary, summary *,
+label[for], label[for] *,
+select:not(:disabled),
+[role="button"]:not([aria-disabled="true"]), [role="button"]:not([aria-disabled="true"]) *,
+[role="tab"]:not([aria-disabled="true"]), [role="tab"]:not([aria-disabled="true"]) *,
+[role="option"]:not([aria-disabled="true"]), [role="option"]:not([aria-disabled="true"]) *,
+[role="menuitem"]:not([aria-disabled="true"]), [role="menuitem"]:not([aria-disabled="true"]) *,
+[role="menuitemcheckbox"], [role="menuitemcheckbox"] *,
+[role="menuitemradio"], [role="menuitemradio"] *,
+[role="switch"]:not([aria-disabled="true"]), [role="switch"]:not([aria-disabled="true"]) *,
+[role="checkbox"]:not([aria-disabled="true"]), [role="checkbox"]:not([aria-disabled="true"]) *,
+[role="radio"]:not([aria-disabled="true"]), [role="radio"]:not([aria-disabled="true"]) *,
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="range"]:not(:disabled),
+input[type="file"]:not(:disabled) {
+  cursor: pointer !important;
+}
+
+/* Typing, refusing and dragging keep the cursors that mean something. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(:disabled),
+textarea:not(:disabled),
+[contenteditable="true"] {
+  cursor: text !important;
+}
+
+:disabled, :disabled *,
+[aria-disabled="true"], [aria-disabled="true"] * {
+  cursor: not-allowed !important;
+}
+
+[draggable="true"], [data-dnd-handle], .cursor-grab {
+  cursor: grab !important;
+}
+[draggable="true"]:active, [data-dnd-handle]:active, .cursor-grab:active {
+  cursor: grabbing !important;
 }
 
 /* ------------------------------------------------------------------ *
