@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     BACKEND_URL: str = "http://localhost:8000"
 
     # --- Object storage (Cloudflare R2 / S3-compatible) ---
+    # Storage. R2 is the production provider; when its credentials are absent
+    # the facade falls back to the local-filesystem provider so attachments
+    # work on a developer machine and in a self-hosted deployment.
+    LOCAL_STORAGE_DIR: str = "./var/attachments"
+    PUBLIC_API_URL: str = "http://localhost:8000"
+
     R2_ACCOUNT_ID: str = ""
     R2_ACCESS_KEY_ID: str = ""
     R2_SECRET_ACCESS_KEY: str = ""

@@ -13,11 +13,12 @@ import uuid
 from typing import Annotated
 
 import structlog
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import storage
+from app.storage import local as local_storage
 from app.api.dependencies.auth import CurrentUser
 from app.core.errors import ApiError
 from app.database.session import get_db
@@ -147,6 +148,45 @@ def create_download_url(
     )
 
 
+@router.delete(
+    "/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None
+)
+def delete_attachment(
+    attachment_id: uuid.UUID,
+    user: CurrentUser,
+    db: DbSession,
+) -> Response:
+    """Remove an attachment and its stored object.
+
+    The row goes first and the object second: if the unlink fails we are left
+    with an orphaned file, which costs disk. The other order would leave a row
+    pointing at nothing, which costs the user a download that 404s.
+    """
+    attachment = db.get(Attachment, attachment_id)
+    if attachment is None:
+        raise ApiError(
+            status.HTTP_404_NOT_FOUND, "NOT_FOUND", "Anexo não encontrado."
+        )
+    # IDOR guard: same boundary as reading the parent (BR-002).
+    attachment_service.authorize_entity_access(
+        db, user, attachment.entity_type, attachment.entity_id
+    )
+    key = attachment.r2_key
+    db.delete(attachment)
+    db.commit()
+
+    if storage.provider is local_storage:
+        try:
+            local_storage.resolve(key).unlink(missing_ok=True)
+        except (OSError, local_storage.StorageNotConfigured):
+            logger.warning("attachment.object_orphaned", key=key)
+
+    logger.info(
+        "attachment.deleted", attachment_id=str(attachment_id), actor_id=str(user.id)
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("", response_model=list[AttachmentResponse])
 def list_attachments(
     user: CurrentUser,
@@ -165,3 +205,89 @@ def list_attachments(
         .order_by(Attachment.created_at.desc())
     ).scalars()
     return list(rows)
+
+
+# --------------------------------------------------------------------------- #
+# Local transfer (only reachable when the local provider is active)
+#
+# The presigned-URL contract says the API does not proxy bytes. A filesystem
+# cannot mint S3 credentials, so for the local provider these two routes ARE
+# the signed URL: the token in the query string is an HMAC over the key, and
+# for uploads over the content type and byte count as well. They are
+# deliberately unauthenticated in the session sense — the signature is the
+# credential, exactly as it is for R2 — and they enforce against the body they
+# actually receive, so a client that lied at presign time cannot store
+# something else with the URL it was handed (#47).
+# --------------------------------------------------------------------------- #
+def _require_local() -> None:
+    if storage.provider is not local_storage:
+        raise ApiError(
+            status.HTTP_404_NOT_FOUND, "NOT_FOUND", "Rota não disponível."
+        )
+
+
+def _bad_signature(detail: str) -> ApiError:
+    return ApiError(status.HTTP_403_FORBIDDEN, "STORAGE_SIGNATURE_INVALID", detail)
+
+
+@router.put("/local", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+async def local_upload(
+    request: Request,
+    key: Annotated[str, Query(min_length=1, max_length=512)],
+    content_type: Annotated[str, Query(min_length=1, max_length=255)],
+    content_length: Annotated[int, Query(ge=0)],
+    expires: Annotated[int, Query()],
+    signature: Annotated[str, Query(min_length=32, max_length=128)],
+) -> Response:
+    _require_local()
+    try:
+        local_storage.verify_upload(
+            key, content_type, content_length, expires, signature
+        )
+        path = local_storage.resolve(key)
+    except local_storage.StorageNotConfigured as exc:
+        raise _bad_signature(str(exc)) from exc
+
+    body = await request.body()
+    # The signed values are the contract, not a hint: a body of a different
+    # size, or sent as a different type, is refused rather than stored.
+    if len(body) != content_length:
+        raise _bad_signature("O tamanho do ficheiro não corresponde ao autorizado.")
+    declared = (request.headers.get("content-type") or "").split(";")[0].strip()
+    if declared and declared != content_type:
+        raise _bad_signature("O tipo do ficheiro não corresponde ao autorizado.")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(body)
+    logger.info("attachment_stored_locally", key=key, bytes=len(body))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/local", response_model=None)
+def local_download(
+    key: Annotated[str, Query(min_length=1, max_length=512)],
+    expires: Annotated[int, Query()],
+    signature: Annotated[str, Query(min_length=32, max_length=128)],
+    filename: Annotated[str | None, Query(max_length=255)] = None,
+) -> Response:
+    _require_local()
+    try:
+        local_storage.verify_download(key, expires, signature)
+        path = local_storage.resolve(key)
+    except local_storage.StorageNotConfigured as exc:
+        raise _bad_signature(str(exc)) from exc
+
+    if not path.is_file():
+        raise ApiError(
+            status.HTTP_404_NOT_FOUND, "NOT_FOUND", "Ficheiro não encontrado."
+        )
+
+    # Always an attachment, never inline, and never the stored MIME type: a row
+    # written before the upload policy tightened must not be renderable from
+    # this origin (stored XSS).
+    safe_name = (filename or path.name).replace('"', "").replace("\\", "")
+    return Response(
+        content=path.read_bytes(),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )

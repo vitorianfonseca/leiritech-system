@@ -205,14 +205,22 @@ def _assert_rejected(resp, reason: str | None = None) -> None:
 def test_valid_upload_passes_validation_and_only_then_hits_storage(
     client, make_user, track
 ):
-    """A legitimate request clears every policy gate. R2 has no credentials in
-    tests, so 503 (not 422) is proof validation accepted it."""
+    """A legitimate request clears every policy gate and is issued a URL.
+
+    This used to assert 503: with no R2 credentials in tests, "not 422" was the
+    only available proof that validation had accepted the request. The local
+    provider now serves when R2 is absent, so the success path is reachable and
+    can be asserted directly — including that the type and byte count the
+    policy decided are the ones bound into the signed URL."""
     gestor = make_user(role="gestor")
     company_id = _make_company(gestor.id, track)
 
     resp = _upload(client, _token(client, gestor.email), company_id)
-    assert resp.status_code == 503, resp.text
-    assert resp.json()["error"]["code"] == "STORAGE_NOT_CONFIGURED"
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["content_type"] == "application/pdf"
+    assert body["content_length"] == 1024
+    assert "signature=" in body["upload_url"]
 
 
 def test_omitting_content_type_does_not_bypass_the_allowlist(
@@ -329,7 +337,10 @@ def test_filename_with_path_or_control_characters_is_handled(client, make_user, 
     # Traversal is stripped to a basename, not rejected — and the stripped name
     # is what gets validated (".pdf" here), so this stays a legitimate upload.
     resp = _upload(client, token, company_id, filename="../../../etc/passwd.pdf")
-    assert resp.status_code == 503, resp.text
+    assert resp.status_code == 201, resp.text
+    # The traversal is gone from the stored key, not merely from the label.
+    assert ".." not in resp.json()["key"]
+    assert resp.json()["key"].endswith("passwd.pdf")
 
 
 # --- pure policy unit tests (no DB, no HTTP) ------------------------------
@@ -424,3 +435,110 @@ def test_presign_download_forces_attachment_disposition(monkeypatch):
     assert '"' not in params["ResponseContentDisposition"].split("filename=", 1)[1][1:-1]
     assert "\r" not in params["ResponseContentDisposition"]
     assert params["ResponseContentType"] == "application/pdf"
+
+
+# --- local storage provider: the full round trip --------------------------
+def test_local_upload_download_and_delete_round_trip(client, make_user, track):
+    """The provider that serves when R2 is absent must actually store bytes.
+
+    Covers the whole contract in one pass: presign, PUT the exact body the
+    signature authorises, list it back, download it, delete it.
+    """
+    gestor = make_user(role="gestor")
+    company_id = _make_company(gestor.id, track)
+    token = _token(client, gestor.email)
+
+    issued = _upload(client, token, company_id)
+    assert issued.status_code == 201, issued.text
+    body = issued.json()
+
+    payload = b"x" * body["content_length"]
+    put = client.put(
+        body["upload_url"].replace("http://localhost:8000", ""),
+        content=payload,
+        headers={"Content-Type": body["content_type"]},
+    )
+    assert put.status_code == 204, put.text
+
+    listed = client.get(
+        f"{API}/attachments",
+        params={"entity_type": "company", "entity_id": str(company_id)},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert listed.status_code == 200
+    assert any(a["id"] == body["attachment_id"] for a in listed.json())
+
+    link = client.get(
+        f"{API}/attachments/{body['attachment_id']}/download-url",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert link.status_code == 200, link.text
+    got = client.get(link.json()["download_url"].replace("http://localhost:8000", ""))
+    assert got.status_code == 200
+    assert got.content == payload
+    # Never inline, whatever was stored: a file from this origin must not render.
+    assert got.headers["content-disposition"].startswith("attachment;")
+
+    gone = client.delete(
+        f"{API}/attachments/{body['attachment_id']}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert gone.status_code == 204
+    after = client.get(
+        f"{API}/attachments",
+        params={"entity_type": "company", "entity_id": str(company_id)},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert all(a["id"] != body["attachment_id"] for a in after.json())
+
+
+def test_local_upload_rejects_a_body_that_is_not_what_was_signed(
+    client, make_user, track
+):
+    """The signed type and byte count are the contract, not a hint.
+
+    This is the property that makes the upload policy unbypassable without R2
+    doing the enforcing: a client handed a URL for a 1 KB PDF cannot use it to
+    store a larger body, a different type, or anything at all under a tampered
+    key.
+    """
+    gestor = make_user(role="gestor")
+    company_id = _make_company(gestor.id, track)
+    body = _upload(client, _token(client, gestor.email), company_id).json()
+    url = body["upload_url"].replace("http://localhost:8000", "")
+    headers = {"Content-Type": body["content_type"]}
+
+    too_big = client.put(url, content=b"x" * (body["content_length"] + 1), headers=headers)
+    assert too_big.status_code == 403
+
+    wrong_type = client.put(
+        url, content=b"x" * body["content_length"], headers={"Content-Type": "text/html"}
+    )
+    assert wrong_type.status_code == 403
+
+    tampered = client.put(
+        url.replace("signature=", "signature=0"),
+        content=b"x" * body["content_length"],
+        headers=headers,
+    )
+    assert tampered.status_code == 403
+
+
+def test_local_download_rejects_a_tampered_or_traversing_key(client, make_user, track):
+    gestor = make_user(role="gestor")
+    company_id = _make_company(gestor.id, track)
+    body = _upload(client, _token(client, gestor.email), company_id).json()
+    link_url = client.get(
+        f"{API}/attachments/{body['attachment_id']}/download-url",
+        headers={"Authorization": f"Bearer {_token(client, gestor.email)}"},
+    ).json()["download_url"].replace("http://localhost:8000", "")
+
+    # Swapping the key invalidates the MAC, so the path is never resolved.
+    swapped = client.get(link_url.replace(body["key"].split("/")[-1], "other.pdf"))
+    assert swapped.status_code == 403
+
+    # And a traversal attempt cannot be signed into existence either.
+    assert client.get(
+        f"{API}/attachments/local",
+        params={"key": "../../../etc/passwd", "expires": 9999999999, "signature": "0" * 64},
+    ).status_code == 403
