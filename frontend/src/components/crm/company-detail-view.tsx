@@ -36,6 +36,7 @@ import {
   toast,
   type ComboboxItem,
 } from "@/components/shared";
+import { useUrlState } from "@/lib/use-url-state";
 import { cn } from "@/lib/utils";
 import { crmApi, crmCollaborationApi } from "@/lib/api/crm";
 import { CrmError, type CompanyInput } from "@/lib/api/crm-types";
@@ -68,6 +69,9 @@ export interface CompanyDetailViewProps {
   };
 }
 
+/** Every tab this page can show; an unrecognised `?tab=` falls back. */
+const COMPANY_TABS = ["information", "contacts", "opportunities", "proposals", "projects", "meetings", "interactions", "notes", "files", "payments", "timeline"] as const;
+
 export function CompanyDetailView({ companyId, user }: CompanyDetailViewProps) {
   const t = useTranslations("crm.detail");
   const tTabs = useTranslations("crm.tabs");
@@ -81,7 +85,9 @@ export function CompanyDetailView({ companyId, user }: CompanyDetailViewProps) {
     retry: (count, err) => !(err instanceof CrmError) && count < 1,
   });
 
-  const [tab, setTab] = React.useState("information");
+  const [tab, setTab] = useUrlState<string>("tab", "information", {
+    valid: COMPANY_TABS,
+  });
   const [editOpen, setEditOpen] = React.useState(false);
   const [archiveOpen, setArchiveOpen] = React.useState(false);
 

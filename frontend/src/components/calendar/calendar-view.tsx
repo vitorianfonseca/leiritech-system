@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState, SkeletonList } from "@/components/shared";
+import { useUrlState } from "@/lib/use-url-state";
 import { calendarApi } from "@/lib/api/calendar";
 import type { CalendarEvent } from "@/lib/api/calendar-types";
 import type { Role } from "@/lib/session";
@@ -52,7 +53,9 @@ export function CalendarView({
   const locale = useLocale();
   const isMembro = user.role === "membro";
 
-  const [view, setView] = React.useState<CalendarViewMode>(defaultView);
+  const [view, setView] = useUrlState<CalendarViewMode>("cal", defaultView, {
+    history: "replace",
+  });
   const [anchor, setAnchor] = React.useState<Date>(() => new Date());
 
   const range = React.useMemo(() => rangeForView(view, anchor), [view, anchor]);
@@ -83,10 +86,13 @@ export function CalendarView({
     setPanelOpen(true);
   }, []);
 
-  const openDay = React.useCallback((day: Date) => {
-    setAnchor(day);
-    setView("agenda");
-  }, []);
+  const openDay = React.useCallback(
+    (day: Date) => {
+      setAnchor(day);
+      setView("agenda");
+    },
+    [setView]
+  );
 
   const goToday = React.useCallback(() => setAnchor(new Date()), []);
   const step = React.useCallback(

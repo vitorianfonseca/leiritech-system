@@ -51,6 +51,7 @@ import { HealthBadge, ProjectStateBadge } from "./status-badges";
 import { LifecycleActions } from "./lifecycle-actions";
 import { HealthDialog } from "./health-dialog";
 import { WorkTab } from "./work-tab";
+import { useUrlState } from "@/lib/use-url-state";
 import { FinanceiroTab } from "./financeiro-tab";
 import { ActivityTab } from "./simple-tabs";
 import { CalendarTab } from "./calendar-tab";
@@ -68,6 +69,17 @@ export interface ProjectDetailViewProps {
     avatarUrl: string | null;
   };
 }
+
+/** Every tab this page can show. `finance` is gated at render, not here: a
+ *  link to it from someone without access still falls back to the default. */
+const PROJECT_TABS = [
+  "tasks",
+  "calendar",
+  "files",
+  "activity",
+  "github",
+  "finance",
+] as const;
 
 export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
   const t = useTranslations("projects.detail");
@@ -92,7 +104,12 @@ export function ProjectDetailView({ projectId, user }: ProjectDetailViewProps) {
     retry: (count, err) => !(err instanceof ProjectError) && count < 1,
   });
 
-  const [tab, setTab] = React.useState("tasks");
+  // In the URL so a refresh, a restored session and a pasted link all land on
+  // the tab you were on. Validated, because `?tab=overview` outlived the tab
+  // it named and an unrecognised value must not leave every tab unselected.
+  const [tab, setTab] = useUrlState<string>("tab", "tasks", {
+    valid: PROJECT_TABS,
+  });
   const [healthOpen, setHealthOpen] = React.useState(false);
 
   const refresh = React.useCallback(async () => {

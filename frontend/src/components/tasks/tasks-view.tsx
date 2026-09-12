@@ -21,13 +21,14 @@ import {
   type TaskState,
 } from "@/lib/api/tasks-types";
 import type { Role } from "@/lib/session";
-import { ViewSwitcher, type TasksViewMode } from "./view-switcher";
+import { TASKS_VIEW_MODES, ViewSwitcher, type TasksViewMode } from "./view-switcher";
 import { TaskFilters, EMPTY_FILTERS, type TaskFilterState } from "./task-filters";
 import { TaskBoard } from "./task-board";
 import { TaskList } from "./task-list";
 import { TaskSidePanel } from "./task-side-panel";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { TaskScopeContext } from "./task-scope";
+import { useUrlState } from "@/lib/use-url-state";
 import { BlockReasonDialog } from "./block-reason-dialog";
 
 export interface TasksViewProps {
@@ -77,7 +78,10 @@ export function TasksView({
   );
 
   /* ---------------- view + filters ---------------- */
-  const [view, setView] = React.useState<TasksViewMode>("kanban");
+  const [view, setView] = useUrlState<TasksViewMode>("view", "kanban", {
+    valid: TASKS_VIEW_MODES,
+    history: "replace",
+  });
   const [filters, setFilters] = React.useState<TaskFilterState>(EMPTY_FILTERS);
 
   // The rail owns the phase selection, so mirror it into the filter state the
