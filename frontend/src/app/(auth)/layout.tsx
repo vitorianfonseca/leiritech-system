@@ -1,7 +1,6 @@
 import * as React from "react";
 import { getTranslations } from "next-intl/server";
 import { LeiritechWordmark } from "@/components/shell/logo";
-import { MeshBackdrop } from "@/components/shell/mesh-backdrop";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
@@ -20,7 +19,6 @@ export default async function AuthLayout({
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
-      <MeshBackdrop />
 
       <header className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6">
         <LeiritechWordmark />
