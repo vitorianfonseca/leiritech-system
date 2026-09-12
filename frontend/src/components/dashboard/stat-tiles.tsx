@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimatedCounter } from "@/components/shared";
-import { cellVariants, cellsVariants, lift } from "@/lib/motion";
+import { cellVariants, cellsVariants } from "@/lib/motion";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { MASK, useHideAmounts } from "@/lib/use-privacy";
@@ -119,11 +119,11 @@ export function StatTiles({
       {metrics.map((m) => {
         const Icon = METRIC_ICON[m.key];
         return (
-          <motion.div key={m.key} variants={cellVariants} {...lift}>
+          <motion.div key={m.key} variants={cellVariants}>
           <Link
             href={m.href}
             aria-label={t(`${m.key}.label`)}
-            className="group relative block h-full bg-card p-3.5 transition-colors duration-[var(--duration-fast)] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
+            className="group relative block h-full bg-card p-3.5 transition-[background-color,box-shadow] duration-[var(--duration-fast)] hover:z-10 hover:bg-accent hover:shadow-[0_2px_10px_-2px_oklch(0.24_0.010_82/0.12)] active:bg-secondary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none"
           >
             {/* Labels wrap rather than truncate: "Oportunidades abertas"
                 clipped to "Oportunidades abert…" tells a reader less than a

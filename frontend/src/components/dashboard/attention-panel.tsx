@@ -169,16 +169,17 @@ function AttentionSection({ group }: { group: AttentionGroup }) {
 
             <span className="min-w-0 py-2.5">
               {/*
-                The title's link stretches across the whole row via `after`,
-                so anywhere in the row opens the record — while the action
-                beside it stays a separate control that can be clicked on its
-                own. A <button> nested inside an <a> would be invalid markup
-                and unreachable by keyboard; this is the pattern that gives
-                both behaviours honestly.
+                The title is a link; the row is NOT. An `after:inset-0` here
+                would stretch the link across the whole row, which makes every
+                pixel of it a click target — and the pointer then never turns
+                back into an arrow while you are anywhere near the queue. That
+                was worth it when the action was a small text link; now that
+                the action is a real button beside it, a row-wide target buys
+                nothing and costs the sense of where things are clickable.
               */}
               <Link
                 href={hrefFor(item.entityType, item.entityId)}
-                className="block truncate text-[0.8125rem] font-medium text-foreground after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
+                className="inline-block max-w-full truncate align-top text-[0.8125rem] font-medium text-foreground hover:text-signal focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 {item.title}
               </Link>
