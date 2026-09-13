@@ -13,8 +13,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toastWithUndo } from "@/components/shared";
@@ -106,22 +107,17 @@ export function ArchiveCompanyDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
+      <DialogContent className="max-w-md">
         {blockers ? (
           <>
-            <div className="flex gap-4">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-warning-muted text-warning">
-                <AlertTriangle className="size-5" strokeWidth={1.8} aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <DialogTitle>{t("blockedTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("blockedDescription", { name: company?.name ?? "" })}
-                </DialogDescription>
-              </div>
-            </div>
-
-            <ul className="mt-4 space-y-3">
+            <DialogHeader
+              icon={AlertTriangle}
+              tone="warning"
+              title={t("blockedTitle")}
+              description={t("blockedDescription", { name: company?.name ?? "" })}
+            />
+            <DialogBody>
+              <ul className="space-y-3">
               {groups.map(([kind, items]) => {
                 const Icon = BLOCKER_ICON[kind];
                 return (
@@ -140,29 +136,23 @@ export function ArchiveCompanyDialog({
                   </li>
                 );
               })}
-            </ul>
-
-            <div className="mt-6 flex justify-end">
+              </ul>
+            </DialogBody>
+            <DialogFooter>
               <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
                 {t("understood")}
               </Button>
-            </div>
+            </DialogFooter>
           </>
         ) : (
           <>
-            <div className="flex gap-4">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <Archive className="size-5" strokeWidth={1.8} aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <DialogTitle>{t("confirmTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("confirmDescription", { name: company?.name ?? "" })}
-                </DialogDescription>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <DialogHeader
+              icon={Archive}
+              tone="neutral"
+              title={t("confirmTitle")}
+              description={t("confirmDescription", { name: company?.name ?? "" })}
+            />
+            <DialogFooter>
               <Button
                 variant="outline"
                 size="lg"
@@ -174,7 +164,7 @@ export function ArchiveCompanyDialog({
               <Button size="lg" disabled={pending} onClick={handleArchive}>
                 {pending ? t("archiving") : t("confirm")}
               </Button>
-            </div>
+            </DialogFooter>
           </>
         )}
       </DialogContent>

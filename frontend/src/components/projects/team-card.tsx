@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Users, UserPlus, X } from "lucide-react";
+import { UserPlus, Users, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { CrmField } from "@/components/crm/crm-field";
 import { ConfirmDialog, toast } from "@/components/shared";
@@ -155,12 +156,13 @@ export function TeamCard({
       </Card>
 
       <Dialog open={addOpen} onOpenChange={(o) => !busy && setAddOpen(o)}>
-        <DialogContent className="max-w-md p-6">
-          <div className="space-y-1.5">
-            <DialogTitle>{tt("addTitle")}</DialogTitle>
-            <DialogDescription>{tt("rolePlaceholder")}</DialogDescription>
-          </div>
-          <div className="mt-5 flex flex-col gap-4">
+        <DialogContent className="max-w-md">
+          <DialogHeader
+            icon={UserPlus}
+            title={tt("addTitle")}
+            description={tt("addSubtitle")}
+          />
+          <DialogBody className="flex flex-col gap-4">
             <CrmField label={tt("person")} required>
               {({ controlProps }) => (
                 <select
@@ -188,20 +190,20 @@ export function TeamCard({
                 />
               )}
             </CrmField>
-            <div className="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                variant="outline"
-                size="lg"
-                disabled={busy}
-                onClick={() => setAddOpen(false)}
-              >
-                {tt("cancel")}
-              </Button>
-              <Button size="lg" disabled={busy || !pick} onClick={() => void add()}>
-                {busy ? tt("adding") : tt("confirm")}
-              </Button>
-            </div>
-          </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={busy}
+              onClick={() => setAddOpen(false)}
+            >
+              {tt("cancel")}
+            </Button>
+            <Button size="lg" disabled={busy || !pick} onClick={() => void add()}>
+              {busy ? tt("adding") : tt("confirm")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

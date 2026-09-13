@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { Building2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@/lib/form/zod-resolver";
@@ -73,16 +75,17 @@ export function CompanyFormDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{isEdit ? t("editTitle") : t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CompanyFormFields form={form} />
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-2xl">
+        <DialogHeader
+          icon={Building2}
+          title={isEdit ? t("editTitle") : t("createTitle")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CompanyFormFields form={form} />
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -95,7 +98,7 @@ export function CompanyFormDialog({
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : isEdit ? t("saveEdit") : t("saveCreate")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

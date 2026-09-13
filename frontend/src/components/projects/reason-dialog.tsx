@@ -3,11 +3,13 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { MessageSquareWarning, OctagonAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CrmField } from "@/components/crm/crm-field";
@@ -73,12 +75,15 @@ export function ReasonDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{title}</DialogTitle>
-          {description ? <DialogDescription>{description}</DialogDescription> : null}
-        </div>
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={variant === "destructive" ? OctagonAlert : MessageSquareWarning}
+          tone={variant === "destructive" ? "danger" : "warning"}
+          title={title}
+          description={description}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
           <CrmField label={label} required error={errors.reason?.message}>
             {({ controlProps }) => (
               <textarea
@@ -90,7 +95,8 @@ export function ReasonDialog({
               />
             )}
           </CrmField>
-          <div className="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -103,7 +109,7 @@ export function ReasonDialog({
             <Button type="submit" size="lg" variant={variant} disabled={isSubmitting}>
               {isSubmitting ? t("saving") : confirmLabel}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

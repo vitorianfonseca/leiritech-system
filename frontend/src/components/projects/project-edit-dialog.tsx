@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { SquarePen } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,84 +118,86 @@ export function ProjectEditDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-xl p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("name")} required>
-            {({ controlProps }) => <Input {...controlProps} {...register("name")} />}
-          </CrmField>
+      <DialogContent className="max-w-xl">
+        <DialogHeader
+          icon={SquarePen}
+          title={t("title")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("name")} required>
+              {({ controlProps }) => <Input {...controlProps} {...register("name")} />}
+            </CrmField>
 
-          <CrmField label={t("description")}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("description")}
-                rows={3}
-                className="glass-field w-full rounded-xl px-3 py-2 text-sm outline-none"
-                placeholder={t("descriptionPlaceholder")}
-              />
-            )}
-          </CrmField>
-
-          <CrmField label={t("manager")}>
-            {({ controlProps }) => (
-              <select
-                {...controlProps}
-                {...register("managerId")}
-                className="glass-field h-10 w-full rounded-xl px-3 text-sm outline-none"
-              >
-                <option value="">{t("noManager")}</option>
-                {owners.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            )}
-          </CrmField>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <CrmField label={t("startDate")}>
+            <CrmField label={t("description")}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("startDate")} type="date" />
+                <textarea
+                  {...controlProps}
+                  {...register("description")}
+                  rows={3}
+                  className="glass-field w-full rounded-xl px-3 py-2 text-sm outline-none"
+                  placeholder={t("descriptionPlaceholder")}
+                />
               )}
             </CrmField>
-            <CrmField label={t("dueDate")}>
+
+            <CrmField label={t("manager")}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("dueDate")} type="date" />
+                <select
+                  {...controlProps}
+                  {...register("managerId")}
+                  className="glass-field h-10 w-full rounded-xl px-3 text-sm outline-none"
+                >
+                  <option value="">{t("noManager")}</option>
+                  {owners.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
               )}
             </CrmField>
-          </div>
 
-          {canFinance ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              <CrmField label={t("contractedValue")}>
+              <CrmField label={t("startDate")}>
                 {({ controlProps }) => (
-                  <Input
-                    {...controlProps}
-                    {...register("contractedValue")}
-                    inputMode="decimal"
-                    placeholder="0,00"
-                  />
+                  <Input {...controlProps} {...register("startDate")} type="date" />
                 )}
               </CrmField>
-              <CrmField label={t("hoursBudget")}>
+              <CrmField label={t("dueDate")}>
                 {({ controlProps }) => (
-                  <Input
-                    {...controlProps}
-                    {...register("hoursBudget")}
-                    inputMode="numeric"
-                    placeholder="0"
-                  />
+                  <Input {...controlProps} {...register("dueDate")} type="date" />
                 )}
               </CrmField>
             </div>
-          ) : null}
 
-          <div className="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {canFinance ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <CrmField label={t("contractedValue")}>
+                  {({ controlProps }) => (
+                    <Input
+                      {...controlProps}
+                      {...register("contractedValue")}
+                      inputMode="decimal"
+                      placeholder="0,00"
+                    />
+                  )}
+                </CrmField>
+                <CrmField label={t("hoursBudget")}>
+                  {({ controlProps }) => (
+                    <Input
+                      {...controlProps}
+                      {...register("hoursBudget")}
+                      inputMode="numeric"
+                      placeholder="0"
+                    />
+                  )}
+                </CrmField>
+              </div>
+            ) : null}
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -206,7 +210,7 @@ export function ProjectEditDialog({
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("save")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

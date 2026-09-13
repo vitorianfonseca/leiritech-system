@@ -1795,7 +1795,8 @@
       "companyActivated": "{name} marked as active client.",
       "close": "Close",
       "convert": "Convert to project",
-      "convertSoon": "Project conversion is coming soon."
+      "convertSoon": "Project conversion is coming soon.",
+      "eyebrow": "Deal"
     },
     "reopen": {
       "title": "Reopen opportunity",
@@ -2582,7 +2583,8 @@
       "removed": "{name} removed from the team.",
       "removeFailed": "Could not remove the member.",
       "alreadyIn": "Already on the team.",
-      "noneLeft": "Everyone is already on the team."
+      "noneLeft": "Everyone is already on the team.",
+      "addSubtitle": "Pick who joins and the role they hold on this project."
     },
     "work": {
       "allPhases": "All phases",

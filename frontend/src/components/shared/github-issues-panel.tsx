@@ -5,20 +5,22 @@ import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bug,
-  CircleDot,
+  Check,
   CircleCheck,
+  CircleDot,
   ExternalLink,
-  RefreshCw,
+  GitPullRequestArrow,
   MessageSquare,
+  RefreshCw,
   Send,
   UserPlus,
-  Check,
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -284,11 +286,12 @@ export function GithubIssuesPanel({
         open={createOpen}
         onOpenChange={(next) => (!createMutation.isPending ? setCreateOpen(next) : null)}
       >
-        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto p-6">
-          <div className="space-y-1.5">
-            <DialogTitle>{t("dialog.title")}</DialogTitle>
-            <DialogDescription>{t("dialog.description")}</DialogDescription>
-          </div>
+        <DialogContent className="max-w-lg">
+          <DialogHeader
+            icon={GitPullRequestArrow}
+            title={t("dialog.title")}
+            description={t("dialog.description")}
+          />
           <form
             noValidate
             onSubmit={(e) => {
@@ -296,81 +299,82 @@ export function GithubIssuesPanel({
               if (!title.trim()) return;
               createMutation.mutate();
             }}
-            className="mt-5 flex flex-col gap-4"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="space-y-1.5">
-              <Label htmlFor="gh-issue-title">{t("dialog.fields.title")}</Label>
-              <Input
-                id="gh-issue-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="gh-issue-body">{t("dialog.fields.body")}</Label>
-              <textarea
-                id="gh-issue-body"
-                rows={4}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder={t("dialog.fields.bodyPlaceholder")}
-                className={TEXTAREA_CLASS}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{t("dialog.fields.labels")}</Label>
-              <div className="flex flex-wrap gap-1.5 rounded-lg border border-input bg-muted p-2">
-                {labelsQuery.isLoading ? (
-                  <span className="text-xs text-muted-foreground">{t("loading")}</span>
-                ) : availableLabels.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">{t("dialog.noLabels")}</span>
-                ) : (
-                  availableLabels.map((lbl) => {
-                    const active = pickedLabels.includes(lbl.name);
-                    return (
-                      <button
-                        key={lbl.name}
-                        type="button"
-                        onClick={() => toggleLabel(lbl.name)}
-                        aria-pressed={active}
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium leading-none outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-ring",
-                          active ? "opacity-100 ring-2 ring-foreground/60" : "opacity-60 hover:opacity-90"
-                        )}
-                        style={{
-                          backgroundColor: `#${lbl.color}`,
-                          color: labelTextColor(lbl.color),
-                        }}
-                      >
-                        {lbl.name}
-                      </button>
-                    );
-                  })
-                )}
+            <DialogBody className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="gh-issue-title">{t("dialog.fields.title")}</Label>
+                <Input
+                  id="gh-issue-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  autoFocus
+                  required
+                />
               </div>
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gh-issue-body">{t("dialog.fields.body")}</Label>
+                <textarea
+                  id="gh-issue-body"
+                  rows={4}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder={t("dialog.fields.bodyPlaceholder")}
+                  className={TEXTAREA_CLASS}
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="gh-issue-assignee">{t("dialog.fields.assignee")}</Label>
-              <select
-                id="gh-issue-assignee"
-                value={pickedAssignee}
-                onChange={(e) => setPickedAssignee(e.target.value)}
-                className="h-8 w-full rounded-lg border border-input bg-card px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
-              >
-                <option value="">{t("dialog.fields.unassigned")}</option>
-                {collaborators.map((c: GithubAssignee) => (
-                  <option key={c.login} value={c.login}>
-                    {c.login}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="space-y-1.5">
+                <Label>{t("dialog.fields.labels")}</Label>
+                <div className="flex flex-wrap gap-1.5 rounded-lg border border-input bg-muted p-2">
+                  {labelsQuery.isLoading ? (
+                    <span className="text-xs text-muted-foreground">{t("loading")}</span>
+                  ) : availableLabels.length === 0 ? (
+                    <span className="text-xs text-muted-foreground">{t("dialog.noLabels")}</span>
+                  ) : (
+                    availableLabels.map((lbl) => {
+                      const active = pickedLabels.includes(lbl.name);
+                      return (
+                        <button
+                          key={lbl.name}
+                          type="button"
+                          onClick={() => toggleLabel(lbl.name)}
+                          aria-pressed={active}
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-xs font-medium leading-none outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-ring",
+                            active ? "opacity-100 ring-2 ring-foreground/60" : "opacity-60 hover:opacity-90"
+                          )}
+                          style={{
+                            backgroundColor: `#${lbl.color}`,
+                            color: labelTextColor(lbl.color),
+                          }}
+                        >
+                          {lbl.name}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
 
-            <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="space-y-1.5">
+                <Label htmlFor="gh-issue-assignee">{t("dialog.fields.assignee")}</Label>
+                <select
+                  id="gh-issue-assignee"
+                  value={pickedAssignee}
+                  onChange={(e) => setPickedAssignee(e.target.value)}
+                  className="h-8 w-full rounded-lg border border-input bg-card px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+                >
+                  <option value="">{t("dialog.fields.unassigned")}</option>
+                  {collaborators.map((c: GithubAssignee) => (
+                    <option key={c.login} value={c.login}>
+                      {c.login}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </DialogBody>
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -383,7 +387,7 @@ export function GithubIssuesPanel({
               <Button type="submit" size="lg" disabled={createMutation.isPending || !title.trim()}>
                 {createMutation.isPending ? t("dialog.saving") : t("dialog.save")}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

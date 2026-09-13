@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { CircleX } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SearchableCombobox, type ComboboxItem } from "@/components/shared";
@@ -79,48 +81,50 @@ export function LostDialog({ open, onOpenChange, opportunity, onConfirm }: LostD
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle", { title: opportunity.title })}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("reason")} required error={errors.reason?.message}>
-            {({ controlProps }) => (
-              <SearchableCombobox
-                id={controlProps.id}
-                aria-label={t("reason")}
-                items={reasonOptions}
-                value={(reason as string) || null}
-                clearable={false}
-                placeholder={t("reasonPlaceholder")}
-                onValueChange={(v) =>
-                  setValue("reason", (v ?? "") as LostReason, { shouldValidate: true })
-                }
-              />
-            )}
-          </CrmField>
-          <CrmField label={t("note")} error={errors.note?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("note")}
-                rows={3}
-                placeholder={t("notePlaceholder")}
-                className={TEXTAREA_CLASS}
-              />
-            )}
-          </CrmField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={CircleX}
+          tone="danger"
+          title={t("title")}
+          description={t("subtitle", { title: opportunity.title })}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("reason")} required error={errors.reason?.message}>
+              {({ controlProps }) => (
+                <SearchableCombobox
+                  id={controlProps.id}
+                  aria-label={t("reason")}
+                  items={reasonOptions}
+                  value={(reason as string) || null}
+                  clearable={false}
+                  placeholder={t("reasonPlaceholder")}
+                  onValueChange={(v) =>
+                    setValue("reason", (v ?? "") as LostReason, { shouldValidate: true })
+                  }
+                />
+              )}
+            </CrmField>
+            <CrmField label={t("note")} error={errors.note?.message}>
+              {({ controlProps }) => (
+                <textarea
+                  {...controlProps}
+                  {...register("note")}
+                  rows={3}
+                  placeholder={t("notePlaceholder")}
+                  className={TEXTAREA_CLASS}
+                />
+              )}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" variant="destructive" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

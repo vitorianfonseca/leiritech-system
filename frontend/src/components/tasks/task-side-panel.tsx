@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
+  AlignLeft,
   Pencil,
   Check,
   X,
@@ -16,6 +17,7 @@ import {
   ArrowRight,
   MessageSquare,
   ListChecks,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   DetailSidePanel,
+  PanelHeader,
+  PanelTabs,
+  PanelBody,
+  PanelFooter,
   SearchableCombobox,
   CommentThread,
   ProgressBar,
@@ -75,26 +81,20 @@ export function TaskSidePanel(props: TaskSidePanelProps) {
       open={open}
       onOpenChange={onOpenChange}
       widthClassName="sm:max-w-2xl md:max-w-3xl"
-      header={
-        task ? (
-          <div className="min-w-0">
-            <StateBadge state={task.state} className="mb-1.5" />
-            <p className="truncate text-sm text-muted-foreground">
-              {task.projectName}
-              {task.phaseName ? <span aria-hidden> · {task.phaseName}</span> : null}
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("panel.loading")}</p>
-        )
-      }
+      bare
     >
-      {task ? <PanelBody key={task.id} {...props} task={task} /> : null}
+      {task ? (
+        <TaskPanelContent key={task.id} {...props} task={task} />
+      ) : (
+        <PanelHeader>
+          <p className="text-sm text-muted-foreground">{t("panel.loading")}</p>
+        </PanelHeader>
+      )}
     </DetailSidePanel>
   );
 }
 
-function PanelBody({
+function TaskPanelContent({
   task,
   role,
   userId,
@@ -227,9 +227,18 @@ function PanelBody({
   );
 
   return (
-    <div className="space-y-6">
-      {/* Title (inline edit) */}
-      <div>
+    <>
+      <PanelHeader
+        eyebrow={
+          <>
+            <StateBadge state={task.state} className="normal-case tracking-normal" />
+            <span className="truncate font-medium normal-case tracking-normal">
+              {task.projectName}
+              {task.phaseName ? <span aria-hidden> · {task.phaseName}</span> : null}
+            </span>
+          </>
+        }
+      >
         {editingTitle ? (
           <div className="flex items-start gap-2">
             <Input
@@ -280,8 +289,44 @@ function PanelBody({
             ) : null}
           </div>
         )}
-      </div>
+      </PanelHeader>
 
+      {/* Tabs */}
+      <PanelTabs>
+        <div
+          role="tablist"
+          aria-label={t("panel.tabsLabel")}
+          data-control-row
+          className="flex gap-1"
+        >
+          {(["details", "comments"] as const).map((key) => (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={tab === key}
+              onClick={() => setTab(key)}
+              className={cn(
+                "inline-flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                tab === key
+                  ? "border-signal text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {key === "details" ? (
+                <ListChecks className="size-4" strokeWidth={1.8} aria-hidden />
+              ) : (
+                <MessageSquare className="size-4" strokeWidth={1.8} aria-hidden />
+              )}
+              {t(`panel.tabs.${key}`)}
+              {key === "comments" && task.commentCount > 0 ? (
+                <Badge variant="default">{task.commentCount}</Badge>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </PanelTabs>
+
+      <PanelBody className="space-y-6">
       {/* Blocked banner (BR-046) */}
       {task.state === "blocked" ? (
         <div className="flex items-start gap-2 rounded-xl border border-status-blocked/40 bg-status-blocked-bg px-3 py-2.5 text-sm text-status-blocked">
@@ -313,77 +358,12 @@ function PanelBody({
         </div>
       ) : null}
 
-      {/* Actions: transitions + timer */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {canEdit &&
-            availableTransitions.map((state) => {
-              const isBlock = state === "blocked";
-              return (
-                <Button
-                  key={state}
-                  size="sm"
-                  variant={isBlock ? "outline" : "default"}
-                  disabled={busy}
-                  onClick={() => onRequestTransition(task, state)}
-                >
-                  {isBlock ? (
-                    <Ban aria-hidden />
-                  ) : (
-                    <ArrowRight aria-hidden />
-                  )}
-                  {t(`panel.moveTo.${state}`)}
-                </Button>
-              );
-            })}
-        </div>
-        <Button
-          variant={running ? "destructive" : "outline"}
-          size="sm"
-          onClick={handleTimer}
-          className="w-full sm:w-auto"
-        >
-          {running ? <Square aria-hidden /> : <Play aria-hidden />}
-          {running
-            ? t("timer.stop", { elapsed: formatElapsed(timer.elapsedMs) })
-            : t("timer.start")}
-        </Button>
-      </div>
-
-      {/* Tabs */}
-      <div role="tablist" aria-label={t("panel.tabsLabel")} className="flex gap-1 border-b border-border">
-        {(["details", "comments"] as const).map((key) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            onClick={() => setTab(key)}
-            className={cn(
-              "inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              tab === key
-                ? "border-signal text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {key === "details" ? (
-              <ListChecks className="size-4" strokeWidth={1.8} aria-hidden />
-            ) : (
-              <MessageSquare className="size-4" strokeWidth={1.8} aria-hidden />
-            )}
-            {t(`panel.tabs.${key}`)}
-            {key === "comments" && task.commentCount > 0 ? (
-              <Badge variant="default">{task.commentCount}</Badge>
-            ) : null}
-          </button>
-        ))}
-      </div>
-
       {tab === "details" ? (
         <div className="space-y-6">
           {/* Description */}
           <section className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label>{t("panel.descriptionLabel")}</Label>
+              <SectionLabel icon={AlignLeft}>{t("panel.descriptionLabel")}</SectionLabel>
               {canEdit && !editingDesc ? (
                 <Button
                   size="icon-sm"
@@ -514,10 +494,7 @@ function PanelBody({
           {/* Checklist */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-1.5">
-                <ListChecks className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-                {t("panel.checklist.title")}
-              </Label>
+              <SectionLabel icon={ListChecks}>{t("panel.checklist.title")}</SectionLabel>
               {checklistTotal > 0 ? (
                 <span className="text-xs tabular-nums text-muted-foreground">
                   {t("panel.checklist.progress", { done: checklistDone, total: checklistTotal })}
@@ -603,10 +580,7 @@ function PanelBody({
 
           {/* Dependencies (BR-045 / BR-047) */}
           <section className="space-y-3">
-            <Label className="flex items-center gap-1.5">
-              <Link2 className="size-4 text-muted-foreground" strokeWidth={1.8} aria-hidden />
-              {t("panel.dependencies.title")}
-            </Label>
+            <SectionLabel icon={Link2}>{t("panel.dependencies.title")}</SectionLabel>
 
             <ul className="space-y-1.5">
               {task.dependencies.map((dep) => (
@@ -657,15 +631,19 @@ function PanelBody({
 
           <Separator />
 
-          <dl className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-            <div>
-              <dt className="font-medium">{t("panel.fields.created")}</dt>
-              <dd>{formatDueDate(task.createdAt.slice(0, 10))}</dd>
-            </div>
-            <div>
-              <dt className="font-medium">{t("panel.fields.updated")}</dt>
-              <dd>{formatDueDate(task.updatedAt.slice(0, 10))}</dd>
-            </div>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <dt className="font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("panel.fields.created")}
+            </dt>
+            <dt className="font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("panel.fields.updated")}
+            </dt>
+            <dd className="tabular-nums text-foreground">
+              {formatDueDate(task.createdAt.slice(0, 10))}
+            </dd>
+            <dd className="tabular-nums text-foreground">
+              {formatDueDate(task.updatedAt.slice(0, 10))}
+            </dd>
           </dl>
         </div>
       ) : (
@@ -676,6 +654,43 @@ function PanelBody({
           api={taskCollaborationApi}
         />
       )}
+      </PanelBody>
+
+      {/* The transitions and the timer are what you came to do. They used to
+          sit inline above the fields at the same weight as everything else,
+          wrapping onto two ragged rows; in the commit band they are the one
+          place actions live. */}
+      <PanelFooter className="flex flex-wrap items-center gap-2">
+        <Button
+          variant={running ? "destructive" : "outline"}
+          size="sm"
+          onClick={handleTimer}
+        >
+          {running ? <Square aria-hidden /> : <Play aria-hidden />}
+          {running
+            ? t("timer.stop", { elapsed: formatElapsed(timer.elapsedMs) })
+            : t("timer.start")}
+        </Button>
+        {canEdit && availableTransitions.length > 0 ? (
+          <div className="ms-auto flex flex-wrap items-center gap-2">
+            {availableTransitions.map((state) => {
+              const isBlock = state === "blocked";
+              return (
+                <Button
+                  key={state}
+                  size="sm"
+                  variant={isBlock ? "outline" : "default"}
+                  disabled={busy}
+                  onClick={() => onRequestTransition(task, state)}
+                >
+                  {isBlock ? <Ban aria-hidden /> : <ArrowRight aria-hidden />}
+                  {t(`panel.moveTo.${state}`)}
+                </Button>
+              );
+            })}
+          </div>
+        ) : null}
+      </PanelFooter>
 
       <ConfirmDialog
         open={switchConfirmOpen}
@@ -695,7 +710,23 @@ function PanelBody({
           setSwitchConfirmOpen(false);
         }}
       />
-    </div>
+    </>
+  );
+}
+
+/** One heading shape for every section of the record. */
+function SectionLabel({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="flex items-center gap-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+      <Icon className="size-3.5 text-signal" strokeWidth={2} aria-hidden />
+      {children}
+    </p>
   );
 }
 

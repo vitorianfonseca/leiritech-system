@@ -6,8 +6,9 @@ import { Ban } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -69,22 +70,18 @@ export function BlockReasonDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="flex gap-4">
-          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-status-blocked-bg text-status-blocked">
-            <Ban className="size-5" strokeWidth={1.8} aria-hidden />
-          </span>
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <DialogTitle>{t("block.title")}</DialogTitle>
-            <DialogDescription>
-              {taskTitle
-                ? t("block.description", { task: taskTitle })
-                : t("block.descriptionGeneric")}
-            </DialogDescription>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-1.5">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={Ban}
+          tone="warning"
+          title={t("block.title")}
+          description={
+            taskTitle
+              ? t("block.description", { task: taskTitle })
+              : t("block.descriptionGeneric")
+          }
+        />
+        <DialogBody className="space-y-1.5">
           <Label htmlFor={fieldId}>{t("block.reasonLabel")}</Label>
           <textarea
             id={fieldId}
@@ -105,9 +102,8 @@ export function BlockReasonDialog({
               {t("block.reasonRequired")}
             </p>
           ) : null}
-        </div>
-
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        </DialogBody>
+        <DialogFooter>
           <Button
             variant="outline"
             size="lg"
@@ -119,7 +115,7 @@ export function BlockReasonDialog({
           <Button size="lg" disabled={pending} onClick={handleConfirm}>
             {pending ? t("block.processing") : t("block.confirm")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -6,8 +6,9 @@ import { Check, X, Send, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { meetsSendRequirements, type Proposal } from "@/lib/api/proposals-types";
@@ -72,50 +73,50 @@ export function SendProposalDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle", { reference: proposal.reference })}</DialogDescription>
-        </div>
-
-        <ul className="mt-4 space-y-2">
-          {checks.map((c) => (
-            <li
-              key={c.key}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted px-3 py-2 text-sm"
-            >
-              <span className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full",
-                    c.met ? "bg-success-muted text-success" : "bg-destructive-muted text-destructive"
-                  )}
-                >
-                  {c.met ? (
-                    <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
-                  ) : (
-                    <X className="size-3.5" strokeWidth={2.5} aria-hidden />
-                  )}
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={Send}
+          title={t("title")}
+          description={t("subtitle", { reference: proposal.reference })}
+        />
+        <DialogBody className="space-y-3">
+          <ul className="space-y-2">
+            {checks.map((c) => (
+              <li
+                key={c.key}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted px-3 py-2 text-sm"
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded-full",
+                      c.met ? "bg-success-muted text-success" : "bg-destructive-muted text-destructive"
+                    )}
+                  >
+                    {c.met ? (
+                      <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
+                    ) : (
+                      <X className="size-3.5" strokeWidth={2.5} aria-hidden />
+                    )}
+                  </span>
+                  {t(`checks.${c.key}`)}
                 </span>
-                {t(`checks.${c.key}`)}
-              </span>
-              {c.value ? (
-                <span className="truncate text-xs text-muted-foreground" title={c.value}>
-                  {c.value}
-                </span>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-
-        {!ready ? (
-          <p role="alert" className="mt-3 flex items-start gap-1.5 text-sm text-destructive">
-            <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            {tErr("send_requirements_missing")}
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                {c.value ? (
+                  <span className="truncate text-xs text-muted-foreground" title={c.value}>
+                    {c.value}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {!ready ? (
+            <p role="alert" className="flex items-start gap-1.5 text-sm text-destructive">
+              <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+              {tErr("send_requirements_missing")}
+            </p>
+          ) : null}
+        </DialogBody>
+        <DialogFooter>
           <Button variant="outline" size="lg" disabled={pending} onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>
@@ -123,7 +124,7 @@ export function SendProposalDialog({
             <Send aria-hidden />
             {pending ? t("sending") : t("confirm")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

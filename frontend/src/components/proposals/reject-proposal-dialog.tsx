@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { ThumbsDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CrmField } from "@/components/crm/crm-field";
@@ -65,34 +67,36 @@ export function RejectProposalDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle", { reference: proposal.reference })}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("note")} required error={errors.note?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("note")}
-                rows={3}
-                autoFocus
-                placeholder={t("notePlaceholder")}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
-              />
-            )}
-          </CrmField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={ThumbsDown}
+          tone="danger"
+          title={t("title")}
+          description={t("subtitle", { reference: proposal.reference })}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("note")} required error={errors.note?.message}>
+              {({ controlProps }) => (
+                <textarea
+                  {...controlProps}
+                  {...register("note")}
+                  rows={3}
+                  autoFocus
+                  placeholder={t("notePlaceholder")}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
+                />
+              )}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" variant="destructive" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

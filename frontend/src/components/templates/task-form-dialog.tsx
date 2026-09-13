@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { ListChecks } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,53 +78,54 @@ export function TaskFormDialog({ open, onOpenChange, task, onSubmit }: TaskFormD
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{isEdit ? t("taskForm.editTitle") : t("taskForm.addTitle")}</DialogTitle>
-          <DialogDescription>{t("taskForm.subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <TemplateField label={t("taskForm.title")} required error={errors.title?.message}>
-            {({ controlProps }) => (
-              <Input
-                {...controlProps}
-                {...register("title")}
-                placeholder={t("taskForm.titlePlaceholder")}
-                autoFocus
-              />
-            )}
-          </TemplateField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TemplateField label={t("taskForm.role")} error={errors.roleResponsible?.message}>
-              {({ controlProps }) => (
-                <TemplateSelect {...controlProps} {...register("roleResponsible")}>
-                  {TEMPLATE_TASK_ROLES.map((role) => (
-                    <option key={role} value={role}>
-                      {tr(role)}
-                    </option>
-                  ))}
-                </TemplateSelect>
-              )}
-            </TemplateField>
-
-            <TemplateField
-              label={t("taskForm.estimateHours")}
-              error={errors.estimateHours?.message}
-            >
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={ListChecks}
+          title={isEdit ? t("taskForm.editTitle") : t("taskForm.addTitle")}
+          description={t("taskForm.subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <TemplateField label={t("taskForm.title")} required error={errors.title?.message}>
               {({ controlProps }) => (
                 <Input
                   {...controlProps}
-                  {...register("estimateHours")}
-                  inputMode="decimal"
-                  placeholder="4"
+                  {...register("title")}
+                  placeholder={t("taskForm.titlePlaceholder")}
+                  autoFocus
                 />
               )}
             </TemplateField>
-          </div>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <TemplateField label={t("taskForm.role")} error={errors.roleResponsible?.message}>
+                {({ controlProps }) => (
+                  <TemplateSelect {...controlProps} {...register("roleResponsible")}>
+                    {TEMPLATE_TASK_ROLES.map((role) => (
+                      <option key={role} value={role}>
+                        {tr(role)}
+                      </option>
+                    ))}
+                  </TemplateSelect>
+                )}
+              </TemplateField>
+
+              <TemplateField
+                label={t("taskForm.estimateHours")}
+                error={errors.estimateHours?.message}
+              >
+                {({ controlProps }) => (
+                  <Input
+                    {...controlProps}
+                    {...register("estimateHours")}
+                    inputMode="decimal"
+                    placeholder="4"
+                  />
+                )}
+              </TemplateField>
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -135,7 +138,7 @@ export function TaskFormDialog({ open, onOpenChange, task, onSubmit }: TaskFormD
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("form.saving") : isEdit ? t("form.saveEdit") : t("taskForm.add")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

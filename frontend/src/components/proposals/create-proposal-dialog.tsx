@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { FileText } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,102 +149,103 @@ export function CreateProposalDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("fields.template")} hint={t("fields.templateHint")}>
-            {({ controlProps }) => (
-              <SearchableCombobox
-                id={controlProps.id}
-                aria-label={t("fields.template")}
-                items={templateOptions}
-                loading={templatesQuery.isPending}
-                value={templateId}
-                clearable
-                placeholder={t("fields.templatePlaceholder")}
-                emptyMessage={t("fields.noTemplates")}
-                onValueChange={(v) => setTemplateId(v)}
-              />
-            )}
-          </CrmField>
-
-          <CrmField label={t("fields.opportunity")} required error={errors.opportunityId?.message}>
-            {({ controlProps }) => (
-              <SearchableCombobox
-                id={controlProps.id}
-                aria-label={t("fields.opportunity")}
-                items={opportunityOptions}
-                loading={opportunitiesQuery.isPending}
-                value={opportunityId || null}
-                placeholder={t("fields.opportunityPlaceholder")}
-                emptyMessage={t("fields.noOpportunities")}
-                onValueChange={(v) => {
-                  setValue("opportunityId", v ?? "", { shouldValidate: true });
-                  setValue("contactId", "");
-                }}
-              />
-            )}
-          </CrmField>
-
-          <CrmField label={t("fields.contact")} error={errors.contactId?.message}>
-            {({ controlProps }) => (
-              <SearchableCombobox
-                id={controlProps.id}
-                aria-label={t("fields.contact")}
-                items={contactOptions}
-                loading={contactsQuery.isPending}
-                value={contactId || null}
-                placeholder={t("fields.contactPlaceholder")}
-                emptyMessage={t("fields.noContacts")}
-                onValueChange={(v) => setValue("contactId", v ?? "")}
-              />
-            )}
-          </CrmField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {canFinance ? (
-              <CrmField label={t("fields.value")} error={errors.value?.message} hint={t("fields.valueHint")}>
-                {({ controlProps }) => (
-                  <Input
-                    {...controlProps}
-                    {...register("value")}
-                    inputMode="decimal"
-                    placeholder={t("fields.valuePlaceholder")}
-                  />
-                )}
-              </CrmField>
-            ) : null}
-            <CrmField label={t("fields.validUntil")} error={errors.validUntil?.message} hint={t("fields.validUntilHint")}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={FileText}
+          title={t("title")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("fields.template")} hint={t("fields.templateHint")}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("validUntil")} type="date" />
+                <SearchableCombobox
+                  id={controlProps.id}
+                  aria-label={t("fields.template")}
+                  items={templateOptions}
+                  loading={templatesQuery.isPending}
+                  value={templateId}
+                  clearable
+                  placeholder={t("fields.templatePlaceholder")}
+                  emptyMessage={t("fields.noTemplates")}
+                  onValueChange={(v) => setTemplateId(v)}
+                />
               )}
             </CrmField>
-          </div>
 
-          <CrmField label={t("fields.notes")} error={errors.notes?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("notes")}
-                rows={3}
-                placeholder={t("fields.notesPlaceholder")}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
-              />
-            )}
-          </CrmField>
+            <CrmField label={t("fields.opportunity")} required error={errors.opportunityId?.message}>
+              {({ controlProps }) => (
+                <SearchableCombobox
+                  id={controlProps.id}
+                  aria-label={t("fields.opportunity")}
+                  items={opportunityOptions}
+                  loading={opportunitiesQuery.isPending}
+                  value={opportunityId || null}
+                  placeholder={t("fields.opportunityPlaceholder")}
+                  emptyMessage={t("fields.noOpportunities")}
+                  onValueChange={(v) => {
+                    setValue("opportunityId", v ?? "", { shouldValidate: true });
+                    setValue("contactId", "");
+                  }}
+                />
+              )}
+            </CrmField>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <CrmField label={t("fields.contact")} error={errors.contactId?.message}>
+              {({ controlProps }) => (
+                <SearchableCombobox
+                  id={controlProps.id}
+                  aria-label={t("fields.contact")}
+                  items={contactOptions}
+                  loading={contactsQuery.isPending}
+                  value={contactId || null}
+                  placeholder={t("fields.contactPlaceholder")}
+                  emptyMessage={t("fields.noContacts")}
+                  onValueChange={(v) => setValue("contactId", v ?? "")}
+                />
+              )}
+            </CrmField>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {canFinance ? (
+                <CrmField label={t("fields.value")} error={errors.value?.message} hint={t("fields.valueHint")}>
+                  {({ controlProps }) => (
+                    <Input
+                      {...controlProps}
+                      {...register("value")}
+                      inputMode="decimal"
+                      placeholder={t("fields.valuePlaceholder")}
+                    />
+                  )}
+                </CrmField>
+              ) : null}
+              <CrmField label={t("fields.validUntil")} error={errors.validUntil?.message} hint={t("fields.validUntilHint")}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("validUntil")} type="date" />
+                )}
+              </CrmField>
+            </div>
+
+            <CrmField label={t("fields.notes")} error={errors.notes?.message}>
+              {({ controlProps }) => (
+                <textarea
+                  {...controlProps}
+                  {...register("notes")}
+                  rows={3}
+                  placeholder={t("fields.notesPlaceholder")}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
+                />
+              )}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

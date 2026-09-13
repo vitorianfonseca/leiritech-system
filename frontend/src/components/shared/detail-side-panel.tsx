@@ -11,6 +11,18 @@ import { cn } from "@/lib/utils";
 const FOCUSABLE =
   'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
+/**
+ * Lets a panel that lays out its own bands reach the close action, so a custom
+ * header does not have to thread `onOpenChange` back down through it.
+ */
+const PanelCloseContext = React.createContext<(() => void) | null>(null);
+
+export function useDetailPanelClose() {
+  const close = React.useContext(PanelCloseContext);
+  if (!close) throw new Error("useDetailPanelClose must be used inside a DetailSidePanel");
+  return close;
+}
+
 export interface DetailSidePanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,6 +40,14 @@ export interface DetailSidePanelProps {
   children?: React.ReactNode;
   /** Dialog width (Tailwind class), defaults to a comfortable detail width. */
   widthClassName?: string;
+  /**
+   * Render `children` straight into the panel column instead of the default
+   * header/tabs/body/footer bands. For a panel whose header and actions depend
+   * on state that lives in the content -- an inline-editable title, a tab
+   * selection -- so it can lay out the bands itself with
+   * `PanelHeader`/`PanelTabs`/`PanelBody`/`PanelFooter`.
+   */
+  bare?: boolean;
 }
 
 /**
@@ -54,6 +74,7 @@ export function DetailSidePanel({
   footer,
   children,
   widthClassName = "sm:max-w-xl md:max-w-2xl",
+  bare = false,
 }: DetailSidePanelProps) {
   const t = useTranslations("shared.sidePanel");
   const reduceMotion = useReducedMotion();
@@ -111,6 +132,8 @@ export function DetailSidePanel({
     [onOpenChange]
   );
 
+  const closePanel = React.useCallback(() => onOpenChange(false), [onOpenChange]);
+
   if (!mounted) return null;
 
   return createPortal(
@@ -142,22 +165,30 @@ export function DetailSidePanel({
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.985 }}
             transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="flex items-start gap-3 border-b border-border px-5 py-4">
+            {bare ? (
+              <PanelCloseContext.Provider value={closePanel}>
+                {children}
+              </PanelCloseContext.Provider>
+            ) : (
+              <>
+            {/* Same three bands as the dialogs, on the same measurements, so a
+                record detail and a form read as the same kind of surface. */}
+            <div className="flex shrink-0 items-start gap-3 px-6 pt-6 pb-5">
               <div className="min-w-0 flex-1">
                 {header ?? (
                   <>
+                    {description ? (
+                      <p className="mb-1 truncate text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {description}
+                      </p>
+                    ) : null}
                     {title ? (
                       <h2
                         id={titleId}
-                        className="font-heading truncate text-lg font-semibold"
+                        className="font-heading truncate text-xl font-semibold leading-snug tracking-[-0.02em] text-foreground"
                       >
                         {title}
                       </h2>
-                    ) : null}
-                    {description ? (
-                      <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                        {description}
-                      </p>
                     ) : null}
                   </>
                 )}
@@ -166,6 +197,7 @@ export function DetailSidePanel({
                 variant="ghost"
                 size="icon-sm"
                 aria-label={t("close")}
+                className="-mr-1.5 -mt-1.5 shrink-0 text-muted-foreground"
                 onClick={() => onOpenChange(false)}
               >
                 <X aria-hidden />
@@ -173,18 +205,100 @@ export function DetailSidePanel({
             </div>
 
             {tabs ? (
-              <div className="border-b border-border px-5">{tabs}</div>
+              <div className="shrink-0 border-t border-border/70 px-6">{tabs}</div>
             ) : null}
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+            <div
+              className={cn(
+                "min-h-0 flex-1 overflow-y-auto px-6 py-5",
+                !tabs && "border-t border-border/70"
+              )}
+            >
+              {children}
+            </div>
 
             {footer ? (
-              <div className="border-t border-border bg-card px-5 py-4">{footer}</div>
+              <div className="shrink-0 border-t border-border bg-foreground/[0.035] px-6 py-4">
+                {footer}
+              </div>
             ) : null}
+              </>
+            )}
           </motion.div>
         </div>
       ) : null}
     </AnimatePresence>,
     document.body
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Bands for a `bare` panel — the same measurements as the dialog's, so
+ * a record detail and a form read as one kind of surface.
+ * ------------------------------------------------------------------ */
+
+/** Eyebrow, title and any status mark, with the close control. */
+export function PanelHeader({
+  eyebrow,
+  children,
+  className,
+}: {
+  /** The context the record sits in — its project, its phase, its client. */
+  eyebrow?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const t = useTranslations("shared.sidePanel");
+  const close = useDetailPanelClose();
+  return (
+    <div className={cn("flex shrink-0 items-start gap-3 px-6 pt-6 pb-5", className)}>
+      <div className="min-w-0 flex-1">
+        {eyebrow ? (
+          <div className="mb-1.5 flex min-w-0 items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+            {eyebrow}
+          </div>
+        ) : null}
+        {children}
+      </div>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t("close")}
+        className="-mr-1.5 -mt-1.5 shrink-0 text-muted-foreground"
+        onClick={close}
+      >
+        <X aria-hidden />
+      </Button>
+    </div>
+  );
+}
+
+export function PanelTabs({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("shrink-0 border-t border-border/70 px-6", className)}
+      {...props}
+    />
+  );
+}
+
+export function PanelBody({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("min-h-0 flex-1 overflow-y-auto px-6 py-5", className)}
+      {...props}
+    />
+  );
+}
+
+export function PanelFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "shrink-0 border-t border-border bg-foreground/[0.035] px-6 py-3.5",
+        className
+      )}
+      {...props}
+    />
   );
 }

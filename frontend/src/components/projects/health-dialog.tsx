@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { CircleCheck, TriangleAlert, OctagonAlert, Sparkles, AlertCircle } from "lucide-react";
+import { Activity, AlertCircle, CircleCheck, OctagonAlert, Sparkles, TriangleAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -84,13 +85,13 @@ export function HealthDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <div className="mt-5 space-y-4">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={Activity}
+          title={t("title")}
+          description={t("subtitle")}
+        />
+        <DialogBody className="space-y-4">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm">
             <Sparkles className="size-4 shrink-0 text-signal" strokeWidth={1.8} aria-hidden />
             <span className="text-muted-foreground">
@@ -160,16 +161,15 @@ export function HealthDialog({
           ) : (
             <p className="text-xs text-muted-foreground">{t("acceptHint")}</p>
           )}
-        </div>
-
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        </DialogBody>
+        <DialogFooter>
           <Button type="button" variant="outline" size="lg" disabled={submitting} onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>
           <Button type="button" size="lg" disabled={submitting} onClick={submit}>
             {submitting ? t("saving") : differs ? t("override") : t("accept")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

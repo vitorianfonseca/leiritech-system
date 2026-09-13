@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,66 +80,67 @@ export function InviteMemberDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor={emailId}>{t("fields.email")}</Label>
-            <Input
-              id={emailId}
-              type="email"
-              value={email}
-              autoFocus
-              placeholder="nome@leiritech.pt"
-              onChange={(e) => {
-                setEmail(e.target.value);
-                onClearServerError?.();
-              }}
-              aria-invalid={(showErrors && !emailValid) || Boolean(serverErrorKey)}
-            />
-            {showErrors && !emailValid ? (
-              <p role="alert" className="text-xs text-destructive">
-                {tErr("emailInvalid")}
-              </p>
-            ) : serverErrorKey ? (
-              <p role="alert" className="text-xs text-destructive">
-                {tErr(serverErrorKey)}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("fields.role")}</Label>
-            <div role="radiogroup" aria-label={t("fields.role")} className="grid grid-cols-3 gap-2">
-              {ROLE_OPTIONS.map((option) => {
-                const active = option === role;
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    onClick={() => setRole(option)}
-                    className={cn(
-                      "rounded-lg border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                      active
-                        ? "border-signal bg-signal-muted text-signal"
-                        : "border-border text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {tRole(option)}
-                  </button>
-                );
-              })}
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={UserPlus}
+          title={t("title")}
+          description={t("description")}
+        />
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor={emailId}>{t("fields.email")}</Label>
+              <Input
+                id={emailId}
+                type="email"
+                value={email}
+                autoFocus
+                placeholder="nome@leiritech.pt"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  onClearServerError?.();
+                }}
+                aria-invalid={(showErrors && !emailValid) || Boolean(serverErrorKey)}
+              />
+              {showErrors && !emailValid ? (
+                <p role="alert" className="text-xs text-destructive">
+                  {tErr("emailInvalid")}
+                </p>
+              ) : serverErrorKey ? (
+                <p role="alert" className="text-xs text-destructive">
+                  {tErr(serverErrorKey)}
+                </p>
+              ) : null}
             </div>
-            <p className="text-xs text-muted-foreground">{t(`roleHint.${role}`)}</p>
-          </div>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="space-y-2">
+              <Label>{t("fields.role")}</Label>
+              <div role="radiogroup" aria-label={t("fields.role")} className="grid grid-cols-3 gap-2">
+                {ROLE_OPTIONS.map((option) => {
+                  const active = option === role;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setRole(option)}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                        active
+                          ? "border-signal bg-signal-muted text-signal"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tRole(option)}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">{t(`roleHint.${role}`)}</p>
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -150,7 +153,7 @@ export function InviteMemberDialog({
             <Button type="submit" size="lg" disabled={pending}>
               {pending ? t("sending") : t("send")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

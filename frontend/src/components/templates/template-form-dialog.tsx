@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { LayoutTemplate } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,78 +92,79 @@ export function TemplateFormDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-lg p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{isEdit ? t("form.editTitle") : t("form.createTitle")}</DialogTitle>
-          <DialogDescription>{t("form.subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <TemplateField label={t("form.name")} required error={errors.name?.message}>
-            {({ controlProps }) => (
-              <Input
-                {...controlProps}
-                {...register("name")}
-                placeholder={t("form.namePlaceholder")}
-                autoFocus
-              />
-            )}
-          </TemplateField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TemplateField label={t("form.type")} error={errors.type?.message}>
-              {({ controlProps }) => (
-                <TemplateSelect {...controlProps} {...register("type")}>
-                  {TEMPLATE_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {tt(type)}
-                    </option>
-                  ))}
-                </TemplateSelect>
-              )}
-            </TemplateField>
-
-            <TemplateField
-              label={t("form.expectedDuration")}
-              hint={t("form.expectedDurationHint")}
-              error={errors.expectedDurationDays?.message}
-            >
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={LayoutTemplate}
+          title={isEdit ? t("form.editTitle") : t("form.createTitle")}
+          description={t("form.subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <TemplateField label={t("form.name")} required error={errors.name?.message}>
               {({ controlProps }) => (
                 <Input
                   {...controlProps}
-                  {...register("expectedDurationDays")}
-                  inputMode="numeric"
-                  placeholder="30"
+                  {...register("name")}
+                  placeholder={t("form.namePlaceholder")}
+                  autoFocus
                 />
               )}
             </TemplateField>
-          </div>
 
-          <TemplateField label={t("form.description")} required error={errors.description?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("description")}
-                rows={3}
-                placeholder={t("form.descriptionPlaceholder")}
-                className="flex w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <TemplateField label={t("form.type")} error={errors.type?.message}>
+                {({ controlProps }) => (
+                  <TemplateSelect {...controlProps} {...register("type")}>
+                    {TEMPLATE_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {tt(type)}
+                      </option>
+                    ))}
+                  </TemplateSelect>
+                )}
+              </TemplateField>
+
+              <TemplateField
+                label={t("form.expectedDuration")}
+                hint={t("form.expectedDurationHint")}
+                error={errors.expectedDurationDays?.message}
+              >
+                {({ controlProps }) => (
+                  <Input
+                    {...controlProps}
+                    {...register("expectedDurationDays")}
+                    inputMode="numeric"
+                    placeholder="30"
+                  />
+                )}
+              </TemplateField>
+            </div>
+
+            <TemplateField label={t("form.description")} required error={errors.description?.message}>
+              {({ controlProps }) => (
+                <textarea
+                  {...controlProps}
+                  {...register("description")}
+                  rows={3}
+                  placeholder={t("form.descriptionPlaceholder")}
+                  className="flex w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+                />
+              )}
+            </TemplateField>
+
+            <label className="flex items-center gap-2.5 text-sm">
+              <input
+                type="checkbox"
+                {...register("active")}
+                className="size-4 rounded border-input text-signal accent-signal focus-visible:ring-2 focus-visible:ring-ring"
               />
-            )}
-          </TemplateField>
-
-          <label className="flex items-center gap-2.5 text-sm">
-            <input
-              type="checkbox"
-              {...register("active")}
-              className="size-4 rounded border-input text-signal accent-signal focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <span>
-              {t("form.active")}
-              <span className="ml-1.5 text-xs text-muted-foreground">{t("form.activeHint")}</span>
-            </span>
-          </label>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <span>
+                {t("form.active")}
+                <span className="ml-1.5 text-xs text-muted-foreground">{t("form.activeHint")}</span>
+              </span>
+            </label>
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -174,7 +177,7 @@ export function TemplateFormDialog({
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("form.saving") : isEdit ? t("form.saveEdit") : t("form.saveCreate")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

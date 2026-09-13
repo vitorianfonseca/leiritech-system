@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { RotateCcw } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,39 +77,40 @@ export function ReopenDialog({ open, onOpenChange, opportunity, onConfirm }: Reo
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle", { title: opportunity.title })}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("stage")} required error={errors.toStageId?.message}>
-            {({ controlProps }) => (
-              <SearchableCombobox
-                id={controlProps.id}
-                aria-label={t("stage")}
-                items={stageOptions}
-                value={(toStageId as string) || null}
-                clearable={false}
-                onValueChange={(v) => setValue("toStageId", (v ?? "qualification") as PipelineStageId, { shouldValidate: true })}
-              />
-            )}
-          </CrmField>
-          <CrmField label={t("note")} required error={errors.note?.message}>
-            {({ controlProps }) => (
-              <Input {...controlProps} {...register("note")} placeholder={t("notePlaceholder")} autoFocus />
-            )}
-          </CrmField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={RotateCcw}
+          title={t("title")}
+          description={t("subtitle", { title: opportunity.title })}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("stage")} required error={errors.toStageId?.message}>
+              {({ controlProps }) => (
+                <SearchableCombobox
+                  id={controlProps.id}
+                  aria-label={t("stage")}
+                  items={stageOptions}
+                  value={(toStageId as string) || null}
+                  clearable={false}
+                  onValueChange={(v) => setValue("toStageId", (v ?? "qualification") as PipelineStageId, { shouldValidate: true })}
+                />
+              )}
+            </CrmField>
+            <CrmField label={t("note")} required error={errors.note?.message}>
+              {({ controlProps }) => (
+                <Input {...controlProps} {...register("note")} placeholder={t("notePlaceholder")} autoFocus />
+              )}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

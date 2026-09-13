@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { ListChecks } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,112 +144,113 @@ export function CreateTaskDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-lg p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("create.title")}</DialogTitle>
-          <DialogDescription>{t("create.description")}</DialogDescription>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor={titleId}>{t("create.fields.title")}</Label>
-            <Input
-              id={titleId}
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (titleError) setTitleError(false);
-              }}
-              autoFocus
-              aria-invalid={titleError}
-              placeholder={t("create.fields.titlePlaceholder")}
-            />
-            {titleError ? (
-              <p role="alert" className="text-xs text-destructive">
-                {t("create.errors.titleRequired")}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor={descId}>{t("create.fields.description")}</Label>
-            <textarea
-              id={descId}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              placeholder={t("create.fields.descriptionPlaceholder")}
-              className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={ListChecks}
+          title={t("create.title")}
+          description={t("create.description")}
+        />
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
             <div className="space-y-1.5">
-              <Label>{t("create.fields.project")}</Label>
-              <SearchableCombobox
-                items={projects}
-                value={projectId}
-                onValueChange={(v) => {
-                  setProjectId(v);
-                  setPhaseId(null);
-                  if (projectError) setProjectError(false);
+              <Label htmlFor={titleId}>{t("create.fields.title")}</Label>
+              <Input
+                id={titleId}
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (titleError) setTitleError(false);
                 }}
-                placeholder={t("create.fields.projectPlaceholder")}
-                aria-label={t("create.fields.project")}
+                autoFocus
+                aria-invalid={titleError}
+                placeholder={t("create.fields.titlePlaceholder")}
               />
-              {projectError ? (
+              {titleError ? (
                 <p role="alert" className="text-xs text-destructive">
-                  {t("create.errors.projectRequired")}
+                  {t("create.errors.titleRequired")}
                 </p>
               ) : null}
             </div>
 
             <div className="space-y-1.5">
-              <Label>{t("create.fields.phase")}</Label>
-              <SearchableCombobox
-                items={phases}
-                value={phaseId}
-                onValueChange={setPhaseId}
-                placeholder={
-                  projectId
-                    ? t("create.fields.phasePlaceholder")
-                    : t("create.fields.phaseSelectProject")
-                }
-                aria-label={t("create.fields.phase")}
+              <Label htmlFor={descId}>{t("create.fields.description")}</Label>
+              <textarea
+                id={descId}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                placeholder={t("create.fields.descriptionPlaceholder")}
+                className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-ring"
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>{t("create.fields.project")}</Label>
+                <SearchableCombobox
+                  items={projects}
+                  value={projectId}
+                  onValueChange={(v) => {
+                    setProjectId(v);
+                    setPhaseId(null);
+                    if (projectError) setProjectError(false);
+                  }}
+                  placeholder={t("create.fields.projectPlaceholder")}
+                  aria-label={t("create.fields.project")}
+                />
+                {projectError ? (
+                  <p role="alert" className="text-xs text-destructive">
+                    {t("create.errors.projectRequired")}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>{t("create.fields.phase")}</Label>
+                <SearchableCombobox
+                  items={phases}
+                  value={phaseId}
+                  onValueChange={setPhaseId}
+                  placeholder={
+                    projectId
+                      ? t("create.fields.phasePlaceholder")
+                      : t("create.fields.phaseSelectProject")
+                  }
+                  aria-label={t("create.fields.phase")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>{t("create.fields.priority")}</Label>
+                <SearchableCombobox
+                  items={TASK_PRIORITIES.map((p) => ({ value: p, label: t(`priority.${p}`) }))}
+                  value={priority}
+                  onValueChange={(v) => setPriority((v as TaskPriority) ?? "normal")}
+                  aria-label={t("create.fields.priority")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor={dueId}>{t("create.fields.due")}</Label>
+                <Input
+                  id={dueId}
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                />
+              </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label>{t("create.fields.priority")}</Label>
-              <SearchableCombobox
-                items={TASK_PRIORITIES.map((p) => ({ value: p, label: t(`priority.${p}`) }))}
-                value={priority}
-                onValueChange={(v) => setPriority((v as TaskPriority) ?? "normal")}
-                aria-label={t("create.fields.priority")}
+              <Label>{t("create.fields.assignees")}</Label>
+              <AssigneePicker
+                directory={TASK_DIRECTORY}
+                value={assigneeIds}
+                onChange={setAssigneeIds}
               />
             </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor={dueId}>{t("create.fields.due")}</Label>
-              <Input
-                id={dueId}
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>{t("create.fields.assignees")}</Label>
-            <AssigneePicker
-              directory={TASK_DIRECTORY}
-              value={assigneeIds}
-              onChange={setAssigneeIds}
-            />
-          </div>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -260,7 +263,7 @@ export function CreateTaskDialog({
             <Button type="submit" size="lg" disabled={pending}>
               {pending ? t("create.processing") : t("create.submit")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

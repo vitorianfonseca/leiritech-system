@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { Sparkles } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,99 +130,100 @@ export function CreateOpportunityDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("fields.title")} required error={errors.title?.message}>
-            {({ controlProps }) => (
-              <Input {...controlProps} {...register("title")} placeholder={t("fields.titlePlaceholder")} autoFocus />
-            )}
-          </CrmField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CrmField label={t("fields.company")} required error={errors.companyId?.message}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={Sparkles}
+          title={t("title")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("fields.title")} required error={errors.title?.message}>
               {({ controlProps }) => (
-                <SearchableCombobox
-                  id={controlProps.id}
-                  aria-label={t("fields.company")}
-                  items={companyOptions}
-                  loading={companiesQuery.isPending}
-                  value={companyId || null}
-                  placeholder={t("fields.companyPlaceholder")}
-                  emptyMessage={t("fields.noCompanies")}
-                  onValueChange={(v) => setValue("companyId", v ?? "", { shouldValidate: true })}
-                />
+                <Input {...controlProps} {...register("title")} placeholder={t("fields.titlePlaceholder")} autoFocus />
               )}
             </CrmField>
-            <CrmField label={t("fields.owner")} required error={errors.ownerId?.message}>
-              {({ controlProps }) => (
-                <SearchableCombobox
-                  id={controlProps.id}
-                  aria-label={t("fields.owner")}
-                  items={ownerOptions}
-                  value={ownerId || null}
-                  placeholder={t("fields.ownerPlaceholder")}
-                  onValueChange={(v) => setValue("ownerId", v ?? "", { shouldValidate: true })}
-                />
-              )}
-            </CrmField>
-          </div>
 
-          <div className="border-t border-border pt-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {t("detailsSection")}
-            </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <CrmField label={t("fields.stage")} error={errors.stageId?.message}>
+              <CrmField label={t("fields.company")} required error={errors.companyId?.message}>
                 {({ controlProps }) => (
                   <SearchableCombobox
                     id={controlProps.id}
-                    aria-label={t("fields.stage")}
-                    items={stageOptions}
-                    value={(stageId as string) || null}
-                    clearable={false}
-                    onValueChange={(v) => setValue("stageId", (v ?? "new_contact") as PipelineStageId)}
+                    aria-label={t("fields.company")}
+                    items={companyOptions}
+                    loading={companiesQuery.isPending}
+                    value={companyId || null}
+                    placeholder={t("fields.companyPlaceholder")}
+                    emptyMessage={t("fields.noCompanies")}
+                    onValueChange={(v) => setValue("companyId", v ?? "", { shouldValidate: true })}
                   />
                 )}
               </CrmField>
-              {canFinance ? (
-                <CrmField label={t("fields.value")} error={errors.value?.message} hint={t("fields.valueHint")}>
+              <CrmField label={t("fields.owner")} required error={errors.ownerId?.message}>
+                {({ controlProps }) => (
+                  <SearchableCombobox
+                    id={controlProps.id}
+                    aria-label={t("fields.owner")}
+                    items={ownerOptions}
+                    value={ownerId || null}
+                    placeholder={t("fields.ownerPlaceholder")}
+                    onValueChange={(v) => setValue("ownerId", v ?? "", { shouldValidate: true })}
+                  />
+                )}
+              </CrmField>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("detailsSection")}
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CrmField label={t("fields.stage")} error={errors.stageId?.message}>
                   {({ controlProps }) => (
-                    <Input
-                      {...controlProps}
-                      {...register("value")}
-                      inputMode="decimal"
-                      placeholder={t("fields.valuePlaceholder")}
+                    <SearchableCombobox
+                      id={controlProps.id}
+                      aria-label={t("fields.stage")}
+                      items={stageOptions}
+                      value={(stageId as string) || null}
+                      clearable={false}
+                      onValueChange={(v) => setValue("stageId", (v ?? "new_contact") as PipelineStageId)}
                     />
                   )}
                 </CrmField>
-              ) : null}
+                {canFinance ? (
+                  <CrmField label={t("fields.value")} error={errors.value?.message} hint={t("fields.valueHint")}>
+                    {({ controlProps }) => (
+                      <Input
+                        {...controlProps}
+                        {...register("value")}
+                        inputMode="decimal"
+                        placeholder={t("fields.valuePlaceholder")}
+                      />
+                    )}
+                  </CrmField>
+                ) : null}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
-            <CrmField label={t("fields.nextAction")} required error={errors.nextAction?.message}>
-              {({ controlProps }) => (
-                <Input {...controlProps} {...register("nextAction")} placeholder={t("fields.nextActionPlaceholder")} />
-              )}
-            </CrmField>
-            <CrmField label={t("fields.dueDate")} error={errors.nextActionAt?.message}>
-              {({ controlProps }) => <Input {...controlProps} {...register("nextActionAt")} type="date" />}
-            </CrmField>
-          </div>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
+              <CrmField label={t("fields.nextAction")} required error={errors.nextAction?.message}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("nextAction")} placeholder={t("fields.nextActionPlaceholder")} />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.dueDate")} error={errors.nextActionAt?.message}>
+                {({ controlProps }) => <Input {...controlProps} {...register("nextActionAt")} type="date" />}
+              </CrmField>
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

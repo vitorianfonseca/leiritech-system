@@ -3,11 +3,13 @@
 import * as React from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { Flag } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,19 +114,18 @@ export function MilestoneFormDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-lg p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>
-            {isEdit ? t("form.editTitle") : t("form.createTitle")}
-          </DialogTitle>
-          <DialogDescription>{t("form.subtitle")}</DialogDescription>
-        </div>
-
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={Flag}
+          title={isEdit ? t("form.editTitle") : t("form.createTitle")}
+          description={t("form.subtitle")}
+        />
         <form
           noValidate
           onSubmit={handleSubmit(submit)}
-          className="mt-5 flex flex-col gap-4"
+          className="flex min-h-0 flex-1 flex-col"
         >
+          <DialogBody className="space-y-4">
           <FinanceField label={t("form.project")} error={errors.projectId?.message}>
             {({ controlProps }) => (
               <SearchableCombobox
@@ -207,8 +208,8 @@ export function MilestoneFormDialog({
               />
             )}
           </FinanceField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -225,7 +226,7 @@ export function MilestoneFormDialog({
                   ? t("form.saveEdit")
                   : t("form.saveCreate")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

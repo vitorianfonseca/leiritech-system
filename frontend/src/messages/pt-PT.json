@@ -1795,7 +1795,8 @@
       "companyActivated": "{name} marcada como cliente ativo.",
       "close": "Fechar",
       "convert": "Converter em projeto",
-      "convertSoon": "A conversão em projeto chega em breve."
+      "convertSoon": "A conversão em projeto chega em breve.",
+      "eyebrow": "Negócio"
     },
     "reopen": {
       "title": "Reabrir oportunidade",
@@ -2582,7 +2583,8 @@
       "removed": "{name} removido da equipa.",
       "removeFailed": "Não foi possível remover o membro.",
       "alreadyIn": "Já está na equipa.",
-      "noneLeft": "Toda a gente já está na equipa."
+      "noneLeft": "Toda a gente já está na equipa.",
+      "addSubtitle": "Escolha quem entra e o papel que tem neste projeto."
     },
     "work": {
       "allPhases": "Todas as fases",

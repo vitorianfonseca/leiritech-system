@@ -9,6 +9,9 @@ import {
   DialogContent,
   DialogTitle,
   DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -78,7 +81,7 @@ export function WonDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
+      <DialogContent className="max-w-md">
         <AnimatePresence mode="wait" initial={false}>
           {phase === "confirm" ? (
             <motion.div
@@ -87,23 +90,27 @@ export function WonDialog({
               animate={{ opacity: 1 }}
               exit={reduce ? undefined : { opacity: 0 }}
               transition={{ duration: 0.15 }}
+              className="flex min-h-0 flex-1 flex-col"
             >
-              <div className="space-y-1.5">
-                <DialogTitle>{t("title")}</DialogTitle>
-                <DialogDescription>{t("subtitle", { title: opportunity.title })}</DialogDescription>
-              </div>
-
+              <DialogHeader
+                icon={Trophy}
+                tone="success"
+                eyebrow={t("eyebrow")}
+                title={t("title")}
+                description={t("subtitle", { title: opportunity.title })}
+              />
               {!opportunity.proposalSentReached ? (
-                <div
-                  role="note"
-                  className="mt-4 flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning"
-                >
-                  <TriangleAlert className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-                  <span>{t("proposalWarning")}</span>
-                </div>
+                <DialogBody>
+                  <div
+                    role="note"
+                    className="flex items-start gap-2 rounded-lg bg-warning-muted px-3 py-2.5 text-xs text-warning"
+                  >
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} aria-hidden />
+                    <span>{t("proposalWarning")}</span>
+                  </div>
+                </DialogBody>
               ) : null}
-
-              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <DialogFooter>
                 <Button type="button" variant="outline" size="lg" disabled={pending} onClick={() => onOpenChange(false)}>
                   {t("cancel")}
                 </Button>
@@ -111,7 +118,7 @@ export function WonDialog({
                   <Trophy aria-hidden />
                   {pending ? t("saving") : t("confirm")}
                 </Button>
-              </div>
+              </DialogFooter>
             </motion.div>
           ) : (
             <motion.div
@@ -119,8 +126,9 @@ export function WonDialog({
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.2 }}
-              className="flex flex-col items-center text-center"
+              className="flex min-h-0 flex-1 flex-col"
             >
+              <DialogBody className="flex flex-col items-center border-t-0 py-8 text-center">
               <motion.span
                 initial={reduce ? false : { scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -142,7 +150,8 @@ export function WonDialog({
                 </div>
               ) : null}
 
-              <div className="mt-6 flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+              </DialogBody>
+              <DialogFooter className="sm:justify-center">
                 <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
                   {t("close")}
                 </Button>
@@ -176,7 +185,7 @@ export function WonDialog({
                     <TooltipContent>{t("convertSoon")}</TooltipContent>
                   </Tooltip>
                 )}
-              </div>
+              </DialogFooter>
             </motion.div>
           )}
         </AnimatePresence>

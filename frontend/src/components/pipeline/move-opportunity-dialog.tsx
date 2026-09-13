@@ -3,12 +3,13 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MoveRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,21 +85,24 @@ export function MoveOpportunityDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs">
-              {tStages(opportunity.stageId)}
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={MoveRight}
+          title={t("title")}
+          description={
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs">
+                {tStages(opportunity.stageId)}
+              </span>
+              <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
+              <span className="rounded-md bg-signal-muted px-1.5 py-0.5 text-xs font-medium text-signal">
+                {tStages(toStageId)}
+              </span>
             </span>
-            <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
-            <span className="rounded-md bg-signal-muted px-1.5 py-0.5 text-xs font-medium text-signal">
-              {tStages(toStageId)}
-            </span>
-          </DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
+          }
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
           <CrmField label={t("nextAction")} required error={errors.nextAction?.message} hint={t("nextActionHint")}>
             {({ controlProps }) => (
               <Input
@@ -113,14 +117,15 @@ export function MoveOpportunityDialog({
             {({ controlProps }) => <Input {...controlProps} {...register("nextActionAt")} type="date" />}
           </CrmField>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("moving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -7,8 +7,9 @@ import { CircleDollarSign } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,41 +91,35 @@ export function RecordPaymentDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="flex gap-4">
-          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-success-muted text-success">
-            <CircleDollarSign className="size-5" strokeWidth={1.8} aria-hidden />
-          </span>
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <DialogTitle>{t("recordPayment.title")}</DialogTitle>
-            <DialogDescription>
-              {milestone ? milestone.description : ""}
-            </DialogDescription>
-          </div>
-        </div>
-
-        {milestone ? (
-          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted p-3 text-sm">
-            <dt className="text-muted-foreground">{t("recordPayment.amount")}</dt>
-            <dd className="text-right tabular-nums font-medium">
-              {formatEUR(milestone.amountCents, locale)}
-            </dd>
-            <dt className="text-muted-foreground">{t("recordPayment.alreadyReceived")}</dt>
-            <dd className="text-right tabular-nums">
-              {formatEUR(milestone.receivedAmountCents, locale)}
-            </dd>
-            <dt className="text-muted-foreground">{t("recordPayment.remaining")}</dt>
-            <dd className="text-right tabular-nums font-semibold">
-              {formatEUR(remainingCents, locale)}
-            </dd>
-          </dl>
-        ) : null}
-
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={CircleDollarSign}
+          tone="success"
+          title={t("recordPayment.title")}
+          description={milestone ? milestone.description : undefined}
+        />
         <form
           noValidate
           onSubmit={handleSubmit(submit)}
-          className="mt-4 flex flex-col gap-4"
+          className="flex min-h-0 flex-1 flex-col"
         >
+          <DialogBody className="space-y-4">
+          {milestone ? (
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border border-border bg-muted p-3 text-sm">
+              <dt className="text-muted-foreground">{t("recordPayment.amount")}</dt>
+              <dd className="text-right tabular-nums font-medium">
+                {formatEUR(milestone.amountCents, locale)}
+              </dd>
+              <dt className="text-muted-foreground">{t("recordPayment.alreadyReceived")}</dt>
+              <dd className="text-right tabular-nums">
+                {formatEUR(milestone.receivedAmountCents, locale)}
+              </dd>
+              <dt className="text-muted-foreground">{t("recordPayment.remaining")}</dt>
+              <dd className="text-right tabular-nums font-semibold">
+                {formatEUR(remainingCents, locale)}
+              </dd>
+            </dl>
+          ) : null}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FinanceField
               label={t("recordPayment.amountReceived")}
@@ -165,7 +160,8 @@ export function RecordPaymentDialog({
             )}
           </FinanceField>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -178,7 +174,7 @@ export function RecordPaymentDialog({
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("recordPayment.saving") : t("recordPayment.confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

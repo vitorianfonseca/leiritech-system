@@ -19,7 +19,13 @@ export { SearchableCombobox } from "./searchable-combobox";
 export type { SearchableComboboxProps, ComboboxItem } from "./searchable-combobox";
 
 // Overlays
-export { DetailSidePanel } from "./detail-side-panel";
+export {
+  DetailSidePanel,
+  PanelHeader,
+  PanelTabs,
+  PanelBody,
+  PanelFooter,
+} from "./detail-side-panel";
 export type { DetailSidePanelProps } from "./detail-side-panel";
 export { GithubIssuesPanel } from "./github-issues-panel";
 export { GithubRepoActivity } from "./github-repo-activity";

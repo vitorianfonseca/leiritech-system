@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { UserRound } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,108 +152,109 @@ export function ContactFormDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{isEdit ? t("editTitle") : t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("fields.name")} required error={errors.name?.message}>
-            {({ controlProps }) => (
-              <Input
-                {...controlProps}
-                {...register("name")}
-                placeholder={t("fields.namePlaceholder")}
-                autoFocus
-              />
-            )}
-          </CrmField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CrmField label={t("fields.company")} required error={errors.companyId?.message}>
-              {({ controlProps }) => (
-                <SearchableCombobox
-                  id={controlProps.id}
-                  aria-label={t("fields.company")}
-                  items={companyOptions}
-                  loading={companiesQuery.isPending}
-                  value={companyId || null}
-                  placeholder={t("fields.companyPlaceholder")}
-                  emptyMessage={t("fields.noCompanies")}
-                  onValueChange={(v) => setValue("companyId", v ?? "", { shouldValidate: true })}
-                />
-              )}
-            </CrmField>
-            <CrmField label={t("fields.owner")} required error={errors.ownerId?.message}>
-              {({ controlProps }) => (
-                <SearchableCombobox
-                  id={controlProps.id}
-                  aria-label={t("fields.owner")}
-                  items={ownerOptions}
-                  value={ownerId || null}
-                  placeholder={t("fields.ownerPlaceholder")}
-                  onValueChange={(v) => setValue("ownerId", v ?? "", { shouldValidate: true })}
-                />
-              )}
-            </CrmField>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CrmField label={t("fields.role")} error={errors.role?.message}>
-              {({ controlProps }) => (
-                <Input {...controlProps} {...register("role")} placeholder={t("fields.rolePlaceholder")} />
-              )}
-            </CrmField>
-            <CrmField label={t("fields.status")} error={errors.status?.message}>
-              {({ controlProps }) => (
-                <SearchableCombobox
-                  id={controlProps.id}
-                  aria-label={t("fields.status")}
-                  items={statusOptions}
-                  value={status || null}
-                  clearable={false}
-                  onValueChange={(v) =>
-                    setValue("status", (v ?? "active") as ContactFormValues["status"], {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              )}
-            </CrmField>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CrmField label={t("fields.email")} error={errors.email?.message}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={UserRound}
+          title={isEdit ? t("editTitle") : t("createTitle")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("fields.name")} required error={errors.name?.message}>
               {({ controlProps }) => (
                 <Input
                   {...controlProps}
-                  {...register("email")}
-                  inputMode="email"
-                  placeholder={t("fields.emailPlaceholder")}
+                  {...register("name")}
+                  placeholder={t("fields.namePlaceholder")}
+                  autoFocus
                 />
               )}
             </CrmField>
-            <CrmField label={t("fields.phone")} error={errors.phone?.message}>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CrmField label={t("fields.company")} required error={errors.companyId?.message}>
+                {({ controlProps }) => (
+                  <SearchableCombobox
+                    id={controlProps.id}
+                    aria-label={t("fields.company")}
+                    items={companyOptions}
+                    loading={companiesQuery.isPending}
+                    value={companyId || null}
+                    placeholder={t("fields.companyPlaceholder")}
+                    emptyMessage={t("fields.noCompanies")}
+                    onValueChange={(v) => setValue("companyId", v ?? "", { shouldValidate: true })}
+                  />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.owner")} required error={errors.ownerId?.message}>
+                {({ controlProps }) => (
+                  <SearchableCombobox
+                    id={controlProps.id}
+                    aria-label={t("fields.owner")}
+                    items={ownerOptions}
+                    value={ownerId || null}
+                    placeholder={t("fields.ownerPlaceholder")}
+                    onValueChange={(v) => setValue("ownerId", v ?? "", { shouldValidate: true })}
+                  />
+                )}
+              </CrmField>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CrmField label={t("fields.role")} error={errors.role?.message}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("role")} placeholder={t("fields.rolePlaceholder")} />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.status")} error={errors.status?.message}>
+                {({ controlProps }) => (
+                  <SearchableCombobox
+                    id={controlProps.id}
+                    aria-label={t("fields.status")}
+                    items={statusOptions}
+                    value={status || null}
+                    clearable={false}
+                    onValueChange={(v) =>
+                      setValue("status", (v ?? "active") as ContactFormValues["status"], {
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                )}
+              </CrmField>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CrmField label={t("fields.email")} error={errors.email?.message}>
+                {({ controlProps }) => (
+                  <Input
+                    {...controlProps}
+                    {...register("email")}
+                    inputMode="email"
+                    placeholder={t("fields.emailPlaceholder")}
+                  />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.phone")} error={errors.phone?.message}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("phone")} inputMode="tel" placeholder="+351 ..." />
+                )}
+              </CrmField>
+            </div>
+
+            <CrmField label={t("fields.notes")} error={errors.notes?.message}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("phone")} inputMode="tel" placeholder="+351 ..." />
+                <textarea
+                  {...controlProps}
+                  {...register("notes")}
+                  rows={3}
+                  placeholder={t("fields.notesPlaceholder")}
+                  className={TEXTAREA_CLASS}
+                />
               )}
             </CrmField>
-          </div>
-
-          <CrmField label={t("fields.notes")} error={errors.notes?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("notes")}
-                rows={3}
-                placeholder={t("fields.notesPlaceholder")}
-                className={TEXTAREA_CLASS}
-              />
-            )}
-          </CrmField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          </DialogBody>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -264,7 +267,7 @@ export function ContactFormDialog({
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : isEdit ? t("saveEdit") : t("saveCreate")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

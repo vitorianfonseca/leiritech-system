@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { Package } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,82 +108,83 @@ export function CatalogFormDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{isEdit ? t("editTitle") : t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("fields.name")} required error={errors.name?.message}>
-            {({ controlProps }) => (
-              <Input {...controlProps} {...register("name")} placeholder={t("fields.namePlaceholder")} />
-            )}
-          </CrmField>
-
-          <CrmField label={t("fields.description")} error={errors.description?.message}>
-            {({ controlProps }) => (
-              <textarea
-                {...controlProps}
-                {...register("description")}
-                rows={2}
-                placeholder={t("fields.descriptionPlaceholder")}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            )}
-          </CrmField>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CrmField label={t("fields.category")} error={errors.category?.message}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader
+          icon={Package}
+          title={isEdit ? t("editTitle") : t("createTitle")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("fields.name")} required error={errors.name?.message}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("category")} placeholder={t("fields.categoryPlaceholder")} />
+                <Input {...controlProps} {...register("name")} placeholder={t("fields.namePlaceholder")} />
               )}
             </CrmField>
-            <CrmField label={t("fields.unit")} error={errors.unit?.message}>
-              {({ controlProps }) => (
-                <select {...controlProps} {...register("unit")} className={SELECT_CLASS}>
-                  {CATALOG_UNITS.map((u) => (
-                    <option key={u} value={u}>
-                      {tUnits(u)}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </CrmField>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <CrmField label={t("fields.price")} required error={errors.price?.message} hint={t("fields.priceHint")}>
+            <CrmField label={t("fields.description")} error={errors.description?.message}>
               {({ controlProps }) => (
-                <Input {...controlProps} {...register("price")} inputMode="decimal" placeholder="0,00" />
+                <textarea
+                  {...controlProps}
+                  {...register("description")}
+                  rows={2}
+                  placeholder={t("fields.descriptionPlaceholder")}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                />
               )}
             </CrmField>
-            <CrmField label={t("fields.taxRate")} error={errors.taxRate?.message}>
-              {({ controlProps }) => (
-                <Input {...controlProps} {...register("taxRate")} inputMode="decimal" placeholder="23,00" />
-              )}
-            </CrmField>
-            <CrmField label={t("fields.billingType")} error={errors.billingType?.message}>
-              {({ controlProps }) => (
-                <select {...controlProps} {...register("billingType")} className={SELECT_CLASS}>
-                  {BILLING_TYPES.map((b) => (
-                    <option key={b} value={b}>
-                      {tBilling(b)}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </CrmField>
-          </div>
 
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CrmField label={t("fields.category")} error={errors.category?.message}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("category")} placeholder={t("fields.categoryPlaceholder")} />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.unit")} error={errors.unit?.message}>
+                {({ controlProps }) => (
+                  <select {...controlProps} {...register("unit")} className={SELECT_CLASS}>
+                    {CATALOG_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {tUnits(u)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </CrmField>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <CrmField label={t("fields.price")} required error={errors.price?.message} hint={t("fields.priceHint")}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("price")} inputMode="decimal" placeholder="0,00" />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.taxRate")} error={errors.taxRate?.message}>
+                {({ controlProps }) => (
+                  <Input {...controlProps} {...register("taxRate")} inputMode="decimal" placeholder="23,00" />
+                )}
+              </CrmField>
+              <CrmField label={t("fields.billingType")} error={errors.billingType?.message}>
+                {({ controlProps }) => (
+                  <select {...controlProps} {...register("billingType")} className={SELECT_CLASS}>
+                    {BILLING_TYPES.map((b) => (
+                      <option key={b} value={b}>
+                        {tBilling(b)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </CrmField>
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : isEdit ? t("save") : t("create")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

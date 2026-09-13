@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,27 +68,28 @@ export function ResendProposalDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle", { reference: proposal.reference })}</DialogDescription>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("validUntil")} required error={errors.validUntil?.message} hint={t("validUntilHint")}>
-            {({ controlProps }) => (
-              <Input {...controlProps} {...register("validUntil")} type="date" autoFocus />
-            )}
-          </CrmField>
-
-          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={Send}
+          title={t("title")}
+          description={t("subtitle", { reference: proposal.reference })}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("validUntil")} required error={errors.validUntil?.message} hint={t("validUntilHint")}>
+              {({ controlProps }) => (
+                <Input {...controlProps} {...register("validUntil")} type="date" autoFocus />
+              )}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : t("confirm")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

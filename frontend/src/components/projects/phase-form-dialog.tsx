@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { Layers } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,28 +63,31 @@ export function PhaseFormDialog({ open, onOpenChange, phase, onSubmit }: PhaseFo
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-md p-6">
-        <div className="space-y-1.5">
-          <DialogTitle>{editing ? t("editTitle") : t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </div>
-        <form noValidate onSubmit={handleSubmit(submit)} className="mt-5 flex flex-col gap-4">
-          <CrmField label={t("name")} required error={errors.name?.message}>
-            {({ controlProps }) => (
-              <Input {...controlProps} {...register("name")} placeholder={t("namePlaceholder")} />
-            )}
-          </CrmField>
-          <CrmField label={t("dueDate")} error={errors.dueDate?.message}>
-            {({ controlProps }) => <Input {...controlProps} {...register("dueDate")} type="date" />}
-          </CrmField>
-          <div className="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <DialogContent className="max-w-md">
+        <DialogHeader
+          icon={Layers}
+          title={editing ? t("editTitle") : t("createTitle")}
+          description={t("subtitle")}
+        />
+        <form noValidate onSubmit={handleSubmit(submit)} className="flex min-h-0 flex-1 flex-col">
+          <DialogBody className="space-y-4">
+            <CrmField label={t("name")} required error={errors.name?.message}>
+              {({ controlProps }) => (
+                <Input {...controlProps} {...register("name")} placeholder={t("namePlaceholder")} />
+              )}
+            </CrmField>
+            <CrmField label={t("dueDate")} error={errors.dueDate?.message}>
+              {({ controlProps }) => <Input {...controlProps} {...register("dueDate")} type="date" />}
+            </CrmField>
+          </DialogBody>
+          <DialogFooter>
             <Button type="button" variant="outline" size="lg" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? t("saving") : editing ? t("save") : t("create")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
