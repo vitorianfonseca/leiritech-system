@@ -82,7 +82,14 @@ export function TaskBoard({ tasks, canDrag, onOpen, onRequestMove }: TaskBoardPr
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 lg:grid lg:snap-none lg:grid-cols-5 lg:overflow-visible">
+      {/* The board is a fixed pane, not a block that grows with its fullest
+          column. Left to itself, one column with thirteen cards stretched the
+          whole board to its length and the four empty columns became columns
+          of nothing — the page scrolled past several screens of white before
+          reaching the footer. The height is clamped to the viewport so the
+          board ends where the screen does, and each column scrolls its own
+          cards inside it. */}
+      <div className="-mx-1 flex h-[clamp(24rem,calc(100dvh-19rem),48rem)] snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-1 pb-2 lg:grid lg:snap-none lg:grid-cols-5 lg:overflow-x-hidden">
         {TASK_BOARD_STATES.map((state) => (
           <BoardColumn
             key={state}
@@ -90,7 +97,7 @@ export function TaskBoard({ tasks, canDrag, onOpen, onRequestMove }: TaskBoardPr
             count={byState.get(state)?.length ?? 0}
           >
             {(byState.get(state) ?? []).length === 0 ? (
-              <p className="px-1 py-6 text-center text-xs text-muted-foreground">
+              <p className="flex flex-1 items-center justify-center px-1 text-center text-xs text-muted-foreground">
                 {t("board.columnEmpty")}
               </p>
             ) : (
@@ -131,11 +138,11 @@ function BoardColumn({
   return (
     <section
       aria-label={t(`state.${state}`)}
-      className="flex w-72 shrink-0 snap-start flex-col lg:w-full"
+      className="flex h-full w-72 min-h-0 shrink-0 snap-start flex-col lg:w-full"
     >
       <div
         className={cn(
-          "flex items-center justify-between gap-2 rounded-t-xl border-x border-t border-border px-3 py-2.5",
+          "flex shrink-0 items-center justify-between gap-2 rounded-t-xl border-x border-t border-border px-3 py-2.5",
           state === "blocked" ? "bg-status-blocked-bg/60" : "bg-muted"
         )}
       >
@@ -157,7 +164,10 @@ function BoardColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-32 flex-1 flex-col gap-2 rounded-b-xl border border-t-0 border-border bg-card p-2 transition-colors",
+          // `min-h-0` is what actually lets the column scroll: a flex child
+          // defaults to min-height:auto and would otherwise refuse to shrink
+          // below its content, pushing the overflow back onto the page.
+          "board-column flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-b-xl border border-t-0 border-border bg-card p-2 transition-colors",
           isOver && "bg-signal-muted/60 ring-2 ring-inset ring-signal/40"
         )}
       >

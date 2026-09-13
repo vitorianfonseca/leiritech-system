@@ -241,7 +241,12 @@ export function PipelineBoard({ user }: PipelineBoardProps) {
           onDragEnd={handleDragEnd}
           onDragCancel={() => setActiveId(null)}
         >
-          <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3 xl:grid-cols-6">
+          {/* Same rule as the task board: the pane is the height of the screen
+              and each column scrolls its own cards, so one busy stage cannot
+              stretch five empty ones. The height only applies where the six
+              stages sit on a single row — between sm and lg the grid wraps
+              into two or three rows, and a fixed height would squash them. */}
+          <div className="-mx-1 flex h-[clamp(24rem,calc(100dvh-19rem),48rem)] snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-1 pb-2 sm:grid sm:h-auto sm:snap-none sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3 xl:h-[clamp(24rem,calc(100dvh-19rem),48rem)] xl:grid-cols-6 xl:overflow-x-hidden xl:overflow-y-hidden">
             {stages.map((stage: PipelineStage) => {
               const items = byStage.get(stage.id) ?? [];
               const total = canFinance
@@ -256,7 +261,7 @@ export function PipelineBoard({ user }: PipelineBoardProps) {
                   valueCents={total}
                 >
                   {items.length === 0 ? (
-                    <p className="px-1 py-6 text-center text-xs text-muted-foreground/70">
+                    <p className="flex flex-1 items-center justify-center px-1 text-center text-xs text-muted-foreground/70">
                       {t("column.empty")}
                     </p>
                   ) : (
