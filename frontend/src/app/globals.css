@@ -694,9 +694,10 @@ textarea:not(:disabled),
    * warning or danger tone gets this, and the calm ones stay plain glass —
    * the difference between them is the hierarchy.
    *
-   * The tint is a wash from the top-left plus a bar down the leading edge.
-   * The bar is what carries at a glance; the wash keeps the card from looking
-   * like a plain card with a stripe stuck on it. */
+   * The tint is a wash from the top-left, held together by a tinted ring. It
+   * used to have a bar down the leading edge as well, which read as a stripe
+   * stuck onto the card; the wash, the ring, and the figure and chip already
+   * in the alert colour carry it without one. */
   .card-alert {
     --alert: var(--status-overdue);
     position: relative;
@@ -709,18 +710,6 @@ textarea:not(:disabled),
       inset 0 1px 0 rgb(255 255 255 / 0.7),
       0 1px 2px rgb(122 132 173 / 0.05),
       0 12px 32px -14px color-mix(in oklch, var(--alert), transparent 78%);
-  }
-
-  .card-alert::after {
-    content: "";
-    position: absolute;
-    inset-block: 0.875rem;
-    inset-inline-start: 0;
-    width: 3px;
-    border-start-end-radius: 3px;
-    border-end-end-radius: 3px;
-    background: var(--alert);
-    pointer-events: none;
   }
 
   .dark .card-alert {
