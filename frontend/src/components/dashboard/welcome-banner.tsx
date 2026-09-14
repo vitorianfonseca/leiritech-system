@@ -72,7 +72,11 @@ export function WelcomeBanner({
       className="relative isolate mt-2 min-h-[13.5rem] overflow-hidden rounded-3xl bg-card px-7 py-6 text-foreground shadow-[0_2px_8px_oklch(0.28_0.06_285/0.05),0_12px_32px_-12px_oklch(0.28_0.06_285/0.10)] sm:px-10 sm:py-7"
     >
       <div className="relative z-10 max-w-[min(42rem,calc(100%-20rem))]">
-        <h1 className="font-heading text-[clamp(1.5rem,2.6vw,2rem)] leading-[1.1] font-semibold tracking-[-0.02em] text-balance">
+        {/* `page-title`, same as every other page's heading — this used to
+            carry its own size, weight and tracking, and semibold in
+            particular is a weight Satoshi does not ship, so it was being
+            synthesised. */}
+        <h1 className="page-title text-balance">
           {greeting}
         </h1>
 
