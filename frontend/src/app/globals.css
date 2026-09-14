@@ -367,9 +367,63 @@
   }
 }
 
-/* No pointer cursor on controls. Chasing it across nested children and the
-   gaps between controls made it flicker more than it helped, so clickable
-   things keep the default arrow and the hover surface does the signalling. */
+/* Pointer on anything clickable, and on whatever sits inside it — the
+   pointer rests on a child <span> or <svg> far more often than on the
+   control itself. Unlayered, so it outranks Tailwind's utility layer.
+
+   This was removed once on the grounds that it flickered. It did, but the
+   flicker was the gaps, not the rule — see the strip note below. Without it
+   only <a href> kept a hand, from the browser's own stylesheet, so half the
+   controls in the app had one and half did not. */
+
+/* Strips of controls: the gaps between them are not dead zones.
+ *
+ * A row of tabs with `gap-1` puts a 4px sliver of container between every
+ * pair, and the container's cursor is the default arrow. Sweeping along the
+ * row therefore flips pointer → arrow → pointer at every gap, which reads as
+ * the cursor flickering rather than as crossing a boundary. Measured on the
+ * project tab bar: pointer×19, auto×1, pointer×35, auto×1, pointer×34.
+ *
+ * The strip as a whole is a control surface, so it carries the pointer. Scoped
+ * with `:has()` so it only applies to a strip that actually holds controls —
+ * an empty tablist or a toolbar of plain text keeps the default. The roles
+ * beyond tablist are the other containers that gap their children: a toolbar,
+ * a menu, a listbox, a radiogroup. */
+[role="tablist"]:has(> [role="tab"]),
+[role="toolbar"]:has(> a[href], > button:not(:disabled)),
+[role="menu"]:has(> [role="menuitem"]),
+[role="listbox"]:has(> [role="option"]),
+[role="radiogroup"]:has(> [role="radio"]),
+[data-control-row]:has(> a[href], > button:not(:disabled)) {
+  cursor: pointer;
+}
+
+/* Keep comments out of the selector list below. Lightning CSS drops the whole
+   rule — silently, no build error — when one appears between two selectors,
+   which is an afternoon nobody needs to spend twice.
+
+   The last pair in the list is the clickable table row. It carries no role:
+   it is a <tr> that took a tabindex because SmartTable was given an
+   onRowClick, and that attribute pair is the only thing separating it from a
+   row you can only read. */
+a[href], a[href] *,
+button:not(:disabled), button:not(:disabled) *,
+summary, summary *,
+label[for], label[for] *,
+select:not(:disabled),
+[role="button"], [role="button"] *,
+[role="tab"], [role="tab"] *,
+[role="option"], [role="option"] *,
+[role="menuitem"], [role="menuitem"] *,
+[role="switch"], [role="switch"] *,
+[role="checkbox"], [role="checkbox"] *,
+[role="radio"], [role="radio"] *,
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="file"]:not(:disabled),
+tr[data-row][tabindex], tr[data-row][tabindex] * {
+  cursor: pointer;
+}
 
 /* Typing and refusal keep their own cursors. */
 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(:disabled),
