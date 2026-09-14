@@ -96,10 +96,122 @@ export interface SmartTableProps<T> {
   emptyIcon?: LucideIcon;
   emptyTitle?: string;
   emptyDescription?: string;
+  /**
+   * Cap the table at the height left in the viewport and scroll its rows
+   * internally, so the page itself does not scroll. Default true. Turn it off
+   * for a table embedded in a page that is meant to scroll as a whole.
+   */
+  fitHeight?: boolean;
   className?: string;
 }
 
 type SortState = { columnId: string; direction: "asc" | "desc" } | null;
+
+/* ------------------------------------------------------------------ *
+ * Viewport-fitting height
+ * ------------------------------------------------------------------ */
+
+/**
+ * How much page may follow the table before it stops fitting itself.
+ *
+ * This is the test for "is this table the page's main region, or one panel
+ * among several?", and it reads what comes *after* the table rather than how
+ * much room is left. A list page trails only the pagination row, the page
+ * padding and the shell footer — around 180px. Finance stacks a second card
+ * below the first, so that one trails hundreds of pixels and keeps its natural
+ * height; crushing a panel while the page scrolls anyway helps nobody.
+ *
+ * Reading the space left over instead puts a cliff in the wrong place: a list
+ * page on a short screen falls just under the bar and gives up on fitting, the
+ * one case where fitting matters most.
+ */
+const MAX_TRAILING_CONTENT = 320;
+
+/** No room worth claiming — a couple of rows under a header. */
+const MIN_FIT_HEIGHT = 200;
+
+/**
+ * Sizes the table's scroll region so the page itself does not have to scroll:
+ * the table runs from wherever it starts down to the bottom of the viewport,
+ * less whatever the page renders after it (the pagination row, the page
+ * padding, the shell footer). Rows past that point are reached by scrolling
+ * inside the table, under a header that stays put.
+ *
+ * Two details this depends on:
+ *
+ * - Positions come from the `offsetTop` chain, not `getBoundingClientRect`.
+ *   The route transition animates the whole page with a transform, and rect
+ *   coordinates are post-transform — measured mid-flight they are off by the
+ *   animation's current offset and scale. `offsetTop` is pure layout.
+ * - `below` subtracts the region's own height from both terms, so it does not
+ *   depend on that height. Without that the measurement chases itself: a
+ *   shorter table shortens the document, which frees space, which lengthens
+ *   the table. As written it settles in a single pass.
+ */
+function useFitToViewport(enabled: boolean) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [maxHeight, setMaxHeight] = React.useState<number>();
+
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) {
+      setMaxHeight(undefined);
+      return;
+    }
+
+    let frame = 0;
+
+    const measure = () => {
+      frame = 0;
+      // `offsetParent` is null while the element is `display: none` — below the
+      // md breakpoint this table is hidden and the card list scrolls with the
+      // page, which is the right behaviour on a phone.
+      if (el.offsetParent === null) {
+        setMaxHeight(undefined);
+        return;
+      }
+
+      let top = 0;
+      for (
+        let node: HTMLElement | null = el;
+        node;
+        node = node.offsetParent as HTMLElement | null
+      ) {
+        top += node.offsetTop;
+      }
+
+      const below = Math.max(0, document.documentElement.scrollHeight - (top + el.offsetHeight));
+      const available = Math.round(window.innerHeight - top - below);
+
+      if (below > MAX_TRAILING_CONTENT || available < MIN_FIT_HEIGHT) {
+        setMaxHeight(undefined);
+        return;
+      }
+
+      // Ignore sub-pixel churn so the ResizeObserver this feeds cannot loop.
+      setMaxHeight((prev) =>
+        prev != null && Math.abs(prev - available) <= 1 ? prev : available
+      );
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+
+    measure();
+    window.addEventListener("resize", schedule);
+    const observer = new ResizeObserver(schedule);
+    observer.observe(document.body);
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      observer.disconnect();
+    };
+  }, [enabled]);
+
+  return [ref, maxHeight] as const;
+}
 
 /* ------------------------------------------------------------------ *
  * Component
@@ -124,6 +236,7 @@ export function SmartTable<T>({
   emptyIcon,
   emptyTitle,
   emptyDescription,
+  fitHeight = true,
   className,
 }: SmartTableProps<T>) {
   const t = useTranslations("shared.table");
@@ -378,6 +491,9 @@ export function SmartTable<T>({
   );
 
   /* ---------- body states ---------- */
+  const showRows = !loading && data.length > 0 && pageRows.length > 0;
+  const [scrollRef, scrollMaxHeight] = useFitToViewport(fitHeight && showRows);
+
   let body: React.ReactNode;
   if (loading) {
     body = <SkeletonTable rows={pageSize > 8 ? 8 : pageSize} columns={colSpan || 4} />;
@@ -405,11 +521,16 @@ export function SmartTable<T>({
   } else {
     body = (
       <>
-        {/* Desktop / tablet table */}
-        <div className="hidden overflow-x-auto rounded-xl border border-border bg-card md:block">
+        {/* Desktop / tablet table. The rows scroll inside this box rather than
+            taking the page with them — see `useFitToViewport`. */}
+        <div
+          ref={scrollRef}
+          style={scrollMaxHeight ? { maxHeight: scrollMaxHeight } : undefined}
+          className="hidden overflow-auto rounded-xl border border-border bg-card md:block"
+        >
           <table className="reveal w-full caption-bottom text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted">
+              <tr>
                 {visibleColumns.map((col) => {
                   const active = sort?.columnId === col.id;
                   const SortIcon = !active
@@ -425,6 +546,11 @@ export function SmartTable<T>({
                         active ? (sort!.direction === "asc" ? "ascending" : "descending") : undefined
                       }
                       className={cn(
+                        // Sticky sits on the cells, not on `thead` or the row:
+                        // a sticky row cannot carry the divider (a collapsed
+                        // border scrolls away with the table), so the header's
+                        // background and its bottom rule live here.
+                        "sticky top-0 z-10 bg-muted shadow-[0_1px_0_0_var(--border)]",
                         "px-4 py-3 text-left align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground",
                         col.align === "right" && "text-right",
                         col.align === "center" && "text-center",
@@ -458,7 +584,10 @@ export function SmartTable<T>({
                   );
                 })}
                 {hasActions ? (
-                  <th scope="col" className="w-12 px-2 py-3">
+                  <th
+                    scope="col"
+                    className="sticky top-0 z-10 w-12 bg-muted px-2 py-3 shadow-[0_1px_0_0_var(--border)]"
+                  >
                     <span className="sr-only">{t("rowActions")}</span>
                   </th>
                 ) : null}
@@ -475,7 +604,7 @@ export function SmartTable<T>({
                   className={cn(
                     "border-b border-border outline-none transition-colors last:border-0",
                     onRowClick &&
-                      "cursor-pointer hover:bg-accent focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      "hover:bg-accent focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   )}
                 >
                   {visibleColumns.map((col) => (
@@ -524,7 +653,7 @@ export function SmartTable<T>({
                 className={cn(
                   "rounded-xl border border-border bg-card p-4 outline-none",
                   onRowClick &&
-                    "cursor-pointer transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                    "transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -553,7 +682,7 @@ export function SmartTable<T>({
   }
 
   /* ---------- footer ---------- */
-  const showFooter = !loading && data.length > 0 && pageRows.length > 0;
+  const showFooter = showRows;
 
   return (
     <div className={cn("space-y-4", className)}>
