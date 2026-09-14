@@ -19,25 +19,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # Mirrors backend/docker-compose.yml (postgres:16, user/pass/db = aurea),
+    # Mirrors backend/docker-compose.yml (postgres:16, user/pass/db = leiritech),
     # published on 5433 so the app's default DATABASE_URL works unchanged.
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: aurea
-          POSTGRES_PASSWORD: aurea
-          POSTGRES_DB: aurea
+          POSTGRES_USER: leiritech
+          POSTGRES_PASSWORD: leiritech
+          POSTGRES_DB: leiritech
         ports:
           - 5433:5432
         options: >-
-          --health-cmd "pg_isready -U aurea -d aurea"
+          --health-cmd "pg_isready -U leiritech -d leiritech"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
 
     env:
-      DATABASE_URL: postgresql+psycopg://aurea:aurea@localhost:5433/aurea
+      DATABASE_URL: postgresql+psycopg://leiritech:leiritech@localhost:5433/leiritech
 
     steps:
       - name: Checkout
