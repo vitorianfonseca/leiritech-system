@@ -26,7 +26,7 @@ export function SoundPreference() {
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <label
           htmlFor="sound-enabled"
-          className="flex cursor-pointer items-center justify-between gap-3 p-4"
+          className="flex items-center justify-between gap-3 p-4"
         >
           <span className="flex items-center gap-2.5">
             {enabled ? (
@@ -71,7 +71,7 @@ export function SoundPreference() {
                 value={volume}
                 onChange={(e) => changeVolume(Number(e.target.value))}
                 onPointerUp={() => play("click")}
-                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-signal"
+                className="h-1.5 flex-1 appearance-none rounded-full bg-muted accent-signal"
               />
               <span className="w-10 text-right text-sm tabular-nums text-muted-foreground">
                 {Math.round(volume * 100)}%

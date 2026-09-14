@@ -57,7 +57,7 @@ function DropdownMenuItem({
       data-slot="dropdown-item"
       data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer select-none items-center gap-2 rounded-xl px-2.5 py-2 text-sm outline-none transition-colors",
+        "relative flex select-none items-center gap-2 rounded-xl px-2.5 py-2 text-sm outline-none transition-colors",
         "glass-item data-[highlighted]:text-foreground",
         "data-[variant=destructive]:text-destructive data-[variant=destructive]:data-[highlighted]:bg-destructive-muted",
         "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground data-[variant=destructive]:[&_svg]:text-destructive",

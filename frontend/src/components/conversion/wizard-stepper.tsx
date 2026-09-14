@@ -48,7 +48,6 @@ export function WizardStepper({
                 aria-current={isCurrent ? "step" : undefined}
                 className={cn(
                   "flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  reachable ? "cursor-pointer" : "cursor-default",
                   isCurrent
                     ? "bg-signal-muted text-signal"
                     : isDone

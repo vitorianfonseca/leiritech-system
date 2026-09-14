@@ -166,7 +166,7 @@ export function TaskRow({
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={t("actions.changeStatus")}
-            className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Badge variant={statusMeta.variant} className="gap-1">
               <statusMeta.icon className="size-3" strokeWidth={2} aria-hidden />
@@ -196,7 +196,7 @@ export function TaskRow({
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={t("actions.changePriority")}
-            className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Badge variant={PRIORITY_META[task.priority]} className="gap-1">
               <Flag className="size-3" strokeWidth={2} aria-hidden />

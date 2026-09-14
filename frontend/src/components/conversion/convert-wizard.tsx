@@ -786,7 +786,7 @@ function StepTeam({
               <label
                 key={m.id}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors",
                   checked ? "border-signal bg-signal-muted/30" : "border-border hover:bg-accent"
                 )}
               >

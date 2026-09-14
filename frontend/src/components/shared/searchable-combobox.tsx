@@ -139,7 +139,7 @@ export function SearchableCombobox({
                   value={item}
                   disabled={item.disabled}
                   className={cn(
-                    "flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none",
+                    "flex select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none",
                     "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
                     "data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                   )}
