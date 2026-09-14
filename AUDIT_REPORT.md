@@ -1,7 +1,7 @@
 # Application Audit Report
 
 - **Date**: 2026-09-10
-- **Project**: LeiriTech (internal PSA/CRM tool for a software studio; formerly "Aurea System" — frontend rebranded this session, backend not yet)
+- **Project**: LeiriTech (internal PSA/CRM tool for a software studio; frontend and backend both rebranded, including the database role/name)
 - **Root**: /Users/vitoriafonseca/LeiriTech/leiritech
 - **Stack**: Next.js 16 App Router (TypeScript, shadcn/ui, TanStack Query) + FastAPI (Python, SQLAlchemy 2.0, Alembic) + PostgreSQL 16
 - **Specification**: forge-prd.md + WORKFLOW_SPEC.md (r2 — state machines, BR-001..084, permission matrix, 25 critical flows)
@@ -212,7 +212,7 @@ On top of these: the logout button never calls the logout endpoint (sessions are
 - **Workflow edge-case hardening** (M20-M23, L12): require ≥1 milestone before activation, re-validate milestone amount vs. received, default company `owner_id`, notify on forced timer-stop, validate `started_at` on open entries. Effort: M.
 - **UX polish** (M11-M14, L8, L9, L13, L14): refactor 3 hand-rolled confirm dialogs onto the shared component, fix `formatDate` locale-awareness, catalog restore feedback, Quick Create honesty, disabled-button tooltips, mock Files-tab labeling, dialog inline errors, dashboard stat-tile skeletons. Effort: M.
 - **Dead-code cleanup** (L1, M10): remove ~9 unused exported functions. Effort: S.
-- **Known, intentional, not itemized further**: backend still uses legacy "Aurea" naming across ~45 files while the frontend was rebranded to "LeiriTech" this session — tracked separately, not a code-quality defect.
+- **Known, intentional, not itemized further**: backend still uses legacy "LeiriTech" naming across ~45 files while the frontend was rebranded to "LeiriTech" this session — tracked separately, not a code-quality defect.
 
 ---
 

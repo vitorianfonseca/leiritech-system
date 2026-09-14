@@ -1,4 +1,4 @@
-# Aurea System
+# LeiriTech
 
 Studio/agency operations platform — commercial pipeline (CRM), projects, tasks,
 time, finance, and reporting.
@@ -20,7 +20,7 @@ ENVIRONMENT=development uv run alembic upgrade head
 # seed the first admin + demo data (dev prints a generated admin password once,
 # or pass your own with --password)
 ENVIRONMENT=development uv run python -m app.database.seed \
-  --email admin@aurea.pt --password "your-strong-pass"
+  --email admin@leiritech.pt --password "your-strong-pass"
 # run
 ENVIRONMENT=development uv run uvicorn app.main:app --port 8000
 ```

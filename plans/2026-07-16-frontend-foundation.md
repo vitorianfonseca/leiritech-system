@@ -1,4 +1,4 @@
-# Aurea System — Frontend Foundation Plan (2026-07-16)
+# LeiriTech — Frontend Foundation Plan (2026-07-16)
 
 Foundation builder. Runs ONCE before any feature builder. Output is the contract.
 
@@ -9,7 +9,7 @@ Foundation builder. Runs ONCE before any feature builder. Output is the contract
 - lucide-react v1.24.0. Geist sans already wired.
 
 ## Brand
-Aurea = balance, proportion, harmony, precision, light, excellence.
+LeiriTech = balance, proportion, harmony, precision, light, excellence.
 Warm-neutral paper/stone palette; ONE sophisticated functional primary (warm espresso ink);
 DISCREET gold/amber accent reserved for state / priority / key indicator / the single primary action.
 Body = Geist; headline = Fraunces (serif, opsz axis).

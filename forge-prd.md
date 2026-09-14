@@ -1,4 +1,4 @@
-# Product Requirements Document: Aurea System
+# Product Requirements Document: LeiriTech
 
 **Generated**: 2026-07-16
 **Domain research**: [DOMAIN_RESEARCH.md](./DOMAIN_RESEARCH.md)
@@ -10,10 +10,10 @@
 
 ## 1. Product Overview
 
-**App name**: Aurea System
-**Tagline**: *O sistema operativo interno da Aurea.*
+**App name**: LeiriTech
+**Tagline**: *O sistema operativo interno da LeiriTech.*
 
-**Problem statement**: Aurea, a software development company, needs a single internal
+**Problem statement**: LeiriTech, a software development company, needs a single internal
 operating system to run its full commercial and delivery lifecycle — from first client
 contact through opportunity, proposal, won deal, project execution, time tracking, and
 payment — without the bloat and duplicate data entry of ClickUp/Notion/Monday/Jira/
@@ -24,7 +24,7 @@ project is created with commercial data already filled in.
 house. This is a private, invite-only, single-company tool — explicitly **not** a SaaS
 product (no multi-tenancy, plans, billing of users, or public signup). The closest
 functional analogue is Productive.io (resourcing/utilization/time/profitability core with
-a deliberately lean CRM); Aurea's narrow scope mirrors PSA vendors that separate delivery
+a deliberately lean CRM); LeiriTech's narrow scope mirrors PSA vendors that separate delivery
 operations from a distinct accounting system.
 
 **Success metrics**:
@@ -37,9 +37,9 @@ operations from a distinct accounting system.
 **Key industry standards / boundaries that apply**:
 - **Portugal SAF-T / certified invoicing (hard scope boundary)**: any *legal* invoice in
   Portugal must be issued by AT-certified software (non-compliant software carries fines of
-  €3,000–€18,750). Aurea therefore **never** issues an invoice, invoice number, VAT
+  €3,000–€18,750). LeiriTech therefore **never** issues an invoice, invoice number, VAT
   breakdown, ATCUD, or QR code. `payment_milestones` are strictly **internal tracking /
-  forecasting**; the real fiscal invoice lives in Aurea's external certified accounting
+  forecasting**; the real fiscal invoice lives in LeiriTech's external certified accounting
   software. Enforced by BR-070..BR-073.
 - **GDPR** (EU/Portugal): data-minimisation and storage-limitation apply to stored
   contact/company personal data and internal time/workload data (BR-063, BR-064).
@@ -108,10 +108,10 @@ authoritative matrix in §9. There are **no** per-project or custom permissions.
 
 **How competing products handle the key workflows** (from DOMAIN_RESEARCH):
 - **Pipeline**: mature PSAs encode buyer progress and tune win-probability from history
-  (not rep-activity stages). Aurea follows this (BR-012, BR-020).
+  (not rep-activity stages). LeiriTech follows this (BR-012, BR-020).
 - **Won→project**: Scoro/Productive carry commercial data into delivery to avoid re-entry;
-  Aurea makes this the core differentiator with a graceful manual fallback for verbal closes.
-- **Health**: best practice is *auto-suggest, human-confirm* — Aurea splits `suggested_health`
+  LeiriTech makes this the core differentiator with a graceful manual fallback for verbal closes.
+- **Health**: best practice is *auto-suggest, human-confirm* — LeiriTech splits `suggested_health`
   (daily cron) from `published_health` (human) so automation never publishes (BR-030).
 - **Time**: single active timer is the industry-correct UX (multi-timer is a data-integrity
   anti-pattern) — enforced at DB level (BR-040).
@@ -121,7 +121,7 @@ authoritative matrix in §9. There are **no** per-project or custom permissions.
 - The "12 fixed automations" were never enumerated in the brief; the canonical set is defined
   in §6.1 of the spec and kept non-configurable (Non-Goal).
 - `invoiced` payment-milestone state means "external certified system issued the invoice; we
-  recorded a reference" — never Aurea generating a fiscal document (SAF-T boundary).
+  recorded a reference" — never LeiriTech generating a fiscal document (SAF-T boundary).
 - Meeting `no_show` state added as a distinct commercial outcome for pipeline hygiene.
 
 **Common pitfalls to avoid** (from DOMAIN_RESEARCH): rep-activity pipeline stages, duplicate
@@ -356,7 +356,7 @@ Priorities: **P0** = required for MVP critical flows; **P1** = important; **P2**
 - **Related BRs**: BR-002, BR-008, BR-065, BR-083.
 
 ### F20 — Settings (P1)
-- **Description**: Aurea data/logo, members, roles, pipeline stages, states, priorities, tags,
+- **Description**: LeiriTech data/logo, members, roles, pipeline stages, states, priorities, tags,
   templates, weekly capacity, internal costs, notifications, theme, archive, data export.
 - **Acceptance criteria**: Admin-only config areas per matrix §9; no workspaces, no custom fields (Non-Goals).
 - **Related BRs**: BR-001, BR-004, BR-012, BR-020, BR-081.
@@ -449,7 +449,7 @@ non-owned records for Membro (BR-002); 409 on illegal state transitions.
 
 ## 8. Frontend Pages & Components
 
-Next.js 16 App Router, TypeScript, shadcn/ui deeply customized (Aurea design system), Tailwind,
+Next.js 16 App Router, TypeScript, shadcn/ui deeply customized (LeiriTech design system), Tailwind,
 TanStack Query, React Hook Form + Zod, Framer Motion, dnd-kit, Recharts. **Locale never in URL**
 (`localePrefix: "never"`, resolved profile→cookie→Accept-Language→pt-PT). **Light mode default**;
 dark mode designed separately. Every page has loading/skeleton/empty/error/no-results/success states
@@ -561,7 +561,7 @@ single English key tree is deferred (pt-PT only at launch).
 - [ ] Railway deploy config (health check, CORS, logs, migrations) + frontend deploy config
 
 **phase:design**
-- [ ] Aurea design system: OKLCH tokens (warm neutrals + subtle amber accent), typography, dark mode — §5/§10
+- [ ] LeiriTech design system: OKLCH tokens (warm neutrals + subtle amber accent), typography, dark mode — §5/§10
 - [ ] App shell: collapsible sidebar (state-persisted), top bar (search/command palette/quick-create/notifications/profile) — nav spec §11
 - [ ] Customized shadcn primitives + shared components (SmartTable, CommandPalette, SidePanel, ConfirmDialog, EmptyState, Skeletons, Toast+undo)
 
@@ -569,7 +569,7 @@ single English key tree is deferred (pt-PT only at launch).
 - [ ] Alembic setup + base; all 33 entities with FKs/indexes/constraints — §6, BR-060
 - [ ] Partial unique index on time_entries (single active timer) — BR-040
 - [ ] Trigram/full-text indexes for global search — F18
-- [ ] Seed script: first admin (CLI) + realistic Aurea demo data — F0/§36
+- [ ] Seed script: first admin (CLI) + realistic LeiriTech demo data — F0/§36
 
 **phase:backend** (FastAPI)
 - [ ] Auth: login/logout/refresh/password-reset/invite/accept, Argon2, rate limiting — F1, BR-005..007

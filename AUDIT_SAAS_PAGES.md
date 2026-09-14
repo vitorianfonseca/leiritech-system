@@ -106,7 +106,7 @@
 | Page | Status | Route | Notes |
 |------|--------|-------|-------|
 | Settings Hub | ✅ EXISTS | /settings | Navigation to all settings areas |
-| Aurea Details | ✅ EXISTS | /settings/leiritech | Company data/logo configuration |
+| LeiriTech Details | ✅ EXISTS | /settings/leiritech | Company data/logo configuration |
 | Members Management | ✅ EXISTS | /settings/members | Invite, manage, deactivate members |
 | Member Invite | ✅ EXISTS | /settings/members/invite | Invite new members by email |
 | Roles Management | ✅ EXISTS | /settings/roles | Admin/Gestor/Membro role configuration |

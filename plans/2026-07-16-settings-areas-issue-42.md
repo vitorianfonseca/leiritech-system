@@ -9,7 +9,7 @@ shared #7 components. Admin-only config (BR-004); templates admin+gestor; cost r
 ## Routes (src/app/(app)/settings/)
 layout.tsx (server gate: membro→notFound; render SettingsLayoutClient) + loading.tsx + error.tsx
 - page.tsx            landing (grid of areas, role-filtered)
-- aurea/             org data + logo (admin) — settings.ts
+- leiritech/             org data + logo (admin) — settings.ts
 - members/           list + role + activate/deactivate + invite; last-admin guard BR-005 — settings.ts
 - roles/             view-only permission matrix (admin)
 - pipeline/          stages: reorder(dnd) + color + win_probability (admin) — opportunities stages + settings color store

@@ -1,10 +1,10 @@
 # App Forge Context
 
 ## App Name
-Aurea System
+LeiriTech
 
 ## Problem Statement
-Aurea, a software development company, needs a single internal operating system to
+LeiriTech, a software development company, needs a single internal operating system to
 run its full commercial and delivery lifecycle — from first client contact through
 opportunity, proposal, won deal, project execution, time tracking, and payment —
 without the bloat of ClickUp/Notion/Monday/Jira/Salesforce.
@@ -116,7 +116,7 @@ evolution.)
 ## Open Questions
 - Frontend deploy target: Vercel assumed (spec says "modern Next.js host") — confirm at deploy time.
 - Whether an English (en) key tree is built now or deferred — deferred by default.
-- Exact Aurea brand palette (warm neutrals + subtle amber accent) — finalized in design-system step.
+- Exact LeiriTech brand palette (warm neutrals + subtle amber accent) — finalized in design-system step.
 
 ## Research Sources
 - [Kantata — What is PSA software](https://www.kantata.com/resource-article/what-is-professional-services-automation-psa-software) — PSA core functional areas (CRM, resourcing, time/expense, billing, forecasts).

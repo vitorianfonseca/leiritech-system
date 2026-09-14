@@ -1,4 +1,4 @@
-# UX Consistency Audit — LeiriTech (Aurea)
+# UX Consistency Audit — LeiriTech (LeiriTech)
 
 Scope: cross-entity CRUD pattern consistency, destructive-action confirmation, terminology
 drift vs `forge-prd.md` §3 glossary, primary-action placement, table-pattern reuse, and

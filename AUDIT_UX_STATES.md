@@ -1,5 +1,5 @@
 # UX State Coverage Audit Report
-**LeiriTech System**  
+**LeiriTech**  
 **Audited**: 2026-09-10  
 **Audit Specification**: forge-prd.md §8
 

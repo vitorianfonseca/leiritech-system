@@ -1,6 +1,6 @@
 # Workflow Validation Report
 
-**App**: Aurea System
+**App**: LeiriTech
 **Validated**: 2026-07-16
 **Inputs**: forge-context.md, DOMAIN_RESEARCH.md, WORKFLOW_SPEC.md
 **Validator**: Workflow Validator (forge-prd team)

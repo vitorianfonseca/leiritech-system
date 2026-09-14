@@ -1,4 +1,4 @@
-# Aurea System — build resume notes
+# LeiriTech — build resume notes
 
 **Paused**: 2026-07-16 ~19:05 WEST — Anthropic account session limit (resets 21:00 Lisbon).
 **Phase**: forge frontend build (Phase 1). `forge-state.json` phase is still `ready` (do NOT

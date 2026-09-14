@@ -1,6 +1,6 @@
 # Workflow Specification
 
-**App**: Aurea System
+**App**: LeiriTech
 **Based on**: forge-context.md + DOMAIN_RESEARCH.md
 **Designed**: 2026-07-16
 **Author**: Workflow Designer (forge-prd team)
@@ -11,7 +11,7 @@
 ## 0. Reading Notes & Scope Guardrails
 
 - **Enforcement layer convention**: `Backend` = FastAPI service/domain layer + DB constraints (authoritative). `Frontend` = UX affordance only (never the security boundary). Every security, state-transition, and financial rule is **backend-authoritative**; the frontend may mirror it for UX but is never trusted.
-- **Compliance boundary (hard rule)**: `payment_milestones` are **internal tracking/forecasting only**. Aurea NEVER issues a legal invoice, invoice number, tax breakdown, ATCUD, or QR code. All UI/PDF copy uses "marco de pagamento" / "payment milestone", never "fatura/invoice". The real fiscal invoice lives in Aurea's external certified accounting software. This is a scope boundary, enforced as BR (see BR-070..BR-073).
+- **Compliance boundary (hard rule)**: `payment_milestones` are **internal tracking/forecasting only**. LeiriTech NEVER issues a legal invoice, invoice number, tax breakdown, ATCUD, or QR code. All UI/PDF copy uses "marco de pagamento" / "payment milestone", never "fatura/invoice". The real fiscal invoice lives in LeiriTech's external certified accounting software. This is a scope boundary, enforced as BR (see BR-070..BR-073).
 - **Soft-delete only**: companies, opportunities, projects, tasks, proposals are **never hard-deleted** — only archived (`archived_at`). See BR-060..BR-064.
 - **Locale**: pt-PT canonical. State labels below are shown in pt-PT (the DB stores stable English enum keys; UI renders translated labels). Enum keys are given in `code_format`.
 - **Non-goals respected**: no configurable automations, no custom fields, no Gantt, no invoicing/accounting, no client portal, no chat, no AI, **no per-project / custom permissions** (the permission matrix in §3 is the single authoritative access model for all three roles). Nothing below introduces features outside forge-context.md MVP scope.
@@ -211,7 +211,7 @@ Health is **orthogonal** to lifecycle state and only meaningful for `planning`/`
 
 **States**: Previsto (`planned`), Faturado (`invoiced`), Parcialmente pago (`partially_paid`), Pago (`paid`), Vencido (`overdue`), Cancelado (`cancelled`).
 
-> `invoiced` = "the external certified accounting system has issued the real invoice; we recorded that it happened." Aurea stores a reference note only — no invoice number generation, no tax fields (BR-070/073).
+> `invoiced` = "the external certified accounting system has issued the real invoice; we recorded that it happened." LeiriTech stores a reference note only — no invoice number generation, no tax fields (BR-070/073).
 
 **Valid transitions**
 
@@ -437,8 +437,8 @@ Enforcement: **Backend** = authoritative (service + DB). **Frontend** = UX mirro
 |----|------|------------|--------------|---------|
 | BR-070 | Payment milestones must NOT contain or generate: sequential invoice numbers, tax/VAT breakdowns, ATCUD, QR codes, or fiscal signatures. | Backend + Frontend | Field rejected / not present | Payment, Compliance |
 | BR-071 | Every payment milestone MUST have a `completion_criteria` (what confirms it done) plus a confirmer, alongside amount and expected date. | Backend + Frontend | 422 | Payment |
-| BR-072 | All UI/PDF copy uses "marco de pagamento"/"payment milestone"; the word "fatura"/"invoice" is not used for Aurea-generated records. | Frontend | (copy review) | Compliance |
-| BR-073 | `invoiced` status only records that an external certified system issued the invoice (reference note); Aurea does not produce the fiscal document. | Backend | — | Payment, Compliance |
+| BR-072 | All UI/PDF copy uses "marco de pagamento"/"payment milestone"; the word "fatura"/"invoice" is not used for LeiriTech-generated records. | Frontend | (copy review) | Compliance |
+| BR-073 | `invoiced` status only records that an external certified system issued the invoice (reference note); LeiriTech does not produce the fiscal document. | Backend | — | Payment, Compliance |
 
 ### Capacity / Workload
 
@@ -701,7 +701,7 @@ Calendar aggregate, global search (Cmd/Ctrl+K), notifications center, and CSV re
 3. **Won without a sent proposal**: soft-warn but allow (verbal closes happen); did not hard-block, to avoid users routing around the system.
 4. **Health model**: implemented as two fields — `suggested_health` (system) + `published_health` (human) — to honor "auto-suggest, human-confirm" without automation ever publishing (DOMAIN_RESEARCH #4/Rec.3).
 5. **Availability thresholds**: chose `<70% / 70–100% / >100%` of net capacity for disponível/equilibrado/sobrecarregado, with role-dependent utilization targets feeding net capacity (BR-080/081). Thresholds are a reasonable industry default; flagged as Admin-tunable.
-6. **`invoiced` state kept but redefined** as "external certified system issued the real invoice; we recorded a reference," never Aurea generating a fiscal document — preserving the SAF-T boundary (BR-070/073).
+6. **`invoiced` state kept but redefined** as "external certified system issued the real invoice; we recorded a reference," never LeiriTech generating a fiscal document — preserving the SAF-T boundary (BR-070/073).
 7. **Phase completion is suggested, never automatic** even when all tasks are done, mirroring the health "human-confirm" philosophy.
 8. **Single-active-timer enforced at the DB level** (partial unique index) in addition to service logic, because DOMAIN_RESEARCH flags multi-timer as a data-integrity anti-pattern that must not be relaxed.
 9. **Cancel project** placed under Admin (Gestor only with grant) since cancellation has financial/margin consequences, consistent with the financial-grant model.
