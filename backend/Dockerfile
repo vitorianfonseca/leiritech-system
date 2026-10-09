@@ -10,7 +10,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml ./
-RUN uv pip install --system .
+RUN uv pip install --system -r pyproject.toml
 
 COPY . .
 
