@@ -16,6 +16,5 @@ test-results
 
 # Local dev / tooling
 *.md
-tests/
 playwright-report/
 .DS_Store
